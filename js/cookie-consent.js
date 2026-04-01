@@ -1,4 +1,11 @@
 (function(){
+  // CCPA 2026: Respect Global Privacy Control (GPC) signal
+  var gpcEnabled = navigator.globalPrivacyControl === true;
+  if(gpcEnabled){
+    localStorage.setItem('ecco_cookies','declined');
+    if(window._hsq)window._hsq.push(['doNotTrack']);
+    return; // No banner needed — GPC auto-declines
+  }
   if(localStorage.getItem('ecco_cookies'))return;
   var b=document.createElement('div');
   b.className='cookie-banner';
@@ -14,7 +21,6 @@
     localStorage.setItem('ecco_cookies','declined');
     b.classList.remove('visible');
     setTimeout(function(){b.remove()},400);
-    // Disable HubSpot tracking if declined
     if(window._hsq)window._hsq.push(['doNotTrack']);
   };
 })();

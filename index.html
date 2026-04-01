@@ -33,13 +33,58 @@
 {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
+  "@id": "https://eccofacilities.com/#business",
   "name": "Ecco Facilities LLC",
   "description": "Premium eco-friendly janitorial and day porter services across all 5 boroughs of New York City.",
   "url": "https://eccofacilities.com",
   "email": "info@eccofacilities.com",
-  "areaServed": ["Manhattan","Brooklyn","Queens","The Bronx","Staten Island"],
+  "telephone": "+1-518-000-0000",
+  "logo": "https://eccofacilities.com/images/logo-horizontal.png",
+  "image": "https://eccofacilities.com/images/logo-vertical.png",
+  "priceRange": "$$",
+  "currenciesAccepted": "USD",
+  "paymentAccepted": "Cash, Check, Credit Card, Invoice",
+  "openingHours": "Mo-Fr 08:00-18:00",
+  "openingHoursSpecification": [
+    {"@type": "OpeningHoursSpecification","dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens": "08:00","closes": "18:00"},
+    {"@type": "OpeningHoursSpecification","dayOfWeek": ["Saturday"],"opens": "09:00","closes": "14:00"}
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Albany, NY",
+    "addressLocality": "New York",
+    "addressRegion": "NY",
+    "postalCode": "12207",
+    "addressCountry": "US"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  },
+  "areaServed": [
+    {"@type": "City", "name": "New York"},
+    {"@type": "Borough", "name": "Manhattan"},
+    {"@type": "Borough", "name": "Brooklyn"},
+    {"@type": "Borough", "name": "Queens"},
+    {"@type": "Borough", "name": "The Bronx"},
+    {"@type": "Borough", "name": "Staten Island"}
+  ],
   "serviceType": ["Janitorial Services","Day Porter Services"],
-  "address": {"@type": "PostalAddress","addressLocality": "New York","addressRegion": "NY"}
+  "knowsAbout": ["Commercial Cleaning","Green Cleaning","Eco-Certified Products","Day Porter Services","Janitorial Services"],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Cleaning Services",
+    "itemListElement": [
+      {"@type": "Offer","itemOffered": {"@type": "Service","name": "Janitorial Services","url": "https://eccofacilities.com/janitorial.html"}},
+      {"@type": "Offer","itemOffered": {"@type": "Service","name": "Day Porter Services","url": "https://eccofacilities.com/day-porter.html"}}
+    ]
+  },
+  "sameAs": [
+    "https://linkedin.com/company/eccofacilities",
+    "https://instagram.com/eccofacilities",
+    "https://g.co/kgs/eccofacilities"
+  ]
 }
 </script>
 <script type="application/ld+json">
@@ -280,7 +325,7 @@
     <div class="footer-col"><h4>Contact</h4><a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a><a href="quote.html">Request a Quote</a><span>New York City — All 5 Boroughs</span></div>
   </div>
   <div class="footer-bottom">
-    <div class="footer-legal"><a href="privacy.html">Privacy Policy</a><span>·</span><a href="terms.html">Terms of Service</a><span>·</span><a href="sitemap.xml">Sitemap</a></div>
+    <div class="footer-legal"><a href="privacy.html">Privacy Policy</a><span>·</span><a href="terms.html">Terms of Service</a><span>·</span><a href="accessibility.html">Accessibility</a><span>·</span><a href="sitemap.xml">Sitemap</a></div>
     <p class="footer-copy">© 2026 Ecco Facilities LLC. All rights reserved.</p>
   </div>
 </footer>

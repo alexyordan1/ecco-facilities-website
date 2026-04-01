@@ -1,0 +1,17 @@
+# Cloudflare Pages redirects
+# Format: from to statusCode
+
+# www to non-www (canonical)
+https://www.eccofacilities.com/* https://eccofacilities.com/:splat 301
+
+# Common typos and old paths
+/contact.html      /quote.html       301
+/contact            /quote.html       301
+/services           /services.html    301
+/about              /about.html       301
+/blog               /blog.html        301
+/careers            /careers.html     301
+/quote              /quote.html       301
+/privacy            /privacy.html     301
+/terms              /terms.html       301
+/accessibility      /accessibility.html 301
