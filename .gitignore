@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (chat-backend)
+node_modules/
+.env
+.env.local
+
+# Claude
+.claude/
+
+# Original/backup files (keep in repo for reference, remove when ready)
+# *.original.*
+
+# Logs
+*.log
