@@ -17,32 +17,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=1.6">
-<style>
-/* Wizard overrides — shared styles in styles.css */
-:root{--r:10px;--rl:16px}
-body{padding-top:72px}
-.fg{margin-bottom:1rem;text-align:center}
-.fg label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:.4rem;text-align:center}
-.fg input,.fg textarea{width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;transition:border-color .3s,box-shadow .3s;background:rgba(255,255,255,.06)}
-.fg input:focus,.fg textarea:focus{border-color:rgba(255,255,255,.4);box-shadow:0 0 0 3px rgba(48,104,173,.15)}
-.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.4)}
-.fg textarea{resize:vertical;min-height:60px}
-.fg input.v-err,.fg textarea.v-err{border-color:#FF6B6B}
-.fg input.v-ok{border-color:rgba(61,154,67,.5)}
-.fg select{width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;transition:border-color .3s;background:rgba(255,255,255,.06);appearance:none}
-.fg select:focus{border-color:rgba(255,255,255,.35)}
-.fg select option{background:var(--navy);color:#FFF}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-.v-hint{position:absolute;right:12px;top:50%;font-size:.75rem;pointer-events:none;opacity:0;transition:opacity .3s}
-.v-hint.show{opacity:1}
-.v-hint.ok{color:#3D9A43}
-.v-hint.bad{color:#FF6B6B}
-.pain-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
-.pain-chip{padding:.5rem .85rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-size:.82rem;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;user-select:none}
-.pain-chip:hover{border-color:rgba(255,255,255,.3)}
-.pain-chip.sel{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.1);color:#FFF;font-weight:600}
-</style>
+<link rel="stylesheet" href="css/styles.css?v=2.0">
+<style>:root{--r:10px;--rl:16px}body{padding-top:72px}</style>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -242,7 +218,7 @@ starttime:()=>`<h2 class="step-q">What time should your porter arrive?</h2>
 days:()=>{
   return`<h2 class="step-q">Which days do you need your porter on-site, ${D.fn}?</h2>
   <p class="step-sub">${D._fromJanitorial?"These are the days your porter will be on-site — this can be a different schedule than your cleaning crew.":"Select every day you need a porter present. Most clients choose Monday through Friday for consistent weekday coverage."}</p>
-  <div style="display:flex;gap:.4rem;justify-content:center;margin-bottom:.8rem"><button type="button" style="padding:.4rem .9rem;border:1px solid rgba(255,255,255,.15);border-radius:50px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:.75rem;font-family:var(--fb);cursor:pointer;transition:all .2s" onclick="W.presetDays('weekdays')">Weekdays (M–F)</button><button type="button" style="padding:.4rem .9rem;border:1px solid rgba(255,255,255,.15);border-radius:50px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:.75rem;font-family:var(--fb);cursor:pointer;transition:all .2s" onclick="W.presetDays('all')">Every Day</button></div>
+  <div class="preset-row"><button type="button" class="preset-btn" onclick="W.presetDays('weekdays')">Weekdays (M–F)</button><button type="button" class="preset-btn" onclick="W.presetDays('all')">Every Day</button></div>
   <div class="day-row" role="group" aria-label="Select coverage days">${DAYS.map(d=>{
     const wasSel=(D.dpDaysArr||[]).includes(d);
     return`<div class="day-btn${wasSel?' sel':''}" role="button" tabindex="0" aria-pressed="${wasSel}" aria-label="Select ${d}" onclick="W.pickDpDay(this)">${d}</div>`}).join('')}</div>
