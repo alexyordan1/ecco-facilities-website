@@ -1425,7 +1425,7 @@ textarea:focus-visible {
 /* --- Layout --- */
 .wiz-bg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; opacity: .18; }
 .wiz-overlay { position: fixed; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(11,29,56,.88) 0%, rgba(11,29,56,.72) 100%); }
-.wiz-main { height: calc(100vh - 170px); padding: 1rem 1.5rem; background: transparent; position: relative; overflow: hidden; box-sizing: border-box; }
+.wiz-main { min-height: calc(100vh - 170px); padding: 1rem 1.5rem; background: transparent; position: relative; overflow: visible; box-sizing: border-box; }
 .wiz-card { width: 100%; max-width: 900px; margin: 0 auto; position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; }
 #sBox { flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
 #sBox::-webkit-scrollbar { width: 6px; }
@@ -1530,13 +1530,13 @@ textarea:focus-visible {
 /* --- Form fields --- */
 .fg { margin-bottom: 1rem; text-align: center; }
 .fg label { display: block; font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65); margin-bottom: .4rem; text-align: center; }
-.fg input, .fg textarea { width: 100%; padding: .85rem 1.1rem; border: 2px solid rgba(255,255,255,.12); border-radius: var(--rl); font-family: var(--fb); font-size: .92rem; color: #FFF; outline: none; transition: border-color .3s, box-shadow .3s; background: rgba(255,255,255,.06); }
+.fg input, .fg textarea { width: 100%; padding: .85rem 1.1rem; border: 2px solid rgba(255,255,255,.12); border-radius: var(--rl); font-family: var(--fb); font-size: 1rem; color: #FFF; outline: none; transition: border-color .3s, box-shadow .3s; background: rgba(255,255,255,.06); }
 .fg input:focus, .fg textarea:focus { border-color: rgba(255,255,255,.4); box-shadow: 0 0 0 3px rgba(48,104,173,.15); }
 .fg input::placeholder, .fg textarea::placeholder { color: rgba(255,255,255,.4); }
 .fg textarea { resize: vertical; min-height: 60px; }
 .fg input.v-err, .fg textarea.v-err { border-color: #FF6B6B; }
 .fg input.v-ok { border-color: rgba(61,154,67,.5); }
-.fg select { width: 100%; padding: .85rem 1.1rem; border: 2px solid rgba(255,255,255,.12); border-radius: var(--rl); font-family: var(--fb); font-size: .92rem; color: #FFF; outline: none; transition: border-color .3s; background: rgba(255,255,255,.06); appearance: none; }
+.fg select { width: 100%; padding: .85rem 1.1rem; border: 2px solid rgba(255,255,255,.12); border-radius: var(--rl); font-family: var(--fb); font-size: 1rem; color: #FFF; outline: none; transition: border-color .3s; background: rgba(255,255,255,.06); appearance: none; }
 .fg select:focus { border-color: rgba(255,255,255,.35); }
 .fg select option { background: var(--navy); color: #FFF; }
 .fr { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
