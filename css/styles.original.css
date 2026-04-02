@@ -659,6 +659,28 @@ textarea:focus-visible {
 .btt.vis { opacity: 1; visibility: visible; transform: translateY(0); }
 .btt:hover { background: var(--navy-l); transform: translateY(-2px); }
 
+/* ============================================================
+   COOKIE BANNER
+   ============================================================ */
+.cookie-banner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 997;
+  padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  background: var(--navy); border-top: 1px solid rgba(255,255,255,.08);
+  transform: translateY(100%); opacity: 0;
+  transition: transform .4s var(--ease-spring), opacity .3s var(--ease);
+}
+.cookie-banner.visible { transform: translateY(0); opacity: 1; }
+.cookie-banner p { color: var(--twm); font-size: .8rem; line-height: 1.6; margin: 0; }
+.cookie-banner a { color: var(--blue-l); text-decoration: underline; }
+.cookie-btn {
+  padding: .5rem 1.2rem; border: none; border-radius: 8px; font-family: var(--fb);
+  font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .2s var(--ease-spring); white-space: nowrap;
+}
+.cookie-btn-accept { background: var(--green); color: var(--wh); }
+.cookie-btn-accept:hover { background: var(--green-l); transform: translateY(-1px); }
+.cookie-btn-decline { background: transparent; color: var(--twm); border: 1px solid rgba(255,255,255,.15); }
+.cookie-btn-decline:hover { border-color: rgba(255,255,255,.3); color: var(--wh); }
+
 /* --- Contrast fixes (WCAG 2.1 AA) --- */
 .safe-card p { color: var(--safe-text); }
 .footer-copy { opacity: .75; }
