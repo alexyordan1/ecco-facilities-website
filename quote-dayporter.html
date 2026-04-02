@@ -210,7 +210,11 @@ body{padding-top:72px}
   .wiz-sec-line{width:12px}
   .step-q{font-size:1.5rem}
   .wiz-main{padding:.3rem .3rem .3rem}
-  .opt{padding:.5rem .5rem;font-size:.8rem}
+  .opt{padding:.6rem .5rem;font-size:.8rem}
+  .time-row{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+  .time-chip{text-align:center;padding:.6rem .5rem}
+  .day-row{flex-direction:column}
+  .day-btn{width:100%;text-align:center;padding:.7rem}
 }
 .hp-field{position:absolute;left:-9999px;opacity:0;height:0;width:0;overflow:hidden}
 </style>
@@ -381,6 +385,7 @@ function validate(stepId){
   if(!el){el=document.createElement('div');el.id='vMsg';el.className='v-msg';el.setAttribute('role','alert');el.setAttribute('aria-live','polite');document.getElementById('sBox').appendChild(el)}
   const msgs={space:'Please select a space type.',hours:'Please select coverage hours.',starttime:'Please select a start time.',days:'Please select at least one day.',porters:'Please select porter count.',areas:'Please select at least one area.',urgency:'Please select a timeline.',info:'Please fill in your name and email.',location:'Please fill in company name and address.'};
   el.textContent=msgs[stepId]||'Please complete this step.';
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),100);
   if(stepId==='info'){['fFn','fLn','fEm'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value.trim())e.classList.add('v-err')})}
   if(stepId==='location'){['fCo','fAddr'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value.trim())e.classList.add('v-err')})}
   return false;
@@ -401,7 +406,7 @@ hours:()=>{
   return`<h2 class="step-q">How many hours should your porter be on-site, ${D.fn}?</h2>
   <p class="step-sub">${D._fromJanitorial?"Unlike after-hours cleaning, a day porter stays on-site during business hours. How many hours per day do you need?":"This is the number of hours your porter will be present each day. Most facilities choose 8 hours for full business-day coverage."}</p>
   <div class="opts" role="group" aria-label="Coverage hours options">${hrOpts.map((h,i)=>`<div class="opt${D.hrs===h?' sel':''}${h==='8 hrs'?' sug':''}" role="button" tabindex="0" aria-pressed="${D.hrs===h}" aria-label="Select coverage: ${h}${h==='8 hrs'?' (Recommended)':''}" onclick="W.pick('hrs','${h}',this)">${h}${h==='8 hrs'?'<div class="opt-tag">Recommended</div>':''}</div>`).join('')}</div>
-  <div id="custSec" class="cnd${D.hrs==='Custom'?' vis':''}"><div class="fg" style="margin-top:1rem"><label for="fCustHrs">How many hours?</label><input type="text" placeholder="e.g. 5 (1-24 hours)" id="fCustHrs" value="${D.customHrs||''}" oninput="D.customHrs=this.value"></div></div>`
+  <div id="custSec" class="cnd${D.hrs==='Custom'?' vis':''}"><div class="fg" style="margin-top:1rem;position:relative"><label for="fCustHrs">How many hours?</label><input type="number" min="1" max="24" placeholder="e.g. 5 (1-24 hours)" id="fCustHrs" value="${D.customHrs||''}" oninput="D.customHrs=this.value;const v=parseInt(this.value);const ok=v>=1&&v<=24;this.classList.toggle('v-ok',ok&&this.value);this.classList.toggle('v-err',this.value&&!ok)"><span class="v-hint" id="hrsHint"></span></div></div>`
 },
 
 starttime:()=>`<h2 class="step-q">What time should your porter arrive?</h2>
@@ -412,6 +417,7 @@ starttime:()=>`<h2 class="step-q">What time should your porter arrive?</h2>
 days:()=>{
   return`<h2 class="step-q">Which days do you need your porter on-site, ${D.fn}?</h2>
   <p class="step-sub">${D._fromJanitorial?"These are the days your porter will be on-site — this can be a different schedule than your cleaning crew.":"Select every day you need a porter present. Most clients choose Monday through Friday for consistent weekday coverage."}</p>
+  <div style="display:flex;gap:.4rem;justify-content:center;margin-bottom:.8rem"><button type="button" style="padding:.4rem .9rem;border:1px solid rgba(255,255,255,.15);border-radius:50px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:.75rem;font-family:var(--fb);cursor:pointer;transition:all .2s" onclick="W.presetDays('weekdays')">Weekdays (M–F)</button><button type="button" style="padding:.4rem .9rem;border:1px solid rgba(255,255,255,.15);border-radius:50px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:.75rem;font-family:var(--fb);cursor:pointer;transition:all .2s" onclick="W.presetDays('all')">Every Day</button></div>
   <div class="day-row" role="group" aria-label="Select coverage days">${DAYS.map(d=>{
     const wasSel=(D.dpDaysArr||[]).includes(d);
     return`<div class="day-btn${wasSel?' sel':''}" role="button" tabindex="0" aria-pressed="${wasSel}" aria-label="Select ${d}" onclick="W.pickDpDay(this)">${d}</div>`}).join('')}</div>
@@ -441,7 +447,7 @@ urgency:()=>{
   return`<h2 class="step-q">When would you like to start?</h2>
   <p class="step-sub">Whether you need us next week or you're just exploring options, there's no pressure. This helps us plan availability and onboarding.</p>
   <div class="opts" role="group" aria-label="Start timeline options">${opts.map(o=>`<div class="opt${D.urg===o.v?' sel':''}" role="button" tabindex="0" aria-pressed="${D.urg===o.v}" aria-label="Select timeline: ${o.l}" onclick="W.pick('urg','${o.v}',this)">${o.l}</div>`).join('')}</div>
-  <div id="urgMic">${D.urg==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':''}</div>`
+  <div id="urgMic">${D.urg==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':(D.urg==='unsure'?'<div class="mic">No problem — we\'ll include flexible start options in your proposal.</div>':'')}</div>`
 },
 
 extras:()=>`<h2 class="step-q">Would you also like after-hours cleaning, ${D.fn}?</h2>
@@ -708,7 +714,7 @@ pick(f,v,el){
   if(el){el.closest('.opts').querySelectorAll('.opt:not(.mu)').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
   this.clearErr();
   if(f==='space'){const o=document.getElementById('spOth');if(o){o.classList.toggle('vis',v==='Other');if(v==='Other'){this.scrollToRevealed(o);return}}}
-  if(f==='urg'){const m=document.getElementById('urgMic');if(m)m.innerHTML=v==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':''}
+  if(f==='urg'){const m=document.getElementById('urgMic');if(m)m.innerHTML=v==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':(v==='unsure'?'<div class="mic">No problem — we\'ll include flexible start options in your proposal.</div>':'')}
   if(f==='hrs'){
     const cs=document.getElementById('custSec');
     if(cs)cs.classList.toggle('vis',v==='Custom');
@@ -762,6 +768,15 @@ pickArea(v,el){
   this.clearErr();
 },
 
+presetDays(type){
+  const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const target=type==='weekdays'?weekdays:DAYS;
+  D.dpDaysArr=[...target];D.dpDays=target.join(' / ');
+  document.querySelectorAll('.day-btn').forEach(b=>{b.classList.toggle('sel',target.includes(b.textContent.trim()))});
+  const msg=document.getElementById('dayV');
+  msg.className='day-count ok';msg.textContent=`✓ ${target.length} day${target.length>1?'s':''} selected`;
+  this.clearErr();
+},
 pickDpDay(el){
   if(!D.dpDaysArr)D.dpDaysArr=[];
   const day=el.textContent.trim();

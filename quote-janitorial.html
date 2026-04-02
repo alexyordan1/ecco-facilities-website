@@ -205,7 +205,9 @@ body{padding-top:72px}
   .wiz-sec-line{width:12px}
   .step-q{font-size:1.5rem}
   .wiz-main{padding:.3rem .3rem .3rem}
-  .opt{padding:.5rem .5rem;font-size:.8rem}
+  .opt{padding:.6rem .5rem;font-size:.8rem}
+  .day-row{flex-direction:column}
+  .day-btn{width:100%;text-align:center;padding:.7rem}
 }
 .hp-field{position:absolute;left:-9999px;opacity:0;height:0;width:0;overflow:hidden}
 </style>
@@ -359,6 +361,7 @@ function validate(stepId){
   if(!el){el=document.createElement('div');el.id='vMsg';el.className='v-msg';el.setAttribute('role','alert');el.setAttribute('aria-live','polite');document.getElementById('sBox').appendChild(el)}
   const msgs={space:'Please select a space type.',size:'Please select or enter a size.',days:'Please select at least one day.',urgency:'Please select a timeline.',info:'Please fill in your name and email.',location:'Please fill in company name and address.'};
   el.textContent=msgs[stepId]||'Please complete this step.';
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),100);
   if(stepId==='info'){['fFn','fLn','fEm'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value.trim())e.classList.add('v-err')})}
   if(stepId==='location'){['fCo','fAddr'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value.trim())e.classList.add('v-err')})}
   return false;
@@ -385,6 +388,7 @@ size:()=>{
 
 days:()=>`<h2 class="step-q">Which days do you need your cleaning team, ${D.fn}?</h2>
   <p class="step-sub">${D._fromDayPorter?"These are the days your cleaning crew will come in — this can be a different schedule than your day porter.":"Select every day you'd like your space cleaned. This determines your weekly cleaning frequency."}</p>
+  <div style="display:flex;gap:.4rem;justify-content:center;margin-bottom:.8rem"><button type="button" style="padding:.4rem .9rem;border:1px solid rgba(255,255,255,.15);border-radius:50px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:.75rem;font-family:var(--fb);cursor:pointer;transition:all .2s" onclick="W.presetDays('weekdays')">Weekdays (M–F)</button><button type="button" style="padding:.4rem .9rem;border:1px solid rgba(255,255,255,.15);border-radius:50px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-size:.75rem;font-family:var(--fb);cursor:pointer;transition:all .2s" onclick="W.presetDays('all')">Every Day</button></div>
   <div class="day-row" role="group" aria-label="Select cleaning days">${DAYS.map(d=>{
     const wasSel=(D._janDayArr||[]).includes(d);
     return`<div class="day-btn${wasSel?' sel':''}" role="button" tabindex="0" aria-pressed="${wasSel}" aria-label="Select ${d}" onclick="W.pickJDay(this)">${d}</div>`}).join('')}</div>
@@ -395,7 +399,7 @@ urgency:()=>{
   return`<h2 class="step-q">When would you like to start?</h2>
   <p class="step-sub">Whether you need us next week or you're just exploring options, there's no pressure. This helps us plan availability and onboarding.</p>
   <div class="opts" role="group" aria-label="Start timeline options">${opts.map(o=>`<div class="opt${D.urg===o.v?' sel':''}" role="button" tabindex="0" aria-pressed="${D.urg===o.v}" aria-label="Select timeline: ${o.l}" onclick="W.pick('urg','${o.v}',this)">${o.l}</div>`).join('')}</div>
-  <div id="urgMic">${D.urg==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':''}</div>`
+  <div id="urgMic">${D.urg==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':(D.urg==='unsure'?'<div class="mic">No problem — we\'ll include flexible start options in your proposal.</div>':'')}</div>`
 },
 
 extras:()=>`<h2 class="step-q">Would you also like a dedicated day porter, ${D.fn}?</h2>
@@ -656,12 +660,21 @@ pick(f,v,el){
   this.clearErr();
   if(f==='space'){const o=document.getElementById('spOth');if(o){o.classList.toggle('vis',v==='Other');if(v==='Other'){this.scrollToRevealed(o);return}}}
   if(f==='size'){const m=document.getElementById('szMic');if(m)m.innerHTML=v==='Not sure'?'<div class="mic">No problem — you can send us a video walkthrough or floor plans after submitting.</div>':''}
-  if(f==='urg'){const m=document.getElementById('urgMic');if(m)m.innerHTML=v==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':''}
+  if(f==='urg'){const m=document.getElementById('urgMic');if(m)m.innerHTML=v==='flex'?'<div class="mic">No rush — your proposal will be valid for 30 days.</div>':(v==='unsure'?'<div class="mic">No problem — we\'ll include flexible start options in your proposal.</div>':'')}
   // Auto-advance for single-select steps
   const autoSteps=['space','size','urg'];
   if(autoSteps.includes(f))setTimeout(()=>this.next(),400);
 },
 
+presetDays(type){
+  const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const target=type==='weekdays'?weekdays:DAYS;
+  D._janDayArr=[...target];D.janDays=target.join(' / ');
+  document.querySelectorAll('.day-btn').forEach(b=>{b.classList.toggle('sel',target.includes(b.textContent.trim()))});
+  const msg=document.getElementById('dayV');
+  msg.className='day-count ok';msg.textContent=`✓ ${target.length} day${target.length>1?'s':''} selected`;
+  this.clearErr();
+},
 pickJDay(el){
   if(el.classList.contains('sel'))el.classList.remove('sel');
   else el.classList.add('sel');
