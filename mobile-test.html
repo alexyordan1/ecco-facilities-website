@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><title>Mobile Test</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;font-family:system-ui;color:#fff;padding:1rem}
+.controls{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.controls button{padding:.5rem 1rem;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;font-size:.8rem}
+.controls button.active{background:#2D7A32;border-color:#3D9A43}
+.device-frame{display:flex;justify-content:center;padding:1rem}
+.phone{background:#000;border-radius:36px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,.8);display:inline-block}
+.phone-screen{border-radius:26px;overflow:hidden;display:block;background:#fff}
+.label{text-align:center;font-size:.75rem;opacity:.5;margin-top:.5rem}
+</style></head><body>
+<div class="controls">
+  <button class="active" onclick="loadPage('index.html',this)">Home</button>
+  <button onclick="loadPage('services.html',this)">Services</button>
+  <button onclick="loadPage('janitorial.html',this)">Janitorial</button>
+  <button onclick="loadPage('about.html',this)">About</button>
+  <button onclick="loadPage('why-ecco.html',this)">Why Ecco</button>
+  <button onclick="loadPage('testimonials.html',this)">Testimonials</button>
+  <button onclick="loadPage('careers.html',this)">Careers</button>
+  <button onclick="loadPage('quote.html',this)">Quote</button>
+  <button onclick="loadPage('quote-janitorial.html',this)">Quote Form</button>
+  <button onclick="loadPage('blog.html',this)">Blog</button>
+  <button onclick="loadPage('404.html',this)">404</button>
+</div>
+<div class="device-frame">
+  <div>
+    <div class="phone">
+      <iframe id="screen" src="index.html" width="390" height="844" class="phone-screen"></iframe>
+    </div>
+    <div class="label">iPhone 14 Pro — 390 x 844</div>
+  </div>
+</div>
+<script>
+function loadPage(url, btn) {
+  document.getElementById('screen').src = url;
+  document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body></html>

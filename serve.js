@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8080;
+const PORT = parseInt(process.env.PORT || '8080', 10);
 const DIR = __dirname;
 
 const MIME = {
@@ -13,7 +13,10 @@ const MIME = {
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
-  '.json': 'application/json'
+  '.webp': 'image/webp',
+  '.json': 'application/json',
+  '.xml': 'application/xml',
+  '.xsl': 'application/xml'
 };
 
 http.createServer((req, res) => {
