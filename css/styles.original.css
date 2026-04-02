@@ -16,13 +16,13 @@
   --bg: #FAFBFC;
   --wh: #FFF;
   --cream: #F3F5F8;
-  --safe-text: #C5D0DC;
+  --safe-text: #CBD6E1;
   --td: #1A1E2C;
   --tb: #495568;
   --tm: #6B7A8D;
-  --tl: #94A3B5;
+  --tl: #7A8A9E;
   --red: #C84444;
-  --twm: #B8C7D6;
+  --twm: #C8D5E2;
   --bl: #DFE4EC;
   --bll: #EDF0F5;
   --bd: rgba(255,255,255,.08);
@@ -81,14 +81,21 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* --- Focus states (accessibility) --- */
+:root { --focus-ring: var(--blue); }
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
+.sec-navy :focus-visible,
+.hero :focus-visible,
+.page-hero :focus-visible,
+.footer :focus-visible,
+.cta-banner :focus-visible,
+.stats-bar :focus-visible { --focus-ring: #FFF; }
 
 /* ============================================================
    NAVIGATION
@@ -300,7 +307,7 @@ textarea:focus-visible {
 .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(11,29,56,.25); }
 .btn-ol { background: transparent; color: var(--wh); border: 1.5px solid rgba(255,255,255,.25); }
 .btn-ol:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.08); transform: translateY(-2px); }
-.btn-ol:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.btn-ol:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--bl); }
 .btn-outline:hover { border-color: var(--navy); }
 .btn-white { background: var(--wh); color: var(--navy); }
@@ -625,11 +632,7 @@ textarea:focus-visible {
 .footer-copy { opacity: .75; }
 .cta-trust span { color: rgba(255,255,255,.85); }
 
-/* --- Focus rings on dark backgrounds --- */
-.hero a:focus-visible, .hero button:focus-visible,
-.footer a:focus-visible, .footer button:focus-visible,
-.stats-bar a:focus-visible, .cta-banner a:focus-visible,
-[style*="navy"] a:focus-visible { outline-color: var(--wh); }
+/* Focus rings on dark backgrounds now handled by --focus-ring variable override above */
 
 /* --- Nav hidden: prevent focus on invisible elements --- */
 .nav.nav-hidden { visibility: hidden; }
