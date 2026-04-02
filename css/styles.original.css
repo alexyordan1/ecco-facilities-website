@@ -1426,7 +1426,7 @@ textarea:focus-visible {
 .wiz-bg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; opacity: .18; }
 .wiz-overlay { position: fixed; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(11,29,56,.88) 0%, rgba(11,29,56,.72) 100%); }
 .wiz-main { min-height: calc(100vh - 170px); padding: 1rem 1.5rem; background: transparent; position: relative; overflow: visible; box-sizing: border-box; }
-.wiz-card { width: 100%; max-width: 900px; margin: 0 auto; position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; }
+.wiz-card { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 .5rem; position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; }
 #sBox { flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
 #sBox::-webkit-scrollbar { width: 6px; }
 #sBox::-webkit-scrollbar-track { background: transparent; }
@@ -1634,8 +1634,8 @@ textarea:focus-visible {
   .wiz-progress-label { display: block; }
   .wiz-sec-line { width: 20px; }
   .wiz-sec-dot { width: 24px; height: 24px; font-size: .65rem; }
-  .wiz-card { margin: 0 .75rem; }
-  .wiz-main { padding: .5rem .75rem; }
+  .wiz-card { margin: 0 auto; padding: 0 .75rem; }
+  .wiz-main { padding: .5rem 0; }
   .wiz-nav { flex-direction: column-reverse; gap: .6rem; padding-top: .5rem; }
   .wiz-next { width: 100%; min-height: 52px; }
   .wiz-back { width: 100%; text-align: center; padding: .7rem 1rem; min-height: 48px; }
@@ -1660,7 +1660,8 @@ textarea:focus-visible {
   .wiz-sec-dot { width: 20px; height: 20px; font-size: .6rem; }
   .wiz-sec-line { width: 12px; }
   .step-q { font-size: 1.5rem; }
-  .wiz-main { padding: .5rem .5rem; }
+  .wiz-main { padding: .5rem 0; }
+  .wiz-card { padding: 0 1rem; }
   .opt { min-height: 48px; padding: .7rem .6rem; font-size: .82rem; }
   .day-row { flex-direction: column; }
   .day-btn { width: 100%; text-align: center; padding: .75rem; min-height: 48px; }
@@ -1673,7 +1674,8 @@ textarea:focus-visible {
   .wiz-progress { padding: .6rem .8rem; }
   .wiz-sec-dot { width: 18px; height: 18px; font-size: .55rem; }
   .wiz-sec-line { width: 8px; }
-  .wiz-main { padding: .4rem; }
+  .wiz-main { padding: .4rem 0; }
+  .wiz-card { padding: 0 .85rem; }
   .step-q { font-size: 1.35rem; }
   .step-sub { font-size: .88rem; }
   .opt { padding: .6rem .4rem; font-size: .78rem; }
