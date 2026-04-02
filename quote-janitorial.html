@@ -17,85 +17,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=1.5">
+<link rel="stylesheet" href="css/styles.css?v=1.6">
 <style>
-:root{--navy:#0B1D38;--navy-l:#15294D;--blue:#3068AD;--blue-l:#4A82C7;--green:#2D7A32;--green-l:#3D9A43;--gbg:rgba(45,122,50,.07);--gbd:rgba(45,122,50,.18);--bg:#FAFBFC;--wh:#FFF;--cream:#F3F5F8;--td:#1A1E2C;--tb:#495568;--tm:#6B7A8D;--tl:#94A3B5;--bl:#DFE4EC;--bll:#EDF0F5;--fd:'Cormorant Garamond',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--r:10px;--rl:16px;--ease:cubic-bezier(.4,0,.2,1)}
-
-/* ── BODY OFFSET FOR FIXED NAV ── */
+/* Wizard overrides — shared styles in styles.css */
+:root{--r:10px;--rl:16px}
 body{padding-top:72px}
-
-/* ── FIXED BACKGROUND ── */
-.wiz-bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center;opacity:.18}
-.wiz-overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,29,56,.88) 0%,rgba(11,29,56,.72) 100%)}
-
-/* ── PROGRESS BAR ── */
-.wiz-progress{position:sticky;top:72px;z-index:50;background:rgba(11,29,56,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:1.2rem 2rem}
-.wiz-progress-inner{display:flex;align-items:center;justify-content:center;max-width:650px;margin:0 auto}
-.wiz-sec{display:flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.35);white-space:nowrap;transition:color .3s}
-.wiz-sec.active{color:#FFF}
-.wiz-sec.done{color:var(--green-l)}
-.wiz-sec-dot{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.35);transition:all .3s;flex-shrink:0}
-.wiz-sec.active .wiz-sec-dot{border-color:#FFF;background:var(--navy);color:var(--wh);animation:pulse 2s infinite}
-.wiz-sec.done .wiz-sec-dot{border-color:var(--green);background:var(--green);color:var(--wh)}
-.wiz-sec-line{width:36px;height:2px;background:rgba(255,255,255,.12);margin:0 .4rem;flex-shrink:0;transition:background .3s}
-.wiz-sec-line.done{background:var(--green)}
-.wiz-progress-label{text-align:center;font-size:.75rem;color:rgba(255,255,255,.85);font-weight:600;margin-top:.5rem;display:none}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.15)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
-
-/* ── WIZARD LAYOUT ── */
-.wiz-main{height:calc(100vh - 170px);padding:1rem 1.5rem 1rem;background:transparent;position:relative;overflow:hidden;box-sizing:border-box}
-.wiz-card{width:100%;max-width:900px;margin:0 auto;padding:0;position:relative;z-index:2;height:100%;display:flex;flex-direction:column;box-sizing:border-box}
-
-/* ── STEP BOX (scrollable content area) ── */
-#sBox{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;min-height:0;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
-#sBox::-webkit-scrollbar{width:5px}
-#sBox::-webkit-scrollbar-track{background:transparent}
-#sBox::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
-
-/* ── STEP CONTENT ── */
-.step-q{font-family:var(--fd);font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:500;color:#FFF;margin-bottom:.6rem;line-height:1.25;letter-spacing:-.02em;text-align:center}
-.step-sub{font-size:.95rem;color:rgba(255,255,255,.75);margin-bottom:0.8rem;line-height:1.6;max-width:620px;text-align:center;margin-left:auto;margin-right:auto}
-.step-sub strong{color:rgba(255,255,255,.9)}
-
-/* ── OPTION CARDS ── */
-.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
-.opts.c1{grid-template-columns:1fr}
-.opts.c2{grid-template-columns:1fr 1fr}
-.opts.c3{grid-template-columns:repeat(3,1fr)}
-.opt{padding:.6rem .5rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);cursor:pointer;transition:transform .2s cubic-bezier(.22,1.3,.36,1),border-color .25s,background .25s,box-shadow .25s;text-align:center;font-size:.82rem;font-weight:500;color:rgba(255,255,255,.85);user-select:none;background:rgba(255,255,255,.05);position:relative}
-.opt:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.1);transform:translateY(-2px)}
-.opt:active{transform:scale(.97)}
-.opt:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
-.opt.sel{border-color:rgba(61,154,67,.4);background:rgba(45,122,50,.08);box-shadow:0 0 0 1px rgba(45,122,50,.2);color:#FFF;font-weight:600}
-.opt.sel::after{content:'✓';position:absolute;top:8px;right:10px;font-size:.65rem;color:var(--green-l);font-weight:800;width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:rgba(45,122,50,.15);border-radius:50%}
-.opt .opt-ico{font-size:1.3rem;display:block;margin-bottom:.2rem}
-.opt .opt-desc{font-size:.76rem;color:rgba(255,255,255,.45);margin-top:.2rem;font-weight:400}
-.opt.sug{border-color:var(--green-l)}.opt.sug .opt-tag{display:block;font-size:.58rem;color:var(--green-l);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:.3rem}
-.opt.mu.sel{border-color:var(--blue-l);background:rgba(74,130,199,.1)}
-.opt.mu.sel::after{color:var(--blue-l);background:rgba(74,130,199,.12)}
-
-/* ── DAY BUTTONS ── */
-.day-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
-.day-btn{padding:.5rem 1rem;min-width:auto;height:auto;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-size:.8rem;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;transition:all .25s var(--ease);user-select:none;background:rgba(255,255,255,.05)}
-.day-btn:hover{border-color:rgba(255,255,255,.28);transform:translateY(-1px)}
-.day-btn:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
-.day-btn.sel{border-color:var(--blue-l);background:var(--blue);color:var(--wh)}
-.day-btn.dis{opacity:.2;pointer-events:none}
-
-/* ── TIME CHIPS ── */
-.time-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
-.time-chip{padding:.5rem .9rem;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:50px;font-size:.8rem;color:rgba(255,255,255,.65);cursor:pointer;transition:all .2s}
-.time-chip:hover{border-color:rgba(255,255,255,.3);color:#FFF}
-.time-chip:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
-.time-chip.sel{border-color:var(--blue-l);background:var(--blue);color:var(--wh)}
-
-/* ── PAIN CHIPS ── */
-.pain-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
-.pain-chip{padding:.5rem .85rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-size:.82rem;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;user-select:none}
-.pain-chip:hover{border-color:rgba(255,255,255,.3)}
-.pain-chip.sel{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.1);color:#FFF;font-weight:600}
-
-/* ── FIELDS ── */
 .fg{margin-bottom:1rem;text-align:center}
 .fg label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:.4rem;text-align:center}
 .fg input,.fg textarea{width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;transition:border-color .3s,box-shadow .3s;background:rgba(255,255,255,.06)}
@@ -103,116 +29,19 @@ body{padding-top:72px}
 .fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.4)}
 .fg textarea{resize:vertical;min-height:60px}
 .fg input.v-err,.fg textarea.v-err{border-color:#FF6B6B}
-.v-hint{position:absolute;right:12px;top:50%;font-size:.75rem;pointer-events:none;opacity:0;transition:opacity .3s}
-.v-hint.show{opacity:1}
-.v-hint.ok{color:#3D9A43}
-.v-hint.bad{color:#FF6B6B}
 .fg input.v-ok{border-color:rgba(61,154,67,.5)}
-.submit-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.5rem}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ref-copy{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:.75rem;cursor:pointer;transition:all .2s;margin-left:.5rem;font-family:var(--fb);font-weight:500}
-.ref-copy:hover{background:rgba(255,255,255,.18)}
-.ref-copy.copied{background:rgba(61,154,67,.25);border-color:rgba(61,154,67,.4)}
-.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
-.confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 2.5s ease-out forwards}
-@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(0);opacity:0}}
 .fg select{width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;transition:border-color .3s;background:rgba(255,255,255,.06);appearance:none}
 .fg select:focus{border-color:rgba(255,255,255,.35)}
 .fg select option{background:var(--navy);color:#FFF}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-
-/* ── SECTION DIVIDER ── */
-.sec-label{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:1.8rem 0 1rem;display:flex;align-items:center;gap:.5rem;justify-content:center}
-.sec-label::before{content:'';width:18px;height:2px;background:rgba(255,255,255,.35);border-radius:2px}
-
-/* ── MICRO FEEDBACK ── */
-.mic{margin-top:1rem;padding:.7rem 1rem;background:rgba(45,122,50,.1);border:1px solid rgba(45,122,50,.2);border-radius:var(--rl);font-size:.86rem;color:var(--green-l);font-weight:500;animation:fadeIn .3s ease;text-align:center}
-.day-count{font-size:.82rem;margin-top:.5rem;font-weight:500;text-align:center}
-.day-count.ok{color:var(--green-l)}.day-count.need{color:#FF6B6B}
-
-/* ── CONDITIONAL ── */
-.cnd{display:none;animation:fadeIn .3s ease;text-align:center}.cnd.vis{display:block}
-
-/* ── SUMMARY ── */
-.sum-section{margin-bottom:1.2rem;padding:1rem 1.2rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px}
-.sum-section-head{font-size:.78rem;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
-.sum-section-ico{font-size:1rem}
-.sum-edit{margin-left:auto;font-size:.78rem;color:var(--blue-l);cursor:pointer;font-weight:500;background:none;border:none;font-family:var(--fb);transition:color .2s}
-.sum-edit:hover{color:#FFF;text-decoration:underline}
-.sr{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.88rem}.sr:last-child{border-bottom:none}
-.sr-l{color:rgba(255,255,255,.5);font-weight:500}.sr-v{color:#FFF;font-weight:600;text-align:right;max-width:55%}
-
-/* ── NAV BUTTONS ── */
-.wiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:0.8rem;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
-.wiz-back{background:none;border:none;cursor:pointer;font-family:var(--fb);font-size:.92rem;color:rgba(255,255,255,.65);font-weight:500;padding:.85rem 1.5rem;transition:color .3s}
-.wiz-back:hover{color:#FFF}
-.wiz-back.hidden{visibility:hidden}
-.wiz-next{padding:.9rem 2.5rem;background:var(--blue);color:var(--wh);font-family:var(--fb);font-size:.95rem;font-weight:600;border:none;border-radius:var(--rl);cursor:pointer;transition:transform .2s cubic-bezier(.22,1.3,.36,1),background .3s,box-shadow .3s;min-width:180px;text-align:center}
-.wiz-next:hover{background:var(--blue-l);transform:translateY(-2px);box-shadow:0 10px 28px rgba(48,104,173,.3)}
-.wiz-next:active{transform:scale(.97)}
-.wiz-next.submit-btn{background:linear-gradient(135deg,var(--green) 0%,var(--green-l) 100%)}.wiz-next.submit-btn:hover{box-shadow:0 10px 28px rgba(45,122,50,.3)}
-.wiz-next.ready{animation:btnPulse 2s infinite}
-@keyframes btnPulse{0%,100%{box-shadow:0 0 16px rgba(48,104,173,.25)}50%{box-shadow:0 0 28px rgba(48,104,173,.5)}}
-
-/* ── VALIDATION ── */
-.v-msg{font-size:.82rem;color:#FF6B6B;margin-top:.6rem;font-weight:500;animation:fadeIn .3s ease;text-align:center}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
-.shake{animation:shake .4s var(--ease)}
-
-/* ── TRANSITIONS ── */
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
-.slide-in-right{animation:slideRight .35s ease forwards}
-.slide-in-left{animation:slideLeft .35s ease forwards}
-
-/* ── SUCCESS ── */
-.success{text-align:center;padding:1rem 0}
-.success-check{width:80px;height:80px;margin:0 auto 1.8rem;background:rgba(45,122,50,.12);border:2px solid rgba(45,122,50,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;animation:popIn .6s var(--ease)}
-@keyframes popIn{from{transform:scale(0);opacity:0}50%{transform:scale(1.15)}to{transform:scale(1);opacity:1}}
-.success-check svg{width:36px;height:36px}
-.success-check svg path{stroke:var(--green-l);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:50;stroke-dashoffset:50;animation:drawCheck .5s .3s ease forwards}
-@keyframes drawCheck{to{stroke-dashoffset:0}}
-.success-timeline{display:flex;justify-content:center;align-items:flex-start;gap:0;margin:2rem 0;flex-wrap:wrap}
-.success-step{text-align:center}
-.success-step-num{width:32px;height:32px;background:var(--blue);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;margin:0 auto .4rem}
-.success-step-text{font-size:.72rem;color:rgba(255,255,255,.55);max-width:100px}
-.success-step-line{width:40px;height:2px;background:rgba(255,255,255,.12);margin-top:15px;flex-shrink:0}
-.success-badges{display:flex;justify-content:center;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
-.success-badge{font-size:.72rem;color:#FFF;font-weight:600;display:flex;align-items:center;gap:.3rem;padding:.4rem .8rem;background:rgba(255,255,255,.06);border-radius:50px;border:1px solid rgba(255,255,255,.1)}
-.success-back{display:inline-block;margin-top:2rem;padding:.85rem 2.5rem;background:var(--blue);color:var(--wh);font-family:var(--fb);font-size:.92rem;font-weight:600;border-radius:var(--rl);text-decoration:none;transition:all .3s var(--ease)}
-.success-back:hover{background:var(--blue-l);transform:translateY(-1px)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .wiz-sec-label{display:none}
-  .wiz-progress-label{display:block}
-  .wiz-sec-line{width:20px}
-  .wiz-sec-dot{width:24px;height:24px;font-size:.65rem}
-  .wiz-card{margin:0 .5rem}
-  .wiz-main{padding:.5rem .5rem .5rem}
-  .wiz-nav{flex-direction:column-reverse;gap:.6rem;padding-top:.5rem}
-  .wiz-next{width:100%}
-  .wiz-back{width:100%;text-align:center;padding:.5rem 1rem}
-  .opts{grid-template-columns:1fr 1fr}
-  .opts.c3{grid-template-columns:1fr 1fr}
-  .opt{padding:.5rem .5rem;font-size:.82rem}
-  .fr{grid-template-columns:1fr}
-  .success-step-line{width:24px}
-  .step-q{margin-bottom:.3rem}
-  .step-sub{margin-bottom:.6rem}
-}
-@media(max-width:480px){
-  .opts{grid-template-columns:1fr}
-  .wiz-sec-dot{width:20px;height:20px;font-size:.6rem}
-  .wiz-sec-line{width:12px}
-  .step-q{font-size:1.5rem}
-  .wiz-main{padding:.3rem .3rem .3rem}
-  .opt{padding:.6rem .5rem;font-size:.8rem}
-  .day-row{flex-direction:column}
-  .day-btn{width:100%;text-align:center;padding:.7rem}
-}
-.hp-field{position:absolute;left:-9999px;opacity:0;height:0;width:0;overflow:hidden}
+.v-hint{position:absolute;right:12px;top:50%;font-size:.75rem;pointer-events:none;opacity:0;transition:opacity .3s}
+.v-hint.show{opacity:1}
+.v-hint.ok{color:#3D9A43}
+.v-hint.bad{color:#FF6B6B}
+.pain-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+.pain-chip{padding:.5rem .85rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-size:.82rem;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;user-select:none}
+.pain-chip:hover{border-color:rgba(255,255,255,.3)}
+.pain-chip.sel{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.1);color:#FFF;font-weight:600}
 </style>
 </head>
 <body>
@@ -415,7 +244,7 @@ extras:()=>`<h2 class="step-q">Would you also like a dedicated day porter, ${D.f
 info:()=>`<h2 class="step-q">Let's start with you</h2>
   <p class="step-sub">We'll use this to send your personalized proposal within 24 hours.</p>
   <div class="fr"><div class="fg"><label for="fFn">First Name *</label><input placeholder="First name" id="fFn" required aria-required="true" value="${D.fn||''}" oninput="D.fn=this.value;this.classList.remove('v-err')"></div><div class="fg"><label for="fLn">Last Name *</label><input placeholder="Last name" id="fLn" required aria-required="true" value="${D.ln||''}" oninput="D.ln=this.value;this.classList.remove('v-err')"></div></div>
-  <div class="fr"><div class="fg" style="position:relative"><label for="fEm">Business Email *</label><input type="email" placeholder="you@company.com" id="fEm" required aria-required="true" value="${D.em||''}" oninput="D.em=this.value;this.classList.remove('v-err');this.parentElement.querySelector('.v-ok')&&this.parentElement.querySelector('.v-ok').remove()" onblur="validateEmail(this)"><span class="v-hint" id="emHint"></span></div><div class="fg"><label for="fPh">Phone</label><input type="tel" placeholder="(555) 000-0000" id="fPh" value="${D.ph||''}" oninput="formatPhone(this)"></div></div>
+  <div class="fr"><div class="fg" style="position:relative"><label for="fEm">Business Email *</label><input type="email" placeholder="you@company.com" id="fEm" required aria-required="true" value="${D.em||''}" oninput="D.em=this.value;this.classList.remove('v-err');this.parentElement.querySelector('.v-ok')&&this.parentElement.querySelector('.v-ok').remove()" onblur="validateEmail(this)"><span class="v-hint" id="emHint"></span></div><div class="fg"><label for="fPh">Phone <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input type="tel" placeholder="(555) 000-0000" id="fPh" value="${D.ph||''}" oninput="formatPhone(this)"></div></div>
   <div class="fg"><label>Preferred Contact Method</label>
   <div class="opts c3" style="margin-top:.3rem" role="group" aria-label="Preferred contact method">
   <div class="opt${D.contactPref==='Email'?' sel':''}" role="button" tabindex="0" aria-pressed="${D.contactPref==='Email'}" onclick="W.pick('contactPref','Email',this)" style="padding:.7rem .5rem;font-size:.82rem">Email</div>
@@ -429,7 +258,7 @@ location:()=>`<h2 class="step-q">Almost there, ${D.fn}! Where is your facility?<
   <p class="step-sub">This helps us assign a local team familiar with your area.</p>
   <div class="fg"><label for="fCo">Company Name *</label><input placeholder="Company name" id="fCo" required aria-required="true" value="${D.co||''}" oninput="D.co=this.value;this.classList.remove('v-err')"></div>
   <div class="fg"><label for="fAddr">Full Address *</label><input type="text" placeholder="Street address, suite/floor, city, state, ZIP" id="fAddr" required aria-required="true" value="${D.addr||''}" oninput="D.addr=this.value;this.classList.remove('v-err')"></div>
-  <div class="fg"><label for="fRef">How did you hear about us?</label>
+  <div class="fg"><label for="fRef">How did you hear about us? <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
   <select id="fRef" class="fg" style="width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;background:rgba(255,255,255,.06);cursor:pointer;appearance:none" onchange="D.referral=this.value">
   <option value="">Select one (optional)</option>
   <option value="Google Search">Google Search</option>
