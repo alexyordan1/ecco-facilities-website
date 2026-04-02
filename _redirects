@@ -4,11 +4,6 @@
 # Common typos and old paths
 /contact.html      /quote.html       301
 /contact            /quote.html       301
-/services           /services.html    301
-/about              /about.html       301
-/blog               /blog.html        301
-/careers            /careers.html     301
-/quote              /quote.html       301
-/privacy            /privacy.html     301
-/terms              /terms.html       301
-/accessibility      /accessibility.html 301
+# Note: Cloudflare Pages auto-strips .html extensions
+# These redirects are only for paths that don't match actual files
+# Do NOT add redirects for pages that already exist as .html files
