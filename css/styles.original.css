@@ -783,7 +783,7 @@ textarea:focus-visible {
   }
   .nm.active .nc { margin: .5rem 0 0; text-align: center; display: block; }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
-  .hero { padding: 3rem 1.5rem 2.5rem; min-height: auto; }
+  .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }
   .hero h1 { font-size: clamp(2rem,7vw,2.8rem); }
   .hero-sub { font-size: .95rem; }
   .page-hero { padding: 2.5rem 1.5rem 2.5rem; min-height: 100vh; }
@@ -806,7 +806,7 @@ textarea:focus-visible {
 @media (max-width: 480px) {
   /* Layout & Sections */
   .sec, .service-detail-section, .problem-sec { padding: 2.5rem 1rem; }
-  .hero { padding: 2.5rem 1rem 2rem; }
+  .hero { padding: 2.5rem 1rem 2rem; min-height: 100vh; min-height: 100svh; }
   .page-hero { padding: 2rem 1rem 2rem; min-height: 100vh; min-height: 100svh; }
   .breadcrumb { flex-wrap: wrap; justify-content: center; }
   .page-hero h1 { font-size: clamp(1.5rem, 5.5vw, 2rem); }
