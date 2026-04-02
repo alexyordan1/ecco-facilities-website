@@ -87,6 +87,7 @@ body{padding-top:72px}
 .time-chip:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
 .time-chip.sel{border-color:var(--blue-l);background:var(--blue);color:var(--wh)}
 .time-chip.common{border-color:var(--green-l);color:var(--green-l)}
+.time-chip.dis{opacity:.25;pointer-events:none;cursor:not-allowed}
 
 /* ── PAIN CHIPS ── */
 .pain-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
@@ -335,8 +336,13 @@ function addH(time,hours){
   const idx=TIMES.indexOf(time);
   if(idx===-1)return null;
   const newIdx=idx+hours;
-  if(newIdx>=TIMES.length)return null;
+  if(newIdx>=TIMES.length)return 'past midnight';
   return TIMES[newIdx];
+}
+function isTimeCompatible(time,hours){
+  const idx=TIMES.indexOf(time);
+  if(idx===-1)return false;
+  return (idx+hours)<TIMES.length;
 }
 
 // ═══ SECTIONS & STEPS ═══
@@ -358,7 +364,7 @@ const REQ={
   hours:()=>!!D.hrs&&(D.hrs!=='Custom'||(/^\d+$/.test(D.customHrs)&&parseInt(D.customHrs)>0&&parseInt(D.customHrs)<=24)),
   starttime:()=>!!D.startTime,
   days:()=>D.dpDaysArr&&D.dpDaysArr.length>0,
-  porters:()=>!!D.porters,
+  porters:()=>!!D.porters&&(D.porters!=='3+'||!!D.porterCount),
   areas:()=>D.dpAreas&&D.dpAreas.length>0,
   urgency:()=>!!D.urg,
   extras:()=>true,
@@ -400,7 +406,7 @@ hours:()=>{
 
 starttime:()=>`<h2 class="step-q">What time should your porter arrive?</h2>
   <p class="step-sub">Pick the start time that matches when your facility gets busy. Common start times are highlighted — we'll calculate the end time for you.</p>
-  <div class="time-row" role="group" aria-label="Start time options">${TIMES.map(t=>{const common=['7:00 AM','8:00 AM','9:00 AM'].includes(t);return `<div class="time-chip${D.startTime===t?' sel':''}${common?' common':''}" role="button" tabindex="0" aria-pressed="${D.startTime===t}" aria-label="Select start time: ${t}${common?' (common)':''}" onclick="W.pickStartTime('${t}',this)">${t}</div>`}).join('')}</div>
+  <div class="time-row" role="group" aria-label="Start time options">${TIMES.map(t=>{const common=['7:00 AM','8:00 AM','9:00 AM'].includes(t);const hrs=D.hrs==='Custom'?parseInt(D.customHrs||0):parseInt(D.hrs||0);const compat=!hrs||isTimeCompatible(t,hrs);return `<div class="time-chip${D.startTime===t?' sel':''}${common?' common':''}${!compat?' dis':''}" role="button" tabindex="${compat?'0':'-1'}" aria-pressed="${D.startTime===t}" aria-label="Select start time: ${t}${common?' (common)':''}${!compat?' (too late for '+D.hrs+' coverage)':''}" ${compat?`onclick="W.pickStartTime('${t}',this)"`:''} ${!compat?'aria-disabled="true"':''}>${t}</div>`}).join('')}</div>
   <div id="endTime" class="auto-calc${D.startTime?' vis':''}" aria-live="polite"></div>`,
 
 days:()=>{
@@ -752,7 +758,7 @@ pickArea(v,el){
     D.dpAreas.push(v);
     el.classList.add('sel');
   }
-  if(v==='Other'){const o=document.getElementById('areaOth');if(o)o.classList.toggle('vis',D.dpAreas.includes('Other'))}
+  if(v==='Other'){const o=document.getElementById('areaOth');if(o)o.classList.toggle('vis',D.dpAreas.includes('Other'));if(!D.dpAreas.includes('Other'))D.areaOther=''}
   this.clearErr();
 },
 
