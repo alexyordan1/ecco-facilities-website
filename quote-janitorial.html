@@ -102,6 +102,19 @@ body{padding-top:72px}
 .fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.3)}
 .fg textarea{resize:vertical;min-height:60px}
 .fg input.v-err,.fg textarea.v-err{border-color:#FF6B6B}
+.v-hint{position:absolute;right:12px;top:50%;font-size:.75rem;pointer-events:none;opacity:0;transition:opacity .3s}
+.v-hint.show{opacity:1}
+.v-hint.ok{color:#3D9A43}
+.v-hint.bad{color:#FF6B6B}
+.fg input.v-ok{border-color:rgba(61,154,67,.5)}
+.submit-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ref-copy{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:.75rem;cursor:pointer;transition:all .2s;margin-left:.5rem;font-family:var(--fb);font-weight:500}
+.ref-copy:hover{background:rgba(255,255,255,.18)}
+.ref-copy.copied{background:rgba(61,154,67,.25);border-color:rgba(61,154,67,.4)}
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 2.5s ease-out forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(0);opacity:0}}
 .fg select{width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;transition:border-color .3s;background:rgba(255,255,255,.06);appearance:none}
 .fg select:focus{border-color:rgba(255,255,255,.35)}
 .fg select option{background:var(--navy);color:#FFF}
@@ -259,6 +272,31 @@ body{padding-top:72px}
 <script src="js/main.js?v=1.2"></script>
 <script src="js/chat-widget.js?v=1.1"></script>
 <script>
+function validateEmail(el){
+  const hint=el.parentElement.querySelector('.v-hint');
+  if(!el.value){if(hint){hint.className='v-hint';hint.textContent=''}el.classList.remove('v-ok');return}
+  const valid=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value);
+  if(hint){hint.textContent=valid?'✓':'Invalid email';hint.className='v-hint show '+(valid?'ok':'bad')}
+  el.classList.toggle('v-ok',valid);el.classList.toggle('v-err',!valid);
+}
+function formatPhone(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>10)v=v.slice(0,10);
+  if(v.length>=7)el.value='('+v.slice(0,3)+') '+v.slice(3,6)+'-'+v.slice(6);
+  else if(v.length>=4)el.value='('+v.slice(0,3)+') '+v.slice(3);
+  else if(v.length>0)el.value='('+v;
+  else el.value='';
+  D.ph=el.value;
+}
+function copyRef(btn,ref){
+  navigator.clipboard.writeText(ref).then(()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000)}).catch(()=>{});
+}
+function showConfetti(){
+  const c=document.createElement('div');c.className='confetti-container';
+  const colors=['#2D7A32','#3068AD','#4A82C7','#3D9A43','#F59E0B','#0B1D38'];
+  for(let i=0;i<40;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'%';p.style.background=colors[Math.floor(Math.random()*colors.length)];p.style.animationDelay=Math.random()*1+'s';p.style.animationDuration=(2+Math.random()*1.5)+'s';p.style.width=(5+Math.random()*6)+'px';p.style.height=(5+Math.random()*6)+'px';c.appendChild(p)}
+  document.body.appendChild(c);setTimeout(()=>c.remove(),4000);
+}
 const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const D={};
 
@@ -369,7 +407,7 @@ extras:()=>`<h2 class="step-q">Would you also like a dedicated day porter, ${D.f
 info:()=>`<h2 class="step-q">Let's start with you</h2>
   <p class="step-sub">We'll use this to send your personalized proposal within 24 hours.</p>
   <div class="fr"><div class="fg"><label for="fFn">First Name *</label><input placeholder="First name" id="fFn" required aria-required="true" value="${D.fn||''}" oninput="D.fn=this.value;this.classList.remove('v-err')"></div><div class="fg"><label for="fLn">Last Name *</label><input placeholder="Last name" id="fLn" required aria-required="true" value="${D.ln||''}" oninput="D.ln=this.value;this.classList.remove('v-err')"></div></div>
-  <div class="fr"><div class="fg"><label for="fEm">Business Email *</label><input type="email" placeholder="you@company.com" id="fEm" required aria-required="true" value="${D.em||''}" oninput="D.em=this.value;this.classList.remove('v-err')"></div><div class="fg"><label for="fPh">Phone</label><input type="tel" placeholder="(555) 000-0000" id="fPh" value="${D.ph||''}" oninput="D.ph=this.value"></div></div>
+  <div class="fr"><div class="fg" style="position:relative"><label for="fEm">Business Email *</label><input type="email" placeholder="you@company.com" id="fEm" required aria-required="true" value="${D.em||''}" oninput="D.em=this.value;this.classList.remove('v-err');this.parentElement.querySelector('.v-ok')&&this.parentElement.querySelector('.v-ok').remove()" onblur="validateEmail(this)"><span class="v-hint" id="emHint"></span></div><div class="fg"><label for="fPh">Phone</label><input type="tel" placeholder="(555) 000-0000" id="fPh" value="${D.ph||''}" oninput="formatPhone(this)"></div></div>
   <div class="fg"><label>Preferred Contact Method</label>
   <div class="opts c3" style="margin-top:.3rem" role="group" aria-label="Preferred contact method">
   <div class="opt${D.contactPref==='Email'?' sel':''}" role="button" tabindex="0" aria-pressed="${D.contactPref==='Email'}" onclick="W.pick('contactPref','Email',this)" style="padding:.7rem .5rem;font-size:.82rem">Email</div>
@@ -728,7 +766,7 @@ submit(){
   formData.append('_autoresponse',`Hi ${D.fn||'there'},\n\nThank you for requesting a free quote from Ecco Facilities LLC!\n\nWe have received your request for Janitorial Services and our team is already reviewing the details. Here is what happens next:\n\n1. Within 24 hours, you will receive a customized proposal tailored to your facility.\n2. Your proposal will include transparent, flat-rate pricing with no hidden fees.\n3. A dedicated Ecco representative will be available to answer any questions.\n\nAll of our cleaning products are Green Seal Certified and EPA Safer Choice approved — safe for your employees, visitors, and the environment.\n\nIf you need immediate assistance, feel free to contact us:\nEmail: info@eccofacilities.com\n\nWe look forward to working with you!\n\nWarm regards,\nThe Ecco Facilities Team\nCleaning The Future, Today\neccofacilities.com`);
   // Show loading state
   document.getElementById('wizProg').style.display='none';
-  document.getElementById('sBox').innerHTML=`<div style="text-align:center;padding:3rem 1rem"><div style="font-size:2.5rem;margin-bottom:1rem">⏳</div><h2 class="step-q">Sending your request, ${D.fn}...</h2><p class="step-sub">This will only take a moment.</p></div>`;
+  document.getElementById('sBox').innerHTML=`<div style="text-align:center;padding:3rem 1rem"><div style="margin-bottom:1.2rem"><span class="submit-spinner"></span></div><h2 class="step-q">Sending your request, ${D.fn}...</h2><p class="step-sub">This will only take a moment.</p></div>`;
   document.querySelector('.wiz-nav').style.display='none';
   fetch('https://formsubmit.co/ajax/info@eccofacilities.com',{method:'POST',body:formData}).then(r=>r.json()).then(()=>{
     // Send confirmation email to client via EmailJS (non-blocking)
@@ -753,7 +791,7 @@ submit(){
       <div class="success-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
       <h2 class="step-q" style="text-align:center">Thank you, ${D.fn}!</h2>
       <p style="color:rgba(255,255,255,.65);font-size:.95rem;margin-top:.4rem;text-align:center">Our team is already reviewing your request. You'll receive a customized proposal at ${D.em} within 24 hours.</p>
-      <p style="font-size:.82rem;color:rgba(255,255,255,.85);font-weight:600;margin-top:.8rem;text-align:center">Reference: ${refNum}</p>
+      <p style="font-size:.82rem;color:rgba(255,255,255,.85);font-weight:600;margin-top:.8rem;text-align:center">Reference: ${refNum} <button class="ref-copy" onclick="copyRef(this,'${refNum}')">Copy</button></p>
       <div class="success-timeline">
         <div class="success-step"><div class="success-step-num">1</div><div class="success-step-text">Request received</div></div>
         <div class="success-step-line"></div>
@@ -770,6 +808,7 @@ submit(){
     </div>`;
     document.getElementById('wizProg').style.display='none';
     document.getElementById('siteFooter').style.display='';
+    showConfetti();
   }).catch(err => {
     D._submitted = false;
     document.getElementById('sBox').innerHTML='<div style="text-align:center;padding:3rem 1rem"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><h2 class="step-q">Something went wrong</h2><p class="step-sub">We couldn\'t send your request. Please try again or email us directly.</p><a href="mailto:info@eccofacilities.com" style="display:inline-block;margin-top:1rem;padding:.8rem 2rem;background:var(--green);color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Email Us Instead</a><button onclick="D._submitted=false;W.cur=W.steps.length-1;W.render();document.querySelector(\'.wiz-nav\').style.display=\'flex\'" style="display:block;margin:1rem auto 0;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:.85rem;text-decoration:underline">← Go back and try again</button></div>';
