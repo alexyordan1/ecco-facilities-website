@@ -1070,13 +1070,32 @@ textarea:focus-visible {
 .problem-cta{margin-top:2rem;text-align:center;font-size:.95rem;color:var(--tb)}
 
 /* ── SAFE FOR EVERYONE (Home) ── */
-.safe-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;max-width:1000px;margin:0 auto}
-.safe-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:var(--rl);padding:1.8rem;text-align:center;transition:all .35s var(--ease)}
-.safe-card:hover{transform:translateY(-3px);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15);box-shadow:0 8px 32px rgba(0,0,0,.15)}
-.safe-ico{display:flex;align-items:center;justify-content:center;width:48px;height:48px;margin:0 auto .8rem;color:var(--green-l);background:rgba(61,154,67,.12);border-radius:14px;transition:transform .3s var(--ease)}
-.safe-card:hover .safe-ico{transform:scale(1.15)}
-.safe-card h3{font-size:.95rem;color:var(--wh);margin-bottom:.4rem;font-weight:600}
-.safe-card p{font-size:.9rem;color:var(--safe-text);line-height:1.7;margin:0}
+.safe-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;max-width:1100px;margin:0 auto;overflow:hidden}
+.safe-card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--rl);padding:2rem 1.8rem;text-align:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),
+             background .3s ease,border-color .3s ease,box-shadow .4s cubic-bezier(0.16,1,0.3,1);
+}
+.safe-card:hover{
+  transform:translateY(-6px);
+  background:rgba(255,255,255,.1);
+  border-color:rgba(106,163,104,.3);
+  box-shadow:0 16px 40px rgba(0,0,0,.2),0 0 20px rgba(45,122,50,.08);
+}
+.safe-ico{
+  display:flex;align-items:center;justify-content:center;
+  width:56px;height:56px;margin:0 auto 1rem;
+  color:var(--green-l);
+  background:linear-gradient(135deg,rgba(61,154,67,.18),rgba(48,104,173,.1));
+  border-radius:16px;border:1px solid rgba(106,163,104,.15);
+  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),box-shadow .3s ease;
+}
+.safe-card:hover .safe-ico{transform:scale(1.15) rotate(5deg);box-shadow:0 4px 16px rgba(45,122,50,.2)}
+.safe-card h3{font-size:1rem;color:var(--green-l);margin-bottom:.5rem;font-weight:700;letter-spacing:.01em}
+.safe-card p{font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.7;margin:0}
 
 @media(max-width:768px){.safe-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.safe-grid{grid-template-columns:1fr}}
