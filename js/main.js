@@ -165,3 +165,85 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
     });
   });
 })();
+
+/* ============================================================
+   PARALLAX ENGINE
+   ============================================================ */
+(function initParallax() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.innerWidth < 769) return; /* Skip on mobile for performance */
+
+  var els = document.querySelectorAll('[data-parallax]');
+  if (!els.length) return;
+
+  var visible = new Set();
+  var ticking = false;
+
+  var pObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) visible.add(e.target);
+      else visible.delete(e.target);
+    });
+  }, { rootMargin: '100px' });
+
+  els.forEach(function(el) { pObs.observe(el); });
+
+  function updateParallax() {
+    var scrollY = window.scrollY;
+    visible.forEach(function(el) {
+      var speed = parseFloat(el.getAttribute('data-parallax')) || 0.1;
+      var rect = el.getBoundingClientRect();
+      var center = rect.top + rect.height / 2;
+      var viewCenter = window.innerHeight / 2;
+      var offset = (center - viewCenter) * speed;
+      el.style.transform = 'translateY(' + offset + 'px)';
+    });
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(updateParallax);
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
+/* ============================================================
+   DIRECTIONAL REVEAL OBSERVER
+   ============================================================ */
+(function initDirectionalReveals() {
+  var revealEls = document.querySelectorAll('.rv-left, .rv-right, .rv-scale');
+  if (!revealEls.length) return;
+
+  var revObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('vis');
+        revObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+
+  revealEls.forEach(function(el) { revObs.observe(el); });
+
+  /* Mandatory fallback — 3s */
+  setTimeout(function() {
+    revealEls.forEach(function(el) {
+      if (!el.classList.contains('vis')) el.classList.add('vis');
+    });
+  }, 3000);
+})();
+
+/* ============================================================
+   STAGGER DELAY HELPER
+   ============================================================ */
+(function initStagger() {
+  document.querySelectorAll('[data-stagger]').forEach(function(parent) {
+    var delay = parseFloat(parent.getAttribute('data-stagger')) || 0.12;
+    var children = parent.children;
+    for (var i = 0; i < children.length; i++) {
+      children[i].style.transitionDelay = (i * delay) + 's';
+    }
+  });
+})();
