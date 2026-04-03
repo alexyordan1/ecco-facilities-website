@@ -445,7 +445,7 @@ textarea:focus-visible {
 .svc-bg-img.active { opacity: 1; }
 .svc-bg-img::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(11,29,56,.55) 0%, rgba(11,29,56,.4) 40%, rgba(30,53,98,.5) 100%);
+  background: linear-gradient(to bottom, rgba(11,29,56,.3) 0%, rgba(11,29,56,.65) 60%, rgba(11,29,56,.85) 100%);
 }
 .svc-tabs {
   position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 3;
