@@ -448,7 +448,7 @@ textarea:focus-visible {
 .val-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 960px; margin: 0 auto; }
 .val-card {
   background: var(--wh); border: 1px solid var(--bl); border-radius: var(--rl);
-  padding: 2.2rem; transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease), border-color .3s var(--ease); position: relative; overflow: hidden;
+  padding: 2.2rem; transition: transform .15s var(--ease-spring), box-shadow .15s var(--ease), border-color .15s var(--ease); position: relative; overflow: hidden;
 }
 .val-card::after {
   content: ''; position: absolute; top: 0; left: 0; width: 0; height: 3px;
@@ -602,6 +602,58 @@ textarea:focus-visible {
 .service-cta { display: inline-block; margin-top: 2rem; }
 
 /* ============================================================
+   SERVICE COMPARISON (tabbed on mobile, side-by-side on desktop)
+   ============================================================ */
+.svc-compare { max-width: 1100px; margin: 0 auto; }
+.svc-tabs { display: none; gap: .5rem; justify-content: center; margin-bottom: 2rem; }
+.svc-tab {
+  min-height: 48px; padding: .7rem 2rem; font-family: var(--fb); font-size: .88rem; font-weight: 600;
+  border: 2px solid var(--bl); border-radius: var(--r); background: transparent; color: var(--tb);
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.svc-tab.active { background: var(--navy); color: var(--wh); border-color: var(--navy); }
+.svc-tab:not(.active):hover { border-color: var(--navy); color: var(--navy); }
+.svc-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.svc-panel h3 { font-family: var(--fd); font-size: 1.3rem; font-weight: 600; color: var(--navy); margin-bottom: .5rem; }
+.svc-panel-intro { font-size: .92rem; color: var(--tb); line-height: 1.8; margin-bottom: 1.5rem; }
+
+/* Checklist toggle (mobile only) */
+.checklist-toggle {
+  display: none; min-height: 44px; margin-top: .8rem; padding: .6rem 1.2rem;
+  background: transparent; border: 1.5px solid var(--bl); border-radius: var(--r);
+  font-family: var(--fb); font-size: .82rem; font-weight: 600; color: var(--blue);
+  cursor: pointer; transition: border-color .2s, color .2s; width: 100%; justify-content: center; align-items: center;
+}
+.checklist-toggle:hover { border-color: var(--navy); color: var(--navy); }
+
+/* Trust strip */
+.trust-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; max-width: var(--mw); margin: 0 auto; }
+.trust-quote { padding: 1.5rem; background: var(--cream); border: 1px solid var(--bl); border-radius: var(--rl); border-left: 3px solid var(--green); }
+.trust-quote-text { font-size: .9rem; font-style: italic; color: var(--tb); line-height: 1.75; margin-bottom: .8rem; }
+.trust-quote-author { font-size: .82rem; font-weight: 600; color: var(--navy); }
+.trust-quote-role { font-size: .72rem; color: var(--tm); }
+
+/* Lighter reveal (200ms per Emil Kowalski) */
+.rv-light { opacity: 0; transform: translateY(12px); transition: opacity .2s cubic-bezier(0.23,1,0.32,1), transform .2s cubic-bezier(0.23,1,0.32,1); }
+.rv-light.vis { opacity: 1; transform: translateY(0); }
+
+/* Service comparison responsive */
+@media (max-width: 900px) {
+  .svc-tabs { display: flex; }
+  .svc-panels { grid-template-columns: 1fr; }
+  .svc-panel { display: none; }
+  .svc-panel.active { display: block; }
+  .checklist-toggle { display: flex; }
+  .checklist-grid.collapsed .checklist-item:nth-child(n+5) { display: none; }
+  .ind-grid {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+    gap: .75rem; padding-bottom: .5rem; -webkit-overflow-scrolling: touch;
+  }
+  .ind-item { flex: 0 0 auto; width: 120px; scroll-snap-align: start; }
+  .trust-strip { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
    FOOTER
    ============================================================ */
 .footer { background: var(--navy); padding: 4.5rem 3.5rem 2rem; position: relative; }
@@ -731,8 +783,8 @@ textarea:focus-visible {
 /* ============================================================
    SCROLL REVEAL
    ============================================================ */
-.rv { opacity: 0; transform: translateY(20px) scale(.98); transition: opacity .6s var(--ease-out), transform .6s var(--ease-spring); }
-.rv.vis { opacity: 1; transform: translateY(0) scale(1); }
+.rv { opacity: 0; transform: translateY(12px); transition: opacity .2s cubic-bezier(0.23,1,0.32,1), transform .2s cubic-bezier(0.23,1,0.32,1); }
+.rv.vis { opacity: 1; transform: translateY(0); }
 .rv-child { opacity: 0; transform: translateY(12px); transition: opacity .4s var(--ease-out), transform .4s var(--ease-spring); }
 .rv-child.vis { opacity: 1; transform: translateY(0); }
 .rv-d1 { transition-delay: .08s; }

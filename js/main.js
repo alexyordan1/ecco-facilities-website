@@ -30,4 +30,49 @@ document.querySelectorAll('.footer-nl-form').forEach(function(form) {
   form.addEventListener('submit', function() { trackEvent('newsletter_signup', { page: location.pathname }); });
 });
 
+/* Service comparison tab switching */
+document.querySelectorAll('.svc-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    var target = tab.dataset.panel;
+    document.querySelectorAll('.svc-tab').forEach(function(t) {
+      t.classList.toggle('active', t === tab);
+      t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+      t.setAttribute('tabindex', t === tab ? '0' : '-1');
+    });
+    document.querySelectorAll('.svc-panel').forEach(function(p) {
+      p.classList.toggle('active', p.id === target);
+      p.setAttribute('aria-hidden', p.id !== target ? 'true' : 'false');
+    });
+  });
+});
+
+/* Keyboard arrow navigation for tabs */
+document.querySelectorAll('.svc-tabs').forEach(function(tablist) {
+  tablist.addEventListener('keydown', function(e) {
+    var tabs = Array.from(tablist.querySelectorAll('.svc-tab'));
+    var idx = tabs.indexOf(document.activeElement);
+    if (idx < 0) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      var next = e.key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+      tabs[next].focus();
+      tabs[next].click();
+    }
+  });
+});
+
+/* Checklist accordion (mobile) */
+document.querySelectorAll('.checklist-toggle').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var grid = btn.previousElementSibling;
+    var isCollapsed = grid.classList.contains('collapsed');
+    grid.classList.toggle('collapsed');
+    btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+    btn.textContent = isCollapsed ? 'Show fewer' : 'Show all ' + grid.children.length + ' items';
+  });
+});
+
+/* Observe rv-light elements for reveal */
+document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); });
+
 })();
