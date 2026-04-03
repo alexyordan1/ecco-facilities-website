@@ -557,6 +557,7 @@ textarea:focus-visible {
 }
 .cta-trust {
   display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem;
+  position: relative; z-index: 2;
 }
 .cta-trust span {
   font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.7); letter-spacing: .02em;
@@ -988,6 +989,7 @@ textarea:focus-visible {
   .problem-grid{grid-template-columns:1fr}
   .steps-grid{flex-direction:column;align-items:center}
   .step-line{width:2px;height:30px;margin:0}
+  .ind-showcase { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── UTILITIES ── */
@@ -995,6 +997,85 @@ textarea:focus-visible {
 .mb-0{margin-bottom:0}.mb-1{margin-bottom:.5rem}.mb-2{margin-bottom:1rem}.mb-3{margin-bottom:1.5rem}
 .text-center{text-align:center}
 .mx-auto{margin-left:auto;margin-right:auto}
+
+/* ============================================================
+   UTILITY — INLINE STYLE EXTRACTION
+   ============================================================ */
+.sec-white { background: var(--wh); }
+.sec-cta-wrap { text-align: center; margin-top: 2rem; }
+.hero-email { margin-top: .8rem; font-size: .85rem; color: rgba(255,255,255,.65); }
+.hero-email a { color: rgba(255,255,255,.85); text-decoration: underline; }
+
+/* ============================================================
+   FEATURED TESTIMONIAL
+   ============================================================ */
+.feat-test { text-align: center; max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
+.feat-test-mark { font-size: 4rem; line-height: 1; color: var(--green); font-family: 'Cormorant Garamond', serif; margin-bottom: .5rem; }
+.feat-test-quote { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 500; line-height: 1.6; color: var(--navy); font-style: italic; margin-bottom: 1.5rem; }
+.feat-test-author { display: flex; align-items: center; justify-content: center; gap: .75rem; }
+.feat-test-av { width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+.feat-test-name { font-size: .9rem; font-weight: 600; color: var(--navy); }
+.feat-test-role { font-size: .78rem; color: var(--tm); }
+.feat-av-jw { background: linear-gradient(135deg, #3068AD, #1E3562); }
+
+/* ============================================================
+   CERTIFICATION BADGES
+   ============================================================ */
+.cert-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; max-width: var(--mw); margin: 0 auto; padding: 2.5rem 1.5rem; }
+.cert-badge { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+.cert-badge-ico { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; color: var(--navy); }
+.cert-badge-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--navy); text-align: center; }
+
+/* ============================================================
+   BEFORE / AFTER COMPARISON
+   ============================================================ */
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: var(--mw); margin: 0 auto; overflow: hidden; }
+.ba-col { padding: 2rem; border-radius: var(--r); }
+.ba-col-bad { background: #fff5f5; border-left: 3px solid #dc3545; }
+.ba-col-good { background: #f0fdf4; border-left: 3px solid #16a34a; }
+.ba-col h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; }
+.ba-col-bad h3 { color: #dc3545; }
+.ba-col-good h3 { color: #16a34a; }
+.ba-item { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .8rem; font-size: .9rem; line-height: 1.5; color: var(--tb); }
+.ba-ico { flex-shrink: 0; font-weight: 700; font-size: 1rem; }
+.ba-col-bad .ba-ico { color: #dc3545; }
+.ba-col-good .ba-ico { color: #16a34a; }
+
+/* ============================================================
+   INDUSTRIES SHOWCASE (ACCORDION)
+   ============================================================ */
+.ind-showcase { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 900px; margin: 0 auto; overflow: hidden; }
+.ind-card { background: var(--wh); border: 1px solid var(--bl); border-radius: var(--r); cursor: pointer; transition: all .35s var(--ease); overflow: hidden; }
+.ind-card:hover { border-color: var(--navy); transform: translateY(-3px); box-shadow: var(--shlg); }
+.ind-card-head { display: flex; align-items: center; gap: .75rem; padding: 1.2rem 1rem; min-height: 44px; }
+.ind-card-head .ind-ico { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; color: var(--navy); flex-shrink: 0; transition: transform .3s var(--ease); }
+.ind-card:hover .ind-card-head .ind-ico { transform: scale(1.15); }
+.ind-card-head span { font-size: .82rem; font-weight: 600; color: var(--navy); }
+.ind-card-body { max-height: 0; overflow: hidden; transition: max-height .4s var(--ease), padding .4s var(--ease); padding: 0 1rem; }
+.ind-card-body p { font-size: .82rem; color: var(--tb); line-height: 1.6; margin: 0; }
+.ind-card-open .ind-card-body { max-height: 200px; padding: 0 1rem 1.2rem; }
+.ind-card-open { border-color: var(--navy); box-shadow: var(--sh); }
+
+/* ============================================================
+   PHOTO GALLERY — SEE ECCO IN ACTION
+   ============================================================ */
+.story-grid { max-width: var(--mw); margin: 0 auto; overflow: hidden; display: flex; flex-direction: column; gap: 1rem; }
+.story-row { display: grid; gap: 1rem; }
+.story-row:first-child { grid-template-columns: 2fr 1fr; }
+.story-row:last-child { grid-template-columns: 1fr 2fr; }
+.story-img { width: 100%; height: 250px; object-fit: cover; border-radius: 12px; display: block; }
+
+/* ============================================================
+   PREMIUM CTA — DUAL BUTTONS
+   ============================================================ */
+.cta-btns { display: flex; justify-content: center; gap: .75rem; flex-wrap: wrap; position: relative; z-index: 2; margin-top: 1.5rem; }
+.btn-ol-white { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .7rem 1.5rem; border: 2px solid rgba(255,255,255,.5); border-radius: var(--r); color: #fff; font-weight: 600; font-size: .9rem; text-decoration: none; transition: all .3s var(--ease); background: transparent; }
+.btn-ol-white:hover { background: rgba(255,255,255,.1); border-color: #fff; }
+
+/* Trust strip avatar gradients */
+.trust-av-1 { background: linear-gradient(135deg, #2D7A32, #1a5e1f); }
+.trust-av-2 { background: linear-gradient(135deg, #C87830, #9e5a1e); }
+.trust-av-3 { background: linear-gradient(135deg, #8244a8, #5e2d80); }
 
 /* ═══════════════════════════════════════════
    SUSTAINABILITY PAGE
@@ -1477,6 +1558,15 @@ textarea:focus-visible {
 .legal-section li strong { color: var(--td); }
 @media (max-width:600px) {
   .legal-toc ol { columns: 1; }
+  .feat-test-quote { font-size: 1.2rem; }
+  .feat-test { padding: 2rem 1rem; }
+  .cert-strip { gap: 1.5rem; padding: 2rem 1rem; }
+  .ba-grid { grid-template-columns: 1fr; }
+  .ind-showcase { grid-template-columns: 1fr; }
+  .story-row, .story-row:first-child, .story-row:last-child { grid-template-columns: 1fr; }
+  .story-img { height: 200px; }
+  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; text-align: center; }
+  .cta-btns { flex-direction: column; align-items: center; }
 }
 
 /* Footer social icons */
