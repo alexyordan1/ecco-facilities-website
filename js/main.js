@@ -172,6 +172,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 (function initSvcTabs() {
   var tabs = document.querySelectorAll('.svc-tab');
   var panels = document.querySelectorAll('.svc-panel');
+  var bgs = document.querySelectorAll('.svc-bg-img');
   if (!tabs.length || !panels.length) return;
 
   tabs.forEach(function(tab) {
@@ -184,6 +185,13 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
           p.classList.add('active');
         } else {
           p.classList.remove('active');
+        }
+      });
+      bgs.forEach(function(bg) {
+        if (bg.getAttribute('data-svc') === target) {
+          bg.classList.add('active');
+        } else {
+          bg.classList.remove('active');
         }
       });
     });

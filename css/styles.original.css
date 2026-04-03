@@ -434,19 +434,18 @@ textarea:focus-visible {
    IMMERSIVE SERVICE TABS
    ============================================================ */
 .svc-immersive {
-  position: relative; min-height: 520px; overflow: hidden;
+  position: relative; min-height: 560px; overflow: hidden;
   border-radius: var(--rl); max-width: var(--mw); margin: 0 auto;
-  background: linear-gradient(135deg, #0B1D38 0%, #162d52 40%, #1E3562 100%);
+  background: #0B1D38;
 }
-.svc-immersive::before {
-  content: ''; position: absolute; top: -80px; right: -60px;
-  width: 300px; height: 300px; background: rgba(45,122,50,.1);
-  border-radius: 50%; filter: blur(70px); pointer-events: none;
+.svc-bg-img {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  opacity: 0; transition: opacity .6s ease;
 }
-.svc-immersive::after {
-  content: ''; position: absolute; bottom: -60px; left: -40px;
-  width: 250px; height: 250px; background: rgba(48,104,173,.12);
-  border-radius: 50%; filter: blur(60px); pointer-events: none;
+.svc-bg-img.active { opacity: 1; }
+.svc-bg-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(11,29,56,.75) 0%, rgba(11,29,56,.6) 40%, rgba(30,53,98,.7) 100%);
 }
 .svc-tabs {
   position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 3;
@@ -468,9 +467,9 @@ textarea:focus-visible {
 .svc-tab:hover:not(.active) { color: rgba(255,255,255,.75); }
 .svc-panel {
   position: absolute; inset: 0; display: flex; align-items: flex-end;
-  padding: 3rem 3.5rem; z-index: 2;
-  background: linear-gradient(transparent 0%, rgba(11,29,56,.85) 50%);
-  opacity: 0; transform: translateY(12px);
+  padding: 3.5rem 3.5rem; z-index: 2;
+  background: linear-gradient(to top, rgba(11,29,56,.92) 0%, rgba(11,29,56,.6) 50%, transparent 100%);
+  opacity: 0; transform: translateY(16px);
   transition: opacity .5s cubic-bezier(0.16,1,0.3,1),
               transform .5s cubic-bezier(0.16,1,0.3,1),
               filter .5s ease;
@@ -479,17 +478,19 @@ textarea:focus-visible {
 .svc-panel.active {
   opacity: 1; transform: translateY(0); filter: blur(0); pointer-events: auto;
 }
-.svc-panel-inner { max-width: 600px; }
+.svc-panel-inner { max-width: 650px; }
 .svc-ico {
   width: 52px; height: 52px; display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(45,122,50,.12); border: 1px solid rgba(106,163,104,.2);
+  background: rgba(45,122,50,.15); border: 1px solid rgba(106,163,104,.25);
   border-radius: 14px; margin-bottom: 1.2rem; color: var(--green-l);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .svc-panel h3 {
-  font-family: var(--fd); font-size: clamp(1.4rem, 2.5vw, 1.8rem);
-  font-weight: 700; color: #fff; margin-bottom: .6rem; line-height: 1.25;
+  font-family: var(--fd); font-size: clamp(1.5rem, 2.8vw, 2rem);
+  font-weight: 700; color: #fff; margin-bottom: .8rem; line-height: 1.3;
+  text-shadow: 0 2px 12px rgba(0,0,0,.3);
 }
-.svc-panel p { color: rgba(255,255,255,.6); font-size: .9rem; line-height: 1.75; margin-bottom: 1rem; }
+.svc-panel p { color: rgba(255,255,255,.75); font-size: .92rem; line-height: 1.75; margin-bottom: 1.2rem; }
 .svc-for {
   display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.5rem;
 }
