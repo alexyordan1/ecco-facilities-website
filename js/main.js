@@ -96,3 +96,72 @@ document.querySelectorAll('.checklist-toggle').forEach(function(btn) {
 document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); });
 
 })();
+
+/* ============================================================
+   HERO STATS — COUNTER ANIMATION
+   ============================================================ */
+(function initCounters() {
+  var counters = document.querySelectorAll('.hero-stat-num');
+  if (!counters.length) return;
+  var animated = false;
+
+  function animateCounters() {
+    if (animated) return;
+    animated = true;
+    counters.forEach(function(el) {
+      var target = parseInt(el.getAttribute('data-target'), 10);
+      var suffix = el.getAttribute('data-suffix') || '';
+      var duration = 2000;
+      var startTime = null;
+
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(eased * target) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          animateCounters();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    observer.observe(counters[0].closest('.hero-stats'));
+  }
+
+  /* Mandatory fallback — project rule */
+  setTimeout(function() {
+    if (!animated) {
+      counters.forEach(function(el) {
+        var target = el.getAttribute('data-target');
+        var suffix = el.getAttribute('data-suffix') || '';
+        el.textContent = target + suffix;
+      });
+      animated = true;
+    }
+  }, 3000);
+})();
+
+/* ============================================================
+   INDUSTRIES ACCORDION
+   ============================================================ */
+(function initIndustryAccordion() {
+  var cards = document.querySelectorAll('.ind-card');
+  if (!cards.length) return;
+
+  cards.forEach(function(card) {
+    card.addEventListener('click', function() {
+      var wasOpen = card.classList.contains('ind-card-open');
+      cards.forEach(function(c) { c.classList.remove('ind-card-open'); });
+      if (!wasOpen) card.classList.add('ind-card-open');
+    });
+  });
+})();
