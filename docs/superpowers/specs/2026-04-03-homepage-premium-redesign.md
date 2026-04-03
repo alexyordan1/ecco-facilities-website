@@ -50,9 +50,9 @@ Add a stat counter bar directly below the existing hero section, inside `<sectio
 
 - **Layout:** Flex row, 4 items, centered, semi-transparent white text on navy
 - **Items:** `12+` Years Serving NYC | `200+` Businesses Trust Us | `5` Boroughs Covered | `0` Missed Services
-- **Animation:** Numbers count up from 0 when entering viewport via IntersectionObserver. Use `data-target` attribute on each number span. Animation duration ~2s with easing.
+- **Animation:** Numbers count up from 0 when entering viewport via IntersectionObserver. Use `data-target` attribute on each number span. Animation duration ~2s with easing. **Must include `setTimeout(3000)` fallback** that sets final values if observer hasn't triggered (project rule).
 - **Mobile:** 2x2 grid below 600px
-- **CSS:** Reuse existing `.hero-stats` class from services.html (already in styles.original.css)
+- **CSS:** Extend existing `.hero-stats` class from services.html — **add mobile 2x2 grid media query at 600px breakpoint** (current CSS only has flex row, no mobile override)
 - **Remove:** The old `.trust-bar` section (static version of the same data, currently below hero)
 
 ### 2. Featured Testimonial (`.feat-test`)
@@ -121,7 +121,7 @@ Replace the plain icon grid (`.ind-grid`) with expandable cards.
 - **Default state:** Each card shows icon + industry name (similar to current but in card format with subtle border/shadow)
 - **Expanded state:** On click, card expands below to show 2-3 line description of how Ecco serves that industry. Only one card open at a time (accordion behavior).
 - **Industries (8):** Corporate Offices, Medical & Dental, Retail & Showrooms, Gyms & Fitness, Schools & Daycares, Restaurants, Coworking Spaces, Residential Buildings
-- **JS:** Click handler toggles `.ind-card-open` class. Clicking another card closes the previous one.
+- **JS:** Click handler toggles `.ind-card-open` class. Clicking another card closes the previous one. **Default state must be fully usable without JS** — cards show collapsed state by default via CSS, JS only adds expand interactivity.
 - **Animation:** `max-height` transition for smooth expand/collapse
 - **New CSS classes:** `.ind-showcase`, `.ind-card`, `.ind-card-open`, `.ind-card-head`, `.ind-card-body`
 - **Touch targets:** Cards have min-height 44px, `cursor: pointer`
@@ -136,7 +136,7 @@ New section after Safe for Everyone.
 
 - **Layout:** White background, section heading "See Ecco In Action", asymmetric photo grid
 - **Grid:** 2 rows. Row 1: 1 large image (2fr) + 1 small image (1fr). Row 2: 1 small (1fr) + 1 large (2fr). Creates visual rhythm.
-- **Images:** Use existing stock images (`images/stock/1.webp` through `images/stock/4.webp` or whichever are available)
+- **Images:** Use existing stock images — **skip `4.webp`** (already used as hero background). Use: `1.webp`, `2.webp`, `3.webp`, `careers-team.webp` for variety
 - **Overlay:** Optional subtle text overlay on hover (e.g., "Office cleaning in Manhattan")
 - **Mobile:** Single column, equal-width images
 - **New CSS classes:** `.story-sec`, `.story-grid`, `.story-img`, `.story-img-lg`
@@ -180,7 +180,7 @@ All 16 inline styles must be extracted to CSS classes:
 | 297 | CTA trust `position;z-index` | Add to `.cta-trust` rule |
 | 302 | CTA button wrap `position;z-index;margin-top` | `.cta-btns` |
 | 319 | Honeypot field `position;left` | Exception — anti-spam honeypot |
-| 256-259 | 4x avatar gradients | `.test-av-1` through `.test-av-4` |
+| 256-259 | 4x avatar gradients | `.trust-av-1` through `.trust-av-3` (only 3 needed for Trust Strip) |
 
 **Exceptions (2):** GTM noscript and honeypot field inline styles stay — they are third-party requirements.
 
@@ -199,9 +199,15 @@ All 16 inline styles must be extracted to CSS classes:
 - `.ind-showcase`, `.ind-card`, `.ind-card-open`, `.ind-card-head`, `.ind-card-body` — industries
 - `.story-sec`, `.story-grid`, `.story-img`, `.story-img-lg` — photo gallery
 - `.cta-btns`, `.btn-ol-white` — CTA redesign
-- `.test-av-1` through `.test-av-4` — avatar gradient classes (for Trust Strip)
+- `.trust-av-1` through `.trust-av-3` — avatar gradient classes (for Trust Strip, 3 quotes only)
 
 Every new component must have: base styles + mobile media query + overflow:hidden on containers.
+
+### CSS Cleanup (remove dead code)
+
+- Remove old `.ind-grid` and `.ind-item` rules + all 4 media query references (lines 435-443, 670-676, 836, 871, 897 of styles.original.css) after replacing with `.ind-showcase`
+- Check if `.test-grid`, `.test-card`, `.test-stars`, `.test-quote`, `.test-auth`, `.test-av`, `.test-name`, `.test-role` are used by testimonials.html — if not, remove them
+- Check if `.trust-bar`, `.trust-i`, `.trust-num` are used by other pages — if not, remove them
 
 ### JS Changes (add to main.js)
 
@@ -211,11 +217,13 @@ Every new component must have: base styles + mobile media query + overflow:hidde
 
 ### Build Steps
 
-1. Edit `styles.original.css` — add all new CSS
-2. Minify: `eval "$(/opt/homebrew/bin/brew shellenv)" && npx clean-css-cli -o css/styles.css css/styles.original.css`
-3. Edit `index.html` — restructure sections, extract inline styles
-4. Edit `js/main.js` — add counter animation + industries accordion
-5. Bump cache busters on ALL 21 pages: CSS `?v=3.5`, JS `?v=1.5`
+1. Add `maximum-scale=1.0` to viewport meta tag in index.html (iOS Safari zoom prevention — project rule)
+2. Edit `styles.original.css` — add all new CSS + remove dead CSS from replaced components
+3. Edit `js/main.js` — add counter animation (with setTimeout fallback) + industries accordion
+4. Edit `index.html` — restructure sections, extract inline styles
+5. Minify: `eval "$(/opt/homebrew/bin/brew shellenv)" && npx clean-css-cli -o css/styles.css css/styles.original.css`
+6. Bump cache busters on ALL 21 pages: CSS `?v=3.5`, JS `?v=1.5`
+7. Add `.superpowers/` to `.gitignore`
 6. Git commit all changes together
 7. Push → Cloudflare auto-deploys
 8. Verify on live `.pages.dev` URL
