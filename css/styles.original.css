@@ -687,11 +687,42 @@ textarea:focus-visible {
 .checklist-toggle:hover { border-color: var(--navy); color: var(--navy); }
 
 /* Trust strip */
-.trust-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; max-width: var(--mw); margin: 0 auto; }
-.trust-quote { padding: 1.5rem; background: var(--cream); border: 1px solid var(--bl); border-radius: var(--rl); border-left: 3px solid var(--green); }
-.trust-quote-text { font-size: .9rem; font-style: italic; color: var(--tb); line-height: 1.75; margin-bottom: .8rem; }
-.trust-quote-author { font-size: .82rem; font-weight: 600; color: var(--navy); }
-.trust-quote-role { font-size: .72rem; color: var(--tm); }
+.trust-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; max-width: var(--mw); margin: 0 auto; overflow: hidden; }
+.trust-quote {
+  padding: 2rem 1.8rem; background: var(--wh); border: 1px solid var(--bl);
+  border-radius: var(--rl); position: relative; overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 0.4s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.3s ease;
+}
+.trust-quote:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(11,29,56,0.1), 0 6px 12px rgba(11,29,56,0.05);
+  border-color: var(--green);
+}
+.trust-quote::before {
+  content: "\201C"; position: absolute; top: .8rem; right: 1.2rem;
+  font-family: 'Cormorant Garamond', serif; font-size: 5rem; line-height: 1;
+  color: rgba(45,122,50,0.08); font-weight: 700; pointer-events: none;
+}
+.trust-quote-stars {
+  display: flex; gap: .15rem; margin-bottom: .8rem;
+}
+.trust-quote-stars svg { width: 16px; height: 16px; fill: #e8b229; }
+.trust-quote-text {
+  font-size: .88rem; font-style: italic; color: var(--tb);
+  line-height: 1.75; margin-bottom: 1.2rem;
+  font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1rem;
+}
+.trust-quote-footer { display: flex; align-items: center; gap: .75rem; }
+.trust-quote-av {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: .9rem; flex-shrink: 0;
+}
+.trust-quote-info { display: flex; flex-direction: column; }
+.trust-quote-author { font-size: .85rem; font-weight: 700; color: var(--navy); }
+.trust-quote-role { font-size: .72rem; color: var(--tm); margin-top: .1rem; }
 
 /* Lighter reveal (200ms per Emil Kowalski) */
 .rv-light { opacity: 0; transform: translateY(12px); transition: opacity .2s cubic-bezier(0.23,1,0.32,1), transform .2s cubic-bezier(0.23,1,0.32,1); }
