@@ -609,7 +609,9 @@ textarea:focus-visible {
 .legal-content { max-width: 860px; margin: 0 auto; }
 .legal-date { text-align: center; color: var(--tm); font-size: .85rem; margin-bottom: 2rem; }
 .legal-list { margin-top: 1rem; padding-left: 1.5rem; line-height: 2; }
-.legal-cta-btn { margin-top: 1rem; font-size: .82rem; padding: .6rem 1.5rem; }
+.legal-cta-btn { margin-top: 1rem; font-size: .82rem; padding: .6rem 1.5rem; min-height: 44px; display: inline-flex; align-items: center; }
+.val-card nav a { display: block; padding: .4rem 0; color: var(--blue); font-size: .88rem; transition: color .2s; }
+.val-card nav a:hover { color: var(--navy); }
 
 /* ============================================================
    SERVICE COMPARISON (tabbed on mobile, side-by-side on desktop)
