@@ -41,8 +41,10 @@ function syncSvcAria() {
     panels.forEach(function(p) { p.removeAttribute('aria-hidden'); });
   }
 }
-syncSvcAria();
-svcMq.addEventListener('change', syncSvcAria);
+if (document.querySelectorAll('.svc-panel').length) {
+  syncSvcAria();
+  svcMq.addEventListener('change', syncSvcAria);
+}
 
 /* Tab switching */
 document.querySelectorAll('.svc-tab').forEach(function(tab) {
