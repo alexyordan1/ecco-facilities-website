@@ -167,6 +167,30 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 })();
 
 /* ============================================================
+   IMMERSIVE SERVICE TABS
+   ============================================================ */
+(function initSvcTabs() {
+  var tabs = document.querySelectorAll('.svc-tab');
+  var panels = document.querySelectorAll('.svc-panel');
+  if (!tabs.length || !panels.length) return;
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var target = tab.getAttribute('data-svc');
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      panels.forEach(function(p) {
+        if (p.getAttribute('data-svc') === target) {
+          p.classList.add('active');
+        } else {
+          p.classList.remove('active');
+        }
+      });
+    });
+  });
+})();
+
+/* ============================================================
    PARALLAX ENGINE
    ============================================================ */
 (function initParallax() {
