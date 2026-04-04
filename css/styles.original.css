@@ -986,7 +986,7 @@ textarea:focus-visible {
 .cookie-btn-decline:hover { border-color: rgba(255,255,255,.3); color: var(--wh); }
 
 /* --- Contrast fixes (WCAG 2.1 AA) --- */
-.safe-card p { color: var(--safe-text); }
+.photo-card-content p { color: rgba(255,255,255,.7); }
 .cta-trust span { color: rgba(255,255,255,.85); }
 
 /* Focus rings on dark backgrounds now handled by --focus-ring variable override above */
@@ -1084,12 +1084,12 @@ textarea:focus-visible {
    CARD TILT & MICRO-INTERACTIONS — Desktop only
    ============================================================ */
 @media (min-width: 769px) and (hover: hover) {
-  .svc-card, .ind-card, .safe-card, .trust-quote {
+  .svc-card, .ind-card, .trust-quote {
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.3s ease;
   }
-  .svc-card:hover, .safe-card:hover {
+  .svc-card:hover {
     transform: translateY(-6px) scale(1.01);
     box-shadow: 0 20px 40px rgba(11,29,56,0.12), 0 8px 16px rgba(11,29,56,0.08);
   }
@@ -1265,36 +1265,56 @@ textarea:focus-visible {
 .problem-item p{font-size:.93rem;color:var(--tb);margin:0;line-height:1.7}
 .problem-cta{margin-top:2rem;text-align:center;font-size:.95rem;color:var(--tb)}
 
-/* ── SAFE FOR EVERYONE (Home) ── */
-.safe-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;max-width:1100px;margin:0 auto;overflow:hidden}
-.safe-card{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:var(--rl);padding:2rem 1.8rem;text-align:center;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),
-             background .3s ease,border-color .3s ease,box-shadow .4s cubic-bezier(0.16,1,0.3,1);
+/* ── SAFE FOR EVERYONE — Photo Cards (Home) ── */
+.photo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem; max-width: 1100px; margin: 0 auto; overflow: hidden;
 }
-.safe-card:hover{
-  transform:translateY(-6px);
-  background:rgba(255,255,255,.1);
-  border-color:rgba(106,163,104,.3);
-  box-shadow:0 16px 40px rgba(0,0,0,.2),0 0 20px rgba(45,122,50,.08);
+.photo-card {
+  border-radius: 20px; overflow: hidden; position: relative;
+  min-height: 320px; cursor: default;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
 }
-.safe-ico{
-  display:flex;align-items:center;justify-content:center;
-  width:56px;height:56px;margin:0 auto 1rem;
-  color:var(--green-l);
-  background:linear-gradient(135deg,rgba(61,154,67,.18),rgba(48,104,173,.1));
-  border-radius:16px;border:1px solid rgba(106,163,104,.15);
-  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),box-shadow .3s ease;
+.photo-card-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  transition: transform .6s ease;
 }
-.safe-card:hover .safe-ico{transform:scale(1.15) rotate(5deg);box-shadow:0 4px 16px rgba(45,122,50,.2)}
-.safe-card h3{font-size:1rem;color:var(--green-l);margin-bottom:.5rem;font-weight:700;letter-spacing:.01em}
-.safe-card p{font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.7;margin:0}
+.photo-card:hover .photo-card-bg { transform: scale(1.05); }
+.photo-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(11,29,56,.15) 0%, rgba(11,29,56,.85) 65%);
+  transition: background .3s;
+}
+.photo-card:hover .photo-card-overlay {
+  background: linear-gradient(180deg, rgba(11,29,56,.1) 0%, rgba(11,29,56,.9) 55%);
+}
+.photo-card-content {
+  position: relative; z-index: 1; height: 100%;
+  padding: 2rem 1.5rem; display: flex; flex-direction: column;
+  justify-content: flex-end;
+}
+.photo-card-pill {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .35rem .75rem; border-radius: 100px;
+  background: rgba(61,154,67,.25); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: .75rem; color: var(--green-l); font-weight: 600;
+  margin-bottom: .8rem; width: fit-content;
+}
+.photo-card-content h3 {
+  font-family: var(--fd); font-size: 1.3rem; font-weight: 600;
+  color: var(--wh); margin-bottom: .4rem;
+}
+.photo-card-content p {
+  font-size: .85rem; color: rgba(255,255,255,.7); line-height: 1.6; margin: 0;
+}
 
-@media(max-width:768px){.safe-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:480px){.safe-grid{grid-template-columns:1fr}}
+@media (max-width: 768px) { .photo-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) {
+  .photo-grid { grid-template-columns: 1fr; }
+  .photo-card { min-height: 280px; }
+}
 
 /* ── HOW IT WORKS STEPS (Home) — Giant Numbers ── */
 .steps-big {
