@@ -462,7 +462,7 @@ textarea:focus-visible {
   opacity: 1; transform: translateY(0); pointer-events: auto;
   position: relative;
 }
-.svc-panels { position: relative; min-height: 200px; }
+.svc-panels { position: relative; min-height: 200px; display: block !important; }
 .svc-showcase .svc-panel h3 {
   font-family: var(--fd); font-size: clamp(1.8rem, 3.5vw, 2.6rem);
   font-weight: 700; color: var(--navy); margin-bottom: .8rem; line-height: 1.2;
