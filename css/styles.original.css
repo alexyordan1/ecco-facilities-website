@@ -356,15 +356,15 @@ textarea:focus-visible {
 /* ============================================================
    SECTIONS
    ============================================================ */
-.sec { padding: 4.5rem 3.5rem; }
+.sec { padding: 6rem 3.5rem; }
 .sec-cream { background: var(--cream); }
 .sec-white { background: var(--wh); }
-.sec-navy { background: var(--navy); color: var(--wh); padding: 5rem 3.5rem; }
-.sec-head { text-align: center; max-width: 640px; margin: 0 auto 2.5rem; }
+.sec-navy { background: var(--navy); color: var(--wh); padding: 7rem 3.5rem; }
+.sec-head { text-align: center; max-width: 700px; margin: 0 auto 3.5rem; }
 .sec-lbl {
   display: inline-flex; align-items: center; gap: .5rem;
   font-size: .72rem; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--green); margin-bottom: 1rem;
+  text-transform: uppercase; color: var(--green); margin-bottom: 1.2rem;
   background: rgba(45,122,50,.07); padding: .35rem .9rem .35rem .5rem; border-radius: 50px;
 }
 .sec-lbl::before { content: ''; width: 16px; height: 2px; background: var(--green); border-radius: 2px; }
@@ -372,10 +372,10 @@ textarea:focus-visible {
 .sec-lbl-l::before { background: var(--green-l); }
 .sec-ttl {
   font-family: var(--fd); font-weight: 600; font-size: clamp(2rem,3.5vw,2.8rem);
-  line-height: 1.15; color: var(--navy); letter-spacing: -.02em;
+  line-height: 1.2; color: var(--navy); letter-spacing: -.02em;
 }
 .sec-ttl-l { color: var(--wh); }
-.sec-sub { color: var(--tb); font-size: .95rem; margin-top: .6rem; line-height: 1.75; }
+.sec-sub { color: var(--tb); font-size: .95rem; margin-top: 1rem; line-height: 1.75; }
 .sec-sub-l { color: var(--twm); }
 
 /* Section divider — subtle gradient line between contrasting sections */
@@ -1820,7 +1820,7 @@ textarea:focus-visible {
 }
 .legal-section li strong { color: var(--td); }
 @media (max-width:600px) {
-  .sec, .service-detail-section, .problem-sec { padding: 3rem 1.5rem; }
+  .sec, .service-detail-section, .problem-sec { padding: 4rem 1.5rem; }
   .legal-toc ol { columns: 1; }
   .feat-test-quote { font-size: 1.2rem; }
   .feat-test { padding: 2rem 1rem; }
