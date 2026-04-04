@@ -1310,9 +1310,16 @@ textarea:focus-visible {
   font-size: .85rem; color: rgba(255,255,255,.7); line-height: 1.6; margin: 0;
 }
 
+/* 4-column variant for industries */
+.photo-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.photo-grid-4 .photo-card { min-height: 280px; }
+.photo-grid-4 .photo-card-content h3 { font-size: 1.1rem; }
+.photo-grid-4 .photo-card-content p { font-size: .8rem; }
+
+@media (max-width: 1024px) { .photo-grid-4 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 768px) { .photo-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 480px) {
-  .photo-grid { grid-template-columns: 1fr; }
+  .photo-grid, .photo-grid-4 { grid-template-columns: 1fr; }
   .photo-card { min-height: 280px; }
 }
 
