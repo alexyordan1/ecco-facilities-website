@@ -967,7 +967,7 @@ textarea:focus-visible {
    FLOATING CTA BUTTON
    ============================================================ */
 .cta-float {
-  position: fixed; bottom: 5.5rem; right: 2rem; z-index: 89;
+  position: fixed; bottom: 2rem; left: 2rem; z-index: 89;
   display: inline-flex; align-items: center; gap: .5rem;
   background: linear-gradient(135deg, var(--green), var(--blue-l));
   color: var(--wh); text-decoration: none;
@@ -987,7 +987,7 @@ textarea:focus-visible {
   50% { box-shadow: 0 8px 32px rgba(45,122,50,.5), 0 0 0 6px rgba(45,122,50,.08); }
 }
 @media (max-width: 480px) {
-  .cta-float { bottom: 5rem; right: 1rem; padding: .65rem 1.1rem; font-size: .8rem; }
+  .cta-float { bottom: 1.5rem; left: 1rem; padding: .65rem 1.1rem; font-size: .8rem; }
 }
 
 /* ============================================================
