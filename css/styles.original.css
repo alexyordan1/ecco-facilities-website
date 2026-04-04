@@ -434,9 +434,9 @@ textarea:focus-visible {
    SERVICE SHOWCASE — APPLE-STYLE (text above, image below)
    ============================================================ */
 .svc-showcase {
-  max-width: var(--mw); margin: 0 auto; overflow: hidden;
-  position: relative; border-radius: var(--rl); min-height: 600px;
+  overflow: hidden; position: relative; min-height: 600px;
   display: flex; align-items: center; justify-content: center;
+  margin-left: -3.5rem; margin-right: -3.5rem; width: calc(100% + 7rem);
 }
 .svc-bg {
   position: absolute; inset: 0; background-size: cover; background-position: center;
@@ -530,7 +530,7 @@ textarea:focus-visible {
 }
 .svc-img-label.active { opacity: 1; }
 @media (max-width: 768px) {
-  .svc-showcase { min-height: 500px; }
+  .svc-showcase { min-height: 500px; margin-left: -1.5rem; margin-right: -1.5rem; width: calc(100% + 3rem); }
   .svc-showcase .svc-panel h3 { font-size: 1.5rem; }
   .svc-inner { padding: 3rem 1.5rem; }
   .svc-showcase .svc-tabs { gap: .3rem; }
