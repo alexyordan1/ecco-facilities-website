@@ -360,7 +360,7 @@ textarea:focus-visible {
 .sec-cream { background: var(--cream); }
 .sec-white { background: var(--wh); }
 .sec-navy { background: var(--navy); color: var(--wh); padding: 7rem 3.5rem; }
-.sec-head { text-align: center; max-width: 700px; margin: 0 auto 3.5rem; }
+.sec-head { text-align: center; max-width: 900px; margin: 0 auto 3.5rem; }
 .sec-lbl {
   display: inline-flex; align-items: center; gap: .5rem;
   font-size: .72rem; font-weight: 700; letter-spacing: .14em;
@@ -371,7 +371,7 @@ textarea:focus-visible {
 .sec-lbl-l { color: var(--green-l); background: rgba(61,154,67,.12); }
 .sec-lbl-l::before { background: var(--green-l); }
 .sec-ttl {
-  font-family: var(--fd); font-weight: 600; font-size: clamp(2rem,3.5vw,2.8rem);
+  font-family: var(--fd); font-weight: 600; font-size: clamp(2.2rem,4vw,3.2rem);
   line-height: 1.2; color: var(--navy); letter-spacing: -.02em;
 }
 .sec-ttl-l { color: var(--wh); }
@@ -464,7 +464,7 @@ textarea:focus-visible {
 }
 .svc-panels { position: relative; min-height: 200px; display: block !important; }
 .svc-showcase .svc-panel h3 {
-  font-family: var(--fd); font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-family: var(--fd); font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700; color: var(--navy); margin-bottom: .8rem; line-height: 1.2;
 }
 .svc-showcase .svc-panel p {
