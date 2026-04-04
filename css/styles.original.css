@@ -499,6 +499,14 @@ textarea:focus-visible {
   transform: scale(1.03);
 }
 .svc-img.active { opacity: 1; position: relative; transform: scale(1); }
+.svc-img-label {
+  position: absolute; bottom: 1.2rem; left: 1.2rem; z-index: 2;
+  padding: .4rem 1rem; border-radius: 20px; font-size: .75rem; font-weight: 600;
+  color: #fff; background: rgba(11,29,56,.6); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); letter-spacing: .02em;
+  opacity: 0; transition: opacity .5s ease; pointer-events: none;
+}
+.svc-img-label.active { opacity: 1; }
 @media (max-width: 768px) {
   .svc-showcase .svc-panel h3 { font-size: 1.5rem; }
   .svc-img-wrap { max-height: 280px; }
