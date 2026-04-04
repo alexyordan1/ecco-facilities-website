@@ -545,7 +545,7 @@ textarea:focus-visible {
   .svc-showcase { min-height: 500px; margin-left: -1.5rem; margin-right: -1.5rem; width: calc(100% + 3rem); }
   .svc-showcase .svc-panel h3 { font-size: 1.5rem; }
   .svc-inner { padding: 3rem 1.5rem; }
-  .svc-ttl { font-size: clamp(1.6rem, 6vw, 2rem); margin-bottom: 1.5rem; }
+  .svc-ttl { font-size: 1.5rem; margin-bottom: 1.5rem; }
   .svc-showcase .svc-tabs { gap: .3rem; }
   .svc-showcase .svc-tab { padding: .5rem 1.2rem; font-size: .82rem; }
 }
