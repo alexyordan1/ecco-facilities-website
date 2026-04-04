@@ -964,6 +964,33 @@ textarea:focus-visible {
 .btt:hover { background: var(--navy-l); transform: scale(1) translateY(-2px); }
 
 /* ============================================================
+   FLOATING CTA BUTTON
+   ============================================================ */
+.cta-float {
+  position: fixed; bottom: 5.5rem; right: 2rem; z-index: 89;
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: linear-gradient(135deg, var(--green), var(--blue-l));
+  color: var(--wh); text-decoration: none;
+  padding: .75rem 1.4rem; border-radius: 100px;
+  font-size: .85rem; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(45,122,50,.35);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+  animation: ctaPulse 2.5s ease-in-out infinite;
+}
+.cta-float:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 32px rgba(45,122,50,.45);
+}
+.cta-float svg { flex-shrink: 0; }
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 8px 24px rgba(45,122,50,.35); }
+  50% { box-shadow: 0 8px 32px rgba(45,122,50,.5), 0 0 0 6px rgba(45,122,50,.08); }
+}
+@media (max-width: 480px) {
+  .cta-float { bottom: 5rem; right: 1rem; padding: .65rem 1.1rem; font-size: .8rem; }
+}
+
+/* ============================================================
    COOKIE BANNER
    ============================================================ */
 .cookie-banner {
