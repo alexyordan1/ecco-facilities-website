@@ -760,6 +760,17 @@ textarea:focus-visible {
 .checklist-toggle[aria-expanded="true"]::after { transform: rotate(180deg); }
 .checklist-toggle:hover { border-color: var(--navy); color: var(--navy); }
 
+/* Trust rating summary */
+.trust-rating-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: .6rem; margin-bottom: 2rem; font-size: .85rem; color: var(--tb);
+}
+.trust-rating-stars { display: flex; gap: .1rem; }
+.trust-rating-stars svg { width: 18px; height: 18px; fill: #e8b229; }
+.trust-rating-score { font-weight: 700; color: var(--navy); font-size: .9rem; }
+.trust-rating-sep { width: 4px; height: 4px; border-radius: 50%; background: var(--bl); flex-shrink: 0; }
+.trust-rating-detail { color: var(--tm); font-size: .82rem; }
+
 /* Trust strip */
 .trust-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; max-width: var(--mw); margin: 0 auto; overflow: hidden; }
 .trust-quote {
@@ -779,14 +790,19 @@ textarea:focus-visible {
   font-family: 'Cormorant Garamond', serif; font-size: 5rem; line-height: 1;
   color: rgba(45,122,50,0.08); font-weight: 700; pointer-events: none;
 }
+.trust-quote::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--blue-l));
+  border-radius: var(--rl) var(--rl) 0 0;
+}
 .trust-quote-stars {
   display: flex; gap: .15rem; margin-bottom: .8rem;
 }
 .trust-quote-stars svg { width: 16px; height: 16px; fill: #e8b229; }
 .trust-quote-text {
-  font-size: .88rem; font-style: italic; color: var(--tb);
+  font-size: 1rem; font-style: italic; color: var(--tb);
   line-height: 1.75; margin-bottom: 1.2rem;
-  font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1rem;
+  font-family: var(--fd); font-weight: 600;
 }
 .trust-quote-footer { display: flex; align-items: center; gap: .75rem; }
 .trust-quote-av {
@@ -797,6 +813,9 @@ textarea:focus-visible {
 .trust-quote-info { display: flex; flex-direction: column; }
 .trust-quote-author { font-size: .85rem; font-weight: 700; color: var(--navy); }
 .trust-quote-role { font-size: .72rem; color: var(--tm); margin-top: .1rem; }
+/* Featured first quote */
+.trust-quote-featured { border-left: 4px solid var(--green); }
+.trust-quote-featured .trust-quote-text { font-size: 1.08rem; font-weight: 600; color: var(--td); }
 
 /* Lighter reveal (200ms per Emil Kowalski) */
 .rv-light { opacity: 0; transform: translateY(12px); transition: opacity .2s cubic-bezier(0.23,1,0.32,1), transform .2s cubic-bezier(0.23,1,0.32,1); }
@@ -1135,6 +1154,8 @@ textarea:focus-visible {
 
   /* Trust bar */
   .trust-bar { gap: .8rem; padding: 1.2rem 1rem; }
+  .trust-rating-bar { flex-direction: column; gap: .3rem; }
+  .trust-rating-sep { display: none; }
 
   /* CTA banner */
   .cta-banner { padding: 2.5rem 1rem; }
@@ -1231,6 +1252,17 @@ textarea:focus-visible {
 .step-big p {
   font-size: .88rem; color: var(--tb); line-height: 1.7; margin: 0;
   max-width: 320px; margin-left: auto; margin-right: auto;
+}
+/* Steps on navy background */
+.sec-navy .step-big h3 { color: var(--wh); }
+.sec-navy .step-big p { color: var(--twm); }
+.sec-navy .step-big-num {
+  background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(61,154,67,0.25));
+  -webkit-background-clip: text; background-clip: text;
+}
+.sec-navy .step-big:hover .step-big-num {
+  background: linear-gradient(135deg, rgba(255,255,255,0.38), rgba(61,154,67,0.35));
+  -webkit-background-clip: text; background-clip: text;
 }
 
 /* ── FAQ ACCORDION (Home) ── */
