@@ -450,8 +450,8 @@ textarea:focus-visible {
   background: linear-gradient(to bottom, rgba(11,29,56,.55) 0%, rgba(11,29,56,.7) 100%);
   z-index: 1;
 }
-/* Section with showcase — reduce cream padding since title is inside image */
-.svc-sec { padding-bottom: 0; }
+/* Section with showcase — no padding since title is inside image */
+.svc-sec { padding: 0; }
 .svc-inner { position: relative; z-index: 2; padding: 4rem 2rem; width: 100%; }
 /* Title inside showcase — original size, full width for single line */
 .svc-ttl {
