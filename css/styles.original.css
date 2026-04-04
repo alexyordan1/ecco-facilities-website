@@ -113,6 +113,12 @@ textarea:focus-visible {
 }
 .nav.scrolled { box-shadow: var(--shsm); }
 .nav.nav-hidden { transform: translateY(-100%); }
+.nav.nav-open {
+  z-index: 1000; background: var(--navy); border-bottom-color: rgba(255,255,255,.08);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.nav.nav-open .nav-logo img:first-child { display: none; }
+.nav.nav-open .nav-logo img:last-child { display: block; }
 .nav::after {
   content: ''; position: absolute; bottom: 0; left: 0; height: 2px;
   background: linear-gradient(90deg, var(--green), var(--blue));
@@ -1176,18 +1182,60 @@ textarea:focus-visible {
   .mt { display: block; }
   .nm.active {
     display: flex; flex-direction: column;
-    position: absolute; top: 100%; left: 0; right: 0;
-    background: var(--wh); padding: 1.5rem;
-    border-bottom: 1px solid var(--bl); box-shadow: var(--shlg); gap: .5rem;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--navy); padding: 0; z-index: 999;
+    gap: 0; overflow-y: auto;
   }
-  .nm.active .nl { padding: .9rem 0; min-height: 44px; display: flex; align-items: center; }
+  .nm.active::before {
+    content: ''; position: fixed; top: -100px; right: -80px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(45,122,50,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  /* Nav bar stays visible at top */
+  .nm.active ~ .mt,
+  .nm.active ~ .nav-logo { position: relative; z-index: 1000; }
+  /* Links — large serif typography */
+  .nm.active .nl {
+    padding: .5rem 2.5rem; min-height: auto;
+    font-family: var(--fd); font-size: 2.2rem; font-weight: 500;
+    color: rgba(255,255,255,.25); text-decoration: none;
+    display: block; transition: color .3s, padding-left .3s;
+    border: none; background: none;
+  }
   .nm.active .nl::after { display: none; }
+  .nm.active .nl:hover { color: rgba(255,255,255,.9); padding-left: 3rem; }
+  .nm.active .nl-active { color: var(--wh); }
+  /* Services dropdown — inline pills */
+  .nm.active .ndd { padding: 0; }
+  .nm.active .ndd > .nl { font-size: 2.2rem; }
   .nm.active .ddp {
     position: static; opacity: 1; visibility: visible;
     transform: none; box-shadow: none; border: none;
-    padding: 0 0 0 1rem; min-width: auto;
+    padding: .2rem 0 .5rem 2.5rem; min-width: auto;
+    display: flex; flex-direction: row; gap: 1rem;
+    background: none;
   }
-  .nm.active .nc { margin: .5rem 0 0; text-align: center; display: block; }
+  .nm.active .ddi {
+    font-size: .82rem; color: var(--green-l);
+    padding: .45rem 1rem; border-radius: 100px;
+    border: 1px solid rgba(61,154,67,.25); background: rgba(61,154,67,.08);
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .nm.active .ddi:hover { background: rgba(61,154,67,.15); }
+  .nm.active .ddi span { display: none; }
+  .nm.active .ddi strong { font-size: .82rem; font-weight: 500; color: var(--green-l); }
+  .nm.active .ddi .ddsc { display: none; }
+  /* CTA button — white solid */
+  .nm.active .nc {
+    margin: 1.5rem 2.5rem .5rem; text-align: center;
+    display: block; padding: 1rem; border-radius: 14px;
+    background: var(--wh); color: var(--navy);
+    font-family: var(--fb); font-size: .92rem; font-weight: 600;
+  }
+  .nm.active .nc:hover { background: rgba(255,255,255,.9); }
+  /* Hamburger becomes X on navy */
+  .mt.open span { background: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
   .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }
   .hero h1 { font-size: clamp(2rem,7vw,2.8rem); }
