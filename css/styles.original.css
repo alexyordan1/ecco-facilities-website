@@ -360,7 +360,7 @@ textarea:focus-visible {
 .sec-cream { background: var(--cream); }
 .sec-white { background: var(--wh); }
 .sec-navy { background: var(--navy); color: var(--wh); padding: 7rem 3.5rem; }
-.sec-head { text-align: center; max-width: 900px; margin: 0 auto 3.5rem; }
+.sec-head { text-align: center; max-width: 1000px; margin: 0 auto 3.5rem; }
 .sec-lbl {
   display: inline-flex; align-items: center; gap: .5rem;
   font-size: .72rem; font-weight: 700; letter-spacing: .14em;
@@ -462,20 +462,20 @@ textarea:focus-visible {
   opacity: 1; transform: translateY(0); pointer-events: auto;
   position: relative;
 }
-.svc-panels { position: relative; min-height: 200px; display: block !important; }
+.svc-panels { position: relative; min-height: 240px; display: block !important; }
 .svc-showcase .svc-panel h3 {
   font-family: var(--fd); font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700; color: var(--navy); margin-bottom: .8rem; line-height: 1.2;
+  font-weight: 700; color: var(--navy); margin-bottom: 1.2rem; line-height: 1.25;
 }
 .svc-showcase .svc-panel p {
-  color: var(--tb); font-size: 1rem; line-height: 1.8; margin: 0 auto 1.5rem;
-  max-width: 600px;
+  color: var(--tb); font-size: 1.05rem; line-height: 1.8; margin: 0 auto 2rem;
+  max-width: 850px;
 }
-.svc-for { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; margin-bottom: 1.5rem; }
+.svc-for { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-bottom: 2rem; }
 .svc-for-tag {
-  display: inline-block; padding: .3rem .8rem;
+  display: inline-block; padding: .35rem 1rem;
   background: var(--cream); border: 1px solid var(--bl);
-  border-radius: 20px; font-size: .72rem; font-weight: 500;
+  border-radius: 20px; font-size: .78rem; font-weight: 500;
   color: var(--navy); letter-spacing: .01em;
 }
 .svc-link {
