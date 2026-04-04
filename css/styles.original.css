@@ -434,39 +434,39 @@ textarea:focus-visible {
    SERVICE SHOWCASE — APPLE-STYLE (text above, image below)
    ============================================================ */
 .svc-showcase { max-width: var(--mw); margin: 0 auto; overflow: hidden; }
-.svc-tabs {
-  display: flex; justify-content: center; gap: .5rem; margin-bottom: 2.5rem;
+.svc-showcase .svc-tabs {
+  display: flex !important; justify-content: center; gap: .5rem; margin-bottom: 2.5rem;
 }
-.svc-tab {
+.svc-showcase .svc-tab {
   padding: .6rem 2rem; border-radius: 30px; font-size: .88rem; font-weight: 500;
   color: var(--tm); cursor: pointer; min-height: 44px;
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex !important; align-items: center; justify-content: center;
   transition: all .35s cubic-bezier(0.16,1,0.3,1); border: 1px solid var(--bl);
   background: var(--wh); font-family: var(--fb);
 }
-.svc-tab.active {
+.svc-showcase .svc-tab.active {
   background: var(--navy); color: #fff; font-weight: 600;
   border-color: var(--navy); box-shadow: 0 4px 12px rgba(11,29,56,.15);
 }
-.svc-tab:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+.svc-showcase .svc-tab:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
 /* Text content area */
-.svc-panel {
+.svc-showcase .svc-panel {
   text-align: center; opacity: 0; position: absolute; width: 100%;
-  transform: translateY(12px);
+  transform: translateY(12px); overflow: visible; padding: 0;
   transition: opacity .5s cubic-bezier(0.16,1,0.3,1),
               transform .5s cubic-bezier(0.16,1,0.3,1);
   pointer-events: none;
 }
-.svc-panel.active {
+.svc-showcase .svc-panel.active {
   opacity: 1; transform: translateY(0); pointer-events: auto;
   position: relative;
 }
 .svc-panels { position: relative; min-height: 200px; }
-.svc-panel h3 {
+.svc-showcase .svc-panel h3 {
   font-family: var(--fd); font-size: clamp(1.8rem, 3.5vw, 2.6rem);
   font-weight: 700; color: var(--navy); margin-bottom: .8rem; line-height: 1.2;
 }
-.svc-panel p {
+.svc-showcase .svc-panel p {
   color: var(--tb); font-size: 1rem; line-height: 1.8; margin: 0 auto 1.5rem;
   max-width: 600px;
 }
@@ -499,11 +499,11 @@ textarea:focus-visible {
 }
 .svc-img.active { opacity: 1; position: relative; transform: scale(1); }
 @media (max-width: 768px) {
-  .svc-panel h3 { font-size: 1.5rem; }
+  .svc-showcase .svc-panel h3 { font-size: 1.5rem; }
   .svc-img-wrap { max-height: 280px; }
   .svc-img { height: 280px; }
-  .svc-tabs { gap: .3rem; }
-  .svc-tab { padding: .5rem 1.2rem; font-size: .82rem; }
+  .svc-showcase .svc-tabs { gap: .3rem; }
+  .svc-showcase .svc-tab { padding: .5rem 1.2rem; font-size: .82rem; }
 }
 
 /* ============================================================
