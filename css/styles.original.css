@@ -1443,15 +1443,28 @@ textarea:focus-visible {
 .pillar-detail p { font-size: .9rem; color: var(--tb); line-height: 1.7; margin: 0; }
 
 @media (max-width: 768px) {
-  .pillars { grid-template-columns: repeat(3, 1fr); }
-  .pillar-detail { padding: 1.5rem; flex-direction: column; text-align: center; }
-}
-@media (max-width: 480px) {
-  .pillars { grid-template-columns: repeat(2, 1fr); }
-  .pillar { padding: 1.2rem .8rem; }
-  .pillar-label { font-size: .68rem; }
-  .pillar-detail { padding: 1.2rem; }
-  .pillar-badge { width: 56px; height: 56px; font-size: 1.4rem; }
+  .pillars {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; gap: .5rem;
+    padding-bottom: .5rem; margin-left: -2rem; margin-right: -2rem;
+    padding-left: 1.5rem; padding-right: 1.5rem;
+    scrollbar-width: none;
+  }
+  .pillars::-webkit-scrollbar { display: none; }
+  .pillar {
+    flex: 0 0 auto; min-width: 100px; scroll-snap-align: start;
+    padding: 1rem .8rem; border-radius: 14px; border-bottom: none;
+  }
+  .pillar.active { border-radius: 14px; border-bottom: none; box-shadow: 0 2px 12px rgba(11,29,56,.1); }
+  .pillar-icon { width: 42px; height: 42px; margin-bottom: .5rem; }
+  .pillar-label { font-size: .65rem; }
+  .pillar-detail {
+    padding: 1.5rem; flex-direction: column; text-align: center;
+    border-radius: 16px; margin-top: .8rem; border-top: none;
+  }
+  .pillar-badge { width: 52px; height: 52px; font-size: 1.3rem; margin: 0 auto .8rem; }
+  .pillar-detail h3 { font-size: 1.1rem; }
+  .pillar-detail p { font-size: .85rem; }
 }
 
 @media(max-width:768px){
