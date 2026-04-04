@@ -846,46 +846,90 @@ textarea:focus-visible {
 /* ============================================================
    FOOTER
    ============================================================ */
-.footer { background: var(--navy); padding: 4.5rem 3.5rem 2rem; position: relative; }
+/* Footer — Layered Design */
+.footer { background: var(--navy); position: relative; overflow: hidden; }
 .footer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--green), var(--blue), var(--green)); }
+
+/* Mini CTA strip */
+.footer-cta {
+  padding: 1.8rem 3.5rem; display: flex; align-items: center;
+  justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+  border-bottom: 1px solid var(--bd); max-width: var(--mw);
+  margin: 0 auto;
+}
+.footer-cta-text {
+  font-family: var(--fd); font-size: 1.35rem; font-weight: 500; color: var(--wh);
+}
+.footer-cta-btn {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: .7rem 2rem; background: var(--wh); color: var(--navy);
+  border-radius: var(--r); font-weight: 600; font-size: .88rem;
+  text-decoration: none; transition: all .3s var(--ease);
+}
+.footer-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+
+/* Nav grid */
 .footer-grid {
   max-width: var(--mw); margin: 0 auto;
-  display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 2.5rem; padding: 3rem 3.5rem 2.5rem;
 }
 .footer-brand img { height: 42px; margin-bottom: 1rem; }
 .footer-brand p { font-size: .82rem; color: var(--twm); line-height: 1.75; max-width: 280px; }
-.footer-col h4 {
-  font-size: .68rem; font-weight: 600; letter-spacing: .15em;
-  text-transform: uppercase; color: var(--twm); margin-bottom: 1rem;
+.footer-heading {
+  font-size: .7rem; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--twm); margin-bottom: 1.2rem; opacity: .6;
 }
 .footer-col a, .footer-col span { display: block; font-size: .84rem; color: var(--twm); padding: .3rem 0; transition: color .3s; }
 .footer-col a:hover { color: var(--wh); }
-.footer-newsletter { margin-top: 1.2rem; }
-.footer-newsletter p { font-size: .78rem; color: var(--twm); margin-bottom: .5rem; }
-.footer-nl-form { display: flex; gap: .4rem; }
-.footer-nl-form input[type="email"] {
-  flex: 1; padding: .55rem .8rem; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-  border-radius: 8px; color: var(--wh); font-size: .8rem; font-family: var(--fb);
-  transition: border-color .3s, background .3s;
+.footer-social { display: flex; gap: .6rem; margin-top: 1.2rem; }
+.footer-social a {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--twm); transition: all .3s var(--ease-spring);
 }
-.footer-nl-form input[type="email"]::placeholder { color: rgba(255,255,255,.4); }
+.footer-social a:hover { color: var(--wh); background: rgba(255,255,255,.12); transform: translateY(-2px); }
+
+/* Newsletter strip */
+.footer-newsletter {
+  padding: 2rem 3.5rem; border-top: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+  flex-wrap: wrap; max-width: var(--mw); margin: 0 auto;
+}
+.footer-nl-info h3 {
+  font-family: var(--fd); font-size: 1.15rem; font-weight: 500; color: var(--wh);
+  margin-bottom: .25rem;
+}
+.footer-nl-info p { font-size: .78rem; color: var(--twm); }
+.footer-nl-form { display: flex; gap: .5rem; }
+.footer-nl-form input[type="email"] {
+  padding: .6rem 1rem; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px; color: var(--wh); font-size: .84rem; font-family: var(--fb);
+  width: 260px; transition: border-color .3s, background .3s;
+}
+.footer-nl-form input[type="email"]::placeholder { color: rgba(255,255,255,.35); }
 .footer-nl-form input[type="email"]:focus { outline: none; border-color: var(--green-l); background: rgba(255,255,255,.12); }
 .footer-nl-form button {
-  padding: .55rem 1rem; background: var(--green); color: var(--wh); border: none;
-  border-radius: 8px; font-size: .78rem; font-weight: 600; font-family: var(--fb);
+  padding: .6rem 1.4rem; background: var(--green); color: var(--wh); border: none;
+  border-radius: 8px; font-size: .82rem; font-weight: 600; font-family: var(--fb);
   cursor: pointer; transition: background .3s, transform .2s var(--ease-spring); white-space: nowrap;
+  min-height: 44px;
 }
 .footer-nl-form button:hover { background: var(--green-l); transform: translateY(-1px); }
 .footer-nl-form button:active { transform: scale(.96); }
-.footer-social { display: flex; gap: .8rem; margin: 1rem 0; }
-.footer-social a { color: var(--twm); transition: color .3s, transform .2s var(--ease-spring); }
-.footer-social a:hover { color: var(--wh); transform: translateY(-2px); }
-.footer-bottom { border-top: 1px solid var(--bd); padding-top: 1.5rem; text-align: center; }
-.footer-legal { display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem; }
-.footer-legal a { font-size: .75rem; color: var(--twm); transition: color .3s; }
-.footer-legal a:hover { color: var(--wh); }
-.footer-legal span { color: rgba(255,255,255,.2); font-size: .75rem; }
-.footer-copy { font-size: .72rem; color: var(--twm); opacity: .5; }
+
+/* Bottom bar */
+.footer-bottom {
+  border-top: 1px solid var(--bd); padding: 1.5rem 3.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: .5rem; max-width: var(--mw); margin: 0 auto;
+}
+.footer-legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.footer-legal a { font-size: .75rem; color: var(--twm); transition: color .3s; opacity: .6; }
+.footer-legal a:hover { color: var(--wh); opacity: 1; }
+.footer-legal span { display: none; }
+.footer-copy { font-size: .72rem; color: var(--twm); opacity: .4; }
 
 /* ============================================================
    BACK TO TOP
@@ -928,19 +972,12 @@ textarea:focus-visible {
 
 /* --- Contrast fixes (WCAG 2.1 AA) --- */
 .safe-card p { color: var(--safe-text); }
-.footer-copy { opacity: .75; }
 .cta-trust span { color: rgba(255,255,255,.85); }
 
 /* Focus rings on dark backgrounds now handled by --focus-ring variable override above */
 
 /* --- Nav hidden: prevent focus on invisible elements --- */
 .nav.nav-hidden { visibility: hidden; }
-
-/* --- Footer legal links --- */
-.footer-legal { display: flex; justify-content: center; gap: .8rem; margin-bottom: .8rem; }
-.footer-legal a { font-size: .75rem; color: var(--twm); transition: color .3s; display: inline; padding: 0; }
-.footer-legal a:hover { color: var(--wh); }
-.footer-legal span { color: var(--twm); opacity: .3; font-size: .75rem; }
 
 /* --- Testimonial star ratings accessibility --- */
 .test-stars { user-select: none; }
@@ -1078,7 +1115,10 @@ textarea:focus-visible {
   .hero, .page-hero { padding-left: 2rem; padding-right: 2rem; }
   .svc-grid { gap: 1.5rem; }
   .ind-grid { grid-template-columns: repeat(4, 1fr); gap: .8rem; }
-  .footer-grid { gap: 2rem; }
+  .footer-grid { gap: 2rem; padding-left: 2rem; padding-right: 2rem; }
+  .footer-cta { padding-left: 2rem; padding-right: 2rem; }
+  .footer-newsletter { padding-left: 2rem; padding-right: 2rem; }
+  .footer-bottom { padding-left: 2rem; padding-right: 2rem; }
   .stats-bar { gap: 3rem; }
   .checklist-grid { gap: 1rem; }
   .trust-bar { gap: 1.5rem; }
@@ -1119,8 +1159,14 @@ textarea:focus-visible {
   .stat::after { display: none; }
   .stats-bar { gap: 2rem; padding: 2.5rem 1.5rem; }
   .cta-banner { padding: 3.5rem 1.5rem; }
-  .footer { padding: 3rem 1.5rem 1.5rem; }
-  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .footer-cta { padding: 1.5rem 1.5rem; flex-direction: column; text-align: center; }
+  .footer-cta-text { font-size: 1.15rem; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2.5rem 1.5rem 2rem; }
+  .footer-newsletter { padding: 1.5rem; flex-direction: column; text-align: center; }
+  .footer-nl-form { width: 100%; }
+  .footer-nl-form input[type="email"] { flex: 1; width: auto; }
+  .footer-bottom { padding: 1.2rem 1.5rem; flex-direction: column; text-align: center; gap: .8rem; }
+  .footer-legal { justify-content: center; }
 }
 
 @media (max-width: 480px) {
@@ -1139,7 +1185,14 @@ textarea:focus-visible {
   /* Grids — all collapse to 1 column */
   .svc-grid, .val-grid, .test-grid { gap: 1rem; }
   .ind-grid { grid-template-columns: 1fr; gap: .8rem; }
-  .footer-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; padding: 2rem 1rem; }
+  .footer-cta { padding: 1.2rem 1rem; }
+  .footer-newsletter { padding: 1.2rem 1rem; }
+  .footer-nl-form { flex-direction: column; }
+  .footer-nl-form input[type="email"] { width: 100%; }
+  .footer-bottom { padding: 1.2rem 1rem; }
+  .footer-col a, .footer-col span { padding: .5rem 0; min-height: 44px; display: flex; align-items: center; }
+  .footer-legal a { min-height: 44px; display: inline-flex; align-items: center; }
   .checklist-grid { grid-template-columns: 1fr; }
 
   /* Card padding — reduce for mobile */
@@ -1168,11 +1221,6 @@ textarea:focus-visible {
 
   /* Back-to-top — position above chat widget */
   .btt { bottom: 5.5rem; right: 1rem; width: 44px; height: 44px; font-size: .9rem; }
-
-  /* Footer */
-  .footer { padding: 2.5rem 1rem 1.5rem; }
-  .footer-brand p { font-size: .82rem; }
-  .footer-col a, .footer-col span { padding: .5rem 0; min-height: 44px; display: flex; align-items: center; }
 
   /* Sustainability + Testimonials */
   .who-grid { grid-template-columns: 1fr; padding: 0 1.5rem; }
@@ -1904,11 +1952,6 @@ textarea:focus-visible {
   .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; text-align: center; }
   .cta-btns { flex-direction: column; align-items: center; }
 }
-
-/* Footer social icons */
-.footer-social { display: flex; gap: 1rem; margin-top: 1.2rem; }
-.footer-social a { color: var(--twm); transition: color .3s, transform .3s; display: flex; }
-.footer-social a:hover { color: var(--wh); transform: translateY(-2px); }
 
 /* Print styles */
 @media print {
