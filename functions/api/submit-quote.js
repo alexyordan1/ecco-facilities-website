@@ -22,12 +22,12 @@ export async function onRequestPost(context) {
     }
 
     // 1. Validate Turnstile server-side
-    if (env.CF_TURNSTILE_SECRET) {
+    if (env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY) {
       const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          secret: env.CF_TURNSTILE_SECRET,
+          secret: env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY,
           response: turnstileToken || '',
           remoteip: context.request.headers.get('CF-Connecting-IP') || ''
         })
