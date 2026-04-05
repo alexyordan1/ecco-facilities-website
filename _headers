@@ -18,3 +18,6 @@
 
 /*.html
   Cache-Control: public, max-age=3600, must-revalidate
+
+/admin/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://raw.githubusercontent.com; font-src 'self' data:; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com; frame-src 'none'; object-src 'none'
