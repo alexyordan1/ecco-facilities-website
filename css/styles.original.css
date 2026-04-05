@@ -122,6 +122,8 @@ textarea:focus-visible {
 .nav-logo:hover img { opacity: .8; }
 
 .nm { display: flex; align-items: center; }
+.nm-label, .nm-contact { display: none; }
+.nm-home { display: none; }
 
 .nl {
   position: relative; padding: .5rem 1.1rem;
@@ -1200,6 +1202,14 @@ textarea:focus-visible {
   }
   @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
   /* Section label */
+  .nm.active .nm-label, .nm.active .nm-contact, .nm.active .nm-home { display: flex; }
+  /* Reorder: Services label first, then services, then Company label, then Home + links */
+  .nm.active .nm-home { order: 3; }
+  .nm.active .nm-label:first-of-type { order: 1; }
+  .nm.active .ndd { order: 2; }
+  .nm.active .nm-label:nth-of-type(2) { order: 3; }
+  .nm.active .nc { order: 10; }
+  .nm.active .nm-contact { order: 11; }
   .nm-label {
     padding: .8rem 1.5rem .3rem; font-size: .65rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: .08em; color: var(--tb);
