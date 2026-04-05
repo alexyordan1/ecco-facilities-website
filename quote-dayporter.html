@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=5.1">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>:root{--r:10px;--rl:16px}body{padding-top:72px}</style>
 </head>
 <body>
@@ -281,6 +282,7 @@ info:()=>`<h2 class="step-q">Let's start with you</h2>
   <div class="opt${D.contactPref==='Either'?' sel':''}" role="button" tabindex="0" aria-pressed="${D.contactPref==='Either'}" onclick="W.pick('contactPref','Either',this)" style="padding:.7rem .5rem;font-size:.82rem">Either</div>
   </div></div>
   <div class="hp-field" aria-hidden="true" tabindex="-1"><label for="fWebsite">Website</label><input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-theme="dark" data-size="compact"></div>
   <p style="font-size:.76rem;color:rgba(255,255,255,.4);margin-top:.5rem;text-align:center">No spam, no aggressive follow-ups — just your proposal and a point of contact.</p>`,
 
 location:()=>`<h2 class="step-q">Almost there, ${D.fn}! Where is your facility?</h2>
@@ -664,6 +666,9 @@ submit(){
   // Honeypot check
   const hp=document.getElementById('fWebsite');
   if(hp&&hp.value){D._submitted=false;return}
+  // Turnstile check
+  const tsToken=document.querySelector('[name="cf-turnstile-response"]');
+  if(!tsToken||!tsToken.value){alert('Please complete the security check.');return}
   if(D._submitted)return;
   D._submitted=true;
   this.saveAll();
