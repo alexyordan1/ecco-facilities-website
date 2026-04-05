@@ -772,6 +772,18 @@ submit(){
         }
       })
     }).catch(()=>{});
+    // SMS owner notification (fire-and-forget)
+    fetch('/api/notify-lead',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:(D.fn||'')+' '+(D.ln||''),
+        email:D.em||'',
+        phone:D.ph||'',
+        service:D._fromJanitorial?'Day Porter + Janitorial':'Day Porter',
+        ref:refNum,
+        urgency:D.urg||''
+      })
+    }).catch(()=>{});
     document.getElementById('wizProg').style.display='none';
     document.getElementById('siteFooter').style.display='';
     showConfetti();

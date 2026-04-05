@@ -644,6 +644,18 @@ submit(){
         }
       })
     }).catch(()=>{});
+    // SMS owner notification (fire-and-forget)
+    fetch('/api/notify-lead',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:(D.fn||'')+' '+(D.ln||''),
+        email:D.em||'',
+        phone:D.ph||'',
+        service:D._fromDayPorter?'Janitorial + Day Porter':'Janitorial',
+        ref:refNum,
+        urgency:D.urg||''
+      })
+    }).catch(()=>{});
     // Show success
     document.getElementById('sBox').innerHTML=`<div class="success">
       <div class="success-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
