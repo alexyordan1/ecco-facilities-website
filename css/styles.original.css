@@ -1233,23 +1233,22 @@ textarea:focus-visible {
   .nm.active .ddi span { display: flex; color: var(--green); }
   .nm.active .ddi strong { font-size: .9rem; font-weight: 500; color: var(--navy); }
   .nm.active .ddi .ddsc { display: none; }
-  /* CTA — sticky at bottom */
+  /* CTA */
   .nm.active .nc {
-    margin: auto 1.5rem 1.5rem; text-align: center;
+    margin: auto 1.5rem 1rem; text-align: center;
     display: block; padding: .9rem; border-radius: 12px;
     background: var(--green); color: var(--wh);
     font-family: var(--fb); font-size: .9rem; font-weight: 600;
     box-shadow: 0 4px 16px rgba(45,122,50,.25);
-    position: sticky; bottom: 1.5rem;
   }
   .nm.active .nc:hover { background: var(--green-l); }
   /* Contact card below CTA */
   .nm-contact {
-    margin: .8rem 1.5rem 5rem; padding: 1rem; border-radius: 12px;
+    margin: 0 1.5rem 2rem; padding: 1.2rem; border-radius: 14px;
     background: var(--navy); text-align: center;
   }
-  .nm-contact p { font-size: .78rem; color: rgba(255,255,255,.5); margin-bottom: .3rem; }
-  .nm-contact a { color: var(--green-l); text-decoration: none; font-weight: 600; font-size: .85rem; }
+  .nm-contact p { font-size: .78rem; color: rgba(255,255,255,.5); margin-bottom: .4rem; }
+  .nm-contact a { color: var(--green-l); text-decoration: none; font-weight: 600; font-size: .88rem; }
   .nm-contact a:hover { color: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
   .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }

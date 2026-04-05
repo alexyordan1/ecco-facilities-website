@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" href="images/stock/23-coworking-space.webp" as="image">
-<link rel="stylesheet" href="css/styles.css?v=4.9">
+<link rel="stylesheet" href="css/styles.css?v=5.0">
 <style>
 .filter-bar{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:3rem;padding:0 3.5rem}
 .filter-btn{padding:.65rem 1.5rem;background:var(--wh);border:1.5px solid var(--bl);border-radius:50px;font-size:.82rem;font-weight:600;color:var(--navy);cursor:pointer;transition:all .3s var(--ease);white-space:nowrap}
@@ -231,7 +231,7 @@
 
 <button class="btt" id="btt" aria-label="Back to top">↑</button>
 
-<script src="js/main.js?v=2.0"></script>
+<script src="js/main.js?v=2.1"></script>
 <script>
 document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const filter=btn.dataset.filter;document.querySelectorAll('.test-card').forEach(card=>{if(filter==='all'||card.dataset.industry===filter){card.classList.add('visible')}else{card.classList.remove('visible')}})})});
 </script>
