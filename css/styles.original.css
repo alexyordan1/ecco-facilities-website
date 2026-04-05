@@ -451,7 +451,7 @@ textarea:focus-visible {
   z-index: 1;
 }
 /* Section with showcase — no padding since title is inside image */
-.svc-sec { padding: 0; }
+.svc-sec { padding: 0 !important; }
 .svc-inner { position: relative; z-index: 2; padding: 4rem 2rem; width: 100%; }
 /* Title inside showcase — original size, full width for single line */
 .svc-ttl {
@@ -824,6 +824,8 @@ textarea:focus-visible {
   width: 42px; height: 42px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   color: #fff; font-weight: 700; font-size: .9rem; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  border: 2px solid var(--wh);
 }
 .trust-quote-info { display: flex; flex-direction: column; }
 .trust-quote-author { font-size: .85rem; font-weight: 700; color: var(--navy); }
