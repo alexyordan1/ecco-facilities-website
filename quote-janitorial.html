@@ -620,6 +620,25 @@ submit(){
       _hsq.push(['trackPageView']);
       _hsq.push(['trackCustomBehavioralEvent',{name:'pe245755967_quote_submitted',properties:{service_type:D.addDayPorter==='yes'||D._fromDayPorter?'Janitorial + Day Porter':'Janitorial',facility_type:D.space||'',facility_size:D.exactSize||D.size||''}}]);
     }
+    // HubSpot Forms API — creates contact + form submission record
+    fetch('https://api.hsforms.com/submissions/v3/integration/submit/245755967/20c9de1e-4067-4961-9cda-3af11efe7fc3',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        fields:[
+          {name:'firstname',value:D.fn||''},
+          {name:'lastname',value:D.ln||''},
+          {name:'email',value:D.em||''},
+          {name:'phone',value:D.ph||''},
+          {name:'company',value:D.co||''},
+          {name:'message',value:'Service: '+(D._fromDayPorter?'Janitorial + Day Porter':'Janitorial')+' | Space: '+(D.space||'')+' | Size: '+(D.exactSize||D.size||'')+' | Frequency: '+(D.janDays||'')+' | Urgency: '+(D.urg||'')+' | Ref: '+refNum}
+        ],
+        context:{
+          hutk:document.cookie.match(/hubspotutk=([^;]*)/)?.[1]||'',
+          pageUri:window.location.href,
+          pageName:'Janitorial Services Quote'
+        }
+      })
+    }).catch(()=>{});
     // Show success
     document.getElementById('sBox').innerHTML=`<div class="success">
       <div class="success-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>

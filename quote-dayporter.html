@@ -748,6 +748,25 @@ submit(){
       _hsq.push(['trackPageView']);
       _hsq.push(['trackCustomBehavioralEvent',{name:'pe245755967_quote_submitted',properties:{service_type:D.addJanitorial==='yes'||D._fromJanitorial?'Day Porter + Janitorial':'Day Porter',facility_type:D.space||'',facility_size:D.exactSize||D.size||''}}]);
     }
+    // HubSpot Forms API — creates contact + form submission record
+    fetch('https://api.hsforms.com/submissions/v3/integration/submit/245755967/6aa21f22-e7f5-4f9f-9286-63381a497590',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        fields:[
+          {name:'firstname',value:D.fn||''},
+          {name:'lastname',value:D.ln||''},
+          {name:'email',value:D.em||''},
+          {name:'phone',value:D.ph||''},
+          {name:'company',value:D.co||''},
+          {name:'message',value:'Service: '+(D._fromJanitorial?'Day Porter + Janitorial':'Day Porter')+' | Space: '+(D.space||'')+' | Hours: '+(D.hrs||'')+' | Start: '+(D.startTime||'')+' | Days: '+(D.dpDaysArr?D.dpDaysArr.join(', '):'')+' | Porters: '+(D.porters||'')+' | Areas: '+(D.dpAreas?D.dpAreas.join(', '):'')+' | Urgency: '+(D.urg||'')+' | Ref: '+refNum}
+        ],
+        context:{
+          hutk:document.cookie.match(/hubspotutk=([^;]*)/)?.[1]||'',
+          pageUri:window.location.href,
+          pageName:'Day Porter Services Quote'
+        }
+      })
+    }).catch(()=>{});
     document.getElementById('wizProg').style.display='none';
     document.getElementById('siteFooter').style.display='';
     showConfetti();
