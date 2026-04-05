@@ -92,7 +92,6 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="js/main.js?v=2.2"></script>
 <script src="js/chat-widget.js?v=1.2"></script>
 <script>
@@ -458,15 +457,10 @@ next(){
   // Partial save: send lead data when user completes info step
   if(id==='info'&&!sessionStorage.getItem('ecco_partial_dp')){
     sessionStorage.setItem('ecco_partial_dp','1');
-    if(typeof emailjs!=='undefined')emailjs.send('service_glp7i9d','template_PARTIAL',{
-      to_email:'info@eccofacilities.com',
-      lead_name:(D.fn||'')+' '+(D.ln||''),
-      lead_email:D.em||'',
-      lead_phone:D.ph||'N/A',
-      service_type:'Day Porter Services',
-      space_type:D.space||'Not selected',
-      facility_size:'N/A',
-      timestamp:new Date().toLocaleString()
+    fetch('/api/capture-partial',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:D.em||'',firstName:D.fn||'',phone:D.ph||''})
     }).catch(()=>{});
   }
   if(this.cur<this.steps.length-1){
@@ -662,68 +656,29 @@ startFresh(){
 },
 
 // ═══ SUBMIT ═══
-submit(){
-  // Honeypot check
+async submit(){
   const hp=document.getElementById('fWebsite');
   if(hp&&hp.value){D._submitted=false;return}
-  // Turnstile check
-  const tsToken=document.querySelector('[name="cf-turnstile-response"]');
-  if(!tsToken||!tsToken.value){alert('Please complete the security check.');return}
   if(D._submitted)return;
   D._submitted=true;
   this.saveAll();
-  const formData=new FormData();
-  formData.append('_honey','');
-  formData.append('_subject',`New Day Porter Quote: ${D.co||D.fn||'Website'}`);
-  formData.append('_template','table');
-  formData.append('_captcha','false');
-  formData.append('Service Requested',D._fromJanitorial?'Day Porter + Janitorial Services':'Day Porter Services');
-  formData.append('First Name',D.fn||'');
-  formData.append('Last Name',D.ln||'');
-  formData.append('Email',D.em||'');
-  formData.append('Phone',D.ph||'');
-  formData.append('Company',D.co||'');
-  formData.append('Facility Address',D.addr||'');
-  formData.append('Facility Type',D.space||'');
-  if(D.spaceOther)formData.append('Other Space',D.spaceOther);
-  formData.append('Coverage Hours',D.hrs||'');
-  if(D.customHrs)formData.append('Custom Hours',D.customHrs);
-  formData.append('Start Time',D.startTime||'');
-  const endTime=D.hrs&&D.startTime?addH(D.startTime,parseInt(D.hrs==='Custom'?D.customHrs:D.hrs)):'';
-  if(endTime)formData.append('End Time',endTime);
-  formData.append('Days',D.dpDaysArr?D.dpDaysArr.join(', '):'');
-  formData.append('Porters',D.porters==='3+'&&D.porterCount?D.porterCount+' porters':D.porters||'');
-  formData.append('Areas',D.dpAreas?D.dpAreas.join(', '):'');
-  if(D.areaOther)formData.append('Other Areas',D.areaOther);
-  formData.append('Urgency',D.urg||'');
-  formData.append('Janitorial Requested',D.addJanitorial==='yes'?'Yes — redirected to Jan form':'No');
-  if(D._fromJanitorial&&D._janData){
-    formData.append('Jan Facility Size',D._janData.exactSize||D._janData.size||'');
-    formData.append('Jan Frequency',D._janData.freq||'');
-    formData.append('Jan Days',D._janData.days||'');
-    formData.append('Jan Preferred Time',D._janData.time||'');
-  }
-  formData.append('Contact Preference',D.contactPref||'Either');
-  if(D.referral)formData.append('Referral Source',D.referral);
-  formData.append('Additional Notes',D.notes||'');
-  formData.append('_replyto',D.em||'');
-  formData.append('_autoresponse',`Hi ${D.fn||'there'},\n\nThank you for requesting a free quote from Ecco Facilities LLC!\n\nWe have received your request for Day Porter Services and our team is already reviewing the details. Here is what happens next:\n\n1. Within 24 hours, you will receive a customized proposal tailored to your facility.\n2. Your proposal will include transparent, flat-rate pricing with no hidden fees.\n3. A dedicated Ecco representative will be available to answer any questions.\n\nOur day porters are thoroughly trained, professional, and equipped to handle your facility's daily needs — from peak-hour support to spill response.\n\nIf you need immediate assistance, feel free to contact us:\nEmail: info@eccofacilities.com\n\nWe look forward to working with you!\n\nWarm regards,\nThe Ecco Facilities Team\nCleaning The Future, Today\neccofacilities.com`);
-  const refNum = 'EDP-' + Date.now().toString(36).toUpperCase();
-  formData.append('Reference',refNum);
-  // Show loading state
+  const token=document.querySelector('[name="cf-turnstile-response"]')?.value||'';
   document.getElementById('wizProg').style.display='none';
   document.getElementById('sBox').innerHTML=`<div style="text-align:center;padding:3rem 1rem"><div style="margin-bottom:1.2rem"><span class="submit-spinner"></span></div><h2 class="step-q">Sending your request, ${D.fn}...</h2><p class="step-sub">This will only take a moment.</p></div>`;
   document.querySelector('.wiz-nav').style.display='none';
-  // Submit via FormSubmit
-  fetch('https://formsubmit.co/ajax/info@eccofacilities.com',{method:'POST',body:formData}).then(r=>r.json()).then(()=>{
-    // Send confirmation email to client via EmailJS (non-blocking)
-    emailjs.init('M9BvegsZOSvCfKmqa');
-    const serviceName=D._fromJanitorial?'Day Porter + Janitorial Services':'Day Porter Services';
-    emailjs.send('service_glp7i9d','template_5vrhsep',{
-      to_email:D.em,
-      html_content:`Hi ${D.fn||'there'},\n\nThank you for requesting a free quote from Ecco Facilities LLC!\n\nYour Reference Number: ${refNum}\nService Requested: ${serviceName}\n\nWe have received your request and our team is already reviewing the details. Here is what happens next:\n\n1. Within 24 hours, you will receive a customized proposal tailored to your facility.\n2. Your proposal will include transparent, flat-rate pricing with no hidden fees.\n3. A dedicated Ecco representative will be available to answer any questions.\n\nOur day porters are thoroughly trained, professional, and equipped to handle your facility's daily needs.\n\nIf you need immediate assistance, feel free to contact us:\nEmail: info@eccofacilities.com\n\nWe look forward to working with you!\n\nWarm regards,\nThe Ecco Facilities Team\nCleaning The Future, Today\neccofacilities.com`
-    }).catch(()=>{});
-    // Show success
+  try{
+    const payload=Object.fromEntries(Object.entries(D).filter(([k])=>!k.startsWith('_')));
+    const res=await fetch('/api/submit-quote',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...payload,turnstileToken:token,formType:'dayporter'})
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok)throw new Error(data.error||'Submit failed');
+    const refNum=data.ref;
+    localStorage.removeItem('ecco_quote_dp');
+    sessionStorage.removeItem('ecco_partial_dp');
+    if(window.gtag)gtag('event','quote_submitted',{form_type:'dayporter'});
     document.getElementById('sBox').innerHTML=`<div class="success">
       <div class="success-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
       <h2 class="step-q" style="text-align:center">Thank you, ${D.fn}!</h2>
@@ -743,54 +698,14 @@ submit(){
       </div>
       <a href="quote.html" class="success-back">← Back to Quote Options</a>
     </div>`;
-    localStorage.removeItem('ecco_quote_dp');
-    sessionStorage.removeItem('ecco_partial_dp');
-    if(window.gtag)gtag('event','quote_submitted',{form_type:'dayporter'});
-    // Push contact to HubSpot
-    if(window._hsq){
-      var _hsq=window._hsq||[];
-      _hsq.push(['identify',{email:D.em,firstname:D.fn,lastname:D.ln,phone:D.ph||'',company:D.co||''}]);
-      _hsq.push(['trackPageView']);
-      _hsq.push(['trackCustomBehavioralEvent',{name:'pe245755967_quote_submitted',properties:{service_type:D.addJanitorial==='yes'||D._fromJanitorial?'Day Porter + Janitorial':'Day Porter',facility_type:D.space||'',facility_size:D.exactSize||D.size||''}}]);
-    }
-    // HubSpot Forms API — creates contact + form submission record
-    fetch('https://api.hsforms.com/submissions/v3/integration/submit/245755967/6aa21f22-e7f5-4f9f-9286-63381a497590',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        fields:[
-          {name:'firstname',value:D.fn||''},
-          {name:'lastname',value:D.ln||''},
-          {name:'email',value:D.em||''},
-          {name:'phone',value:D.ph||''},
-          {name:'company',value:D.co||''},
-          {name:'message',value:'Service: '+(D._fromJanitorial?'Day Porter + Janitorial':'Day Porter')+' | Space: '+(D.space||'')+' | Hours: '+(D.hrs||'')+' | Start: '+(D.startTime||'')+' | Days: '+(D.dpDaysArr?D.dpDaysArr.join(', '):'')+' | Porters: '+(D.porters||'')+' | Areas: '+(D.dpAreas?D.dpAreas.join(', '):'')+' | Urgency: '+(D.urg||'')+' | Ref: '+refNum}
-        ],
-        context:{
-          hutk:document.cookie.match(/hubspotutk=([^;]*)/)?.[1]||'',
-          pageUri:window.location.href,
-          pageName:'Day Porter Services Quote'
-        }
-      })
-    }).catch(()=>{});
-    // SMS owner notification (fire-and-forget)
-    fetch('/api/notify-lead',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        name:(D.fn||'')+' '+(D.ln||''),
-        email:D.em||'',
-        phone:D.ph||'',
-        service:D._fromJanitorial?'Day Porter + Janitorial':'Day Porter',
-        ref:refNum,
-        urgency:D.urg||''
-      })
-    }).catch(()=>{});
     document.getElementById('wizProg').style.display='none';
     document.getElementById('siteFooter').style.display='';
     showConfetti();
-  }).catch(err => {
-    D._submitted = false;
+  }catch(err){
+    D._submitted=false;
     document.getElementById('sBox').innerHTML='<div style="text-align:center;padding:3rem 1rem"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><h2 class="step-q">Something went wrong</h2><p class="step-sub">We couldn\'t send your request. Please try again or email us directly.</p><a href="mailto:info@eccofacilities.com" style="display:inline-block;margin-top:1rem;padding:.8rem 2rem;background:var(--green);color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Email Us Instead</a><button onclick="D._submitted=false;W.cur=W.steps.length-1;W.render();document.querySelector(\'.wiz-nav\').style.display=\'flex\'" style="display:block;margin:1rem auto 0;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:.85rem;text-decoration:underline">← Go back and try again</button></div>';
-  });
+    document.querySelector('.wiz-nav').style.display='';
+  }
 }
 };
 
@@ -807,8 +722,5 @@ window.addEventListener('beforeunload',function(){
 });
 </script>
 <script src="js/cookie-consent.js?v=1.0"></script>
-<!-- Start of HubSpot Embed Code -->
-<script type="text/javascript" id="hs-script-loader" async defer src="//js-na2.hs-scripts.com/245755967.js"></script>
-<!-- End of HubSpot Embed Code -->
 </body>
 </html>
