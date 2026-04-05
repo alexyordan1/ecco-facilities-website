@@ -1186,25 +1186,37 @@ textarea:focus-visible {
     position: fixed; top: 64px; right: 0;
     width: 85%; max-width: 360px;
     height: calc(100vh - 64px); height: calc(100dvh - 64px);
-    background: var(--wh); padding: 1rem 0 0; z-index: 999;
+    background: var(--wh); padding: 0; z-index: 999;
     gap: 0; overflow-y: auto;
-    box-shadow: -8px 0 40px rgba(11,29,56,.15);
+    box-shadow: -12px 0 48px rgba(11,29,56,.12), -2px 0 8px rgba(11,29,56,.06);
     animation: slideInRight .35s cubic-bezier(.16,1,.3,1);
   }
+  /* Green accent bar at top */
+  .nm.active::before {
+    content: ''; display: block; height: 3px; flex-shrink: 0;
+    background: linear-gradient(90deg, var(--green), var(--blue-l));
+  }
   @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-  /* Links — left-aligned, no borders, spacing-based */
+  /* Section label */
+  .nm-label {
+    padding: .8rem 1.5rem .3rem; font-size: .65rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em; color: var(--tb);
+  }
+  /* Links — left-aligned, bigger, hover feedback */
   .nm.active .nl {
-    padding: 1.1rem 1.5rem; min-height: 48px;
+    padding: 1rem 1.5rem; min-height: 48px;
     display: flex; align-items: center;
-    font-size: .95rem; font-weight: 500; color: var(--navy);
+    font-size: 1.05rem; font-weight: 500; color: var(--navy);
     text-decoration: none; text-align: left;
-    transition: background .2s, padding-left .2s;
+    transition: background .2s, border-left .2s;
+    border-left: 3px solid transparent;
   }
   .nm.active .nl::after { display: none; }
-  .nm.active .nl:hover { background: rgba(45,122,50,.03); padding-left: 1.8rem; }
-  .nm.active .nl-active { color: var(--green); font-weight: 600; border-left: 3px solid var(--green); }
-  /* Services dropdown — same bg, indented */
+  .nm.active .nl:hover { background: rgba(45,122,50,.03); border-left-color: rgba(45,122,50,.2); }
+  .nm.active .nl-active { color: var(--green); font-weight: 600; border-left-color: var(--green); }
+  /* Services dropdown — indented */
   .nm.active .ndd { padding: 0; }
+  .nm.active .ndd > .nl { font-size: 1.05rem; }
   .nm.active .ndd > .nl span { font-size: .6rem; opacity: .4; }
   .nm.active .ddp {
     position: static; opacity: 1; visibility: visible;
@@ -1212,23 +1224,32 @@ textarea:focus-visible {
     padding: 0; min-width: auto; background: none;
   }
   .nm.active .ddi {
-    padding: .8rem 1.5rem .8rem 2.5rem; display: flex; align-items: center; gap: .6rem;
-    font-size: .88rem; color: var(--tb);
+    padding: .7rem 1.5rem .7rem 2.5rem; display: flex; align-items: center; gap: .6rem;
+    font-size: .9rem; color: var(--tb);
+    border-left: 3px solid transparent;
+    transition: background .2s, border-left .2s;
   }
-  .nm.active .ddi:hover { background: rgba(45,122,50,.03); }
+  .nm.active .ddi:hover { background: rgba(45,122,50,.03); border-left-color: rgba(45,122,50,.15); }
   .nm.active .ddi span { display: flex; color: var(--green); }
-  .nm.active .ddi strong { font-size: .88rem; font-weight: 500; color: var(--navy); }
+  .nm.active .ddi strong { font-size: .9rem; font-weight: 500; color: var(--navy); }
   .nm.active .ddi .ddsc { display: none; }
-  /* CTA — sticky at bottom with space for chat */
+  /* CTA — sticky at bottom */
   .nm.active .nc {
-    margin: auto 1.5rem 5rem; text-align: center;
+    margin: auto 1.5rem 1.5rem; text-align: center;
     display: block; padding: .9rem; border-radius: 12px;
     background: var(--green); color: var(--wh);
     font-family: var(--fb); font-size: .9rem; font-weight: 600;
     box-shadow: 0 4px 16px rgba(45,122,50,.25);
-    position: sticky; bottom: 5rem;
+    position: sticky; bottom: 1.5rem;
   }
   .nm.active .nc:hover { background: var(--green-l); }
+  /* Contact info below CTA */
+  .nm-contact {
+    text-align: center; padding: 0 1.5rem 5rem;
+    font-size: .75rem; color: var(--tb); opacity: .6;
+  }
+  .nm-contact a { color: var(--tb); text-decoration: none; }
+  .nm-contact a:hover { color: var(--green); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
   .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }
   .hero h1 { font-size: clamp(2rem,7vw,2.8rem); }
