@@ -104,10 +104,13 @@ export async function onRequestPost(context) {
       }
     }
 
+    // --- Debug: collect integration results ---
+    const _debug = { postmarkClient: null, postmarkOwner: null, twilio: null };
+
     // 6. Postmark: confirmation email to client
     if (env.POSTMARK_API_KEY) {
       try {
-        await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        const pmRes = await fetch('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -125,13 +128,14 @@ export async function onRequestPost(context) {
             }
           })
         });
+        _debug.postmarkClient = { status: pmRes.status, body: await pmRes.json() };
       } catch (e) {
-        console.error('[submit-quote] Postmark client email error:', e.message);
+        _debug.postmarkClient = { error: e.message };
       }
 
       // 7. Postmark: notification email to owner
       try {
-        await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        const pmRes2 = await fetch('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -155,9 +159,12 @@ export async function onRequestPost(context) {
             }
           })
         });
+        _debug.postmarkOwner = { status: pmRes2.status, body: await pmRes2.json() };
       } catch (e) {
-        console.error('[submit-quote] Postmark owner email error:', e.message);
+        _debug.postmarkOwner = { error: e.message };
       }
+    } else {
+      _debug.postmarkClient = { skipped: 'no POSTMARK_API_KEY' };
     }
 
     // 8. Twilio: SMS to owner
@@ -177,7 +184,7 @@ export async function onRequestPost(context) {
         params.append('To', env.NOTIFY_PHONE);
         params.append('Body', smsBody);
 
-        await fetch(`https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`, {
+        const twRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`, {
           method: 'POST',
           headers: {
             'Authorization': `Basic ${btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`)}`,
@@ -185,12 +192,15 @@ export async function onRequestPost(context) {
           },
           body: params.toString()
         });
+        _debug.twilio = { status: twRes.status, body: await twRes.json() };
       } catch (e) {
-        console.error('[submit-quote] Twilio error:', e.message);
+        _debug.twilio = { error: e.message };
       }
+    } else {
+      _debug.twilio = { skipped: 'missing env vars', has: { sid: !!env.TWILIO_ACCOUNT_SID, auth: !!env.TWILIO_AUTH_TOKEN, from: !!env.TWILIO_FROM, phone: !!env.NOTIFY_PHONE } };
     }
 
-    return new Response(JSON.stringify({ ok: true, ref: refNumber }), { status: 200, headers: corsHeaders });
+    return new Response(JSON.stringify({ ok: true, ref: refNumber, _debug }), { status: 200, headers: corsHeaders });
 
   } catch (err) {
     console.error('[submit-quote] Fatal error:', err.message, err.stack);
