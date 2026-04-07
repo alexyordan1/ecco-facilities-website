@@ -39,7 +39,7 @@ export async function onRequestPost(context) {
     // 4. UPSERT into Supabase (via REST API — no npm package needed)
     if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
       try {
-        const sbRes = await fetch(`${env.SUPABASE_URL}/rest/v1/leads`, {
+        const sbRes = await fetch(`${env.SUPABASE_URL}/rest/v1/leads?on_conflict=email,service`, {
           method: 'POST',
           headers: {
             'apikey': env.SUPABASE_SERVICE_KEY,
