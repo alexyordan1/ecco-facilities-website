@@ -1,5 +1,3 @@
-import { neon } from '@neondatabase/serverless';
-
 export async function onRequestPost(context) {
   const corsHeaders = {
     'Content-Type': 'application/json',
@@ -8,7 +6,7 @@ export async function onRequestPost(context) {
   };
 
   try {
-    const { NEON_DATABASE_URL, ACTIVECAMPAIGN_API_URL, ACTIVECAMPAIGN_API_KEY } = context.env;
+    const { SUPABASE_URL, SUPABASE_SERVICE_KEY, ACTIVECAMPAIGN_API_URL, ACTIVECAMPAIGN_API_KEY } = context.env;
 
     let body;
     try { body = await context.request.json(); }
@@ -19,21 +17,41 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ ok: true }), { status: 200, headers: corsHeaders });
     }
 
-    // 1. Insert partial lead into Neon (skip if already completed)
-    let contactId = null;
-    if (NEON_DATABASE_URL) {
+    // 1. Insert partial lead into Supabase (skip if already completed)
+    if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
       try {
-        const sql = neon(NEON_DATABASE_URL);
-        await sql`
-          INSERT INTO leads (email, first_name, phone, status)
-          VALUES (${email}, ${firstName || null}, ${phone || null}, 'partial')
-          ON CONFLICT (email) DO UPDATE SET
-            first_name = COALESCE(EXCLUDED.first_name, leads.first_name),
-            phone = COALESCE(EXCLUDED.phone, leads.phone)
-          WHERE leads.status != 'completed'
-        `;
+        // First check if lead already exists and is completed
+        const checkRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/leads?email=eq.${encodeURIComponent(email)}&select=status`,
+          {
+            headers: {
+              'apikey': SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+            }
+          }
+        );
+        const existing = await checkRes.json();
+        const isCompleted = existing?.[0]?.status === 'completed';
+
+        if (!isCompleted) {
+          await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
+              email,
+              first_name: firstName || null,
+              phone: phone || null,
+              status: 'partial'
+            })
+          });
+        }
       } catch (e) {
-        console.error('[capture-partial] Neon error:', e.message);
+        console.error('[capture-partial] Supabase error:', e.message);
       }
     }
 
@@ -42,16 +60,14 @@ export async function onRequestPost(context) {
       try {
         const acHeaders = { 'Api-Token': ACTIVECAMPAIGN_API_KEY, 'Content-Type': 'application/json' };
 
-        // Create or update contact
         const syncRes = await fetch(`${ACTIVECAMPAIGN_API_URL}/api/3/contact/sync`, {
           method: 'POST', headers: acHeaders,
           body: JSON.stringify({ contact: { email, firstName: firstName || '', phone: phone || '' } })
         });
         const syncData = await syncRes.json();
-        contactId = syncData?.contact?.id;
+        const contactId = syncData?.contact?.id;
 
         if (contactId) {
-          // Find or create "partial_lead" tag
           const tagsRes = await fetch(`${ACTIVECAMPAIGN_API_URL}/api/3/tags?search=partial_lead`, { headers: acHeaders });
           const tagsData = await tagsRes.json();
           let tagId = tagsData?.tags?.find(t => t.tag === 'partial_lead')?.id;
@@ -64,7 +80,6 @@ export async function onRequestPost(context) {
             tagId = (await createTagRes.json())?.tag?.id;
           }
 
-          // Add tag to contact
           if (tagId) {
             await fetch(`${ACTIVECAMPAIGN_API_URL}/api/3/contactTags`, {
               method: 'POST', headers: acHeaders,
@@ -72,13 +87,23 @@ export async function onRequestPost(context) {
             });
           }
 
-          // Update Neon with AC contact ID
-          if (NEON_DATABASE_URL) {
+          // Update Supabase with AC contact ID
+          if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
             try {
-              const sql = neon(NEON_DATABASE_URL);
-              await sql`UPDATE leads SET ac_contact_id = ${contactId} WHERE email = ${email}`;
+              await fetch(
+                `${SUPABASE_URL}/rest/v1/leads?email=eq.${encodeURIComponent(email)}`,
+                {
+                  method: 'PATCH',
+                  headers: {
+                    'apikey': SUPABASE_SERVICE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ ac_contact_id: contactId })
+                }
+              );
             } catch (e) {
-              console.error('[capture-partial] Neon AC ID update error:', e.message);
+              console.error('[capture-partial] Supabase AC ID update error:', e.message);
             }
           }
         }

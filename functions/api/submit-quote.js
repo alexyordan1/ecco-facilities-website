@@ -1,5 +1,3 @@
-import { neon } from '@neondatabase/serverless';
-
 export async function onRequestPost(context) {
   const corsHeaders = {
     'Content-Type': 'application/json',
@@ -24,11 +22,7 @@ export async function onRequestPost(context) {
     // 1. Validate Turnstile server-side (temporarily disabled — widget hanging, error 300030)
     // TODO: re-enable after fixing Turnstile widget configuration
     // const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
-    // if (turnstileSecret) {
-    //   const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { ... });
-    //   const tsData = await tsRes.json();
-    //   if (!tsData.success) return 403;
-    // }
+    // if (turnstileSecret) { ... }
 
     // 2. Generate reference number
     const prefix = formType === 'dayporter' ? 'EDP-' : 'ECJ-';
@@ -40,31 +34,40 @@ export async function onRequestPost(context) {
       if (!k.startsWith('_') && k !== 'turnstileToken') formData[k] = v;
     }
 
-    // 4. UPSERT into Neon
     const service = formType === 'dayporter' ? 'dayporter' : 'janitorial';
-    if (env.NEON_DATABASE_URL) {
+
+    // 4. UPSERT into Supabase (via REST API — no npm package needed)
+    if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
       try {
-        const sql = neon(env.NEON_DATABASE_URL);
-        await sql`
-          INSERT INTO leads (email, first_name, last_name, phone, company, service, status, form_data, ref_number, completed_at)
-          VALUES (${email}, ${firstName || null}, ${lastName || null}, ${phone || null}, ${company || null}, ${service}, 'completed', ${JSON.stringify(formData)}, ${refNumber}, NOW())
-          ON CONFLICT (email) DO UPDATE SET
-            first_name = EXCLUDED.first_name,
-            last_name = EXCLUDED.last_name,
-            phone = EXCLUDED.phone,
-            company = EXCLUDED.company,
-            service = EXCLUDED.service,
-            status = 'completed',
-            form_data = EXCLUDED.form_data,
-            ref_number = EXCLUDED.ref_number,
-            completed_at = NOW()
-        `;
+        const sbRes = await fetch(`${env.SUPABASE_URL}/rest/v1/leads`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            email,
+            first_name: firstName || null,
+            last_name: lastName || null,
+            phone: phone || null,
+            company: company || null,
+            service,
+            status: 'completed',
+            form_data: formData,
+            ref_number: refNumber,
+            completed_at: new Date().toISOString()
+          })
+        });
+        if (!sbRes.ok) {
+          const errText = await sbRes.text();
+          console.error('[submit-quote] Supabase error:', sbRes.status, errText);
+        }
       } catch (dbErr) {
-        console.error('[submit-quote] Neon DB error:', dbErr.message);
+        console.error('[submit-quote] Supabase DB error:', dbErr.message);
       }
     }
-
-    // --- Non-blocking integrations (errors logged but don't fail the request) ---
 
     // 5. ActiveCampaign: sync contact + add "completed" tag
     if (env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY) {
@@ -79,7 +82,6 @@ export async function onRequestPost(context) {
         const contactId = syncData?.contact?.id;
 
         if (contactId) {
-          // Find or create "completed" tag
           const tagsRes = await fetch(`${env.ACTIVECAMPAIGN_API_URL}/api/3/tags?search=completed`, { headers: acHeaders });
           const tagsData = await tagsRes.json();
           let tagId = tagsData?.tags?.find(t => t.tag === 'completed')?.id;
@@ -104,13 +106,10 @@ export async function onRequestPost(context) {
       }
     }
 
-    // --- Debug: collect integration results ---
-    const _debug = { postmarkClient: null, postmarkOwner: null, twilio: null };
-
     // 6. Postmark: confirmation email to client
     if (env.POSTMARK_API_KEY) {
       try {
-        const pmRes = await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        await fetch('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -123,19 +122,18 @@ export async function onRequestPost(context) {
             TemplateAlias: 'quote-confirmation',
             TemplateModel: {
               firstName: firstName || 'there',
-              refNumber: refNumber,
+              refNumber,
               service: service === 'dayporter' ? 'Day Porter Services' : 'Janitorial Services'
             }
           })
         });
-        _debug.postmarkClient = { status: pmRes.status, body: await pmRes.json() };
       } catch (e) {
-        _debug.postmarkClient = { error: e.message };
+        console.error('[submit-quote] Postmark client email error:', e.message);
       }
 
       // 7. Postmark: notification email to owner
       try {
-        const pmRes2 = await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        await fetch('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -149,61 +147,25 @@ export async function onRequestPost(context) {
             TemplateModel: {
               firstName: firstName || '',
               lastName: lastName || '',
-              email: email,
+              email,
               phone: phone || 'N/A',
               company: company || 'N/A',
               service: service === 'dayporter' ? 'Day Porter Services' : 'Janitorial Services',
-              refNumber: refNumber,
+              refNumber,
               urgency: body.urg || 'Standard',
               formData: JSON.stringify(formData, null, 2)
             }
           })
         });
-        _debug.postmarkOwner = { status: pmRes2.status, body: await pmRes2.json() };
       } catch (e) {
-        _debug.postmarkOwner = { error: e.message };
+        console.error('[submit-quote] Postmark owner email error:', e.message);
       }
-    } else {
-      _debug.postmarkClient = { skipped: 'no POSTMARK_API_KEY' };
     }
 
-    // 8. Twilio: SMS to owner
-    if (env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM && env.NOTIFY_PHONE) {
-      try {
-        const smsBody =
-          '\uD83D\uDD14 NEW ECCO LEAD\n' +
-          `Ref: ${refNumber}\n` +
-          `Name: ${(firstName || '').trim()} ${(lastName || '').trim()}\n` +
-          (phone ? `Phone: ${phone}\n` : '') +
-          `Email: ${email}\n` +
-          `Service: ${service === 'dayporter' ? 'Day Porter' : 'Janitorial'}` +
-          (body.urg ? `\nUrgency: ${body.urg}` : '');
-
-        const params = new URLSearchParams();
-        params.append('From', env.TWILIO_FROM);
-        params.append('To', env.NOTIFY_PHONE);
-        params.append('Body', smsBody);
-
-        const twRes = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`)}`,
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: params.toString()
-        });
-        _debug.twilio = { status: twRes.status, body: await twRes.json() };
-      } catch (e) {
-        _debug.twilio = { error: e.message };
-      }
-    } else {
-      _debug.twilio = { skipped: 'missing env vars', has: { sid: !!env.TWILIO_ACCOUNT_SID, auth: !!env.TWILIO_AUTH_TOKEN, from: !!env.TWILIO_FROM, phone: !!env.NOTIFY_PHONE } };
-    }
-
-    return new Response(JSON.stringify({ ok: true, ref: refNumber, _debug }), { status: 200, headers: corsHeaders });
+    return new Response(JSON.stringify({ ok: true, ref: refNumber }), { status: 200, headers: corsHeaders });
 
   } catch (err) {
     console.error('[submit-quote] Fatal error:', err.message, err.stack);
-    return new Response(JSON.stringify({ ok: false, error: 'Server error', code: 'FATAL', detail: err.message }), { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ ok: false, error: 'Server error' }), { status: 500, headers: corsHeaders });
   }
 }
