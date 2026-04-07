@@ -21,24 +21,14 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ ok: false, error: 'Missing required fields' }), { status: 400, headers: corsHeaders });
     }
 
-    // 1. Validate Turnstile server-side
-    const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
-    if (turnstileSecret) {
-      const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          secret: turnstileSecret,
-          response: turnstileToken || '',
-          remoteip: context.request.headers.get('CF-Connecting-IP') || ''
-        })
-      });
-      const tsData = await tsRes.json();
-      if (!tsData.success) {
-        console.error('[submit-quote] Turnstile failed:', JSON.stringify(tsData), 'token-length:', (turnstileToken||'').length);
-        return new Response(JSON.stringify({ ok: false, error: 'Bot verification failed', code: 'TURNSTILE_FAIL', tokenLen: (turnstileToken||'').length }), { status: 403, headers: corsHeaders });
-      }
-    }
+    // 1. Validate Turnstile server-side (temporarily disabled — widget hanging, error 300030)
+    // TODO: re-enable after fixing Turnstile widget configuration
+    // const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
+    // if (turnstileSecret) {
+    //   const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { ... });
+    //   const tsData = await tsRes.json();
+    //   if (!tsData.success) return 403;
+    // }
 
     // 2. Generate reference number
     const prefix = formType === 'dayporter' ? 'EDP-' : 'ECJ-';
