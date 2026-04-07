@@ -560,7 +560,9 @@ async submit(){
   if(D._submitted)return;
   D._submitted=true;
   this.saveAll();
-  const token=document.querySelector('[name="cf-turnstile-response"]')?.value||(window.turnstile?turnstile.getResponse():'')||'';
+  let token=document.querySelector('[name="cf-turnstile-response"]')?.value||'';
+  if(!token){try{token=window.turnstile?turnstile.getResponse()||'':''}catch(e){token=''}}
+  if(!token&&window.turnstile){try{const c=document.querySelector('.cf-turnstile');if(c&&!c.querySelector('iframe')){token=await new Promise((res)=>{const t=setTimeout(()=>res(''),4000);turnstile.render(c,{sitekey:'0x4AAAAAAC0yqxn8GnsosDXq',theme:'dark',size:'compact',callback(tk){clearTimeout(t);res(tk)}})})}}catch(e){token=''}}
   document.getElementById('wizProg').style.display='none';
   document.getElementById('sBox').innerHTML=`<div style="text-align:center;padding:3rem 1rem"><div style="margin-bottom:1.2rem"><span class="submit-spinner"></span></div><h2 class="step-q">Sending your request, ${D.fn}...</h2><p class="step-sub">This will only take a moment.</p></div>`;
   document.querySelector('.wiz-nav').style.display='none';
