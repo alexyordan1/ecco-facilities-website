@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=5.1">
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <style>:root{--r:10px;--rl:16px}body{padding-top:72px}</style>
 </head>
 <body>
@@ -280,7 +280,6 @@ info:()=>`<h2 class="step-q">Let's start with you</h2>
   <div class="opt${D.contactPref==='Phone'?' sel':''}" role="button" tabindex="0" aria-pressed="${D.contactPref==='Phone'}" onclick="W.pick('contactPref','Phone',this)" style="padding:.7rem .5rem;font-size:.82rem">Phone</div>
   <div class="opt${D.contactPref==='Either'?' sel':''}" role="button" tabindex="0" aria-pressed="${D.contactPref==='Either'}" onclick="W.pick('contactPref','Either',this)" style="padding:.7rem .5rem;font-size:.82rem">Either</div>
   </div></div>
-  <div class="hp-field" aria-hidden="true" tabindex="-1"><label for="fWebsite">Website</label><input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off"></div>
   <p style="font-size:.76rem;color:rgba(255,255,255,.4);margin-top:.5rem;text-align:center">No spam, no aggressive follow-ups — just your proposal and a point of contact.</p>`,
 
 location:()=>`<h2 class="step-q">Almost there, ${D.fn}! Where is your facility?</h2>
@@ -347,7 +346,8 @@ summary:()=>{
   ${h}
   <div class="fg"><label for="fNotes">Additional Notes <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
   <textarea placeholder="Access instructions, special requirements, expectations..." id="fNotes" oninput="D.notes=this.value">${D.notes||''}</textarea></div>
-  <div style="display:flex;justify-content:center;margin-top:1rem"><div class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-theme="dark" data-size="compact"></div></div>`
+  <div class="hp-field" aria-hidden="true" tabindex="-1"><label for="fWebsite">Website</label><input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+  <div style="display:flex;justify-content:center;margin-top:1rem"><div class="cf-turnstile"></div></div>`
 }
 };
 
@@ -399,6 +399,7 @@ render(){
   const animClass=this.direction==='forward'?'slide-in-right':'slide-in-left';
   sBox.className=animClass;
   sBox.innerHTML=S[id]();
+  if(id==='review'&&window.turnstile){setTimeout(()=>{const c=sBox.querySelector('.cf-turnstile');if(c)turnstile.render(c,{sitekey:'0x4AAAAAAC0yqxn8GnsosDXq',theme:'dark',size:'compact'})},50)}
   setTimeout(()=>sBox.className='',400);
   setTimeout(()=>{sBox.style.justifyContent=sBox.scrollHeight<=sBox.clientHeight?'center':'flex-start'},20);
   // Re-calculate end time when returning to starttime step
