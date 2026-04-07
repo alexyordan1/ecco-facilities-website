@@ -180,7 +180,7 @@ const REQ={
   space:()=>!!D.space&&(D.space!=='Other'||D.spaceOther),
   hours:()=>!!D.hrs&&(D.hrs!=='Custom'||(/^\d+$/.test(D.customHrs)&&parseInt(D.customHrs)>0&&parseInt(D.customHrs)<=24)),
   starttime:()=>!!D.startTime,
-  days:()=>D.dpDaysArr&&D.dpDaysArr.length>0,
+  days:()=>D.__dpDaysArr&&D.__dpDaysArr.length>0,
   porters:()=>!!D.porters&&(D.porters!=='3+'||!!D.porterCount),
   areas:()=>D.dpAreas&&D.dpAreas.length>0,
   urgency:()=>!!D.urg,
@@ -232,7 +232,7 @@ days:()=>{
   <p class="step-sub">${D._fromJanitorial?"These are the days your porter will be on-site — this can be a different schedule than your cleaning crew.":"Select every day you need a porter present. Most clients choose Monday through Friday for consistent weekday coverage."}</p>
   <div class="preset-row"><button type="button" class="preset-btn" onclick="W.presetDays('weekdays')">Weekdays (M–F)</button><button type="button" class="preset-btn" onclick="W.presetDays('all')">Every Day</button></div>
   <div class="day-row" role="group" aria-label="Select coverage days">${DAYS.map(d=>{
-    const wasSel=(D.dpDaysArr||[]).includes(d);
+    const wasSel=(D.__dpDaysArr||[]).includes(d);
     return`<div class="day-btn${wasSel?' sel':''}" role="button" tabindex="0" aria-pressed="${wasSel}" aria-label="Select ${d}" onclick="W.pickDpDay(this)">${d}</div>`}).join('')}</div>
   <div id="dayV" class="day-count" aria-live="polite"></div>`
 },
@@ -310,7 +310,7 @@ summary:()=>{
     covRows+=`<div class="sr"><div class="sr-l">Hours</div><div class="sr-v">${hrsLabel}</div></div>`;
     covRows+=`<div class="sr"><div class="sr-l">Schedule</div><div class="sr-v">${D.startTime}${endTime?' → '+endTime:''}</div></div>`;
   }
-  if(D.dpDaysArr&&D.dpDaysArr.length)covRows+=`<div class="sr"><div class="sr-l">Days</div><div class="sr-v">${D.dpDaysArr.join(' / ')}</div></div>`;
+  if(D.__dpDaysArr&&D.__dpDaysArr.length)covRows+=`<div class="sr"><div class="sr-l">Days</div><div class="sr-v">${D.__dpDaysArr.join(' / ')}</div></div>`;
   if(D.porters)covRows+=`<div class="sr"><div class="sr-l">Porters</div><div class="sr-v">${D.porters==='notSure'?'Not Sure':(D.porters==='3+'&&D.porterCount?D.porterCount+' porters':D.porters)}</div></div>`;
   if(D.dpAreas&&D.dpAreas.length)covRows+=`<div class="sr"><div class="sr-l">Areas</div><div class="sr-v">${D.dpAreas.join(', ')}</div></div>`;
   if(D.areaOther)covRows+=`<div class="sr"><div class="sr-l">Other Areas</div><div class="sr-v">${D.areaOther}</div></div>`;
@@ -581,26 +581,26 @@ pickArea(v,el){
 presetDays(type){
   const weekdays=['Monday','Tuesday','Wednesday','Thursday','Friday'];
   const target=type==='weekdays'?weekdays:DAYS;
-  D.dpDaysArr=[...target];D.dpDays=target.join(' / ');
+  D._dpDaysArr=[...target];D.dpDays=target.join(' / ');
   document.querySelectorAll('.day-btn').forEach(b=>{b.classList.toggle('sel',target.includes(b.textContent.trim()))});
   const msg=document.getElementById('dayV');
   msg.className='day-count ok';msg.textContent=`✓ ${target.length} day${target.length>1?'s':''} selected`;
   this.clearErr();
 },
 pickDpDay(el){
-  if(!D.dpDaysArr)D.dpDaysArr=[];
+  if(!D._dpDaysArr)D._dpDaysArr=[];
   const day=el.textContent.trim();
   if(el.classList.contains('sel')){
     el.classList.remove('sel');
-    D.dpDaysArr=D.dpDaysArr.filter(d=>d!==day);
+    D._dpDaysArr=D._dpDaysArr.filter(d=>d!==day);
   }else{
     el.classList.add('sel');
-    D.dpDaysArr.push(day);
+    D._dpDaysArr.push(day);
   }
   const msg=document.getElementById('dayV');
-  if(D.dpDaysArr.length>0){
+  if(D._dpDaysArr.length>0){
     msg.className='day-count ok';
-    msg.textContent=`✓ ${D.dpDaysArr.length} day${D.dpDaysArr.length>1?'s':''} selected`;
+    msg.textContent=`✓ ${D._dpDaysArr.length} day${D._dpDaysArr.length>1?'s':''} selected`;
   }else{
     msg.className='day-count need';
     msg.textContent='Please select at least one day';
