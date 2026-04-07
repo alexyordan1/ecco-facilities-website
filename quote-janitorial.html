@@ -560,7 +560,7 @@ async submit(){
   if(D._submitted)return;
   D._submitted=true;
   this.saveAll();
-  const token=document.querySelector('[name="cf-turnstile-response"]')?.value||'';
+  const token=document.querySelector('[name="cf-turnstile-response"]')?.value||(window.turnstile?turnstile.getResponse():'')||'';
   document.getElementById('wizProg').style.display='none';
   document.getElementById('sBox').innerHTML=`<div style="text-align:center;padding:3rem 1rem"><div style="margin-bottom:1.2rem"><span class="submit-spinner"></span></div><h2 class="step-q">Sending your request, ${D.fn}...</h2><p class="step-sub">This will only take a moment.</p></div>`;
   document.querySelector('.wiz-nav').style.display='none';
@@ -572,7 +572,7 @@ async submit(){
       body:JSON.stringify({...payload,turnstileToken:token,formType:'janitorial'})
     });
     const data=await res.json();
-    if(!res.ok||!data.ok)throw new Error(data.error||'Submit failed');
+    if(!res.ok||!data.ok){console.error('Submit error:',res.status,JSON.stringify(data));throw new Error(data.error||'Submit failed')}
     const refNum=data.ref;
     localStorage.removeItem('ecco_quote_jan');
     sessionStorage.removeItem('ecco_partial_jan');

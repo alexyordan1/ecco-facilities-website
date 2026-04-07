@@ -35,7 +35,8 @@ export async function onRequestPost(context) {
       });
       const tsData = await tsRes.json();
       if (!tsData.success) {
-        return new Response(JSON.stringify({ ok: false, error: 'Bot verification failed' }), { status: 403, headers: corsHeaders });
+        console.error('[submit-quote] Turnstile failed:', JSON.stringify(tsData), 'token-length:', (turnstileToken||'').length);
+        return new Response(JSON.stringify({ ok: false, error: 'Bot verification failed', code: 'TURNSTILE_FAIL', tokenLen: (turnstileToken||'').length }), { status: 403, headers: corsHeaders });
       }
     }
 
@@ -52,21 +53,25 @@ export async function onRequestPost(context) {
     // 4. UPSERT into Neon
     const service = formType === 'dayporter' ? 'dayporter' : 'janitorial';
     if (env.NEON_DATABASE_URL) {
-      const sql = neon(env.NEON_DATABASE_URL);
-      await sql`
-        INSERT INTO leads (email, first_name, last_name, phone, company, service, status, form_data, ref_number, completed_at)
-        VALUES (${email}, ${firstName || null}, ${lastName || null}, ${phone || null}, ${company || null}, ${service}, 'completed', ${JSON.stringify(formData)}, ${refNumber}, NOW())
-        ON CONFLICT (email) DO UPDATE SET
-          first_name = EXCLUDED.first_name,
-          last_name = EXCLUDED.last_name,
-          phone = EXCLUDED.phone,
-          company = EXCLUDED.company,
-          service = EXCLUDED.service,
-          status = 'completed',
-          form_data = EXCLUDED.form_data,
-          ref_number = EXCLUDED.ref_number,
-          completed_at = NOW()
-      `;
+      try {
+        const sql = neon(env.NEON_DATABASE_URL);
+        await sql`
+          INSERT INTO leads (email, first_name, last_name, phone, company, service, status, form_data, ref_number, completed_at)
+          VALUES (${email}, ${firstName || null}, ${lastName || null}, ${phone || null}, ${company || null}, ${service}, 'completed', ${JSON.stringify(formData)}, ${refNumber}, NOW())
+          ON CONFLICT (email) DO UPDATE SET
+            first_name = EXCLUDED.first_name,
+            last_name = EXCLUDED.last_name,
+            phone = EXCLUDED.phone,
+            company = EXCLUDED.company,
+            service = EXCLUDED.service,
+            status = 'completed',
+            form_data = EXCLUDED.form_data,
+            ref_number = EXCLUDED.ref_number,
+            completed_at = NOW()
+        `;
+      } catch (dbErr) {
+        console.error('[submit-quote] Neon DB error:', dbErr.message);
+      }
     }
 
     // --- Non-blocking integrations (errors logged but don't fail the request) ---
@@ -198,7 +203,7 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ ok: true, ref: refNumber }), { status: 200, headers: corsHeaders });
 
   } catch (err) {
-    console.error('[submit-quote] Fatal error:', err.message);
-    return new Response(JSON.stringify({ ok: false, error: 'Server error' }), { status: 500, headers: corsHeaders });
+    console.error('[submit-quote] Fatal error:', err.message, err.stack);
+    return new Response(JSON.stringify({ ok: false, error: 'Server error', code: 'FATAL', detail: err.message }), { status: 500, headers: corsHeaders });
   }
 }
