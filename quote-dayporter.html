@@ -281,7 +281,6 @@ info:()=>`<h2 class="step-q">Let's start with you</h2>
   <div class="opt${D.contactPref==='Either'?' sel':''}" role="button" tabindex="0" aria-pressed="${D.contactPref==='Either'}" onclick="W.pick('contactPref','Either',this)" style="padding:.7rem .5rem;font-size:.82rem">Either</div>
   </div></div>
   <div class="hp-field" aria-hidden="true" tabindex="-1"><label for="fWebsite">Website</label><input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off"></div>
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-theme="dark" data-size="compact"></div>
   <p style="font-size:.76rem;color:rgba(255,255,255,.4);margin-top:.5rem;text-align:center">No spam, no aggressive follow-ups — just your proposal and a point of contact.</p>`,
 
 location:()=>`<h2 class="step-q">Almost there, ${D.fn}! Where is your facility?</h2>
@@ -347,7 +346,8 @@ summary:()=>{
   <p class="step-sub">Take a moment to confirm everything looks right. You can edit any section before submitting.</p>
   ${h}
   <div class="fg"><label for="fNotes">Additional Notes <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
-  <textarea placeholder="Access instructions, special requirements, expectations..." id="fNotes" oninput="D.notes=this.value">${D.notes||''}</textarea></div>`
+  <textarea placeholder="Access instructions, special requirements, expectations..." id="fNotes" oninput="D.notes=this.value">${D.notes||''}</textarea></div>
+  <div style="display:flex;justify-content:center;margin-top:1rem"><div class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-theme="dark" data-size="compact"></div></div>`
 }
 };
 
