@@ -351,7 +351,7 @@ render(){
   const animClass=this.direction==='forward'?'slide-in-right':'slide-in-left';
   sBox.className=animClass;
   sBox.innerHTML=S[id]();
-  if(id==='review'&&window.turnstile){setTimeout(()=>{const c=sBox.querySelector('.cf-turnstile');if(c)turnstile.render(c,{sitekey:'0x4AAAAAAC0yqxn8GnsosDXq',theme:'dark',size:'compact'})},50)}
+  if(id==='review'){const _ts=()=>{const c=sBox.querySelector('.cf-turnstile');if(!c)return;if(window.turnstile)turnstile.render(c,{sitekey:'0x4AAAAAAC0yqxn8GnsosDXq',theme:'dark',size:'compact'});else setTimeout(_ts,200)};setTimeout(_ts,50)}
   setTimeout(()=>sBox.className='',400);
   setTimeout(()=>{sBox.style.justifyContent=sBox.scrollHeight<=sBox.clientHeight?'center':'flex-start'},20);
   // Auto-skip confirmation-only steps
