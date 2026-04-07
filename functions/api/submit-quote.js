@@ -28,10 +28,31 @@ export async function onRequestPost(context) {
     const prefix = formType === 'dayporter' ? 'EDP-' : 'ECJ-';
     const refNumber = prefix + Date.now().toString(36).toUpperCase();
 
-    // 3. Build form_data JSONB (strip internal fields)
+    // 3. Build form_data with readable labels
+    const KEY_MAP = {
+      fn: 'first_name', ln: 'last_name', em: 'email', ph: 'phone',
+      co: 'company', addr: 'address', referral: 'how_heard', notes: 'notes',
+      contactPref: 'contact_preference', formType: 'form_type',
+      // Shared
+      space: 'space_type', spaceOther: 'space_type_custom', urg: 'urgency',
+      // Janitorial
+      size: 'space_size', exactSize: 'exact_sqft',
+      janDays: 'cleaning_days', addDayPorter: 'also_wants_dayporter',
+      // Day Porter
+      hrs: 'hours_per_day', customHrs: 'custom_hours',
+      startTime: 'start_time', dpDays: 'coverage_days',
+      porters: 'num_porters', porterCount: 'porter_count_custom',
+      dpAreas: 'areas_covered', areaOther: 'area_custom',
+      addJanitorial: 'also_wants_janitorial',
+    };
+    const URGENCY_MAP = {
+      asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'
+    };
     const formData = {};
     for (const [k, v] of Object.entries(body)) {
-      if (!k.startsWith('_') && k !== 'turnstileToken') formData[k] = v;
+      if (k.startsWith('_') || k === 'turnstileToken') continue;
+      const label = KEY_MAP[k] || k;
+      formData[label] = (k === 'urg' && URGENCY_MAP[v]) ? URGENCY_MAP[v] : v;
     }
 
     const service = formType === 'dayporter' ? 'dayporter' : 'janitorial';
