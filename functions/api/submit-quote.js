@@ -181,7 +181,7 @@ export async function onRequestPost(context) {
             body: JSON.stringify({
               properties: {
                 dealname: dealName,
-                dealstage: 'appointmentscheduled',
+                dealstage: '3441379002',
                 pipeline: 'default'
               }
             })
