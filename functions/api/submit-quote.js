@@ -127,7 +127,81 @@ export async function onRequestPost(context) {
       }
     }
 
-    // 6. Postmark: confirmation email to client
+    // 6. HubSpot: create/update contact + create deal
+    if (env.HUBSPOT_ACCESS_TOKEN) {
+      try {
+        const hsHeaders = {
+          'Authorization': `Bearer ${env.HUBSPOT_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        };
+
+        // Search for existing contact by email
+        const searchRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
+          method: 'POST', headers: hsHeaders,
+          body: JSON.stringify({
+            filterGroups: [{ filters: [{ propertyName: 'email', operator: 'EQ', value: email }] }]
+          })
+        });
+        const searchData = await searchRes.json();
+        let hsContactId = searchData?.results?.[0]?.id;
+
+        const contactProps = {
+          email,
+          firstname: firstName || '',
+          lastname: lastName || '',
+          phone: phone || '',
+          company: company || '',
+          ecco_service_type: service,
+          ecco_ref_number: refNumber,
+          ecco_space_type: formData.space_type || '',
+          ecco_urgency: formData.urgency || '',
+          ecco_lead_status: 'completed',
+          ecco_form_data: JSON.stringify(formData)
+        };
+
+        if (hsContactId) {
+          await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${hsContactId}`, {
+            method: 'PATCH', headers: hsHeaders,
+            body: JSON.stringify({ properties: contactProps })
+          });
+        } else {
+          const createRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+            method: 'POST', headers: hsHeaders,
+            body: JSON.stringify({ properties: contactProps })
+          });
+          const createData = await createRes.json();
+          hsContactId = createData?.id;
+        }
+
+        // Create a deal for pipeline tracking
+        if (hsContactId) {
+          const dealName = `${company || firstName} - ${service === 'dayporter' ? 'Day Porter' : 'Janitorial'} (${refNumber})`;
+          const dealRes = await fetch('https://api.hubapi.com/crm/v3/objects/deals', {
+            method: 'POST', headers: hsHeaders,
+            body: JSON.stringify({
+              properties: {
+                dealname: dealName,
+                dealstage: 'appointmentscheduled',
+                pipeline: 'default'
+              }
+            })
+          });
+          const dealData = await dealRes.json();
+          const dealId = dealData?.id;
+
+          if (dealId) {
+            await fetch(
+              `https://api.hubapi.com/crm/v3/objects/deals/${dealId}/associations/contacts/${hsContactId}/deal_to_contact/3`,
+              { method: 'PUT', headers: hsHeaders }
+            );
+          }
+        }
+      } catch (e) {
+        console.error('[submit-quote] HubSpot error:', e.message);
+      }
+    }
+
+    // 7. Postmark: confirmation email to client
     if (env.POSTMARK_API_KEY) {
       try {
         await fetch('https://api.postmarkapp.com/email/withTemplate', {
@@ -173,8 +247,13 @@ export async function onRequestPost(context) {
               company: company || 'N/A',
               service: service === 'dayporter' ? 'Day Porter Services' : 'Janitorial Services',
               refNumber,
-              urgency: body.urg || 'Standard',
-              formData: JSON.stringify(formData, null, 2)
+              urgency: formData.urgency || 'Standard',
+              fields: Object.entries(formData)
+                .filter(([_, v]) => v != null && v !== '')
+                .map(([key, value]) => ({
+                  label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+                  value: Array.isArray(value) ? value.join(', ') : String(value)
+                }))
             }
           })
         });

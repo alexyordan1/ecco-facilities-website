@@ -112,6 +112,50 @@ export async function onRequestPost(context) {
       }
     }
 
+    // 3. HubSpot: sync partial lead as contact
+    if (context.env.HUBSPOT_ACCESS_TOKEN) {
+      try {
+        const hsHeaders = {
+          'Authorization': `Bearer ${context.env.HUBSPOT_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        };
+
+        const searchRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
+          method: 'POST', headers: hsHeaders,
+          body: JSON.stringify({
+            filterGroups: [{ filters: [{ propertyName: 'email', operator: 'EQ', value: email }] }],
+            properties: ['ecco_lead_status']
+          })
+        });
+        const searchData = await searchRes.json();
+        const existing = searchData?.results?.[0];
+
+        const contactProps = {
+          email,
+          firstname: firstName || '',
+          phone: phone || '',
+          ecco_lead_status: 'partial'
+        };
+
+        if (existing?.id) {
+          // Don't downgrade completed contacts back to partial
+          if (existing.properties?.ecco_lead_status !== 'completed') {
+            await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${existing.id}`, {
+              method: 'PATCH', headers: hsHeaders,
+              body: JSON.stringify({ properties: contactProps })
+            });
+          }
+        } else {
+          await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+            method: 'POST', headers: hsHeaders,
+            body: JSON.stringify({ properties: contactProps })
+          });
+        }
+      } catch (e) {
+        console.error('[capture-partial] HubSpot error:', e.message);
+      }
+    }
+
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error('[capture-partial] Unexpected error:', err.message);
