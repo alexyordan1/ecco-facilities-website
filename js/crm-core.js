@@ -93,6 +93,7 @@ const CRM = {
       if (!refreshed) { this.clearSession(); window.location.href = '/crm/login.html'; return false; }
     }
 
+    if (!this._notifRegistered) this.initNotifications();
     return true;
   },
 
@@ -275,6 +276,85 @@ const CRM = {
 
   stopPolling() {
     if (this._pollInterval) { clearInterval(this._pollInterval); this._pollInterval = null; }
+  },
+
+  /* ---- Notifications ---- */
+  _notifRegistered: false,
+
+  async initNotifications() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+    /* Register service worker */
+    try {
+      var reg = await navigator.serviceWorker.register('/crm/sw.js');
+      this._swReg = reg;
+    } catch (e) { return; }
+
+    /* Check/request permission */
+    if (Notification.permission === 'default') {
+      /* Show a non-intrusive prompt */
+      this._showNotifPrompt();
+    } else if (Notification.permission === 'granted') {
+      this._notifRegistered = true;
+      this._startNewLeadCheck();
+    }
+  },
+
+  _showNotifPrompt() {
+    var self = this;
+
+    /* Don't show again if dismissed in last 7 days */
+    var dismissed = parseInt(localStorage.getItem('crm_notif_dismissed') || '0');
+    if (Date.now() - dismissed < 7 * 86400000) return;
+
+    var banner = document.createElement('div');
+    banner.className = 'crm-notif-banner';
+    banner.innerHTML = '<span>Get notified when new leads arrive?</span>' +
+      '<button class="crm-btn-sm" id="notifAllow">Enable</button>' +
+      '<button class="crm-btn-sm crm-btn-secondary" id="notifDismiss">Later</button>';
+    document.body.appendChild(banner);
+
+    banner.querySelector('#notifAllow').addEventListener('click', async function() {
+      var perm = await Notification.requestPermission();
+      banner.remove();
+      if (perm === 'granted') {
+        self._notifRegistered = true;
+        self._startNewLeadCheck();
+      }
+    });
+
+    banner.querySelector('#notifDismiss').addEventListener('click', function() {
+      banner.remove();
+      localStorage.setItem('crm_notif_dismissed', Date.now());
+    });
+  },
+
+  _lastLeadCount: null,
+
+  _startNewLeadCheck() {
+    var self = this;
+    /* Check every 60 seconds for new leads */
+    setInterval(async function() {
+      if (document.hidden) return;
+      try {
+        var res = await self.fetch('/crm-leads?per_page=1&sort=created_at&order=desc');
+        if (!res || !res.ok) return;
+        var total = res.data.total;
+
+        if (self._lastLeadCount !== null && total > self._lastLeadCount) {
+          var diff = total - self._lastLeadCount;
+          var lead = res.data.leads[0];
+          var name = lead ? ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() : '';
+
+          new Notification('New Lead' + (diff > 1 ? 's' : ''), {
+            body: (diff > 1 ? diff + ' new leads' : name || 'New lead received'),
+            icon: '/images/favicon-32.png',
+            tag: 'new-lead'
+          });
+        }
+        self._lastLeadCount = total;
+      } catch (e) {}
+    }, 60000);
   },
 
   /* ---- Badge helpers ---- */

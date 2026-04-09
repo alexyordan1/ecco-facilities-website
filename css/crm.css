@@ -2545,3 +2545,42 @@ select.crm-input {
   background: var(--cream);
   color: var(--td);
 }
+
+/* ============================================
+   NOTIFICATION PROMPT
+   ============================================ */
+
+.crm-notif-banner {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--wh);
+  border: 1px solid var(--bll);
+  border-radius: var(--r);
+  box-shadow: var(--shlg);
+  padding: .75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-size: .85rem;
+  color: var(--td);
+  z-index: 200;
+  animation: crm-fadeIn .3s var(--ease);
+  max-width: 90vw;
+}
+
+.crm-notif-banner span {
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .crm-notif-banner {
+    bottom: 4rem;
+    left: .5rem;
+    right: .5rem;
+    transform: none;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
