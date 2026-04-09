@@ -352,3 +352,22 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
     }, 800);
   }, 5000);
 })();
+
+/* ============================================================
+   HERO TEST — Mobile word rotation (built from scratch)
+   ============================================================ */
+(function() {
+  var word = document.querySelector('.hero-test-word');
+  if (!word || window.innerWidth > 900) return;
+  var list = ['health.', 'future.', 'planet.', 'people.'];
+  var i = 0;
+  word.style.transition = 'opacity .4s ease';
+  setInterval(function() {
+    word.style.opacity = '0';
+    setTimeout(function() {
+      i = (i + 1) % list.length;
+      word.textContent = list[i];
+      word.style.opacity = '1';
+    }, 400);
+  }, 3000);
+})();

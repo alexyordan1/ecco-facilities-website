@@ -317,6 +317,26 @@ textarea:focus-visible {
   50% { transform: rotate(45deg) translateY(6px); }
 }
 
+/* Hero test title — mobile only, full desktop features */
+.hero-test-ttl { display: none; }
+.hero-test-word {
+  font-style: italic;
+  background: linear-gradient(90deg, #8FD48C, #5BA8E6, #6BD568, #8FD48C);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+@media (max-width: 900px) {
+  .hero-test-ttl {
+    display: block; font-family: var(--fd); font-weight: 500;
+    font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.1;
+    color: var(--wh); text-align: center; margin-bottom: 1.5rem;
+    padding: .8rem; border: 1px dashed rgba(255,255,255,.2); border-radius: 12px;
+  }
+}
+
 /* Hero gradient border bottom */
 .hero::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
