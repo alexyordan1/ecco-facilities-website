@@ -102,10 +102,13 @@
       '</div>';
     }
 
+    var svcLabel = lead.service === 'dayporter' ? 'Day Porter' : 'Janitorial';
+    var emailSubject = encodeURIComponent('Ecco Facilities — ' + svcLabel + ' Services Follow-up');
+    var emailBody = encodeURIComponent('Hi ' + (lead.first_name || 'there') + ',\n\nThank you for your interest in our ' + svcLabel.toLowerCase() + ' services. I wanted to follow up on your recent inquiry' + (lead.ref_number ? ' (Ref: ' + lead.ref_number + ')' : '') + '.\n\nI\'d love to discuss how we can help ' + (company ? company + ' ' : '') + 'with your cleaning needs. Would you have time for a quick call this week?\n\nBest regards,\nEcco Facilities Team\n(212) 555-0100\neccofacilities.com');
+
     var actions = '';
-    if (phone) actions += '<a href="tel:' + CRM.escapeHtml(phone) + '" class="crm-action-btn">\uD83D\uDCDE Call</a>';
-    if (email) actions += '<a href="mailto:' + CRM.escapeHtml(email) + '" class="crm-action-btn">\u2709\uFE0F Email</a>';
-    if (phone) actions += '<a href="https://wa.me/' + phone.replace(/\D/g, '') + '" target="_blank" rel="noopener" class="crm-action-btn">\uD83D\uDCAC WhatsApp</a>';
+    if (phone) actions += '<button class="crm-action-btn" data-action="call" data-phone="' + CRM.escapeHtml(phone) + '">\uD83D\uDCDE Call</button>';
+    if (email) actions += '<a href="mailto:' + CRM.escapeHtml(email) + '?subject=' + emailSubject + '&body=' + emailBody + '" class="crm-action-btn" data-action="email">\u2709\uFE0F Email</a>';
 
     return '<div class="crm-card">' +
       '<div class="crm-card-header">' +
@@ -249,6 +252,22 @@
   }
 
   function bindEvents() {
+    /* Communication action buttons */
+    var actionBtns = detailEl.querySelectorAll('[data-action]');
+    actionBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        var action = btn.dataset.action;
+        if (action === 'call') {
+          /* Open tel: link then log */
+          window.location.href = 'tel:' + btn.dataset.phone;
+          logCommunication('call', 'Call initiated to ' + btn.dataset.phone);
+        } else if (action === 'email') {
+          /* mailto link opens naturally via <a>, just log */
+          logCommunication('email', 'Email sent to ' + (lead.email || ''));
+        }
+      });
+    });
+
     /* Stage change */
     var stageSelect = document.getElementById('stageSelect');
     var lostWrap = document.getElementById('lostReasonWrap');
@@ -376,6 +395,18 @@
     } catch (err) {
       /* Silently fail — the UI already updated optimistically */
     }
+  }
+
+  async function logCommunication(type, description) {
+    try {
+      await CRM.fetch('/crm-notes', {
+        method: 'POST',
+        body: { lead_id: parseInt(leadId), note: '[' + type.toUpperCase() + '] ' + description }
+      });
+      /* Also update last_contacted_at */
+      await saveField({ id: leadId, last_contacted_at: new Date().toISOString() });
+      reloadActivities();
+    } catch (err) { /* silent */ }
   }
 
   async function reloadActivities() {
