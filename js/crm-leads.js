@@ -543,7 +543,7 @@
     preview.innerHTML =
       '<h3>CSV Import Preview</h3>' +
       '<table><thead>' + thHtml + '</thead><tbody>' + tbHtml + '</tbody></table>' +
-      (dataRows.length > 5 ? '<p style="margin-top:.5rem;font-size:.78rem;color:var(--tm)">Showing 5 of ' + dataRows.length + ' rows</p>' : '') +
+      (dataRows.length > 5 ? '<p class="crm-import-hint">Showing 5 of ' + dataRows.length + ' rows</p>' : '') +
       '<div class="crm-import-actions">' +
         '<button id="confirmImport" class="crm-btn-sm">Import ' + totalLabel + '</button>' +
         '<button id="cancelImport" class="crm-btn-sm crm-btn-secondary">Cancel</button>' +
@@ -572,7 +572,7 @@
         } else {
           btn.disabled = false;
           btn.textContent = 'Retry Import';
-          preview.insertAdjacentHTML('beforeend', '<p style="color:var(--red);font-size:.82rem;margin-top:.5rem">' + CRM.escapeHtml((result && result.error) || 'Import failed') + '</p>');
+          preview.insertAdjacentHTML('beforeend', '<p class="crm-import-error">' + CRM.escapeHtml((result && result.error) || 'Import failed') + '</p>');
         }
       } catch (err) {
         btn.disabled = false;

@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/crm.css?v=4.0">
+  <link rel="stylesheet" href="/css/crm.css?v=4.1">
 </head>
 <body>
   <div id="app" class="crm-shell">
@@ -59,12 +59,12 @@
             <div class="crm-card-header"><h2 class="crm-card-title">Preferences</h2></div>
             <div class="crm-form-group">
               <label class="crm-label">Stale Lead Threshold (days)</label>
-              <input type="number" id="staleThreshold" class="crm-input" value="7" min="1" max="90" style="max-width:120px">
+              <input type="number" id="staleThreshold" class="crm-input" value="7" min="1" max="90" class="crm-input-narrow">
               <div class="crm-settings-hint">Leads older than this are flagged as stale</div>
             </div>
             <div class="crm-form-group">
               <label class="crm-label">Auto-refresh Interval (seconds)</label>
-              <input type="number" id="refreshInterval" class="crm-input" value="45" min="10" max="300" style="max-width:120px">
+              <input type="number" id="refreshInterval" class="crm-input" value="45" min="10" max="300" class="crm-input-narrow">
               <div class="crm-settings-hint">How often lead lists and pipeline refresh</div>
             </div>
             <button id="savePrefsBtn" class="crm-btn">Save Preferences</button>
@@ -89,8 +89,8 @@
       </div>
     </div>
   </div>
-  <script src="/js/crm-core.js?v=4.0"></script>
-  <script src="/js/crm-settings.js?v=1.0"></script>
-  <script src="/js/crm-ai.js?v=4.0"></script>
+  <script src="/js/crm-core.js?v=4.1"></script>
+  <script src="/js/crm-settings.js?v=4.1"></script>
+  <script src="/js/crm-ai.js?v=4.1"></script>
 </body>
 </html>
