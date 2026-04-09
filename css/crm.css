@@ -2498,3 +2498,50 @@ select.crm-input {
     font-size: .78rem;
   }
 }
+
+/* ============================================
+   EMAIL TEMPLATE DROPDOWN
+   ============================================ */
+
+.crm-email-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.crm-email-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--wh);
+  border: 1px solid var(--bll);
+  border-radius: var(--r);
+  box-shadow: var(--shlg);
+  padding: .35rem;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: all .2s var(--ease);
+  z-index: 20;
+}
+
+.crm-email-menu.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.crm-email-option {
+  display: block;
+  padding: .5rem .75rem;
+  font-size: .85rem;
+  color: var(--tb);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background .15s;
+}
+
+.crm-email-option:hover {
+  background: var(--cream);
+  color: var(--td);
+}

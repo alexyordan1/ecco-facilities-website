@@ -92,6 +92,114 @@
     bindEvents(allTags || []);
   }
 
+  function buildMailto(template, lead, email, company, svcLabel) {
+    var name = lead.first_name || 'there';
+    var ref = lead.ref_number ? ' (Ref: ' + lead.ref_number + ')' : '';
+    var companyText = company ? company + ' ' : '';
+    var subjects = {
+      intro: 'Ecco Facilities \u2014 ' + svcLabel + ' Services for ' + (company || 'Your Business'),
+      followup: 'Following Up \u2014 ' + svcLabel + ' Services' + ref,
+      proposal: 'Your ' + svcLabel + ' Proposal from Ecco Facilities' + ref,
+      thankyou: 'Thank You \u2014 Ecco Facilities'
+    };
+    var bodies = {
+      intro: 'Hi ' + name + ',\n\nThank you for reaching out to Ecco Facilities! I\'d love to learn more about your ' + svcLabel.toLowerCase() + ' needs at ' + companyText + 'and show you how we can help.\n\nWould you have 15 minutes for a quick call this week? I can walk you through our services and provide a customized quote.\n\nBest regards,\nEcco Facilities Team\neccofacilities.com',
+      followup: 'Hi ' + name + ',\n\nI wanted to follow up on your recent inquiry about our ' + svcLabel.toLowerCase() + ' services' + ref + '. Have you had a chance to review our options?\n\nI\'m happy to answer any questions or schedule a site visit at your convenience. We\'re currently offering complimentary assessments for new clients.\n\nLooking forward to hearing from you!\n\nBest,\nEcco Facilities Team',
+      proposal: 'Hi ' + name + ',\n\nI\'m pleased to send you our ' + svcLabel.toLowerCase() + ' proposal for ' + companyText + ref + '. Please find the details below.\n\nOur proposal includes:\n- Customized cleaning schedule\n- Eco-certified products (safe for people, pets, and planet)\n- Dedicated team assignment\n- Quality assurance inspections\n\nI\'d love to walk you through the details. Would you be available for a brief call?\n\nBest regards,\nEcco Facilities Team',
+      thankyou: 'Hi ' + name + ',\n\nThank you for choosing Ecco Facilities for your ' + svcLabel.toLowerCase() + ' needs! We\'re excited to partner with ' + companyText + 'and committed to exceeding your expectations.\n\nYour dedicated team will begin on the agreed start date. If you have any questions, don\'t hesitate to reach out.\n\nWelcome to the Ecco family!\n\nWarm regards,\nEcco Facilities Team'
+    };
+    return 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subjects[template] || '') + '&body=' + encodeURIComponent(bodies[template] || '');
+  }
+
+  function generateProposal() {
+    var name = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() || 'Client';
+    var svcLabel = lead.service === 'dayporter' ? 'Day Porter' : 'Janitorial';
+    var company = lead.company || '';
+    var ref = lead.ref_number || '';
+    var date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    var value = lead.estimated_value ? '$' + parseFloat(lead.estimated_value).toLocaleString() : 'To be determined';
+
+    var fd = lead.form_data || {};
+    var address = fd.address || '';
+    var spaceType = fd.space_type || '';
+    var spaceSize = fd.space_size || fd.exact_sqft || '';
+    var cleaningDays = fd.cleaning_days || fd.coverage_days || '';
+
+    var html = '<!DOCTYPE html><html><head>' +
+      '<meta charset="UTF-8">' +
+      '<title>Proposal \u2014 ' + CRM.escapeHtml(company || name) + '</title>' +
+      '<style>' +
+        'body { font-family: "DM Sans", Arial, sans-serif; color: #1A1E2C; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 2rem; }' +
+        '.header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0B1D38; padding-bottom: 1.5rem; margin-bottom: 2rem; }' +
+        '.logo { font-size: 1.5rem; font-weight: 700; color: #0B1D38; }' +
+        '.logo small { display: block; font-size: .7rem; font-weight: 400; color: #6B7A8D; letter-spacing: .1em; text-transform: uppercase; }' +
+        '.meta { text-align: right; font-size: .85rem; color: #6B7A8D; }' +
+        'h1 { font-size: 1.8rem; color: #0B1D38; margin: 0 0 .5rem; }' +
+        'h2 { font-size: 1.1rem; color: #0B1D38; border-bottom: 1px solid #DFE4EC; padding-bottom: .5rem; margin-top: 2rem; }' +
+        '.client-info { background: #FAFBFC; border: 1px solid #EDF0F5; border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; }' +
+        '.client-info table { width: 100%; border-collapse: collapse; }' +
+        '.client-info td { padding: .35rem .5rem; font-size: .9rem; }' +
+        '.client-info td:first-child { font-weight: 600; color: #6B7A8D; width: 140px; }' +
+        '.services { margin: 1.5rem 0; }' +
+        '.service-item { display: flex; justify-content: space-between; padding: .6rem 0; border-bottom: 1px solid #EDF0F5; }' +
+        '.service-item:last-child { border-bottom: none; font-weight: 700; font-size: 1.1rem; border-top: 2px solid #0B1D38; padding-top: .8rem; margin-top: .5rem; }' +
+        '.features { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin: 1rem 0; }' +
+        '.feature { padding: .5rem .75rem; background: #FAFBFC; border-radius: 6px; font-size: .85rem; }' +
+        '.feature::before { content: "\\2713 "; color: #2D7A32; font-weight: 700; }' +
+        '.footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #DFE4EC; text-align: center; font-size: .82rem; color: #6B7A8D; }' +
+        '.cta { background: #0B1D38; color: white; padding: 1rem 2rem; border-radius: 8px; text-align: center; margin: 2rem 0; font-size: 1rem; }' +
+        '.cta a { color: white; }' +
+        '@media print { body { padding: 1rem; } }' +
+      '</style>' +
+      '</head><body>' +
+      '<div class="header">' +
+        '<div class="logo">Ecco Facilities<small>Cleaning the Future. Today.</small></div>' +
+        '<div class="meta">Proposal ' + CRM.escapeHtml(ref) + '<br>' + date + '</div>' +
+      '</div>' +
+      '<h1>' + CRM.escapeHtml(svcLabel) + ' Services Proposal</h1>' +
+      '<p>Prepared for ' + CRM.escapeHtml(name) + (company ? ' at ' + CRM.escapeHtml(company) : '') + '</p>' +
+      '<div class="client-info"><table>' +
+        (company ? '<tr><td>Company</td><td>' + CRM.escapeHtml(company) + '</td></tr>' : '') +
+        (address ? '<tr><td>Location</td><td>' + CRM.escapeHtml(address) + '</td></tr>' : '') +
+        (spaceType ? '<tr><td>Space Type</td><td>' + CRM.escapeHtml(spaceType) + '</td></tr>' : '') +
+        (spaceSize ? '<tr><td>Space Size</td><td>' + CRM.escapeHtml(spaceSize) + '</td></tr>' : '') +
+        (cleaningDays ? '<tr><td>Schedule</td><td>' + CRM.escapeHtml(cleaningDays) + '</td></tr>' : '') +
+        '<tr><td>Service</td><td>' + CRM.escapeHtml(svcLabel) + '</td></tr>' +
+      '</table></div>' +
+      '<h2>What\'s Included</h2>' +
+      '<div class="features">' +
+        '<div class="feature">100% Eco-Certified Products</div>' +
+        '<div class="feature">Dedicated Cleaning Team</div>' +
+        '<div class="feature">Quality Assurance Inspections</div>' +
+        '<div class="feature">Flexible Scheduling</div>' +
+        '<div class="feature">24/7 Emergency Support</div>' +
+        '<div class="feature">Monthly Performance Reports</div>' +
+        '<div class="feature">Trained & Background-Checked Staff</div>' +
+        '<div class="feature">Green Seal Certified</div>' +
+      '</div>' +
+      '<h2>Investment</h2>' +
+      '<div class="services">' +
+        '<div class="service-item"><span>' + CRM.escapeHtml(svcLabel) + ' Services</span><span>' + value + '/month</span></div>' +
+        '<div class="service-item"><span>Setup & Equipment</span><span>Included</span></div>' +
+        '<div class="service-item"><span>Quality Inspections</span><span>Included</span></div>' +
+        '<div class="service-item"><span>Estimated Monthly Total</span><span>' + value + '</span></div>' +
+      '</div>' +
+      '<div class="cta">Ready to get started? Call us at <a href="tel:2125550100">(212) 555-0100</a> or email <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a></div>' +
+      '<h2>Why Ecco Facilities?</h2>' +
+      '<p>With 12+ years serving NYC businesses and 200+ satisfied clients, Ecco Facilities delivers premium cleaning services with a commitment to sustainability. Our eco-certified products are safe for your people, your pets, and the planet.</p>' +
+      '<div class="footer">' +
+        '<strong>Ecco Facilities LLC</strong><br>' +
+        'eccofacilities.com &bull; info@eccofacilities.com &bull; (212) 555-0100<br>' +
+        'This proposal is valid for 30 days from the date above.' +
+      '</div>' +
+      '</body></html>';
+
+    var win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    setTimeout(function() { win.print(); }, 500);
+  }
+
   function renderContactCard(lead, name, email, phone, company, tags) {
     var firstName = lead.first_name || '';
     var lastName = lead.last_name || '';
@@ -118,12 +226,21 @@
     }
 
     var svcLabel = lead.service === 'dayporter' ? 'Day Porter' : 'Janitorial';
-    var emailSubject = encodeURIComponent('Ecco Facilities \u2014 ' + svcLabel + ' Services Follow-up');
-    var emailBody = encodeURIComponent('Hi ' + (lead.first_name || 'there') + ',\n\nThank you for your interest in our ' + svcLabel.toLowerCase() + ' services. I wanted to follow up on your recent inquiry' + (lead.ref_number ? ' (Ref: ' + lead.ref_number + ')' : '') + '.\n\nI\'d love to discuss how we can help ' + (company ? company + ' ' : '') + 'with your cleaning needs. Would you have time for a quick call this week?\n\nBest regards,\nEcco Facilities Team\n(212) 555-0100\neccofacilities.com');
 
     var actions = '';
     if (phone) actions += '<button class="crm-action-btn" data-action="call" data-phone="' + CRM.escapeHtml(phone) + '">\uD83D\uDCDE Call</button>';
-    if (email) actions += '<a href="mailto:' + CRM.escapeHtml(email) + '?subject=' + emailSubject + '&body=' + emailBody + '" class="crm-action-btn" data-action="email">\u2709\uFE0F Email</a>';
+    if (email) {
+      actions += '<div class="crm-email-dropdown">' +
+        '<button class="crm-action-btn" id="emailTemplateBtn">\u2709\uFE0F Email \u25BE</button>' +
+        '<div class="crm-email-menu" id="emailMenu">' +
+          '<a href="' + buildMailto('intro', lead, email, company, svcLabel) + '" class="crm-email-option" data-action="email" data-template="intro">Introduction</a>' +
+          '<a href="' + buildMailto('followup', lead, email, company, svcLabel) + '" class="crm-email-option" data-action="email" data-template="followup">Follow-up</a>' +
+          '<a href="' + buildMailto('proposal', lead, email, company, svcLabel) + '" class="crm-email-option" data-action="email" data-template="proposal">Proposal Sent</a>' +
+          '<a href="' + buildMailto('thankyou', lead, email, company, svcLabel) + '" class="crm-email-option" data-action="email" data-template="thankyou">Thank You</a>' +
+        '</div>' +
+      '</div>';
+    }
+    actions += '<button class="crm-action-btn" id="generateProposal">\uD83D\uDCC4 Proposal</button>';
 
     return '<div class="crm-card">' +
       '<div class="crm-card-header">' +
@@ -327,15 +444,37 @@
       btn.addEventListener('click', function(e) {
         var action = btn.dataset.action;
         if (action === 'call') {
-          /* Open tel: link then log */
           window.location.href = 'tel:' + btn.dataset.phone;
           logCommunication('call', 'Call initiated to ' + btn.dataset.phone);
         } else if (action === 'email') {
-          /* mailto link opens naturally via <a>, just log */
-          logCommunication('email', 'Email sent to ' + (lead.email || ''));
+          var tpl = btn.dataset.template || 'general';
+          logCommunication('email', 'Email (' + tpl + ') sent to ' + (lead.email || ''));
         }
       });
     });
+
+    /* Email template dropdown toggle */
+    var emailBtn = detailEl.querySelector('#emailTemplateBtn');
+    var emailMenu = detailEl.querySelector('#emailMenu');
+    if (emailBtn && emailMenu) {
+      emailBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        emailMenu.classList.toggle('open');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (emailMenu.classList.contains('open') && !emailBtn.contains(e.target) && !emailMenu.contains(e.target)) {
+          emailMenu.classList.remove('open');
+        }
+      });
+    }
+
+    /* Proposal PDF generator */
+    var proposalBtn = detailEl.querySelector('#generateProposal');
+    if (proposalBtn) {
+      proposalBtn.addEventListener('click', generateProposal);
+    }
 
     /* Inline editing */
     detailEl.querySelectorAll('.crm-editable').forEach(function(el) {
