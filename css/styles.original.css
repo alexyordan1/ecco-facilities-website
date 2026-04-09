@@ -273,18 +273,19 @@ textarea:focus-visible {
   100% { background-position: 200% center; }
 }
 
-/* Hero morph effect */
+/* Hero morph — desktop only */
 .hero-morph-wrap {
   display: inline-block; position: relative;
   width: 2.6em; text-align: left; vertical-align: baseline;
-}
-@media (max-width: 900px) {
-  .hero-morph-wrap { width: auto; display: inline; }
 }
 .hero-morph {
   display: inline-block;
   opacity: 1;
   transition: opacity .4s ease;
+}
+@media (max-width: 900px) {
+  .hero-morph-wrap { width: auto; display: inline; position: static; }
+  .hero-morph { display: inline; transition: none; opacity: 1 !important; }
 }
 
 /* Hero badge — rotating social proof */
