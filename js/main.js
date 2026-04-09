@@ -316,7 +316,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    ============================================================ */
 (function initHeroMorph() {
   var el = document.querySelector('.hero-morph');
-  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 900) return;
   var words = ['health.', 'future.', 'planet.'];
   var idx = 0;
   function cycle() {
@@ -335,7 +335,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    ============================================================ */
 (function initBadgeRotate() {
   var el = document.querySelector('.hero-badge-text');
-  if (!el) return;
+  if (!el || window.innerWidth < 900) return;
   var msgs = [
     "NYC's Eco-Certified Facility Partner",
     '200+ Businesses Trust Us',
