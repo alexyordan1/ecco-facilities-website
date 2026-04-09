@@ -331,10 +331,10 @@ textarea:focus-visible {
 @media (max-width: 900px) {
   .hero-test-ttl {
     display: block; font-family: var(--fd); font-weight: 500;
-    font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.1;
-    color: var(--wh); text-align: center; margin-bottom: 1.5rem;
-    padding: .8rem; border: 1px dashed rgba(255,255,255,.2); border-radius: 12px;
+    font-size: clamp(2.6rem, 10vw, 3.2rem); line-height: 1.05;
+    color: var(--wh); text-align: center; margin-bottom: 2rem;
   }
+  .hero-test-word { display: inline-block; width: 2.6em; text-align: center; }
 }
 
 /* Hero gradient border bottom */
