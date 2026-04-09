@@ -285,7 +285,7 @@ textarea:focus-visible {
 .hero-morph {
   display: inline-block;
   opacity: 1;
-  transition: opacity .6s ease;
+  transition: opacity .4s ease;
 }
 
 /* Hero badge — rotating social proof */
