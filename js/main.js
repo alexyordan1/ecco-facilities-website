@@ -317,7 +317,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 (function initHeroMorph() {
   var el = document.querySelector('.hero-morph');
   if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 900) return;
-  var words = ['health.', 'future.', 'planet.'];
+  var words = ['health.', 'future.', 'planet.', 'people.'];
   var idx = 0;
   function cycle() {
     el.style.opacity = '0';

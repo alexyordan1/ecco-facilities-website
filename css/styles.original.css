@@ -274,6 +274,13 @@ textarea:focus-visible {
 }
 
 /* Hero morph effect */
+.hero-morph-wrap {
+  display: inline-block; position: relative;
+  width: 2.6em; text-align: left; vertical-align: baseline;
+}
+@media (max-width: 900px) {
+  .hero-morph-wrap { width: auto; display: inline; }
+}
 .hero-morph {
   display: inline-block;
   opacity: 1;
