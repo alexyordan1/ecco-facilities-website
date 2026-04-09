@@ -1329,7 +1329,8 @@ textarea:focus-visible {
   .hero-actions .btn { width: auto; min-height: 48px; padding: .85rem 2.5rem; font-size: .9rem; border-radius: 100px; }
   .hero-actions .btn-white { box-shadow: 0 6px 24px rgba(0,0,0,.2); }
   .hero-actions .btn-ol { display: none; }
-  .hero-img { opacity: .25; }
+  .hero-img { opacity: .15; }
+  .hero-bg .orb { opacity: .25; }
   /* Scroll hint — absolute bottom of hero */
   .hero-scroll {
     display: flex; position: absolute; bottom: 1.5rem; left: 50%;
