@@ -13,7 +13,7 @@ var styles = document.createElement('style');
 styles.textContent = `
 .ecco-chat-toggle { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; background: url('${CONFIG.avatar}') center/cover; cursor: pointer; box-shadow: 0 8px 32px rgba(11,29,56,.25); transition: all .35s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; justify-content: center; padding: 0; }
 .ecco-chat-toggle:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 12px 40px rgba(11,29,56,.35); }
-.ecco-chat-toggle.open { background: linear-gradient(135deg, #0B1D38, #15294D); border-color: rgba(255,255,255,.2); }
+.ecco-chat-toggle.open { background: linear-gradient(135deg, #0B1D38, #15294D); border-color: rgba(255,255,255,.2); display: none; }
 .ecco-chat-toggle.open .ecco-close-icon { display: flex; }
 .ecco-close-icon { display: none; color: #fff; font-size: 1.4rem; width: 100%; height: 100%; align-items: center; justify-content: center; }
 .ecco-chat-dot { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background: #2D7A32; border: 2px solid #fff; animation: ecco-pulse 2s ease-in-out infinite; }
@@ -23,7 +23,7 @@ styles.textContent = `
 .ecco-chat-tooltip.show { opacity: 1; visibility: visible; transform: translateY(0); }
 .ecco-chat-tooltip .tip-name { font-weight: 700; color: #0B1D38; }
 .ecco-chat-tooltip .tip-close { position: absolute; top: .3rem; right: .5rem; background: none; border: none; color: #94A3B5; cursor: pointer; font-size: .9rem; padding: .2rem; }
-.ecco-chat-panel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 998; width: 440px; max-height: none; height: 100vh; height: 100dvh; border-radius: 0; background: #fff; border-radius: 20px; box-shadow: 0 16px 64px rgba(11,29,56,.18); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(20px) scale(.95); transition: all .35s cubic-bezier(.4,0,.2,1); overflow: hidden; border-left: 3px solid; border-image: linear-gradient(180deg, #2D7A32, #3068AD) 1; }
+.ecco-chat-panel { position: fixed; top: 1rem; right: 1rem; bottom: 1rem; z-index: 998; width: 420px; max-height: none; height: calc(100vh - 2rem); height: calc(100dvh - 2rem); border-radius: 20px; background: #fff; border-radius: 20px; box-shadow: 0 16px 64px rgba(11,29,56,.18); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(20px) scale(.95); transition: all .35s cubic-bezier(.4,0,.2,1); overflow: hidden; }
 .ecco-chat-panel.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 .ecco-chat-header { background: linear-gradient(135deg, #0B1D38 0%, #1E3562 100%); padding: 1rem 1.2rem; display: flex; align-items: center; gap: .7rem; flex-shrink: 0; }
 .ecco-chat-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,.2); overflow: hidden; flex-shrink: 0; }
