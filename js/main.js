@@ -325,9 +325,9 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
       idx = (idx + 1) % words.length;
       el.textContent = words[idx];
       el.style.opacity = '1';
-    }, 1200);
+    }, 800);
   }
-  setInterval(cycle, 5000);
+  setInterval(cycle, 4000);
 })();
 
 /* ============================================================
