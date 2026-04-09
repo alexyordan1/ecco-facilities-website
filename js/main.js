@@ -327,8 +327,8 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
       el.textContent = words[idx];
       el.classList.remove('out');
       el.classList.add('in');
-    }, 600);
-  }, 3500);
+    }, 1000);
+  }, 4500);
 })();
 
 /* ============================================================
@@ -350,6 +350,6 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
       idx = (idx + 1) % msgs.length;
       el.textContent = msgs[idx];
       el.classList.remove('out');
-    }, 300);
-  }, 4000);
+    }, 800);
+  }, 5000);
 })();
