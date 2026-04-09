@@ -1339,6 +1339,7 @@ textarea:focus-visible {
   .hero h1, .hero-sub, .hero-actions, .hero-badge, .hero-stats {
     animation: none !important;
   }
+  .hero-word-mobile { animation: shimmer 4s linear infinite !important; }
   .hero-badge { display: none; }
   .hero-sub { display: block; font-size: .85rem; max-width: 90%; margin: 0 auto 1.5rem; }
   .hero-email { display: none; }

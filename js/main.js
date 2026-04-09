@@ -359,7 +359,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 (function() {
   var word = document.querySelector('.hero-word-mobile');
   if (!word || window.innerWidth > 900) return;
-  var list = ['health.', 'future.', 'planet.', 'people.'];
+  var list = ['health.', 'future.', 'people.', 'planet.'];
   var i = 0;
   word.style.transition = 'opacity .4s ease';
   setInterval(function() {
