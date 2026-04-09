@@ -29,7 +29,7 @@
     }
 
     await loadLeads();
-    CRM.startPolling(loadLeads, 30);
+    CRM.startPolling(loadLeads, Math.max(15, CRM.getRefreshInterval() - 15));
   }
 
   async function loadLeads() {
@@ -132,9 +132,27 @@
 
     // Click handlers on cards to open detail
     boardEl.querySelectorAll('.crm-kanban-card').forEach(function(card) {
-      card.addEventListener('dblclick', function() {
+      card.addEventListener('dblclick', function(e) {
+        if (e.target.tagName === 'SELECT') return;
         window.location.href = '/crm/lead.html?id=' + this.dataset.id;
       });
+    });
+
+    // Keyboard-accessible move dropdowns
+    boardEl.querySelectorAll('.crm-kanban-move').forEach(function(sel) {
+      sel.addEventListener('change', async function() {
+        var newStage = this.value;
+        if (!newStage) return;
+        var leadId = parseInt(this.dataset.id, 10);
+        var lead = allLeads.find(function(l) { return l.id === leadId; });
+        if (lead) lead.pipeline_stage = newStage;
+        updateCounts();
+        try {
+          await CRM.fetch('/crm-leads', { method: 'PATCH', body: { id: leadId, pipeline_stage: newStage } });
+        } catch (e) {}
+        renderBoard();
+      });
+      sel.addEventListener('click', function(e) { e.stopPropagation(); });
     });
   }
 
@@ -160,6 +178,10 @@
       + CRM.alertBadges(lead)
       + '<span class="crm-kanban-card-days">' + daysInStage + '</span>'
       + '</div>'
+      + '<select class="crm-kanban-move" data-id="' + lead.id + '" aria-label="Move ' + CRM.escapeHtml(name) + ' to stage" title="Move to...">'
+      + '<option value="">Move...</option>'
+      + STAGES.map(function(s) { return '<option value="' + s.slug + '"' + (s.slug === (lead.pipeline_stage || 'new') ? ' disabled' : '') + '>' + s.name + '</option>'; }).join('')
+      + '</select>'
       + '</div>';
   }
 

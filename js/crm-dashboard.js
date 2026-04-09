@@ -33,7 +33,7 @@
     CRM.showLoading(kpisEl);
     chartsEl.innerHTML = '';
     await loadDashboard();
-    CRM.startPolling(loadDashboard, 60);
+    CRM.startPolling(loadDashboard, CRM.getRefreshInterval() + 15);
   }
 
   function getDateParams() {

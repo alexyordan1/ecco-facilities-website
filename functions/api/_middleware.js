@@ -10,7 +10,7 @@ export async function onRequest(context) {
     return new Response(null, {
       status: 204,
       headers: {
-        'Access-Control-Allow-Origin': url.origin,
+        'Access-Control-Allow-Origin': (url.origin.indexOf('eccofacilities.com') !== -1 || url.origin.indexOf('pages.dev') !== -1) ? url.origin : 'https://eccofacilities.com',
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Max-Age': '86400'

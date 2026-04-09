@@ -400,6 +400,13 @@ const CRM = {
   },
 
   /* ---- Alert helpers ---- */
+  getPrefs() {
+    try { return JSON.parse(localStorage.getItem('crm_prefs') || '{}'); } catch (e) { return {}; }
+  },
+
+  getStaleThreshold() { return (this.getPrefs().stale_days || 7); },
+  getRefreshInterval() { return (this.getPrefs().refresh_seconds || 45); },
+
   getLeadAlerts(lead) {
     var alerts = [];
     var now = Date.now();
@@ -414,9 +421,10 @@ const CRM = {
       alerts.push({ type: 'uncontacted', label: 'No contact', cls: 'crm-alert-warn' });
     }
 
-    /* Stale > 7 days in same stage */
+    /* Stale > X days (configurable in Settings, default 7) */
+    var staleDays = this.getStaleThreshold();
     var daysOld = Math.floor((now - created) / 86400000);
-    if (daysOld >= 7) {
+    if (daysOld >= staleDays) {
       alerts.push({ type: 'stale', label: daysOld + 'd stale', cls: 'crm-alert-danger' });
     }
 

@@ -77,7 +77,7 @@
     }
 
     loadLeads();
-    CRM.startPolling(loadLeads, 45);
+    CRM.startPolling(loadLeads, CRM.getRefreshInterval());
   }
 
   async function loadLeads() {
@@ -329,7 +329,7 @@
 
     var btns = '';
     /* Prev button */
-    btns += '<button ' + (page <= 1 ? 'disabled' : '') + ' data-page="' + (page - 1) + '">&lsaquo;</button>';
+    btns += '<button ' + (page <= 1 ? 'disabled' : '') + ' data-page="' + (page - 1) + '" aria-label="Previous page">&lsaquo;</button>';
 
     /* Page numbers (show max 5 around current) */
     var start = Math.max(1, page - 2);
@@ -343,7 +343,7 @@
     if (end < pages) btns += '<button data-page="' + pages + '">' + pages + '</button>';
 
     /* Next button */
-    btns += '<button ' + (page >= pages ? 'disabled' : '') + ' data-page="' + (page + 1) + '">&rsaquo;</button>';
+    btns += '<button ' + (page >= pages ? 'disabled' : '') + ' data-page="' + (page + 1) + '" aria-label="Next page">&rsaquo;</button>';
 
     paginationEl.innerHTML =
       '<div class="crm-pagination-info">Showing ' + from + '\u2013' + to + ' of ' + total + ' leads</div>' +
