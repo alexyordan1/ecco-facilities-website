@@ -44,7 +44,7 @@
 
 /* --- Reset --- */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--fb);
   background: var(--bg);
@@ -199,7 +199,7 @@ textarea:focus-visible {
 .hero-img {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center;
-  opacity: .25;
+  opacity: .22;
   will-change: transform;
 }
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
@@ -246,7 +246,7 @@ textarea:focus-visible {
   animation: heroEnter 1s var(--ease-out) 0.15s both;
 }
 .hero h1 em {
-  background: linear-gradient(90deg, #8FD48C, #5BA8E6, #6BD568, #8FD48C);
+  background: linear-gradient(90deg, #6BA368, #3068AD, #2D7A32, #6BA368);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -273,32 +273,6 @@ textarea:focus-visible {
   100% { background-position: 200% center; }
 }
 
-/* Static title for mobile — zero JS, zero animation, zero flicker */
-.hero-morph-static {
-  display: none;
-  color: var(--green-l); font-style: italic;
-}
-/* Morph wrap — desktop only */
-.hero-morph-wrap {
-  display: inline-block; position: relative;
-  width: 2.6em; text-align: left; vertical-align: baseline;
-}
-.hero-morph {
-  display: inline-block;
-  opacity: 1;
-  transition: opacity .4s ease;
-}
-@media (max-width: 900px) {
-  .hero-morph-static { display: inline; }
-  .hero-morph-wrap { display: none !important; }
-}
-
-/* Hero badge — rotating social proof */
-.hero-badge-text {
-  display: inline-block; min-width: 200px;
-  transition: opacity .8s ease;
-}
-
 /* Hero gradient border bottom */
 .hero::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
@@ -307,7 +281,6 @@ textarea:focus-visible {
 }
 
 /* Hero stat icons */
-.hero-stats { overflow: hidden; }
 .hero-stats span { display: inline-flex; align-items: center; gap: .4rem; }
 .hero-stats svg { opacity: .5; flex-shrink: 0; }
 
@@ -586,11 +559,10 @@ textarea:focus-visible {
 @media (max-width: 768px) {
   .svc-showcase { min-height: 500px; margin-left: -1.5rem; margin-right: -1.5rem; width: calc(100% + 3rem); }
   .svc-showcase .svc-panel h3 { font-size: 1.5rem; }
-  .svc-inner { padding: 1.5rem 3rem 2.5rem; }
-  .svc-ttl { font-size: 1.5rem; font-weight: 700; letter-spacing: normal; text-shadow: 0 2px 20px rgba(0,0,0,.3); margin-bottom: 1rem; }
-  .svc-showcase .svc-tabs { gap: .3rem; margin-bottom: 1.5rem; }
+  .svc-inner { padding: 3rem 1.5rem; }
+  .svc-ttl { font-size: 2.2rem; font-weight: 700; letter-spacing: normal; text-shadow: 0 2px 20px rgba(0,0,0,.3); margin-bottom: 1.5rem; }
+  .svc-showcase .svc-tabs { gap: .3rem; }
   .svc-showcase .svc-tab { padding: .5rem 1.2rem; font-size: .82rem; }
-  .svc-panels { min-height: auto; }
 }
 
 /* ============================================================
@@ -1295,18 +1267,9 @@ textarea:focus-visible {
   .nm-contact a { color: var(--green-l); text-decoration: none; font-weight: 600; font-size: .88rem; }
   .nm-contact a:hover { color: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
-  .hero { padding: 5rem 1.5rem 2rem; min-height: 100vh; min-height: 100svh; }
-  .hero h1 { font-size: clamp(2.4rem, 9vw, 3rem); line-height: 1.1; }
-  .hero h1 br { display: none; }
-  .hero-badge { display: none; }
-  .hero-sub { display: block; font-size: .9rem; max-width: 90%; margin: 1.2rem auto 2rem; }
-  .hero-email { display: none; }
-  .hero-stats { display: none !important; }
-  .hero-actions { justify-content: center; }
-  .hero-actions .btn { width: auto; min-height: 48px; padding: .8rem 2rem; font-size: .9rem; border-radius: 100px; }
-  .hero-actions .btn-white { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
-  .hero-actions .btn-ol { display: none; }
-  .hero-img { opacity: .20; }
+  .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }
+  .hero h1 { font-size: 2.2rem; }
+  .hero-sub { font-size: .95rem; }
   .page-hero { padding: 2.5rem 1.5rem 2.5rem; min-height: 100vh; }
   .page-hero h1 { font-size: clamp(1.8rem,6vw,2.4rem); }
   .page-hero-sub { font-size: .92rem; }
@@ -1378,7 +1341,8 @@ textarea:focus-visible {
   .cta-banner h2 { font-size: clamp(1.2rem, 5vw, 1.6rem); }
 
   /* Buttons — full width on mobile */
-  .hero-actions .btn { min-height: 44px; }
+  .hero-actions { flex-direction: column; gap: .8rem; }
+  .hero-actions .btn { width: 100%; text-align: center; min-height: 48px; display: flex; align-items: center; justify-content: center; }
   .btn { min-height: 44px; }
 
   /* Back-to-top — position above chat widget */
