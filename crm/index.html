@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/crm.css?v=2.1">
+  <link rel="stylesheet" href="/css/crm.css?v=3.0">
 </head>
 <body>
   <div id="app" class="crm-shell">
@@ -19,14 +19,21 @@
         <button id="sidebarToggle" class="crm-sidebar-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
       </div>
       <div class="crm-content">
+        <div class="crm-date-range" id="dateRange">
+          <button class="crm-date-pill" data-range="7">7d</button>
+          <button class="crm-date-pill" data-range="30">30d</button>
+          <button class="crm-date-pill" data-range="month">This Month</button>
+          <button class="crm-date-pill" data-range="lastmonth">Last Month</button>
+          <button class="crm-date-pill active" data-range="all">All</button>
+        </div>
         <div id="dashboardKpis" class="crm-stats-grid"></div>
         <div id="dashboardCharts" class="crm-charts-grid"></div>
       </div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="/js/crm-core.js?v=2.1"></script>
-  <script src="/js/crm-dashboard.js?v=2.1"></script>
-  <script src="/js/crm-ai.js?v=2.1"></script>
+  <script src="/js/crm-core.js?v=3.0"></script>
+  <script src="/js/crm-dashboard.js?v=3.0"></script>
+  <script src="/js/crm-ai.js?v=3.0"></script>
 </body>
 </html>

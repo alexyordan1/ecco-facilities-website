@@ -4,6 +4,7 @@
   var exportBtn = document.getElementById('exportReport');
   var printBtn = document.getElementById('printReport');
   var allLeads = [];
+  var dateRange = 'all';
 
   var STAGE_ORDER = ['new', 'contacted', 'site-visit', 'proposal', 'negotiation', 'won', 'lost'];
   var STAGE_NAMES = {
@@ -15,6 +16,18 @@
     var authed = await CRM.requireAuth();
     if (!authed) return;
     CRM.renderShell('reports');
+
+    var dateRangeEl = document.getElementById('dateRange');
+    if (dateRangeEl) {
+      dateRangeEl.addEventListener('click', function(e) {
+        var pill = e.target.closest('.crm-date-pill');
+        if (!pill) return;
+        dateRange = pill.dataset.range;
+        dateRangeEl.querySelectorAll('.crm-date-pill').forEach(function(p) { p.classList.remove('active'); });
+        pill.classList.add('active');
+        renderReport();
+      });
+    }
 
     if (reportType) reportType.addEventListener('change', renderReport);
     if (exportBtn) exportBtn.addEventListener('click', exportCsv);
@@ -38,6 +51,38 @@
     }
   }
 
+  function getFilteredByDate() {
+    if (dateRange === 'all') return allLeads;
+    var now = new Date();
+    var from = null;
+    var to = null;
+
+    switch (dateRange) {
+      case '7':
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        break;
+      case '30':
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+        break;
+      case 'month':
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'lastmonth':
+        from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        to = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        break;
+      default:
+        return allLeads;
+    }
+
+    return allLeads.filter(function(l) {
+      var t = new Date(l.created_at).getTime();
+      if (from && t < from.getTime()) return false;
+      if (to && t > to.getTime()) return false;
+      return true;
+    });
+  }
+
   function renderReport() {
     var type = reportType ? reportType.value : 'overview';
     switch (type) {
@@ -51,17 +96,18 @@
 
   /* === OVERVIEW === */
   function renderOverview() {
-    var total = allLeads.length;
-    var completed = allLeads.filter(function(l) { return l.status === 'completed'; }).length;
+    var leads = getFilteredByDate();
+    var total = leads.length;
+    var completed = leads.filter(function(l) { return l.status === 'completed'; }).length;
     var partial = total - completed;
-    var won = allLeads.filter(function(l) { return l.pipeline_stage === 'won'; }).length;
-    var lost = allLeads.filter(function(l) { return l.pipeline_stage === 'lost'; }).length;
+    var won = leads.filter(function(l) { return l.pipeline_stage === 'won'; }).length;
+    var lost = leads.filter(function(l) { return l.pipeline_stage === 'lost'; }).length;
     var open = total - won - lost;
     var convRate = total > 0 ? (won / total * 100).toFixed(1) : '0';
-    var totalValue = allLeads.reduce(function(sum, l) { return sum + (parseFloat(l.estimated_value) || 0); }, 0);
+    var totalValue = leads.reduce(function(sum, l) { return sum + (parseFloat(l.estimated_value) || 0); }, 0);
 
     var byMonth = {};
-    allLeads.forEach(function(l) {
+    leads.forEach(function(l) {
       var d = new Date(l.created_at);
       var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
       byMonth[key] = (byMonth[key] || 0) + 1;
@@ -83,8 +129,9 @@
 
   /* === CONVERSION BY SOURCE === */
   function renderSourcesReport() {
+    var leads = getFilteredByDate();
     var sources = {};
-    allLeads.forEach(function(l) {
+    leads.forEach(function(l) {
       var src = (l.form_data ? (l.form_data.how_heard || l.form_data.referral) : null) || 'Unknown';
       src = src.charAt(0).toUpperCase() + src.slice(1);
       if (!sources[src]) sources[src] = { total: 0, won: 0, lost: 0 };
@@ -106,8 +153,9 @@
 
   /* === CONVERSION BY SERVICE === */
   function renderServicesReport() {
+    var leads = getFilteredByDate();
     var services = {};
-    allLeads.forEach(function(l) {
+    leads.forEach(function(l) {
       var svc = l.service === 'dayporter' ? 'Day Porter' : 'Janitorial';
       if (!services[svc]) services[svc] = { total: 0, won: 0, lost: 0, value: 0, completed: 0 };
       services[svc].total++;
@@ -128,17 +176,18 @@
 
   /* === TIME PER STAGE === */
   function renderStagesReport() {
+    var leads = getFilteredByDate();
     var stageCounts = {};
     STAGE_ORDER.forEach(function(s) { stageCounts[s] = { count: 0, value: 0 }; });
 
-    allLeads.forEach(function(l) {
+    leads.forEach(function(l) {
       var stage = l.pipeline_stage || 'new';
       if (!stageCounts[stage]) stageCounts[stage] = { count: 0, value: 0 };
       stageCounts[stage].count++;
       stageCounts[stage].value += parseFloat(l.estimated_value) || 0;
     });
 
-    var totalLeads = allLeads.length;
+    var totalLeads = leads.length;
     var rows = STAGE_ORDER.map(function(slug) {
       var s = stageCounts[slug];
       var pct = totalLeads > 0 ? (s.count / totalLeads * 100).toFixed(1) : '0';
@@ -165,7 +214,8 @@
 
   /* === LOST LEADS === */
   function renderLostReport() {
-    var lostLeads = allLeads.filter(function(l) { return l.pipeline_stage === 'lost'; });
+    var leads = getFilteredByDate();
+    var lostLeads = leads.filter(function(l) { return l.pipeline_stage === 'lost'; });
 
     if (lostLeads.length === 0) {
       reportContent.innerHTML = '<div class="crm-report-empty">No lost leads found.</div>';
@@ -219,12 +269,13 @@
   function exportCsv() {
     var type = reportType ? reportType.value : 'overview';
     var csvData = [];
+    var leads = getFilteredByDate();
 
     switch (type) {
       case 'sources':
         csvData.push(['Source', 'Total', 'Won', 'Lost', 'Conversion Rate']);
         var sources = {};
-        allLeads.forEach(function(l) {
+        leads.forEach(function(l) {
           var src = (l.form_data ? (l.form_data.how_heard || l.form_data.referral) : null) || 'Unknown';
           if (!sources[src]) sources[src] = { total: 0, won: 0, lost: 0 };
           sources[src].total++;
@@ -240,7 +291,7 @@
       case 'services':
         csvData.push(['Service', 'Total', 'Completed', 'Won', 'Lost', 'Conv Rate', 'Est Value']);
         var svcs = {};
-        allLeads.forEach(function(l) {
+        leads.forEach(function(l) {
           var svc = l.service === 'dayporter' ? 'Day Porter' : 'Janitorial';
           if (!svcs[svc]) svcs[svc] = { total: 0, won: 0, lost: 0, completed: 0, value: 0 };
           svcs[svc].total++;
@@ -257,7 +308,7 @@
 
       case 'lost':
         csvData.push(['Name', 'Company', 'Service', 'Reason', 'Created']);
-        allLeads.filter(function(l) { return l.pipeline_stage === 'lost'; }).forEach(function(l) {
+        leads.filter(function(l) { return l.pipeline_stage === 'lost'; }).forEach(function(l) {
           csvData.push([
             (l.first_name || '') + ' ' + (l.last_name || ''),
             l.company || '', l.service || '', l.lost_reason || '', l.created_at || ''
@@ -267,7 +318,7 @@
 
       default:
         csvData.push(['Name', 'Email', 'Company', 'Service', 'Status', 'Stage', 'Source', 'Created']);
-        allLeads.forEach(function(l) {
+        leads.forEach(function(l) {
           csvData.push([
             (l.first_name || '') + ' ' + (l.last_name || ''),
             l.email || '', l.company || '', l.service || '', l.status || '',

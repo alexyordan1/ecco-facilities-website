@@ -2,6 +2,7 @@
   var kpisEl = document.getElementById('dashboardKpis');
   var chartsEl = document.getElementById('dashboardCharts');
   var charts = {};
+  var dateRange = 'all';
 
   /* Chart.js global defaults */
   if (typeof Chart !== 'undefined') {
@@ -16,15 +17,59 @@
     var authed = await CRM.requireAuth();
     if (!authed) return;
     CRM.renderShell('dashboard');
+
+    var dateRangeEl = document.getElementById('dateRange');
+    if (dateRangeEl) {
+      dateRangeEl.addEventListener('click', function(e) {
+        var pill = e.target.closest('.crm-date-pill');
+        if (!pill) return;
+        dateRange = pill.dataset.range;
+        dateRangeEl.querySelectorAll('.crm-date-pill').forEach(function(p) { p.classList.remove('active'); });
+        pill.classList.add('active');
+        loadDashboard();
+      });
+    }
+
     CRM.showLoading(kpisEl);
     chartsEl.innerHTML = '';
     await loadDashboard();
     CRM.startPolling(loadDashboard, 60);
   }
 
+  function getDateParams() {
+    var now = new Date();
+    var from = null;
+    var to = null;
+
+    switch (dateRange) {
+      case '7':
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+        break;
+      case '30':
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+        break;
+      case 'month':
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'lastmonth':
+        from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        to = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        break;
+      default:
+        return '';
+    }
+
+    var params = '';
+    if (from) params += '&from=' + from.toISOString();
+    if (to) params += '&to=' + to.toISOString();
+    return params;
+  }
+
   async function loadDashboard() {
     try {
-      var result = await CRM.fetch('/crm-stats');
+      var dateParams = getDateParams();
+      var url = '/crm-stats' + (dateParams ? '?' + dateParams.substring(1) : '');
+      var result = await CRM.fetch(url);
       if (!result || !result.ok) {
         CRM.showError(kpisEl, { message: result ? result.error : 'Failed to load dashboard', onRetry: loadDashboard });
         return;

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/crm.css?v=2.1">
+  <link rel="stylesheet" href="/css/crm.css?v=3.0">
 </head>
 <body>
   <div class="crm-login-page">
@@ -29,10 +29,19 @@
         </div>
         <button type="submit" id="loginBtn" class="crm-btn crm-btn-full">Sign In</button>
       </form>
+      <button type="button" id="showForgot" class="crm-forgot-link">Forgot password?</button>
+      <div id="forgotSection" class="crm-forgot-section">
+        <p class="crm-forgot-text">Enter your email and we'll send you a reset link.</p>
+        <div class="crm-form-group">
+          <input type="email" id="forgotEmail" class="crm-input" placeholder="Your email address" required>
+        </div>
+        <button type="button" id="forgotBtn" class="crm-btn crm-btn-full">Send Reset Link</button>
+        <button type="button" id="backToLogin" class="crm-login-back">Back to sign in</button>
+      </div>
       <a href="/" class="crm-login-back">&larr; Back to website</a>
     </div>
   </div>
-  <script src="/js/crm-core.js?v=2.1"></script>
-  <script src="/js/crm-auth.js?v=2.1"></script>
+  <script src="/js/crm-core.js?v=3.0"></script>
+  <script src="/js/crm-auth.js?v=3.0"></script>
 </body>
 </html>

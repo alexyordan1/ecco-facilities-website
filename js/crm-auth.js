@@ -60,4 +60,62 @@
       submitBtn.textContent = 'Sign In';
     }
   });
+
+  // Forgot password toggle
+  var showForgotBtn = document.getElementById('showForgot');
+  var forgotSection = document.getElementById('forgotSection');
+  var backToLoginBtn = document.getElementById('backToLogin');
+  var forgotEmailInput = document.getElementById('forgotEmail');
+  var forgotBtn = document.getElementById('forgotBtn');
+  var loginFormEl = document.getElementById('loginForm');
+
+  if (showForgotBtn) {
+    showForgotBtn.addEventListener('click', function() {
+      loginFormEl.style.display = 'none';
+      showForgotBtn.style.display = 'none';
+      forgotSection.style.display = 'block';
+      forgotEmailInput.focus();
+    });
+  }
+
+  if (backToLoginBtn) {
+    backToLoginBtn.addEventListener('click', function() {
+      loginFormEl.style.display = '';
+      showForgotBtn.style.display = '';
+      forgotSection.style.display = 'none';
+      hideError();
+    });
+  }
+
+  if (forgotBtn) {
+    forgotBtn.addEventListener('click', async function() {
+      var email = forgotEmailInput.value.trim();
+      if (!email) { showError('Please enter your email.'); return; }
+
+      forgotBtn.disabled = true;
+      forgotBtn.textContent = 'Sending...';
+      hideError();
+
+      try {
+        var res = await fetch('/api/crm-auth', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        var data = await res.json();
+
+        if (data.ok) {
+          forgotSection.innerHTML = '<div class="crm-forgot-success"><p>Reset link sent! Check your email.</p><button type="button" id="backToLogin2" class="crm-login-back">Back to sign in</button></div>';
+          document.getElementById('backToLogin2').addEventListener('click', function() { window.location.reload(); });
+        } else {
+          showError(data.error || 'Failed to send reset link.');
+        }
+      } catch (err) {
+        showError('Unable to connect. Please try again.');
+      } finally {
+        forgotBtn.disabled = false;
+        forgotBtn.textContent = 'Send Reset Link';
+      }
+    });
+  }
 })();

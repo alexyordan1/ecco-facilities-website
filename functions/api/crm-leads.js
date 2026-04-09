@@ -4,7 +4,7 @@ const HEADERS = {
 };
 
 const ALLOWED_SORT = ['created_at', 'first_name', 'company', 'service', 'status', 'pipeline_stage'];
-const UPDATABLE_FIELDS = ['pipeline_stage', 'estimated_value', 'last_contacted_at', 'lost_reason'];
+const UPDATABLE_FIELDS = ['pipeline_stage', 'estimated_value', 'last_contacted_at', 'lost_reason', 'first_name', 'last_name', 'email', 'phone', 'company'];
 
 function sbHeaders(env) {
   return {

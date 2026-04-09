@@ -84,6 +84,40 @@ export async function onRequestPatch(context) {
   }
 }
 
+export async function onRequestPut(context) {
+  var env = context.env;
+  var headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
+
+  var body;
+  try { body = await context.request.json(); }
+  catch { return new Response(JSON.stringify({ ok: false, error: 'Invalid request' }), { status: 400, headers }); }
+
+  var email = (body.email || '').trim();
+  if (!email) {
+    return new Response(JSON.stringify({ ok: false, error: 'Email is required' }), { status: 400, headers });
+  }
+
+  try {
+    var res = await fetch(env.SUPABASE_URL + '/auth/v1/recover', {
+      method: 'POST',
+      headers: {
+        'apikey': env.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        redirect_to: 'https://eccofacilities.com/crm/reset-password'
+      })
+    });
+
+    // Always return success to prevent email enumeration
+    return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+
+  } catch (err) {
+    return new Response(JSON.stringify({ ok: false, error: 'Server error' }), { status: 500, headers });
+  }
+}
+
 export async function onRequestGet(context) {
   const user = context.data?.user;
   if (!user) {

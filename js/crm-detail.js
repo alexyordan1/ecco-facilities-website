@@ -83,8 +83,13 @@
   }
 
   function renderContactCard(lead, name, email, phone, company) {
-    var phoneLink = phone ? '<a href="tel:' + CRM.escapeHtml(phone) + '">' + CRM.escapeHtml(phone) + '</a>' : '\u2014';
-    var emailLink = email ? '<a href="mailto:' + CRM.escapeHtml(email) + '">' + CRM.escapeHtml(email) + '</a>' : '\u2014';
+    var firstName = lead.first_name || '';
+    var lastName = lead.last_name || '';
+    var nameHtml = '<span class="crm-editable" data-field="first_name">' + CRM.escapeHtml(firstName || '\u2014') + '</span> ' +
+      '<span class="crm-editable" data-field="last_name">' + CRM.escapeHtml(lastName || '\u2014') + '</span>';
+    var emailHtml = '<span class="crm-editable" data-field="email">' + CRM.escapeHtml(email || '\u2014') + '</span>';
+    var phoneHtml = '<span class="crm-editable" data-field="phone">' + CRM.escapeHtml(phone || '\u2014') + '</span>';
+    var companyHtml = '<span class="crm-editable" data-field="company">' + CRM.escapeHtml(company || '\u2014') + '</span>';
 
     var completedRow = '';
     if (lead.completed_at) {
@@ -103,7 +108,7 @@
     }
 
     var svcLabel = lead.service === 'dayporter' ? 'Day Porter' : 'Janitorial';
-    var emailSubject = encodeURIComponent('Ecco Facilities — ' + svcLabel + ' Services Follow-up');
+    var emailSubject = encodeURIComponent('Ecco Facilities \u2014 ' + svcLabel + ' Services Follow-up');
     var emailBody = encodeURIComponent('Hi ' + (lead.first_name || 'there') + ',\n\nThank you for your interest in our ' + svcLabel.toLowerCase() + ' services. I wanted to follow up on your recent inquiry' + (lead.ref_number ? ' (Ref: ' + lead.ref_number + ')' : '') + '.\n\nI\'d love to discuss how we can help ' + (company ? company + ' ' : '') + 'with your cleaning needs. Would you have time for a quick call this week?\n\nBest regards,\nEcco Facilities Team\n(212) 555-0100\neccofacilities.com');
 
     var actions = '';
@@ -118,19 +123,19 @@
       '<div class="crm-contact-grid">' +
         '<div class="crm-contact-item">' +
           '<div class="crm-contact-label">Name</div>' +
-          '<div class="crm-contact-value">' + CRM.escapeHtml(name) + '</div>' +
+          '<div class="crm-contact-value">' + nameHtml + '</div>' +
         '</div>' +
         '<div class="crm-contact-item">' +
           '<div class="crm-contact-label">Email</div>' +
-          '<div class="crm-contact-value">' + emailLink + '</div>' +
+          '<div class="crm-contact-value">' + emailHtml + '</div>' +
         '</div>' +
         '<div class="crm-contact-item">' +
           '<div class="crm-contact-label">Phone</div>' +
-          '<div class="crm-contact-value">' + phoneLink + '</div>' +
+          '<div class="crm-contact-value">' + phoneHtml + '</div>' +
         '</div>' +
         '<div class="crm-contact-item">' +
           '<div class="crm-contact-label">Company</div>' +
-          '<div class="crm-contact-value">' + CRM.escapeHtml(company || '\u2014') + '</div>' +
+          '<div class="crm-contact-value">' + companyHtml + '</div>' +
         '</div>' +
         '<div class="crm-contact-item">' +
           '<div class="crm-contact-label">Reference</div>' +
@@ -265,6 +270,50 @@
           /* mailto link opens naturally via <a>, just log */
           logCommunication('email', 'Email sent to ' + (lead.email || ''));
         }
+      });
+    });
+
+    /* Inline editing */
+    detailEl.querySelectorAll('.crm-editable').forEach(function(el) {
+      el.addEventListener('click', function() {
+        if (el.classList.contains('crm-editing')) return;
+        var field = el.dataset.field;
+        var currentValue = el.textContent.trim();
+        if (currentValue === '\u2014') currentValue = '';
+
+        el.classList.add('crm-editing');
+        var input = document.createElement('input');
+        input.type = field === 'email' ? 'email' : (field === 'phone' ? 'tel' : 'text');
+        input.className = 'crm-input crm-inline-input';
+        input.value = currentValue;
+        el.textContent = '';
+        el.appendChild(input);
+        input.focus();
+        input.select();
+
+        var save = async function() {
+          var newValue = input.value.trim();
+          el.classList.remove('crm-editing');
+          el.textContent = newValue || '\u2014';
+
+          if (newValue !== currentValue) {
+            var update = { id: parseInt(leadId) };
+            update[field] = newValue;
+            await saveField(update);
+            /* Update breadcrumb if name changed */
+            if (field === 'first_name' || field === 'last_name') {
+              lead[field] = newValue;
+              var fullName = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim();
+              if (breadcrumbName) breadcrumbName.textContent = fullName || lead.email;
+            }
+          }
+        };
+
+        input.addEventListener('blur', save);
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+          if (e.key === 'Escape') { el.classList.remove('crm-editing'); el.textContent = currentValue || '\u2014'; }
+        });
       });
     });
 

@@ -8,6 +8,10 @@ export async function onRequestGet(context) {
   };
 
   try {
+    var url = new URL(context.request.url);
+    var fromParam = url.searchParams.get('from');
+    var toParam = url.searchParams.get('to');
+
     var res = await fetch(env.SUPABASE_URL + '/rest/v1/leads?select=id,service,status,pipeline_stage,created_at,completed_at,estimated_value,form_data&order=created_at.desc&limit=500', {
       headers: sbHeaders
     });
@@ -17,6 +21,16 @@ export async function onRequestGet(context) {
     }
 
     var leads = await res.json();
+
+    if (fromParam || toParam) {
+      var fromDate = fromParam ? new Date(fromParam).getTime() : 0;
+      var toDate = toParam ? new Date(toParam).getTime() : Infinity;
+      leads = leads.filter(function(l) {
+        var t = new Date(l.created_at).getTime();
+        return t >= fromDate && t <= toDate;
+      });
+    }
+
     var now = new Date();
     var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     var weekStart = new Date(todayStart);
