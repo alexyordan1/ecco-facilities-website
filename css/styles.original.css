@@ -246,7 +246,7 @@ textarea:focus-visible {
   animation: heroEnter 1s var(--ease-out) 0.15s both;
 }
 .hero h1 em {
-  background: linear-gradient(90deg, #6BA368, #3068AD, #2D7A32, #6BA368);
+  background: linear-gradient(90deg, #8FD48C, #5BA8E6, #6BD568, #8FD48C);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1303,7 +1303,7 @@ textarea:focus-visible {
   .hero-actions .btn { width: auto; min-height: 48px; padding: .8rem 2rem; font-size: .9rem; border-radius: 100px; }
   .hero-actions .btn-white { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
   .hero-actions .btn-ol { display: none; }
-  .hero-img { opacity: .32; }
+  .hero-img { opacity: .20; }
   .page-hero { padding: 2.5rem 1.5rem 2.5rem; min-height: 100vh; }
   .page-hero h1 { font-size: clamp(1.8rem,6vw,2.4rem); }
   .page-hero-sub { font-size: .92rem; }
