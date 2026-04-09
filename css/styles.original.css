@@ -1292,10 +1292,16 @@ textarea:focus-visible {
   .nm-contact a { color: var(--green-l); text-decoration: none; font-weight: 600; font-size: .88rem; }
   .nm-contact a:hover { color: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
-  .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }
-  .hero h1 { font-size: 1.8rem; }
+  .hero { padding: 2rem 1.5rem 1.5rem; min-height: auto; }
+  .hero h1 { font-size: 2rem; margin-bottom: 1.5rem; }
   .hero h1 br { display: none; }
-  .hero-sub { font-size: .95rem; }
+  .hero-badge { display: none; }
+  .hero-sub { display: none; }
+  .hero-actions { gap: .6rem; }
+  .hero-actions .btn-ol { display: none; }
+  .hero-email { display: none; }
+  .hero-content .hero-stats { margin-top: 1.5rem; padding-top: 1rem; }
+  .hero-img { opacity: .30; }
   .page-hero { padding: 2.5rem 1.5rem 2.5rem; min-height: 100vh; }
   .page-hero h1 { font-size: clamp(1.8rem,6vw,2.4rem); }
   .page-hero-sub { font-size: .92rem; }
