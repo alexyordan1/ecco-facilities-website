@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Settings — CRM — Ecco Facilities</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/crm.css?v=3.2">
+</head>
+<body>
+  <div id="app" class="crm-shell">
+    <div class="crm-main">
+      <div class="crm-topbar">
+        <div class="crm-breadcrumb"><span>Settings</span></div>
+        <button id="sidebarToggle" class="crm-sidebar-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      </div>
+      <div class="crm-content">
+        <div class="crm-settings-grid">
+          <div class="crm-card" id="profileSection">
+            <div class="crm-card-header"><h2 class="crm-card-title">Profile</h2></div>
+            <div class="crm-form-group">
+              <label class="crm-label">Email</label>
+              <div id="userEmail" class="crm-settings-value">—</div>
+            </div>
+            <div class="crm-form-group">
+              <label class="crm-label">User ID</label>
+              <div id="userId" class="crm-settings-value crm-settings-mono">—</div>
+            </div>
+            <div class="crm-form-group">
+              <label class="crm-label">Session</label>
+              <div id="sessionInfo" class="crm-settings-value">—</div>
+            </div>
+          </div>
+
+          <div class="crm-card" id="passwordSection">
+            <div class="crm-card-header"><h2 class="crm-card-title">Change Password</h2></div>
+            <div id="passwordError" class="crm-login-error" role="alert"></div>
+            <div id="passwordSuccess" class="crm-settings-success"></div>
+            <div class="crm-form-group">
+              <label for="newPassword" class="crm-label">New Password</label>
+              <input type="password" id="newPassword" class="crm-input" placeholder="Enter new password" autocomplete="new-password">
+            </div>
+            <div class="crm-form-group">
+              <label for="confirmPassword" class="crm-label">Confirm Password</label>
+              <input type="password" id="confirmPassword" class="crm-input" placeholder="Confirm new password" autocomplete="new-password">
+            </div>
+            <button id="changePasswordBtn" class="crm-btn">Update Password</button>
+          </div>
+
+          <div class="crm-card" id="prefsSection">
+            <div class="crm-card-header"><h2 class="crm-card-title">Preferences</h2></div>
+            <div class="crm-form-group">
+              <label class="crm-label">Stale Lead Threshold (days)</label>
+              <input type="number" id="staleThreshold" class="crm-input" value="7" min="1" max="90" style="max-width:120px">
+              <div class="crm-settings-hint">Leads older than this are flagged as stale</div>
+            </div>
+            <div class="crm-form-group">
+              <label class="crm-label">Auto-refresh Interval (seconds)</label>
+              <input type="number" id="refreshInterval" class="crm-input" value="45" min="10" max="300" style="max-width:120px">
+              <div class="crm-settings-hint">How often lead lists and pipeline refresh</div>
+            </div>
+            <button id="savePrefsBtn" class="crm-btn">Save Preferences</button>
+          </div>
+
+          <div class="crm-card" id="aboutSection">
+            <div class="crm-card-header"><h2 class="crm-card-title">About</h2></div>
+            <div class="crm-form-group">
+              <label class="crm-label">CRM Version</label>
+              <div class="crm-settings-value">3.2</div>
+            </div>
+            <div class="crm-form-group">
+              <label class="crm-label">Platform</label>
+              <div class="crm-settings-value">Cloudflare Pages + Supabase</div>
+            </div>
+            <div class="crm-form-group">
+              <label class="crm-label">AI Model</label>
+              <div class="crm-settings-value">Claude Sonnet 4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/crm-core.js?v=3.2"></script>
+  <script src="/js/crm-settings.js?v=1.0"></script>
+  <script src="/js/crm-ai.js?v=3.2"></script>
+</body>
+</html>

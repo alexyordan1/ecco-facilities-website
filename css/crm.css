@@ -2223,3 +2223,52 @@ select.crm-input {
     flex: 1 1 100% !important;
   }
 }
+
+/* ============================================
+   SETTINGS PAGE
+   ============================================ */
+
+.crm-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.crm-settings-value {
+  font-size: .92rem;
+  color: var(--td);
+  padding: .4rem 0;
+}
+
+.crm-settings-mono {
+  font-family: monospace;
+  font-size: .78rem;
+  color: var(--tm);
+  word-break: break-all;
+}
+
+.crm-settings-hint {
+  font-size: .75rem;
+  color: var(--tl);
+  margin-top: .25rem;
+}
+
+.crm-settings-success {
+  background: rgba(45,122,50,.08);
+  color: var(--green);
+  border-radius: var(--r);
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  margin-bottom: 1rem;
+  display: none;
+}
+
+.crm-settings-success.visible {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .crm-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
