@@ -1291,7 +1291,7 @@ textarea:focus-visible {
   .nm-contact a:hover { color: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
   .hero { padding: 5rem 1.5rem 2rem; min-height: 100vh; min-height: 100svh; }
-  .hero h1 { font-size: clamp(2.8rem, 10vw, 3.4rem); line-height: 1.08; }
+  .hero h1 { display: none; }
   .hero h1 br { display: none; }
   .hero-badge { display: none; }
   .hero-sub { display: block; font-size: .9rem; max-width: 90%; margin: 1.2rem auto 2rem; }
