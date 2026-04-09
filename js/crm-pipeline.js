@@ -111,7 +111,8 @@
       summaryEl.textContent = totalOpen + ' open lead' + (totalOpen !== 1 ? 's' : '') + ' in pipeline';
     }
 
-    // Initialize SortableJS on each column
+    // Initialize SortableJS on each column (guard if CDN failed)
+    if (typeof Sortable === 'undefined') return;
     var cardContainers = boardEl.querySelectorAll('.crm-kanban-cards');
     cardContainers.forEach(function(container) {
       var instance = new Sortable(container, {
