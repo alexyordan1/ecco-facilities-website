@@ -319,16 +319,15 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var words = ['health.', 'future.', 'planet.', 'people.'];
   var idx = 0;
-  setInterval(function() {
-    el.classList.add('out');
-    el.classList.remove('in');
+  function cycle() {
+    el.style.opacity = '0';
     setTimeout(function() {
       idx = (idx + 1) % words.length;
       el.textContent = words[idx];
-      el.classList.remove('out');
-      el.classList.add('in');
-    }, 1000);
-  }, 4500);
+      el.style.opacity = '1';
+    }, 1200);
+  }
+  setInterval(cycle, 5000);
 })();
 
 /* ============================================================
@@ -345,11 +344,11 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   ];
   var idx = 0;
   setInterval(function() {
-    el.classList.add('out');
+    el.style.opacity = '0';
     setTimeout(function() {
       idx = (idx + 1) % msgs.length;
       el.textContent = msgs[idx];
-      el.classList.remove('out');
+      el.style.opacity = '1';
     }, 800);
   }, 5000);
 })();
