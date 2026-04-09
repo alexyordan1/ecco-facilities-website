@@ -199,7 +199,7 @@ textarea:focus-visible {
 .hero-img {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover; background-position: center;
-  opacity: .22;
+  opacity: .25;
   will-change: transform;
 }
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
@@ -1292,10 +1292,16 @@ textarea:focus-visible {
   .nm-contact a { color: var(--green-l); text-decoration: none; font-weight: 600; font-size: .88rem; }
   .nm-contact a:hover { color: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
-  .hero { padding: 3rem 1.5rem 2.5rem; min-height: 100vh; min-height: 100svh; }
-  .hero h1 { font-size: 1.8rem; }
+  .hero { padding: 2.5rem 1.5rem 2rem; min-height: 100vh; min-height: 100svh; }
+  .hero h1 { font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.15; }
   .hero h1 br { display: none; }
-  .hero-sub { font-size: .95rem; }
+  .hero-badge { display: none; }
+  .hero-sub { font-size: .88rem; max-width: 90%; margin: 1.2rem auto 1.8rem; }
+  .hero-email { display: none; }
+  .hero-actions { flex-direction: row; gap: .6rem; justify-content: center; }
+  .hero-actions .btn { width: auto; min-height: 44px; padding: .7rem 1.4rem; font-size: .85rem; border-radius: 100px; }
+  .hero-actions .btn-white { box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+  .hero-actions .btn-ol { border-width: 1px; font-size: .82rem; padding: .65rem 1.2rem; }
   .page-hero { padding: 2.5rem 1.5rem 2.5rem; min-height: 100vh; }
   .page-hero h1 { font-size: clamp(1.8rem,6vw,2.4rem); }
   .page-hero-sub { font-size: .92rem; }
@@ -1367,8 +1373,7 @@ textarea:focus-visible {
   .cta-banner h2 { font-size: clamp(1.2rem, 5vw, 1.6rem); }
 
   /* Buttons — full width on mobile */
-  .hero-actions { flex-direction: column; gap: .8rem; }
-  .hero-actions .btn { width: 100%; text-align: center; min-height: 48px; display: flex; align-items: center; justify-content: center; }
+  .hero-actions .btn { min-height: 44px; }
   .btn { min-height: 44px; }
 
   /* Back-to-top — position above chat widget */
