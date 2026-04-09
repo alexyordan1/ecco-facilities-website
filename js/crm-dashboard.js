@@ -76,6 +76,19 @@
       }
       renderKpis(result.data.kpis);
       renderCharts(result.data.charts, result.data.kpis);
+
+      /* Fetch upcoming tasks */
+      try {
+        var tasksResult = await CRM.fetch('/crm-tasks?upcoming=true&days=7');
+        if (tasksResult && tasksResult.ok && tasksResult.data.tasks.length > 0) {
+          renderUpcomingTasks(tasksResult.data.tasks);
+        } else {
+          /* Clear existing tasks card if no tasks */
+          var existing = document.getElementById('upcomingTasks');
+          if (existing) existing.remove();
+        }
+      } catch (e) { /* silent */ }
+
     } catch (err) {
       CRM.showError(kpisEl, { message: 'Failed to load dashboard', onRetry: loadDashboard });
     }
@@ -107,6 +120,31 @@
       + '<div class="crm-stat-value">' + value + '</div>'
       + (extra || '')
       + '</div>';
+  }
+
+  function renderUpcomingTasks(tasks) {
+    var container = document.getElementById('upcomingTasks');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'upcomingTasks';
+      container.className = 'crm-card crm-upcoming-tasks';
+      kpisEl.parentNode.insertBefore(container, chartsEl);
+    }
+
+    var html = '<div class="crm-card-header"><h3 class="crm-card-title">Upcoming Tasks</h3></div>';
+    tasks.forEach(function(t) {
+      var isOverdue = t.due_date && new Date(t.due_date) < new Date();
+      var leadName = t.leads ? ((t.leads.first_name || '') + ' ' + (t.leads.last_name || '')).trim() : '';
+      html += '<div class="crm-task ' + (isOverdue ? 'crm-task-overdue' : '') + '">' +
+        '<div class="crm-task-content">' +
+          '<div class="crm-task-title">' + CRM.escapeHtml(t.title) + '</div>' +
+          '<div class="crm-task-due">' + (t.due_date ? CRM.formatDate(t.due_date) : 'No date') +
+          (leadName ? ' &middot; <a href="/crm/lead.html?id=' + t.lead_id + '">' + CRM.escapeHtml(leadName) + '</a>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    container.innerHTML = html;
   }
 
   function formatNumber(n) {

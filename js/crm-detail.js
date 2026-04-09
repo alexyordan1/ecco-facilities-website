@@ -25,18 +25,20 @@
 
   async function loadLead() {
     try {
-      /* Fetch lead, notes, activities, and stages in parallel */
+      /* Fetch lead, notes, activities, stages, and tasks in parallel */
       var results = await Promise.all([
         CRM.fetch('/crm-leads?id=' + leadId),
         CRM.fetch('/crm-notes?lead_id=' + leadId),
         CRM.fetch('/crm-activities?lead_id=' + leadId),
-        CRM.fetch('/crm-leads?stages=true')
+        CRM.fetch('/crm-leads?stages=true'),
+        CRM.fetch('/crm-tasks?lead_id=' + leadId)
       ]);
 
       var leadRes = results[0];
       var notesRes = results[1];
       var activitiesRes = results[2];
       var stagesRes = results[3];
+      var tasksRes = results[4];
 
       if (!leadRes || !leadRes.ok || !leadRes.data || !leadRes.data.lead) {
         CRM.showError(detailEl, { message: 'Lead not found', onRetry: loadLead });
@@ -47,20 +49,21 @@
       var notes = (notesRes && notesRes.ok) ? notesRes.data.notes : [];
       var activities = (activitiesRes && activitiesRes.ok) ? activitiesRes.data.activities : [];
       stages = (stagesRes && stagesRes.ok && stagesRes.data.stages) ? stagesRes.data.stages : [];
+      var tasks = (tasksRes && tasksRes.ok && tasksRes.data.tasks) ? tasksRes.data.tasks : [];
 
       /* Update breadcrumb */
       var name = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() || lead.email;
       breadcrumbName.textContent = name;
       document.title = name + ' \u2014 CRM \u2014 Ecco Facilities';
 
-      renderDetail(lead, notes, activities);
+      renderDetail(lead, notes, activities, tasks);
 
     } catch (err) {
       CRM.showError(detailEl, { message: 'Failed to load lead details', onRetry: loadLead });
     }
   }
 
-  function renderDetail(lead, notes, activities) {
+  function renderDetail(lead, notes, activities, tasks) {
     var name = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() || '\u2014';
     var phone = lead.phone || (lead.form_data && lead.form_data.phone) || '';
     var email = lead.email || '';
@@ -75,6 +78,7 @@
         '</div>' +
         '<div class="crm-detail-right">' +
           renderPipelineCard(lead) +
+          renderTasksCard(tasks) +
           renderNotesCard(notes) +
         '</div>' +
       '</div>';
@@ -230,6 +234,37 @@
         '<input type="number" id="estimatedValue" class="crm-input" placeholder="0.00" value="' + (lead.estimated_value || '') + '" step="0.01" min="0">' +
       '</div>' +
       '<button id="markContacted" class="crm-btn-sm crm-btn-secondary crm-contacted-btn">' + contactedLabel + '</button>' +
+    '</div>';
+  }
+
+  function renderTasksCard(tasks) {
+    var tasksList = '';
+    if (!tasks || tasks.length === 0) {
+      tasksList = '<div class="crm-empty"><div class="crm-empty-subtitle">No tasks yet.</div></div>';
+    } else {
+      tasks.forEach(function(t) {
+        var isOverdue = !t.completed && t.due_date && new Date(t.due_date) < new Date();
+        var dueText = t.due_date ? CRM.formatDate(t.due_date) : 'No date';
+        var cls = t.completed ? 'crm-task-done' : (isOverdue ? 'crm-task-overdue' : '');
+        tasksList += '<div class="crm-task ' + cls + '" data-task-id="' + t.id + '">' +
+          '<label class="crm-task-check"><input type="checkbox" ' + (t.completed ? 'checked' : '') + ' data-task-id="' + t.id + '"></label>' +
+          '<div class="crm-task-content">' +
+            '<div class="crm-task-title">' + CRM.escapeHtml(t.title) + '</div>' +
+            '<div class="crm-task-due">' + dueText + '</div>' +
+          '</div>' +
+          '<button class="crm-btn-icon crm-task-delete" data-task-id="' + t.id + '" aria-label="Delete task">&times;</button>' +
+        '</div>';
+      });
+    }
+
+    return '<div class="crm-card">' +
+      '<div class="crm-card-header"><h2 class="crm-card-title">Tasks</h2></div>' +
+      '<div class="crm-task-form">' +
+        '<input type="text" id="taskTitle" class="crm-input" placeholder="Add a task...">' +
+        '<input type="datetime-local" id="taskDue" class="crm-input crm-task-date-input">' +
+        '<button id="addTaskBtn" class="crm-btn-sm">Add</button>' +
+      '</div>' +
+      '<div id="tasksList">' + tasksList + '</div>' +
     '</div>';
   }
 
@@ -415,6 +450,122 @@
         }
       });
     }
+
+    /* Add task */
+    var taskTitleInput = document.getElementById('taskTitle');
+    var taskDueInput = document.getElementById('taskDue');
+    var addTaskBtn = document.getElementById('addTaskBtn');
+    var tasksListEl = document.getElementById('tasksList');
+
+    if (addTaskBtn && taskTitleInput) {
+      addTaskBtn.addEventListener('click', async function() {
+        var title = taskTitleInput.value.trim();
+        if (!title) return;
+
+        this.disabled = true;
+        this.textContent = 'Saving\u2026';
+
+        try {
+          var taskBody = { lead_id: parseInt(leadId), title: title };
+          if (taskDueInput && taskDueInput.value) {
+            taskBody.due_date = new Date(taskDueInput.value).toISOString();
+          }
+
+          var result = await CRM.fetch('/crm-tasks', {
+            method: 'POST',
+            body: taskBody
+          });
+
+          if (result && result.ok) {
+            var t = result.data.task;
+            var dueText = t.due_date ? CRM.formatDate(t.due_date) : 'No date';
+            var taskHtml = '<div class="crm-task" data-task-id="' + t.id + '">' +
+              '<label class="crm-task-check"><input type="checkbox" data-task-id="' + t.id + '"></label>' +
+              '<div class="crm-task-content">' +
+                '<div class="crm-task-title">' + CRM.escapeHtml(t.title) + '</div>' +
+                '<div class="crm-task-due">' + dueText + '</div>' +
+              '</div>' +
+              '<button class="crm-btn-icon crm-task-delete" data-task-id="' + t.id + '" aria-label="Delete task">&times;</button>' +
+            '</div>';
+
+            /* Remove empty state if present */
+            var emptyEl = tasksListEl.querySelector('.crm-empty');
+            if (emptyEl) emptyEl.remove();
+
+            tasksListEl.insertAdjacentHTML('afterbegin', taskHtml);
+            taskTitleInput.value = '';
+            if (taskDueInput) taskDueInput.value = '';
+
+            /* Rebind task events for new elements */
+            bindTaskItemEvents();
+
+            /* Reload activities to show task_created */
+            reloadActivities();
+          }
+        } finally {
+          this.disabled = false;
+          this.textContent = 'Add';
+        }
+      });
+    }
+
+    /* Bind task item events (checkboxes + delete) */
+    bindTaskItemEvents();
+  }
+
+  function bindTaskItemEvents() {
+    var tasksListEl = document.getElementById('tasksList');
+    if (!tasksListEl) return;
+
+    /* Task checkbox toggle */
+    tasksListEl.querySelectorAll('.crm-task-check input[type="checkbox"]').forEach(function(cb) {
+      /* Remove old listeners by cloning */
+      var newCb = cb.cloneNode(true);
+      cb.parentNode.replaceChild(newCb, cb);
+
+      newCb.addEventListener('change', async function() {
+        var taskId = parseInt(this.dataset.taskId, 10);
+        var completed = this.checked;
+        var taskEl = this.closest('.crm-task');
+
+        if (completed) {
+          taskEl.classList.add('crm-task-done');
+          taskEl.classList.remove('crm-task-overdue');
+        } else {
+          taskEl.classList.remove('crm-task-done');
+        }
+
+        await CRM.fetch('/crm-tasks', {
+          method: 'PATCH',
+          body: { id: taskId, completed: completed }
+        });
+      });
+    });
+
+    /* Task delete buttons */
+    tasksListEl.querySelectorAll('.crm-task-delete').forEach(function(btn) {
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', async function() {
+        var taskId = parseInt(this.dataset.taskId, 10);
+        var taskEl = this.closest('.crm-task');
+
+        taskEl.style.opacity = '0.4';
+
+        var result = await CRM.fetch('/crm-tasks?id=' + taskId, { method: 'DELETE' });
+        if (result && result.ok) {
+          taskEl.remove();
+          /* Show empty state if no tasks left */
+          var remaining = document.querySelectorAll('#tasksList .crm-task');
+          if (remaining.length === 0) {
+            document.getElementById('tasksList').innerHTML = '<div class="crm-empty"><div class="crm-empty-subtitle">No tasks yet.</div></div>';
+          }
+        } else {
+          taskEl.style.opacity = '1';
+        }
+      });
+    });
   }
 
   async function saveField(update) {
