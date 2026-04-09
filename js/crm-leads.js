@@ -1,4 +1,4 @@
-/* crm-leads.js — Leads list page logic v1.0 */
+/* crm-leads.js — Leads list page logic v1.1 — bulk actions, CSV import */
 (function() {
   var state = {
     page: 1,
@@ -68,6 +68,14 @@
 
     if (exportBtn) exportBtn.addEventListener('click', exportCsv);
 
+    /* Import CSV */
+    var importBtn = document.getElementById('importCsv');
+    var csvFileInput = document.getElementById('csvFileInput');
+    if (importBtn && csvFileInput) {
+      importBtn.addEventListener('click', function() { csvFileInput.click(); });
+      csvFileInput.addEventListener('change', handleCsvFile);
+    }
+
     loadLeads();
     CRM.startPolling(loadLeads, 45);
   }
@@ -127,8 +135,26 @@
       return state.order === 'asc' ? ' sorted-asc' : ' sorted-desc';
     };
 
-    var html = '<div class="crm-table-wrap"><table class="crm-table">' +
+    /* Bulk action bar (inserted above table, hidden by default) */
+    var bulkHtml = '<div class="crm-bulk-bar" id="bulkBar" style="display:none">' +
+      '<span id="bulkCount">0 selected</span>' +
+      '<select id="bulkStage" class="crm-filter-select">' +
+        '<option value="">Change Stage...</option>' +
+        '<option value="new">New Lead</option>' +
+        '<option value="contacted">Contacted</option>' +
+        '<option value="site-visit">Site Visit</option>' +
+        '<option value="proposal">Proposal Sent</option>' +
+        '<option value="negotiation">Negotiation</option>' +
+        '<option value="won">Won</option>' +
+        '<option value="lost">Lost</option>' +
+      '</select>' +
+      '<button id="bulkContacted" class="crm-btn-sm">Mark Contacted</button>' +
+      '<button id="bulkDeselect" class="crm-btn-sm crm-btn-secondary">Deselect All</button>' +
+    '</div>';
+
+    var html = bulkHtml + '<div class="crm-table-wrap"><table class="crm-table">' +
       '<thead><tr>' +
+        '<th class="crm-check-col"><input type="checkbox" id="selectAll"></th>' +
         '<th class="sortable' + sortIcon('first_name') + '" data-sort="first_name">Name</th>' +
         '<th class="sortable' + sortIcon('company') + '" data-sort="company">Company</th>' +
         '<th>Service</th>' +
@@ -149,6 +175,7 @@
       var rowClass = CRM.getLeadAlerts(lead).some(function(a) { return a.type === 'stale'; }) ? ' crm-row-stale' : '';
 
       html += '<tr data-id="' + lead.id + '" role="link" tabindex="0" class="' + rowClass + '">' +
+        '<td class="crm-check-col"><input type="checkbox" class="crm-row-check" data-id="' + lead.id + '"></td>' +
         '<td data-label="Name">' + name + (alertBadges ? ' ' + alertBadges : '') + '</td>' +
         '<td data-label="Company">' + company + '</td>' +
         '<td data-label="Service">' + CRM.serviceBadge(lead.service) + '</td>' +
@@ -163,13 +190,14 @@
     html += '</tbody></table></div>';
     tableEl.innerHTML = html;
 
-    /* Click handlers for rows */
+    /* Click handlers for rows (skip clicks on checkboxes) */
     tableEl.querySelectorAll('tr[data-id]').forEach(function(row) {
-      row.addEventListener('click', function() {
+      row.addEventListener('click', function(e) {
+        if (e.target.type === 'checkbox' || e.target.closest('.crm-check-col')) return;
         window.location.href = '/crm/lead.html?id=' + row.dataset.id;
       });
       row.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') window.location.href = '/crm/lead.html?id=' + row.dataset.id;
+        if (e.key === 'Enter' && e.target.type !== 'checkbox') window.location.href = '/crm/lead.html?id=' + row.dataset.id;
       });
     });
 
@@ -186,6 +214,111 @@
         loadLeads();
       });
     });
+
+    /* Bulk selection handlers */
+    bindBulkActions();
+  }
+
+  /* --- Bulk Actions --- */
+  function getCheckedIds() {
+    var ids = [];
+    tableEl.querySelectorAll('.crm-row-check:checked').forEach(function(cb) {
+      ids.push(parseInt(cb.dataset.id, 10));
+    });
+    return ids;
+  }
+
+  function updateBulkBar() {
+    var ids = getCheckedIds();
+    var bar = document.getElementById('bulkBar');
+    var count = document.getElementById('bulkCount');
+    if (!bar) return;
+    if (ids.length > 0) {
+      bar.style.display = 'flex';
+      count.textContent = ids.length + ' selected';
+    } else {
+      bar.style.display = 'none';
+    }
+    /* Keep selectAll in sync */
+    var selectAll = document.getElementById('selectAll');
+    var allBoxes = tableEl.querySelectorAll('.crm-row-check');
+    if (selectAll && allBoxes.length > 0) {
+      selectAll.checked = ids.length === allBoxes.length;
+      selectAll.indeterminate = ids.length > 0 && ids.length < allBoxes.length;
+    }
+  }
+
+  function bindBulkActions() {
+    var selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+      selectAll.addEventListener('change', function() {
+        var checked = this.checked;
+        tableEl.querySelectorAll('.crm-row-check').forEach(function(cb) {
+          cb.checked = checked;
+        });
+        updateBulkBar();
+      });
+    }
+
+    tableEl.querySelectorAll('.crm-row-check').forEach(function(cb) {
+      cb.addEventListener('change', updateBulkBar);
+    });
+
+    var bulkStage = document.getElementById('bulkStage');
+    if (bulkStage) {
+      bulkStage.addEventListener('change', async function() {
+        var newStage = this.value;
+        if (!newStage) return;
+        var ids = getCheckedIds();
+        if (ids.length === 0) return;
+
+        bulkStage.disabled = true;
+        var promises = ids.map(function(id) {
+          return CRM.fetch('/crm-leads', {
+            method: 'PATCH',
+            body: { id: id, pipeline_stage: newStage }
+          });
+        });
+        await Promise.all(promises);
+        bulkStage.value = '';
+        bulkStage.disabled = false;
+        loadLeads();
+      });
+    }
+
+    var bulkContacted = document.getElementById('bulkContacted');
+    if (bulkContacted) {
+      bulkContacted.addEventListener('click', async function() {
+        var ids = getCheckedIds();
+        if (ids.length === 0) return;
+
+        this.disabled = true;
+        this.textContent = 'Updating\u2026';
+        var now = new Date().toISOString();
+        var promises = ids.map(function(id) {
+          return CRM.fetch('/crm-leads', {
+            method: 'PATCH',
+            body: { id: id, last_contacted_at: now }
+          });
+        });
+        await Promise.all(promises);
+        this.disabled = false;
+        this.textContent = 'Mark Contacted';
+        loadLeads();
+      });
+    }
+
+    var bulkDeselect = document.getElementById('bulkDeselect');
+    if (bulkDeselect) {
+      bulkDeselect.addEventListener('click', function() {
+        tableEl.querySelectorAll('.crm-row-check').forEach(function(cb) {
+          cb.checked = false;
+        });
+        var selectAll = document.getElementById('selectAll');
+        if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+        updateBulkBar();
+      });
+    }
   }
 
   function renderPagination(page, pages, total) {
@@ -280,6 +413,172 @@
         exportBtn.textContent = 'Export CSV';
       }
     }
+  }
+
+  /* --- CSV Import --- */
+  function parseCsv(text) {
+    var lines = [];
+    var current = '';
+    var inQuotes = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (ch === '"') {
+        if (inQuotes && i + 1 < text.length && text[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') i++;
+        lines.push(current);
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+    if (current.trim()) lines.push(current);
+
+    return lines.map(function(line) {
+      var fields = [];
+      var field = '';
+      var q = false;
+      for (var j = 0; j < line.length; j++) {
+        var c = line[j];
+        if (c === '"') {
+          if (q && j + 1 < line.length && line[j + 1] === '"') {
+            field += '"';
+            j++;
+          } else {
+            q = !q;
+          }
+        } else if (c === ',' && !q) {
+          fields.push(field.trim());
+          field = '';
+        } else {
+          field += c;
+        }
+      }
+      fields.push(field.trim());
+      return fields;
+    });
+  }
+
+  function mapColumns(headers) {
+    var map = {};
+    var aliases = {
+      'name': 'name', 'full name': 'name', 'fullname': 'name', 'contact': 'name',
+      'first name': 'first_name', 'first_name': 'first_name', 'firstname': 'first_name',
+      'last name': 'last_name', 'last_name': 'last_name', 'lastname': 'last_name',
+      'email': 'email', 'e-mail': 'email', 'email address': 'email',
+      'phone': 'phone', 'telephone': 'phone', 'phone number': 'phone', 'tel': 'phone',
+      'company': 'company', 'organization': 'company', 'org': 'company', 'business': 'company',
+      'service': 'service', 'service type': 'service'
+    };
+    for (var i = 0; i < headers.length; i++) {
+      var h = headers[i].toLowerCase().trim();
+      if (aliases[h]) {
+        map[i] = aliases[h];
+      }
+    }
+    return map;
+  }
+
+  function handleCsvFile() {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var rows = parseCsv(e.target.result);
+      if (rows.length < 2) return;
+
+      var headers = rows[0];
+      var colMap = mapColumns(headers);
+      var dataRows = rows.slice(1).filter(function(r) { return r.join('').trim(); });
+
+      if (dataRows.length === 0) return;
+
+      var leads = dataRows.map(function(row) {
+        var obj = {};
+        for (var idx in colMap) {
+          if (colMap.hasOwnProperty(idx)) {
+            obj[colMap[idx]] = row[idx] || '';
+          }
+        }
+        return obj;
+      });
+
+      showImportPreview(headers, dataRows, colMap, leads);
+    };
+    reader.readAsText(file);
+    this.value = '';
+  }
+
+  function showImportPreview(headers, dataRows, colMap, leads) {
+    /* Remove any existing preview */
+    var existing = document.getElementById('importPreview');
+    if (existing) existing.remove();
+
+    var previewRows = dataRows.slice(0, 5);
+    var thHtml = '<tr>';
+    for (var i = 0; i < headers.length; i++) {
+      var mapped = colMap[i] ? ' (' + colMap[i] + ')' : '';
+      thHtml += '<th>' + CRM.escapeHtml(headers[i]) + mapped + '</th>';
+    }
+    thHtml += '</tr>';
+
+    var tbHtml = '';
+    previewRows.forEach(function(row) {
+      tbHtml += '<tr>';
+      for (var j = 0; j < row.length; j++) {
+        tbHtml += '<td>' + CRM.escapeHtml(row[j]) + '</td>';
+      }
+      tbHtml += '</tr>';
+    });
+
+    var totalLabel = dataRows.length === 1 ? '1 lead' : dataRows.length + ' leads';
+    var preview = document.createElement('div');
+    preview.id = 'importPreview';
+    preview.className = 'crm-import-preview';
+    preview.innerHTML =
+      '<h3>CSV Import Preview</h3>' +
+      '<table><thead>' + thHtml + '</thead><tbody>' + tbHtml + '</tbody></table>' +
+      (dataRows.length > 5 ? '<p style="margin-top:.5rem;font-size:.78rem;color:var(--tm)">Showing 5 of ' + dataRows.length + ' rows</p>' : '') +
+      '<div class="crm-import-actions">' +
+        '<button id="confirmImport" class="crm-btn-sm">Import ' + totalLabel + '</button>' +
+        '<button id="cancelImport" class="crm-btn-sm crm-btn-secondary">Cancel</button>' +
+      '</div>';
+
+    tableEl.parentNode.insertBefore(preview, tableEl);
+
+    document.getElementById('cancelImport').addEventListener('click', function() {
+      preview.remove();
+    });
+
+    document.getElementById('confirmImport').addEventListener('click', async function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Importing\u2026';
+
+      try {
+        var result = await CRM.fetch('/crm-import', {
+          method: 'POST',
+          body: { leads: leads }
+        });
+
+        if (result && result.ok) {
+          preview.innerHTML = '<h3>Import complete! ' + (result.data.imported || leads.length) + ' leads imported.</h3>';
+          setTimeout(function() { preview.remove(); loadLeads(); }, 1500);
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Retry Import';
+          preview.insertAdjacentHTML('beforeend', '<p style="color:var(--red);font-size:.82rem;margin-top:.5rem">' + CRM.escapeHtml((result && result.error) || 'Import failed') + '</p>');
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Retry Import';
+      }
+    });
   }
 
   init();

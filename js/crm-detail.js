@@ -1,4 +1,4 @@
-/* crm-detail.js — Lead detail page logic v1.0 */
+/* crm-detail.js — Lead detail page logic v1.1 — tags support */
 (function() {
   var detailEl = document.getElementById('leadDetail');
   var breadcrumbName = document.getElementById('breadcrumbName');
@@ -25,13 +25,15 @@
 
   async function loadLead() {
     try {
-      /* Fetch lead, notes, activities, stages, and tasks in parallel */
+      /* Fetch lead, notes, activities, stages, tasks, and tags in parallel */
       var results = await Promise.all([
         CRM.fetch('/crm-leads?id=' + leadId),
         CRM.fetch('/crm-notes?lead_id=' + leadId),
         CRM.fetch('/crm-activities?lead_id=' + leadId),
         CRM.fetch('/crm-leads?stages=true'),
-        CRM.fetch('/crm-tasks?lead_id=' + leadId)
+        CRM.fetch('/crm-tasks?lead_id=' + leadId),
+        CRM.fetch('/crm-tags?lead_id=' + leadId),
+        CRM.fetch('/crm-tags')
       ]);
 
       var leadRes = results[0];
@@ -39,6 +41,8 @@
       var activitiesRes = results[2];
       var stagesRes = results[3];
       var tasksRes = results[4];
+      var tagsRes = results[5];
+      var allTagsRes = results[6];
 
       if (!leadRes || !leadRes.ok || !leadRes.data || !leadRes.data.lead) {
         CRM.showError(detailEl, { message: 'Lead not found', onRetry: loadLead });
@@ -50,20 +54,22 @@
       var activities = (activitiesRes && activitiesRes.ok) ? activitiesRes.data.activities : [];
       stages = (stagesRes && stagesRes.ok && stagesRes.data.stages) ? stagesRes.data.stages : [];
       var tasks = (tasksRes && tasksRes.ok && tasksRes.data.tasks) ? tasksRes.data.tasks : [];
+      var tags = (tagsRes && tagsRes.ok && tagsRes.data.tags) ? tagsRes.data.tags : [];
+      var allTags = (allTagsRes && allTagsRes.ok && allTagsRes.data.tags) ? allTagsRes.data.tags : [];
 
       /* Update breadcrumb */
       var name = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() || lead.email;
       breadcrumbName.textContent = name;
       document.title = name + ' \u2014 CRM \u2014 Ecco Facilities';
 
-      renderDetail(lead, notes, activities, tasks);
+      renderDetail(lead, notes, activities, tasks, tags, allTags);
 
     } catch (err) {
       CRM.showError(detailEl, { message: 'Failed to load lead details', onRetry: loadLead });
     }
   }
 
-  function renderDetail(lead, notes, activities, tasks) {
+  function renderDetail(lead, notes, activities, tasks, tags, allTags) {
     var name = ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim() || '\u2014';
     var phone = lead.phone || (lead.form_data && lead.form_data.phone) || '';
     var email = lead.email || '';
@@ -72,7 +78,7 @@
     detailEl.innerHTML =
       '<div class="crm-detail-layout">' +
         '<div class="crm-detail-left">' +
-          renderContactCard(lead, name, email, phone, company) +
+          renderContactCard(lead, name, email, phone, company, tags) +
           renderFormDataCard(lead) +
           renderTimelineCard(activities) +
         '</div>' +
@@ -83,10 +89,10 @@
         '</div>' +
       '</div>';
 
-    bindEvents();
+    bindEvents(allTags || []);
   }
 
-  function renderContactCard(lead, name, email, phone, company) {
+  function renderContactCard(lead, name, email, phone, company, tags) {
     var firstName = lead.first_name || '';
     var lastName = lead.last_name || '';
     var nameHtml = '<span class="crm-editable" data-field="first_name">' + CRM.escapeHtml(firstName || '\u2014') + '</span> ' +
@@ -153,6 +159,29 @@
         lastContactedRow +
       '</div>' +
       '<div class="crm-contact-actions">' + actions + '</div>' +
+      renderTagsSection(tags || []) +
+    '</div>';
+  }
+
+  function renderTagsSection(tags) {
+    var pills = '';
+    if (tags && tags.length > 0) {
+      tags.forEach(function(t) {
+        var tagName = typeof t === 'string' ? t : t.tag;
+        pills += '<span class="crm-tag" data-tag="' + CRM.escapeHtml(tagName) + '">' +
+          CRM.escapeHtml(tagName) +
+          ' <button class="crm-tag-remove" data-tag="' + CRM.escapeHtml(tagName) + '" aria-label="Remove tag">&times;</button>' +
+        '</span>';
+      });
+    }
+
+    return '<div class="crm-tags-section">' +
+      '<div class="crm-tags-list" id="tagsList">' + pills + '</div>' +
+      '<div class="crm-tags-add">' +
+        '<input type="text" id="tagInput" class="crm-input crm-tag-input" placeholder="Add tag..." maxlength="30" list="tagSuggestions">' +
+        '<datalist id="tagSuggestions"></datalist>' +
+        '<button id="addTagBtn" class="crm-btn-sm">Add</button>' +
+      '</div>' +
     '</div>';
   }
 
@@ -291,7 +320,7 @@
     '</div>';
   }
 
-  function bindEvents() {
+  function bindEvents(allTags) {
     /* Communication action buttons */
     var actionBtns = detailEl.querySelectorAll('[data-action]');
     actionBtns.forEach(function(btn) {
@@ -511,6 +540,85 @@
 
     /* Bind task item events (checkboxes + delete) */
     bindTaskItemEvents();
+
+    /* Tag autocomplete suggestions */
+    var tagSuggestions = document.getElementById('tagSuggestions');
+    if (tagSuggestions && allTags && allTags.length > 0) {
+      var opts = '';
+      allTags.forEach(function(t) { opts += '<option value="' + CRM.escapeHtml(t) + '">'; });
+      tagSuggestions.innerHTML = opts;
+    }
+
+    /* Add tag */
+    var tagInput = document.getElementById('tagInput');
+    var addTagBtn = document.getElementById('addTagBtn');
+
+    if (addTagBtn && tagInput) {
+      var doAddTag = async function() {
+        var tag = tagInput.value.trim().toLowerCase();
+        if (!tag) return;
+
+        addTagBtn.disabled = true;
+        try {
+          var result = await CRM.fetch('/crm-tags', {
+            method: 'POST',
+            body: { lead_id: parseInt(leadId, 10), tag: tag }
+          });
+
+          if (result && result.ok) {
+            var tagsList = document.getElementById('tagsList');
+            if (tagsList) {
+              var pill = '<span class="crm-tag" data-tag="' + CRM.escapeHtml(tag) + '">' +
+                CRM.escapeHtml(tag) +
+                ' <button class="crm-tag-remove" data-tag="' + CRM.escapeHtml(tag) + '" aria-label="Remove tag">&times;</button>' +
+              '</span>';
+              tagsList.insertAdjacentHTML('beforeend', pill);
+              bindTagRemoveButtons();
+            }
+            tagInput.value = '';
+          }
+        } finally {
+          addTagBtn.disabled = false;
+        }
+      };
+
+      addTagBtn.addEventListener('click', doAddTag);
+      tagInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); doAddTag(); }
+      });
+    }
+
+    /* Bind remove buttons on existing tags */
+    bindTagRemoveButtons();
+  }
+
+  function bindTagRemoveButtons() {
+    var tagsList = document.getElementById('tagsList');
+    if (!tagsList) return;
+
+    tagsList.querySelectorAll('.crm-tag-remove').forEach(function(btn) {
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', async function() {
+        var tag = this.dataset.tag;
+        var pill = this.closest('.crm-tag');
+        if (pill) pill.style.opacity = '0.4';
+
+        try {
+          var result = await CRM.fetch('/crm-tags?lead_id=' + leadId + '&tag=' + encodeURIComponent(tag), {
+            method: 'DELETE'
+          });
+          if (result && result.ok && pill) {
+            pill.remove();
+          } else if (pill) {
+            pill.style.opacity = '1';
+          }
+        } catch (e) {
+          if (pill) pill.style.opacity = '1';
+        }
+      });
+    });
   }
 
   function bindTaskItemEvents() {
