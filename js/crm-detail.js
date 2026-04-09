@@ -286,9 +286,7 @@
 
         var update = { id: leadId, pipeline_stage: this.value };
 
-        /* If changing to lost, wait for reason */
-        if (this.value === 'lost') return;
-
+        /* Save stage change immediately — lost_reason can be added later on blur */
         await saveField(update);
       });
 

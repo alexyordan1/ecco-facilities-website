@@ -37,9 +37,11 @@
   }
 
   function renderKpis(kpis) {
-    var monthChange = kpis.prev_month > 0
-      ? Math.round((kpis.month - kpis.prev_month) / kpis.prev_month * 100)
-      : (kpis.month > 0 ? 100 : 0);
+    var prevMonth = kpis.prev_month || 0;
+    var curMonth = kpis.month || 0;
+    var monthChange = prevMonth > 0
+      ? Math.round((curMonth - prevMonth) / prevMonth * 100)
+      : (curMonth > 0 ? 100 : 0);
     var changeClass = monthChange >= 0 ? 'positive' : 'negative';
     var changeSymbol = monthChange >= 0 ? '+' : '';
 

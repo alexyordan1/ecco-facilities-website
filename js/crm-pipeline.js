@@ -64,7 +64,7 @@
 
     leads.forEach(function(lead) {
       var stage = lead.pipeline_stage || 'new';
-      if (!grouped[stage]) grouped[stage] = grouped['new'];
+      if (!grouped[stage]) stage = 'new';
       grouped[stage].push(lead);
     });
 

@@ -38,6 +38,15 @@
   --topbar-h: 56px;
 }
 
+/* --- Smooth page transitions --- */
+.crm-content > * {
+  animation: crm-fadeIn .3s var(--ease);
+}
+@keyframes crm-fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ------------------------------------------------------------------
    2. RESET + BASE
    ------------------------------------------------------------------ */
@@ -120,7 +129,7 @@ ol {
   top: 0;
   width: var(--sidebar-w);
   height: 100%;
-  background: var(--navy);
+  background: linear-gradient(180deg, #0B1D38 0%, #0F2444 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -133,8 +142,9 @@ ol {
 }
 
 .crm-sidebar-logo img {
-  max-height: 28px;
+  max-height: 40px;
   width: auto;
+  margin-bottom: .5rem;
 }
 
 .crm-sidebar-nav {
@@ -146,8 +156,8 @@ ol {
   display: flex;
   align-items: center;
   gap: .75rem;
-  padding: .65rem 1rem;
-  border-radius: 8px;
+  padding: .75rem 1.15rem;
+  border-radius: 10px;
   color: rgba(255, 255, 255, .7);
   transition: background .2s var(--ease), color .2s var(--ease);
   font-size: .88rem;
@@ -156,14 +166,17 @@ ol {
 }
 
 .crm-sidebar-nav a:hover {
-  background: rgba(255, 255, 255, .08);
+  background: rgba(255,255,255,.06);
   color: #fff;
+  transform: translateX(2px);
+  transition: all .2s var(--ease);
 }
 
 .crm-sidebar-nav a.active {
-  background: rgba(255, 255, 255, .12);
+  background: rgba(48,104,173,.2);
   color: #fff;
   font-weight: 600;
+  border-left: 3px solid var(--blue);
 }
 
 .crm-sidebar-nav a svg {
@@ -235,7 +248,9 @@ ol {
 /* --- Top bar --- */
 .crm-topbar {
   height: var(--topbar-h);
-  background: var(--wh);
+  background: rgba(255,255,255,.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--bll);
   display: flex;
   align-items: center;
@@ -280,7 +295,7 @@ ol {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--navy);
+  background: radial-gradient(ellipse at top, #15294D 0%, #0B1D38 50%);
   padding: 1rem;
 }
 
@@ -290,7 +305,7 @@ ol {
   padding: 2.5rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: var(--shlg);
+  box-shadow: 0 20px 60px rgba(11,29,56,.2), 0 0 0 1px rgba(255,255,255,.1);
 }
 
 .crm-login-logo {
@@ -359,18 +374,23 @@ ol {
 .crm-input {
   width: 100%;
   padding: .75rem 1rem;
-  border: 1.5px solid var(--bl);
+  border: 1.5px solid var(--bll);
   border-radius: var(--r);
   font-size: 1rem;
   color: var(--td);
   background: var(--wh);
-  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+  transition: border-color .2s, box-shadow .2s, background-color .2s;
   outline: none;
+}
+
+.crm-input:hover {
+  border-color: var(--bl);
 }
 
 .crm-input:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(48, 104, 173, .1);
+  box-shadow: 0 0 0 4px rgba(48,104,173,.08);
+  background: var(--wh);
 }
 
 .crm-input::placeholder {
@@ -401,6 +421,7 @@ select.crm-input {
   padding: .75rem 1.5rem;
   font-size: .88rem;
   font-weight: 600;
+  letter-spacing: .01em;
   border: none;
   border-radius: var(--r);
   cursor: pointer;
@@ -410,12 +431,13 @@ select.crm-input {
   color: var(--wh);
   text-decoration: none;
   line-height: 1;
+  box-shadow: 0 1px 2px rgba(11,29,56,.08);
 }
 
 .crm-btn:hover {
   background: var(--navy-l);
-  transform: translateY(-1px);
-  box-shadow: var(--shsm);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11,29,56,.15);
 }
 
 .crm-btn:active {
@@ -500,7 +522,7 @@ select.crm-input {
 }
 
 .crm-table thead {
-  background: var(--cream);
+  background: linear-gradient(180deg, var(--cream) 0%, #F0F2F7 100%);
 }
 
 .crm-table th {
@@ -515,7 +537,9 @@ select.crm-input {
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .crm-table th:hover {
@@ -545,8 +569,13 @@ select.crm-input {
 }
 
 .crm-table tbody tr:hover {
-  background: rgba(48, 104, 173, .03);
+  background: rgba(48,104,173,.04);
+  transform: scale(1.001);
   cursor: pointer;
+}
+
+.crm-table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 var(--blue);
 }
 
 .crm-table tbody tr:last-child td {
@@ -559,11 +588,11 @@ select.crm-input {
 .crm-badge {
   display: inline-flex;
   align-items: center;
-  padding: .15rem .55rem;
+  padding: .2rem .65rem;
   border-radius: 50px;
   font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .02em;
+  font-weight: 700;
+  letter-spacing: .03em;
   white-space: nowrap;
   line-height: 1.4;
 }
@@ -779,11 +808,20 @@ select.crm-input {
    10. CARDS
    ------------------------------------------------------------------ */
 .crm-card {
-  background: var(--wh);
-  border: 1px solid var(--bll);
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(223,228,236,.6);
   border-radius: var(--r);
   padding: 1.25rem;
   margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(11,29,56,.04), 0 4px 16px rgba(11,29,56,.04);
+  transition: box-shadow .3s var(--ease), transform .3s var(--ease);
+}
+
+.crm-card:hover {
+  box-shadow: 0 4px 20px rgba(11,29,56,.08);
+  transform: translateY(-1px);
 }
 
 .crm-card-header {
@@ -931,12 +969,13 @@ select.crm-input {
   position: absolute;
   left: -1.75rem;
   top: .35rem;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 2px solid;
   background: var(--wh);
   z-index: 1;
+  box-shadow: 0 0 0 3px var(--bg);
 }
 
 /* Timeline dot colors by type */
@@ -1129,6 +1168,20 @@ select.crm-input {
   border: 1px solid var(--bll);
   border-radius: var(--r);
   padding: 1.25rem;
+  border-left: 3px solid var(--blue);
+  position: relative;
+  overflow: hidden;
+}
+
+.crm-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(48,104,173,.04) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .crm-stat-label {
@@ -1136,12 +1189,13 @@ select.crm-input {
   text-transform: uppercase;
   letter-spacing: .05em;
   color: var(--tm);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .crm-stat-value {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
+  letter-spacing: -.02em;
   color: var(--td);
   margin-top: .25rem;
 }
@@ -1290,7 +1344,7 @@ select.crm-input {
   display: flex;
   flex-direction: column;
   background: var(--cream);
-  border-radius: var(--r);
+  border-radius: 14px;
   border: 1px solid var(--bll);
   max-height: calc(100vh - var(--topbar-h) - 5rem);
   scroll-snap-align: start;
@@ -1305,7 +1359,7 @@ select.crm-input {
   position: sticky;
   top: 0;
   background: var(--cream);
-  border-radius: var(--r) var(--r) 0 0;
+  border-radius: 14px 14px 0 0;
   z-index: 1;
 }
 
@@ -1352,8 +1406,8 @@ select.crm-input {
 
 .crm-kanban-card {
   background: var(--wh);
-  border: 1px solid var(--bll);
-  border-radius: 10px;
+  border: 1px solid rgba(223,228,236,.5);
+  border-radius: 12px;
   padding: .75rem;
   cursor: grab;
   transition: box-shadow .2s var(--ease), transform .2s var(--ease);
@@ -1361,8 +1415,8 @@ select.crm-input {
 }
 
 .crm-kanban-card:hover {
-  box-shadow: var(--shmd);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(11,29,56,.1);
+  transform: translateY(-2px);
 }
 
 .crm-kanban-card:active {
@@ -1496,10 +1550,19 @@ select.crm-input {
 }
 
 .crm-chart-card {
-  background: var(--wh);
-  border: 1px solid var(--bll);
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(223,228,236,.6);
   border-radius: var(--r);
   padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(11,29,56,.04), 0 4px 16px rgba(11,29,56,.04);
+  transition: box-shadow .3s var(--ease), transform .3s var(--ease);
+}
+
+.crm-chart-card:hover {
+  box-shadow: 0 4px 20px rgba(11,29,56,.08);
+  transform: translateY(-1px);
 }
 
 .crm-chart-card canvas {
@@ -1616,12 +1679,14 @@ select.crm-input {
   background: rgba(217,119,6,.1);
   color: #b45309;
   font-size: .68rem;
+  padding: .2rem .55rem;
 }
 
 .crm-alert-danger {
   background: rgba(239,68,68,.1);
   color: #dc2626;
   font-size: .68rem;
+  padding: .2rem .55rem;
   animation: crm-pulse 2s ease-in-out infinite;
 }
 
@@ -1653,4 +1718,14 @@ select.crm-input {
   font-size: .75rem;
   color: var(--tl);
   font-weight: 400;
+}
+
+/* Lost-reason textarea: hidden by default, shown via data-visible or class */
+.crm-lost-reason-wrap {
+  display: none;
+  margin-top: .75rem;
+}
+.crm-lost-reason-wrap[data-visible="block"],
+.crm-lost-reason-wrap.crm-lost-visible {
+  display: block;
 }

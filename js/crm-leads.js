@@ -240,7 +240,9 @@
       params.set('order', state.order);
 
       var result = await CRM.fetch('/crm-leads?' + params.toString());
-      if (!result || !result.ok || !result.data || !result.data.leads) return;
+      if (!result || !result.ok || !result.data || !result.data.leads) {
+        return;
+      }
 
       var leads = result.data.leads;
       var headers = ['Name', 'Email', 'Phone', 'Company', 'Service', 'Status', 'Stage', 'Ref#', 'Urgency', 'Created'];
@@ -270,9 +272,13 @@
       a.download = 'ecco-leads-' + new Date().toISOString().split('T')[0] + '.csv';
       a.click();
       URL.revokeObjectURL(url);
+    } catch (err) {
+      /* Network or unexpected error — user sees button re-enable via finally */
     } finally {
-      exportBtn.disabled = false;
-      exportBtn.textContent = 'Export CSV';
+      if (exportBtn) {
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export CSV';
+      }
     }
   }
 
