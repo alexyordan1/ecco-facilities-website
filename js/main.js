@@ -357,7 +357,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    HERO TEST — Mobile word rotation (built from scratch)
    ============================================================ */
 (function() {
-  var word = document.querySelector('.hero-test-word');
+  var word = document.querySelector('.hero-word-mobile');
   if (!word || window.innerWidth > 900) return;
   var list = ['health.', 'future.', 'planet.', 'people.'];
   var i = 0;

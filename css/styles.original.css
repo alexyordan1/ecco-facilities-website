@@ -273,11 +273,6 @@ textarea:focus-visible {
   100% { background-position: 200% center; }
 }
 
-/* Static title for mobile — zero JS, zero animation, zero flicker */
-.hero-morph-static {
-  display: none;
-  color: var(--green-l); font-style: italic;
-}
 /* Morph wrap — desktop only */
 .hero-morph-wrap {
   display: inline-block; position: relative;
@@ -289,7 +284,6 @@ textarea:focus-visible {
   transition: opacity .4s ease;
 }
 @media (max-width: 900px) {
-  .hero-morph-static { display: inline; }
   .hero-morph-wrap { display: none !important; }
 }
 
@@ -317,9 +311,9 @@ textarea:focus-visible {
   50% { transform: rotate(45deg) translateY(6px); }
 }
 
-/* Hero test title — mobile only, full desktop features */
-.hero-test-ttl { display: none; }
-.hero-test-word {
+/* Hero mobile title — separate element, no shared code with desktop */
+.hero-ttl-mobile { display: none; }
+.hero-word-mobile {
   font-style: italic;
   background: linear-gradient(90deg, #8FD48C, #5BA8E6, #6BD568, #8FD48C);
   background-size: 200% auto;
@@ -329,12 +323,13 @@ textarea:focus-visible {
   animation: shimmer 4s linear infinite;
 }
 @media (max-width: 900px) {
-  .hero-test-ttl {
+  .hero-ttl-mobile {
     display: block; font-family: var(--fd); font-weight: 500;
     font-size: clamp(2.6rem, 10vw, 3.2rem); line-height: 1.05;
-    color: var(--wh); text-align: center; margin-bottom: 2rem;
+    color: var(--wh); text-align: center; margin-bottom: 1.5rem;
   }
-  .hero-test-word { display: inline-block; width: 2.6em; text-align: center; }
+  .hero-word-mobile { display: inline-block; width: 2.6em; text-align: center; }
+  .hero-ttl-desktop { display: none; }
 }
 
 /* Hero gradient border bottom */
@@ -1342,7 +1337,7 @@ textarea:focus-visible {
     animation: none;
   }
   .hero-badge { display: none; }
-  .hero-sub { display: none; }
+  .hero-sub { display: block; font-size: .85rem; max-width: 90%; margin: 0 auto 1.5rem; }
   .hero-email { display: none; }
   .hero-stats { display: none !important; }
   .hero-actions { justify-content: center; }
