@@ -299,6 +299,24 @@ textarea:focus-visible {
   transition: opacity .8s ease;
 }
 
+/* Hero scroll hint — mobile only */
+.hero-scroll {
+  display: none; position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  flex-direction: column; align-items: center; gap: .4rem;
+  color: rgba(255,255,255,.3); font-size: .68rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .1em; z-index: 3;
+}
+.hero-scroll-arrow {
+  width: 18px; height: 18px;
+  border-right: 1.5px solid rgba(255,255,255,.3);
+  border-bottom: 1.5px solid rgba(255,255,255,.3);
+  transform: rotate(45deg);
+}
+@keyframes heroArrowBounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(6px); }
+}
+
 /* Hero gradient border bottom */
 .hero::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
@@ -1295,18 +1313,21 @@ textarea:focus-visible {
   .nm-contact a { color: var(--green-l); text-decoration: none; font-weight: 600; font-size: .88rem; }
   .nm-contact a:hover { color: var(--wh); }
   .sec, .service-detail-section, .problem-sec { padding: 3.5rem 1.5rem; }
-  .hero { padding: 5rem 1.5rem 2rem; min-height: 100vh; min-height: 100svh; }
-  .hero h1 { font-size: clamp(2.4rem, 9vw, 3rem); line-height: 1.1; }
+  .hero { padding: 2rem 1.5rem 3rem; min-height: 85vh; min-height: 85svh; }
+  .hero h1 { font-size: clamp(2.6rem, 10vw, 3.2rem); line-height: 1.05; margin-bottom: 2rem; }
   .hero h1 br { display: none; }
   .hero-badge { display: none; }
-  .hero-sub { display: block; font-size: .9rem; max-width: 90%; margin: 1.2rem auto 2rem; }
+  .hero-sub { display: none; }
   .hero-email { display: none; }
   .hero-stats { display: none !important; }
   .hero-actions { justify-content: center; }
-  .hero-actions .btn { width: auto; min-height: 48px; padding: .8rem 2rem; font-size: .9rem; border-radius: 100px; }
-  .hero-actions .btn-white { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+  .hero-actions .btn { width: auto; min-height: 48px; padding: .85rem 2.5rem; font-size: .9rem; border-radius: 100px; }
+  .hero-actions .btn-white { box-shadow: 0 6px 24px rgba(0,0,0,.2); }
   .hero-actions .btn-ol { display: none; }
-  .hero-img { opacity: .20; }
+  .hero-img { opacity: .25; }
+  /* Scroll hint */
+  .hero-scroll { display: flex; }
+  .hero-scroll-arrow { animation: heroArrowBounce 2s ease infinite; }
   .page-hero { padding: 2.5rem 1.5rem 2.5rem; min-height: 100vh; }
   .page-hero h1 { font-size: clamp(1.8rem,6vw,2.4rem); }
   .page-hero-sub { font-size: .92rem; }
