@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>CRM Login &mdash; Ecco Facilities</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/crm.css?v=1.0">
+</head>
+<body>
+  <div class="crm-login-page">
+    <div class="crm-login-card">
+      <img src="/images/logo-horizontal.png" alt="Ecco Facilities" class="crm-login-logo">
+      <h1 class="crm-login-title">Welcome back</h1>
+      <p class="crm-login-subtitle">Sign in to manage your leads</p>
+      <div id="loginError" class="crm-login-error" role="alert"></div>
+      <form id="loginForm" novalidate>
+        <div class="crm-form-group">
+          <label for="email" class="crm-label">Email</label>
+          <input type="email" id="email" class="crm-input" placeholder="admin@eccofacilities.com" required autocomplete="email">
+        </div>
+        <div class="crm-form-group">
+          <label for="password" class="crm-label">Password</label>
+          <input type="password" id="password" class="crm-input" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="loginBtn" class="crm-btn crm-btn-full">Sign In</button>
+      </form>
+      <a href="/" class="crm-login-back">&larr; Back to website</a>
+    </div>
+  </div>
+  <script src="/js/crm-core.js?v=1.0"></script>
+  <script src="/js/crm-auth.js?v=1.0"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Leads &mdash; CRM &mdash; Ecco Facilities</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/crm.css?v=1.0">
+</head>
+<body>
+  <div id="app" class="crm-shell">
+    <div class="crm-main">
+      <div class="crm-topbar">
+        <div class="crm-breadcrumb"><span>Leads</span></div>
+        <button id="sidebarToggle" class="crm-sidebar-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      </div>
+      <div class="crm-content">
+        <div class="crm-toolbar">
+          <div class="crm-search-wrap">
+            <input type="search" id="searchInput" class="crm-search" placeholder="Search leads...">
+          </div>
+          <select id="filterStatus" class="crm-filter-select">
+            <option value="">All Statuses</option>
+            <option value="partial">Partial</option>
+            <option value="completed">Completed</option>
+          </select>
+          <select id="filterService" class="crm-filter-select">
+            <option value="">All Services</option>
+            <option value="janitorial">Janitorial</option>
+            <option value="dayporter">Day Porter</option>
+          </select>
+          <select id="filterStage" class="crm-filter-select">
+            <option value="">All Stages</option>
+            <option value="new">New Lead</option>
+            <option value="contacted">Contacted</option>
+            <option value="site-visit">Site Visit</option>
+            <option value="proposal">Proposal Sent</option>
+            <option value="negotiation">Negotiation</option>
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+          </select>
+          <div class="crm-toolbar-actions">
+            <button id="exportCsv" class="crm-btn-sm crm-btn-secondary">Export CSV</button>
+          </div>
+        </div>
+        <div id="leadsTable"></div>
+        <div id="pagination" class="crm-pagination"></div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/crm-core.js?v=1.0"></script>
+  <script src="/js/crm-leads.js?v=1.0"></script>
+</body>
+</html>
