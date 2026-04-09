@@ -1531,3 +1531,79 @@ select.crm-input {
     max-height: 220px;
   }
 }
+
+/* ============================================
+   REPORTS
+   ============================================ */
+
+.crm-reports-toolbar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.crm-reports-toolbar .crm-filter-select {
+  min-width: 200px;
+}
+
+.crm-report-card {
+  margin-bottom: 1rem;
+}
+
+.crm-report-bar {
+  width: 100%;
+  height: 20px;
+  background: var(--bll);
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.crm-report-bar-fill {
+  height: 100%;
+  width: 0;
+  background: var(--blue);
+  border-radius: 10px;
+  transition: width .4s var(--ease);
+  min-width: 2px;
+}
+
+.crm-report-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--tl);
+  font-style: italic;
+}
+
+.crm-table a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.crm-table a:hover {
+  text-decoration: underline;
+}
+
+@media print {
+  .crm-sidebar,
+  .crm-sidebar-overlay,
+  .crm-topbar,
+  .crm-reports-toolbar {
+    display: none !important;
+  }
+
+  .crm-main {
+    margin-left: 0 !important;
+  }
+
+  .crm-content {
+    padding: 0 !important;
+  }
+
+  .crm-card {
+    break-inside: avoid;
+    border: 1px solid #ddd;
+  }
+}
