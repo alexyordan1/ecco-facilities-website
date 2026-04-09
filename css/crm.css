@@ -1483,3 +1483,51 @@ select.crm-input {
     margin-left: 0;
   }
 }
+
+/* ============================================
+   DASHBOARD CHARTS
+   ============================================ */
+
+.crm-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.crm-chart-card {
+  background: var(--wh);
+  border: 1px solid var(--bll);
+  border-radius: var(--r);
+  padding: 1.25rem;
+}
+
+.crm-chart-card canvas {
+  max-height: 260px;
+}
+
+.crm-chart-wide {
+  grid-column: 1 / -1;
+}
+
+.crm-chart-wide canvas {
+  max-height: 220px;
+}
+
+.crm-stat-change.positive {
+  color: var(--green);
+}
+
+.crm-stat-change.negative {
+  color: var(--red);
+}
+
+@media (max-width: 768px) {
+  .crm-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-chart-card canvas {
+    max-height: 220px;
+  }
+}
