@@ -49,7 +49,9 @@
       + kpiCard('This Month', kpis.month, '<span class="crm-stat-change ' + changeClass + '">' + changeSymbol + monthChange + '% vs last month</span>')
       + kpiCard('Conversion Rate', kpis.conversion_rate + '%', '<span class="crm-stat-change">' + kpis.won + ' won / ' + kpis.total + ' total</span>')
       + kpiCard('Pipeline Value', '$' + formatNumber(kpis.pipeline_value), '<span class="crm-stat-change">' + kpis.open_leads + ' open leads</span>')
-      + kpiCard('Total Leads', kpis.total, '<span class="crm-stat-change">' + kpis.open_leads + ' open, ' + kpis.won + ' won, ' + kpis.lost + ' lost</span>');
+      + kpiCard('Total Leads', kpis.total, '<span class="crm-stat-change">' + kpis.open_leads + ' open, ' + kpis.won + ' won, ' + kpis.lost + ' lost</span>')
+      + (kpis.uncontacted_24h > 0 ? kpiCard('Needs Contact', kpis.uncontacted_24h, '<span class="crm-stat-change negative">No contact in 24h+</span>') : '')
+      + (kpis.stale_7d > 0 ? kpiCard('Stale Leads', kpis.stale_7d, '<span class="crm-stat-change negative">7+ days without movement</span>') : '');
   }
 
   function kpiCard(label, value, extra) {

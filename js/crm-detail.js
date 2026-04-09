@@ -209,6 +209,8 @@
       '<div class="crm-card-header"><h2 class="crm-card-title">Pipeline</h2></div>' +
       '<div class="crm-stage-current">' +
         '<span>Current:</span> ' + CRM.stageBadge(lead.pipeline_stage) +
+        ' <span class="crm-stage-days">' + CRM.daysInStage(lead) + ' in stage</span>' +
+        ' ' + CRM.alertBadges(lead) +
       '</div>' +
       '<select id="stageSelect" class="crm-input crm-stage-select">' + stageOptions + '</select>' +
       '<div id="lostReasonWrap" class="crm-form-group crm-lost-reason-wrap" data-visible="' + lostDisplay + '">' +

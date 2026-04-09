@@ -145,8 +145,11 @@
       var urgency = (lead.form_data && (lead.form_data.urgency || lead.form_data.urg)) || '';
       var fullDate = CRM.formatDateTime(lead.created_at);
 
-      html += '<tr data-id="' + lead.id + '" role="link" tabindex="0">' +
-        '<td data-label="Name">' + name + '</td>' +
+      var alertBadges = CRM.alertBadges(lead);
+      var rowClass = CRM.getLeadAlerts(lead).some(function(a) { return a.type === 'stale'; }) ? ' crm-row-stale' : '';
+
+      html += '<tr data-id="' + lead.id + '" role="link" tabindex="0" class="' + rowClass + '">' +
+        '<td data-label="Name">' + name + (alertBadges ? ' ' + alertBadges : '') + '</td>' +
         '<td data-label="Company">' + company + '</td>' +
         '<td data-label="Service">' + CRM.serviceBadge(lead.service) + '</td>' +
         '<td data-label="Status">' + CRM.statusBadge(lead.status) + '</td>' +

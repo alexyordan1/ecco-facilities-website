@@ -144,13 +144,19 @@
     var daysInStage = getDaysInStage(lead);
     var urgencyClass = getUrgencyClass(urgency);
 
-    return '<div class="crm-kanban-card" data-id="' + lead.id + '">'
+    var alerts = CRM.getLeadAlerts(lead);
+    var cardClass = 'crm-kanban-card';
+    if (alerts.some(function(a) { return a.type === 'stale'; })) cardClass += ' crm-card-stale';
+    else if (alerts.some(function(a) { return a.type === 'uncontacted'; })) cardClass += ' crm-card-warn';
+
+    return '<div class="' + cardClass + '" data-id="' + lead.id + '">'
       + (urgencyClass ? '<div class="crm-kanban-card-urgency-bar ' + urgencyClass + '"></div>' : '')
       + '<div class="crm-kanban-card-name">' + CRM.escapeHtml(name) + '</div>'
       + '<div class="crm-kanban-card-company">' + CRM.escapeHtml(company) + '</div>'
       + '<div class="crm-kanban-card-meta">'
       + CRM.serviceBadge(lead.service)
       + (urgency ? ' ' + CRM.urgencyBadge(urgency) : '')
+      + CRM.alertBadges(lead)
       + '<span class="crm-kanban-card-days">' + daysInStage + '</span>'
       + '</div>'
       + '</div>';

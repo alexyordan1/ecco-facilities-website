@@ -298,5 +298,43 @@ const CRM = {
   /* Format a form_data key into a readable label */
   formatLabel(key) {
     return key.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+  },
+
+  /* ---- Alert helpers ---- */
+  getLeadAlerts(lead) {
+    var alerts = [];
+    var now = Date.now();
+    var created = new Date(lead.created_at).getTime();
+    var stage = lead.pipeline_stage || 'new';
+
+    /* Skip closed stages */
+    if (stage === 'won' || stage === 'lost') return alerts;
+
+    /* Uncontacted > 24h */
+    if (!lead.last_contacted_at && (now - created) > 86400000) {
+      alerts.push({ type: 'uncontacted', label: 'No contact', cls: 'crm-alert-warn' });
+    }
+
+    /* Stale > 7 days in same stage */
+    var daysOld = Math.floor((now - created) / 86400000);
+    if (daysOld >= 7) {
+      alerts.push({ type: 'stale', label: daysOld + 'd stale', cls: 'crm-alert-danger' });
+    }
+
+    return alerts;
+  },
+
+  alertBadges(lead) {
+    var alerts = this.getLeadAlerts(lead);
+    return alerts.map(function(a) {
+      return '<span class="crm-badge ' + a.cls + '">' + a.label + '</span>';
+    }).join(' ');
+  },
+
+  daysInStage(lead) {
+    var created = new Date(lead.created_at).getTime();
+    var days = Math.floor((Date.now() - created) / 86400000);
+    if (days === 0) return 'today';
+    return days + 'd';
   }
 };

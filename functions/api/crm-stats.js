@@ -35,6 +35,8 @@ export async function onRequestGet(context) {
     var bySource = {};
     var dailyLeads = {};
     var monthlyLeads = { current: 0, previous: 0 };
+    var uncontacted24h = 0;
+    var stale7d = 0;
 
     leads.forEach(function(lead) {
       var created = new Date(lead.created_at);
@@ -52,7 +54,12 @@ export async function onRequestGet(context) {
 
       if (stage === 'won') { wonCount++; totalCompleted++; }
       else if (stage === 'lost') { lostCount++; totalCompleted++; }
-      else { openLeads++; }
+      else {
+        openLeads++;
+        var ageMs = now - created;
+        if (!lead.last_contacted_at && ageMs > 86400000) uncontacted24h++;
+        if (ageMs > 7 * 86400000) stale7d++;
+      }
 
       if (stage !== 'won' && stage !== 'lost' && lead.estimated_value) {
         pipelineValue += parseFloat(lead.estimated_value) || 0;
@@ -111,7 +118,9 @@ export async function onRequestGet(context) {
           pipeline_value: Math.round(pipelineValue * 100) / 100,
           open_leads: openLeads,
           won: wonCount,
-          lost: lostCount
+          lost: lostCount,
+          uncontacted_24h: uncontacted24h,
+          stale_7d: stale7d
         },
         charts: {
           daily: dailyChart,
