@@ -23,7 +23,7 @@ styles.textContent = `
 .ecco-chat-tooltip.show { opacity: 1; visibility: visible; transform: translateY(0); }
 .ecco-chat-tooltip .tip-name { font-weight: 700; color: #0B1D38; }
 .ecco-chat-tooltip .tip-close { position: absolute; top: .3rem; right: .5rem; background: none; border: none; color: #94A3B5; cursor: pointer; font-size: .9rem; padding: .2rem; }
-.ecco-chat-panel { position: fixed; bottom: 6rem; right: 2rem; z-index: 998; width: 440px; max-height: 700px; height: calc(100vh - 8rem); background: #fff; border-radius: 20px; box-shadow: 0 16px 64px rgba(11,29,56,.18); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(20px) scale(.95); transition: all .35s cubic-bezier(.4,0,.2,1); overflow: hidden; border-top: 3px solid; border-image: linear-gradient(90deg, #2D7A32, #3068AD) 1; }
+.ecco-chat-panel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 998; width: 440px; max-height: none; height: 100vh; height: 100dvh; border-radius: 0; background: #fff; border-radius: 20px; box-shadow: 0 16px 64px rgba(11,29,56,.18); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(20px) scale(.95); transition: all .35s cubic-bezier(.4,0,.2,1); overflow: hidden; border-left: 3px solid; border-image: linear-gradient(180deg, #2D7A32, #3068AD) 1; }
 .ecco-chat-panel.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 .ecco-chat-header { background: linear-gradient(135deg, #0B1D38 0%, #1E3562 100%); padding: 1rem 1.2rem; display: flex; align-items: center; gap: .7rem; flex-shrink: 0; }
 .ecco-chat-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,.2); overflow: hidden; flex-shrink: 0; }
