@@ -154,6 +154,7 @@
   }
 
   function renderCharts(chartData, kpis) {
+    if (typeof Chart === 'undefined') { chartsEl.innerHTML = '<div class="crm-empty"><div class="crm-empty-subtitle">Charts unavailable — Chart.js failed to load.</div></div>'; return; }
     /* Destroy existing charts */
     Object.keys(charts).forEach(function(key) {
       if (charts[key]) charts[key].destroy();
