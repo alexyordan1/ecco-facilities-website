@@ -51,11 +51,24 @@
         componentRestrictions: { country: 'us' },
         fields: ['formatted_address', 'address_components', 'geometry']
       });
-      // Helper: hide all Places dropdowns (one per input, can be multiple if reinit)
-      function hidePacContainers() {
+      // Robust hide: Google re-renders the dropdown after place_changed, so a
+      // single display:none is not enough. We enforce hide via rAF for a short
+      // window, then release so new typing can reopen the dropdown normally.
+      var pacSuppressUntil = 0;
+      function hidePacNow() {
         document.querySelectorAll('.pac-container').forEach(function (el) {
           el.style.display = 'none';
+          el.style.visibility = 'hidden';
         });
+      }
+      function enforceHide() {
+        if (Date.now() > pacSuppressUntil) return;
+        hidePacNow();
+        requestAnimationFrame(enforceHide);
+      }
+      function suppressPacFor(ms) {
+        pacSuppressUntil = Date.now() + ms;
+        enforceHide();
       }
       ac.addListener('place_changed', function () {
         var place = ac.getPlace();
@@ -63,21 +76,24 @@
           input.value = place.formatted_address;
           input.dispatchEvent(new Event('input', { bubbles: true }));
         }
-        // Hide the suggestion dropdown after selection so it stops covering the CTA
-        hidePacContainers();
-        // Blur to ensure no re-open on any residual focus state
-        setTimeout(function () { input.blur(); }, 0);
+        // Aggressively hide the dropdown for 1s so Google's re-render can't
+        // flash it back; blur after to release any residual focus.
+        suppressPacFor(1000);
+        setTimeout(function () { input.blur(); }, 10);
       });
-      // Also hide on blur with a small delay (allows click-to-select to fire first)
-      input.addEventListener('blur', function () {
-        setTimeout(hidePacContainers, 180);
-      });
-      // Hide on Escape for keyboard users
+      // Re-enable dropdown as soon as the user types new chars
       input.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { hidePacContainers(); return; }
+        if (e.key === 'Escape') { suppressPacFor(800); return; }
         if (e.key === 'Enter' && document.querySelector('.pac-container:not([style*="display: none"])')) {
           e.preventDefault();
+          return;
         }
+        // Any printable key resets suppression so Google can show suggestions again
+        if (e.key && e.key.length === 1) pacSuppressUntil = 0;
+      });
+      // Hide on blur with a small delay (allows click-to-select to fire first)
+      input.addEventListener('blur', function () {
+        setTimeout(function () { suppressPacFor(600); }, 180);
       });
     } catch (err) {
       /* Fallback silently — the manual text input still works */
