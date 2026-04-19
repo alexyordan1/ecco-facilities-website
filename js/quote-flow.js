@@ -360,11 +360,11 @@
 
   var SIZE_LABELS = {
     'under3k': 'Under 3,000 sq ft',
-    '3k-7k':   '3,000\u20137,000 sq ft',
-    '7k-12k':  '7,000\u201312,000 sq ft',
-    '12k-20k': '12,000\u201320,000 sq ft',
-    '20k+':    '20,000+ sq ft',
-    'notsure': 'Alina will estimate'
+    '3k-6k':   '3,000\u20136,000 sq ft',
+    '6k-9k':   '6,000\u20139,000 sq ft',
+    '9k-12k':  '9,000\u201312,000 sq ft',
+    '12k-15k': '12,000\u201315,000 sq ft',
+    'notsure': 'In-person visit'
   };
   // Format a custom sq ft entry (e.g. "5000sqft" or "5000") → "5,000 sq ft"
   function formatSizeLabel(raw) {
@@ -1512,11 +1512,11 @@
     //   Day Porter: $28–$45 per hour per porter
     var SIZE_MIDPOINTS = {
       'under3k':  2000,
-      '3k-7k':    5000,
-      '7k-12k':   9500,
-      '12k-20k': 16000,
-      '20k+':    25000,
-      'notsure':  5000
+      '3k-6k':    4500,
+      '6k-9k':    7500,
+      '9k-12k':  10500,
+      '12k-15k': 13500,
+      'notsure':  7500
     };
     function sizeToSqft(raw) {
       if (!raw) return 5000;

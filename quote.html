@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=13.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=13.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=14.0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places Autocomplete — address suggestions as you type.
      FIX #6 / #31 — Key restricted to: eccofacilities.com, *.eccofacilities.com, *.pages.dev, localhost:8080.
@@ -402,25 +402,25 @@
             <span class="qf-service-card-label">Under 3,000 sq ft</span>
             <span class="qf-service-card-hint">Small suite, 1&ndash;15 people</span>
           </button>
-          <button type="button" class="qf-service-card" data-size="3k-7k">
-            <span class="qf-service-card-label">3,000 &ndash; 7,000 sq ft</span>
-            <span class="qf-service-card-hint">Mid-size office, 15&ndash;40 people</span>
+          <button type="button" class="qf-service-card" data-size="3k-6k">
+            <span class="qf-service-card-label">3,000 &ndash; 6,000 sq ft</span>
+            <span class="qf-service-card-hint">Mid-size office, 15&ndash;30 people</span>
           </button>
-          <button type="button" class="qf-service-card" data-size="7k-12k">
-            <span class="qf-service-card-label">7,000 &ndash; 12,000 sq ft</span>
+          <button type="button" class="qf-service-card" data-size="6k-9k">
+            <span class="qf-service-card-label">6,000 &ndash; 9,000 sq ft</span>
+            <span class="qf-service-card-hint">Full suite or partial floor</span>
+          </button>
+          <button type="button" class="qf-service-card" data-size="9k-12k">
+            <span class="qf-service-card-label">9,000 &ndash; 12,000 sq ft</span>
             <span class="qf-service-card-hint">Large office, one full floor</span>
           </button>
-          <button type="button" class="qf-service-card" data-size="12k-20k">
-            <span class="qf-service-card-label">12,000 &ndash; 20,000 sq ft</span>
+          <button type="button" class="qf-service-card" data-size="12k-15k">
+            <span class="qf-service-card-label">12,000 &ndash; 15,000 sq ft</span>
             <span class="qf-service-card-hint">Multi-area or multi-floor</span>
-          </button>
-          <button type="button" class="qf-service-card" data-size="20k+">
-            <span class="qf-service-card-label">20,000+ sq ft</span>
-            <span class="qf-service-card-hint">Large facility or campus</span>
           </button>
           <button type="button" class="qf-service-card qf-s3-notsure" data-size="notsure">
             <span class="qf-service-card-label">Not sure?</span>
-            <span class="qf-service-card-hint">I&rsquo;ll help you estimate</span>
+            <span class="qf-service-card-hint">We&rsquo;ll schedule an in-person visit</span>
           </button>
         </div>
         <div class="qf-s3-or">
@@ -760,10 +760,10 @@
                 <div class="qf-rev-row-edit" hidden>
                   <select class="qf-rev-select" id="qfEditSize" aria-label="Choose space size">
                     <option value="under3k">Under 3K sqft</option>
-                    <option value="3k-7k">3K&ndash;7K sqft</option>
-                    <option value="7k-12k">7K&ndash;12K sqft</option>
-                    <option value="12k-20k">12K&ndash;20K sqft</option>
-                    <option value="20k+">20K+ sqft</option>
+                    <option value="3k-6k">3K&ndash;6K sqft</option>
+                    <option value="6k-9k">6K&ndash;9K sqft</option>
+                    <option value="9k-12k">9K&ndash;12K sqft</option>
+                    <option value="12k-15k">12K&ndash;15K sqft</option>
                     <option value="notsure">Not sure</option>
                   </select>
                   <div class="qf-rev-edit-actions">
@@ -1074,7 +1074,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=13.0"></script>
+<script src="js/quote-flow.js?v=14.0"></script>
 <script src="js/cookie-consent.js?v=1.0"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
