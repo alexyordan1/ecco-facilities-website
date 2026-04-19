@@ -1578,9 +1578,13 @@
       // Personalize the plan hero title
       var heroTitle = document.getElementById('qfPlanHeroTitle');
       if (heroTitle) {
-        heroTitle.textContent = STATE.userName
-          ? 'Here\u2019s your plan, ' + STATE.userName + '.'
-          : 'Here\u2019s your plan.';
+        // Escape the name so it can safely be rendered with innerHTML (<em> tag)
+        var safeName = (STATE.userName || '').replace(/[&<>"']/g, function (c) {
+          return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c];
+        });
+        heroTitle.innerHTML = safeName
+          ? 'Looks good, <em>' + safeName + '</em>?'
+          : 'Looks good?';
       }
       // Re-evaluate floating CTA visibility once layout settles
       setTimeout(function () { if (window.qfRecheckFloatingCta) window.qfRecheckFloatingCta(); }, 60);

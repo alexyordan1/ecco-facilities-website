@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=13.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=14.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=15.0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places Autocomplete — address suggestions as you type.
      FIX #6 / #31 — Key restricted to: eccofacilities.com, *.eccofacilities.com, *.pages.dev, localhost:8080.
@@ -623,8 +623,8 @@
           </div>
           <div class="qf-plan-hero-text">
             <p class="qf-plan-hero-eyebrow"><span class="qf-plan-hero-dot" aria-hidden="true"></span> Plan ready for review</p>
-            <h2 class="qf-plan-hero-title" id="qfPlanHeroTitle">Here&rsquo;s your plan</h2>
-            <p class="qf-plan-hero-sub">Tap any row to edit. When everything looks right, send it over.</p>
+            <h2 class="qf-plan-hero-title" id="qfPlanHeroTitle">Looks good</h2>
+            <p class="qf-plan-hero-sub">Quick review of what we captured &mdash; hover any row to edit. Your custom quote lands in your inbox within 24 hours.</p>
           </div>
         </header>
 
@@ -639,14 +639,15 @@
           <div class="qf-rev-grid">
 
             <!-- Contact -->
-            <div class="qf-rev-cell">
+            <div class="qf-rev-cell" data-section="contact">
               <div class="qf-rev-cell-head">
+                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
                 <span class="qf-rev-cell-label">Contact</span>
               </div>
               <!-- Name -->
               <div class="qf-rev-row" data-field="name">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Name:</span>
+                  <span class="qf-rev-item-label">Name</span>
                   <span class="qf-rev-item-value" id="qfSumName">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="name" aria-label="Edit name">Edit</button>
                 </div>
@@ -664,7 +665,7 @@
               <!-- Email -->
               <div class="qf-rev-row" data-field="email">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Email:</span>
+                  <span class="qf-rev-item-label">Email</span>
                   <span class="qf-rev-item-value" id="qfSumEmail">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="email">Edit</button>
                 </div>
@@ -679,7 +680,7 @@
               <!-- Phone (optional) -->
               <div class="qf-rev-row" data-field="phone" id="qfSumPhoneRow" hidden>
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Phone:</span>
+                  <span class="qf-rev-item-label">Phone</span>
                   <span class="qf-rev-item-value" id="qfSumPhone">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="phone">Edit</button>
                 </div>
@@ -694,7 +695,7 @@
               <!-- Company (optional) -->
               <div class="qf-rev-row" data-field="company" id="qfSumCompanyRow" hidden>
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Company:</span>
+                  <span class="qf-rev-item-label">Company</span>
                   <span class="qf-rev-item-value" id="qfSumCompany">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="company">Edit</button>
                 </div>
@@ -709,14 +710,15 @@
             </div>
 
             <!-- Location -->
-            <div class="qf-rev-cell">
+            <div class="qf-rev-cell" data-section="location">
               <div class="qf-rev-cell-head">
+                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
                 <span class="qf-rev-cell-label">Location</span>
               </div>
               <!-- Address -->
               <div class="qf-rev-row" data-field="address">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Address:</span>
+                  <span class="qf-rev-item-label">Address</span>
                   <span class="qf-rev-item-value" id="qfSumAddress">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="address">Edit</button>
                 </div>
@@ -731,7 +733,7 @@
               <!-- Space type -->
               <div class="qf-rev-row" data-field="space">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Space:</span>
+                  <span class="qf-rev-item-label">Space</span>
                   <span class="qf-rev-item-value" id="qfSumSpace">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="space">Edit</button>
                 </div>
@@ -753,7 +755,7 @@
               <!-- Size (hidden for dayporter) -->
               <div class="qf-rev-row" data-field="size" id="qfSumSizeRow">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Size:</span>
+                  <span class="qf-rev-item-label">Size</span>
                   <span class="qf-rev-item-value" id="qfSumSize">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="size">Edit</button>
                 </div>
@@ -775,14 +777,15 @@
             </div>
 
             <!-- Service -->
-            <div class="qf-rev-cell">
+            <div class="qf-rev-cell" data-section="service">
               <div class="qf-rev-cell-head">
+                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
                 <span class="qf-rev-cell-label">Service</span>
               </div>
               <!-- Service type -->
               <div class="qf-rev-row" data-field="service">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Type:</span>
+                  <span class="qf-rev-item-label">Type</span>
                   <span class="qf-rev-item-value qf-rev-item-green" id="qfSumService">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="service">Edit</button>
                 </div>
@@ -802,7 +805,7 @@
               <!-- Porter count (dayporter/both only) -->
               <div class="qf-rev-row" data-field="porters" id="qfSumPortersRow" hidden>
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Porters:</span>
+                  <span class="qf-rev-item-label">Porters</span>
                   <span class="qf-rev-item-value" id="qfSumPorters">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="porters">Edit</button>
                 </div>
@@ -824,7 +827,7 @@
               <!-- Cleaning window row removed: we don't ask "When should we clean?" anymore -->
               <div class="qf-rev-row" data-field="window" id="qfSumWindowRow" hidden>
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Window:</span>
+                  <span class="qf-rev-item-label">Window</span>
                   <span class="qf-rev-item-value" id="qfSumWindow">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="window" hidden>Edit</button>
                 </div>
@@ -843,14 +846,15 @@
             </div>
 
             <!-- Schedule -->
-            <div class="qf-rev-cell">
+            <div class="qf-rev-cell" data-section="schedule">
               <div class="qf-rev-cell-head">
+                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
                 <span class="qf-rev-cell-label">Schedule</span>
               </div>
               <!-- Days -->
               <div class="qf-rev-row" data-field="days">
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Days:</span>
+                  <span class="qf-rev-item-label">Days</span>
                   <span class="qf-rev-item-value qf-rev-item-green" id="qfSumSchedule">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="days">Edit</button>
                 </div>
@@ -873,7 +877,7 @@
               <!-- Time (optional) -->
               <div class="qf-rev-row" data-field="time" id="qfSumTimeRow" hidden>
                 <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Time:</span>
+                  <span class="qf-rev-item-label">Time</span>
                   <span class="qf-rev-item-value" id="qfSumTime">&mdash;</span>
                   <button type="button" class="qf-rev-edit" data-edit="time">Edit</button>
                 </div>
@@ -910,7 +914,7 @@
             <!-- Fix #45 — Cloudflare Turnstile invisible captcha (anti-bot) -->
             <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="invisible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
             <button type="button" class="qf-rev-btn" id="qfContactSubmit">
-              Submit my request <span aria-hidden="true">&rarr;</span>
+              Looks good &mdash; get my quote <span aria-hidden="true">&rarr;</span>
             </button>
           </div>
 
@@ -927,7 +931,7 @@
         <!-- Floating submit bar — appears once the inline CTA scrolls out of view -->
         <div class="qf-plan-floating-cta" id="qfPlanFloatingCta" aria-hidden="true">
           <button type="button" class="qf-rev-btn qf-plan-floating-cta-btn" id="qfFloatingSubmitBtn">
-            Submit my request <span aria-hidden="true">&rarr;</span>
+            Looks good &mdash; get my quote <span aria-hidden="true">&rarr;</span>
           </button>
         </div>
       </div><!-- /.qf-screen-inner -->
@@ -1074,7 +1078,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=14.0"></script>
+<script src="js/quote-flow.js?v=15.0"></script>
 <script src="js/cookie-consent.js?v=1.0"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
