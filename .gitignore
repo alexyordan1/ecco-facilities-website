@@ -19,7 +19,24 @@ node_modules/
 # Original/backup files (keep in repo for reference, remove when ready)
 # *.original.*
 
+# Alina Stage redesign temporary files (delete after live verification)
+*.backup.css
+*.backup.js
+*.backup.html
+mockups/
+mockups.html
+
 # Logs
 *.log
 .superpowers/
 .mcp.json
+
+# Pre-minify source (regenerated from quote-flow.css when needed)
+css/*.source.css
+
+# AYS capture artifacts (local reference, not in repo)
+docs/superpowers/plans/before/
+docs/superpowers/plans/after/
+docs/superpowers/plans/mid-*/
+docs/superpowers/plans/capture-*.mjs
+docs/claude-design-input/

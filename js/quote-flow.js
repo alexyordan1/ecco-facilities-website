@@ -191,6 +191,21 @@
       }
     }
     wrap.setAttribute('data-state', currentIdx >= flow.length - 2 ? 'final' : 'active');
+
+    // D1 · sync linear fill bar (desktop) + compact pill (mobile)
+    var pct = totalSteps > 1 ? Math.round(((displayStep - 1) / (totalSteps - 1)) * 100) : 0;
+    var fillBar = document.getElementById('qfRailFillBar');
+    if (fillBar) {
+      fillBar.style.setProperty('--qf-progress', pct + '%');
+      fillBar.setAttribute('aria-valuenow', String(pct));
+    }
+    var pillBar = document.getElementById('qfRailPillBar');
+    var pillLabel = document.getElementById('qfRailPillLabel');
+    if (pillBar) {
+      pillBar.style.setProperty('--qf-progress', pct + '%');
+      pillBar.setAttribute('aria-valuenow', String(pct));
+    }
+    if (pillLabel) pillLabel.textContent = 'Paso ' + displayStep + ' de ' + totalSteps;
   }
 
   /* -----------------------------------------------------------------------

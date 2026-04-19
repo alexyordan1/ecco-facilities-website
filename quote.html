@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=13.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=9.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=10.0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places Autocomplete — address suggestions as you type.
      FIX #6 / #31 — Key restricted to: eccofacilities.com, *.eccofacilities.com, *.pages.dev, localhost:8080.
@@ -146,6 +146,8 @@
 
     <!-- Persistent narrative rail (hidden on Step 1) -->
     <header class="qf-flow-bar" id="qfFlowBar">
+      <!-- D1 · Linear fill bar (desktop) -->
+      <span class="qf-rail-fill-bar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="qfRailFillBar"></span>
       <button type="button" class="qf-flow-back" id="qfFlowBackBtn" aria-label="Back to previous step">
         <span class="qf-flow-back-arrow" aria-hidden="true">&larr;</span>
       </button>
@@ -185,6 +187,11 @@
         <span class="qf-progress-step" id="qfRailProgressStep" aria-live="polite">&mdash;</span>
         <span class="qf-progress-time" id="qfRailProgressTime" aria-hidden="true"></span>
       </aside>
+      <!-- D1 · Compact pill (mobile) -->
+      <div class="qf-rail-pill">
+        <span class="qf-rail-pill-bar" id="qfRailPillBar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>
+        <span class="qf-rail-pill-label" id="qfRailPillLabel">Paso 1 de 7</span>
+      </div>
     </header>
 
     <!-- STEP 1 · WELCOME -->
@@ -1035,7 +1042,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=9.0"></script>
+<script src="js/quote-flow.js?v=10.0"></script>
 <script src="js/cookie-consent.js?v=1.0"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
