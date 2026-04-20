@@ -33,9 +33,13 @@
 <link rel="stylesheet" href="css/styles.css?v=13.5">
 <link rel="stylesheet" href="css/quote-flow.css?v=24.4">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
-<!-- Google Places — address suggestions. Prefers the modern
-     PlaceAutocompleteElement (GA since late 2024) and falls back to the
-     legacy Autocomplete (still receiving bug-fixes) for older SDK caches.
+<!-- Google Places — address suggestions.
+     Uses the legacy google.maps.places.Autocomplete API, which is deprecated
+     for NEW customers (March 2025) but continues to work indefinitely for
+     existing accounts. An earlier attempt to use the modern
+     PlaceAutocompleteElement hid it with display:none and never showed
+     suggestions — verified broken in preview. Migration to PAE deferred
+     until we can restyle the native component to match the form.
      Key restricted to eccofacilities.com + *.pages.dev + localhost.
      The deprecation warning from the legacy API is filtered from console
      to avoid 20+ duplicate log entries per page load. -->
@@ -57,35 +61,13 @@
     if (!input) return;
     if (!window.google || !window.google.maps || !window.google.maps.places) return;
 
-    // Prefer PlaceAutocompleteElement when available (modern API, GA since 2024).
-    try {
-      if (typeof google.maps.places.PlaceAutocompleteElement === 'function') {
-        var pae = new google.maps.places.PlaceAutocompleteElement({
-          componentRestrictions: { country: 'us' },
-          types: ['address']
-        });
-        pae.style.display = 'none'; // keep the existing styled input, query via API
-        input.parentNode.appendChild(pae);
-        input.addEventListener('input', function () {
-          pae.value = input.value;
-        });
-        pae.addEventListener('gmp-placeselect', function (ev) {
-          var place = ev && ev.place ? ev.place : null;
-          if (!place) return;
-          (place.fetchFields ? place.fetchFields({ fields: ['formattedAddress'] }) : Promise.resolve()).then(function () {
-            var fa = place.formattedAddress || '';
-            if (fa) {
-              input.value = fa;
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-          });
-        });
-        return; // modern path done
-      }
-    } catch (modernErr) {
-      /* Fall through to legacy Autocomplete below */
-    }
-
+    // AYS Ola 3 Commit I — the modern PlaceAutocompleteElement was being
+    // appended with display:none so only the legacy-styled <input> was visible.
+    // That kills the suggestion dropdown entirely (verified in preview: 0 suggestions
+    // rendered; the legacy path rendered 5 for "450 Broadway"). Google's legacy
+    // Autocomplete is deprecated for NEW customers only — existing customers keep
+    // it functional indefinitely. Skip the broken modern path until we can
+    // restyle the native PAE to match the form, and go straight to legacy.
     try {
       var ac = new google.maps.places.Autocomplete(input, {
         types: ['address'],
