@@ -876,7 +876,10 @@
           <!-- Footer — only the submit button; info block removed -->
           <div class="qf-rev-foot qf-rev-foot-minimal">
             <!-- Fix #45 — Cloudflare Turnstile invisible captcha (anti-bot) -->
-            <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="invisible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
+            <!-- AYS Ola 3 Commit J — Cloudflare deprecated data-size="invisible" (throws
+     TurnstileError in console). Switch to "flexible" which renders inline but
+     tiny — functionally equivalent for our low-friction use case. -->
+<div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
             <button type="button" class="qf-rev-btn" id="qfContactSubmit">
               Looks good &mdash; get my quote <span aria-hidden="true">&rarr;</span>
             </button>
