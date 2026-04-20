@@ -612,9 +612,17 @@
 
     stations.forEach(function (st, idx) {
       st.classList.remove('is-done', 'is-current');
+      // AYS Ola 3 #15 — aria-current="step" announces progress position to
+      // screen readers. Was missing entirely; only the visual .is-current
+      // class existed. Removing stale aria-current on all, then re-adding
+      // on the active station.
+      st.removeAttribute('aria-current');
       if (currentStationIdx >= 0) {
         if (idx < currentStationIdx) st.classList.add('is-done');
-        else if (idx === currentStationIdx) st.classList.add('is-current');
+        else if (idx === currentStationIdx) {
+          st.classList.add('is-current');
+          st.setAttribute('aria-current', 'step');
+        }
       } else {
         // currentStep is a pass-through (checkpoint/success)
         if (idx <= lastDoneIdx) st.classList.add('is-done');
