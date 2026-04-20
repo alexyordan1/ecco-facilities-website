@@ -115,7 +115,7 @@
   /* -----------------------------------------------------------------------
      Screen elements — map name → DOM node
      ----------------------------------------------------------------------- */
-  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'window', 'porter', 'hours', 'details', 'contact', 'success'];
+  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'window', 'porter', 'hours', 'contact', 'success'];
   var SCREENS = {};
 
   SCREEN_NAMES.forEach(function (name) {
@@ -343,20 +343,43 @@
     unsure:     'No worries, I\u2019ll help you figure it out. Let\u2019s start here.'
   };
 
+  // Alina copy indexed by SPACE (not service) — every space shares the same
+  // Janitorial/Day Porter mechanics so the space is the real source of truth
+  // for what the user cares about.
   var ALINA_S3 = {
-    Office:     'Most offices like yours are between 3K\u20137K sq ft. Pick the closest range or enter the exact number.',
-    Medical:    'Clinics typically range from 1,500\u20135,000 sq ft. What\u2019s yours?',
-    Retail:     'Most NYC retail spaces are under 5,000 sq ft. Pick your range.',
-    Restaurant: 'Restaurants are usually under 4,000 sq ft. What\u2019s your size?',
-    Fitness:    'Gyms range widely \u2014 pick the closest or type your exact sq ft.',
+    Office:     'Most offices like yours are between 3K\u20139K sq ft. Pick the closest range.',
+    Medical:    'Clinics typically range 1,500\u20135,000 sq ft. Labs and surgical centers can run bigger.',
+    Retail:     'Most NYC retail spaces are under 6,000 sq ft. Pick your range.',
+    Restaurant: 'Restaurants are usually 2K\u20135K sq ft. Kitchen counts toward the total.',
+    Fitness:    'Gyms range widely \u2014 boutiques under 3K, full facilities 10K+. Pick the closest.',
     Other:      'Pick the closest range or enter the exact number below.'
   };
 
-  var ALINA_S4 = {
-    janitorial: 'For a space like yours, Monday through Friday is the most popular. Pick the days that work best.',
-    dayporter:  'Most offices have their porter Monday through Friday. Select the days you need.',
-    both:       'Monday through Friday is the standard for full coverage. Pick what works for you.',
-    unsure:     'Most spaces go with weekdays. Just tap the days you need.'
+  var ALINA_S4_BY_SPACE = {
+    Office:     'For offices, Monday\u2013Friday is most common. Weekends only if you need them.',
+    Medical:    'Medical spaces usually match patient-facing days. Pick what fits your schedule.',
+    Retail:     'Retail often needs full 7-day coverage \u2014 weekends matter most.',
+    Restaurant: 'Restaurants usually need 6\u20137 days. After-hours is the key window.',
+    Fitness:    'Gyms and studios often need daily coverage during open hours.',
+    Other:      'Pick the days that match your schedule.'
+  };
+
+  var ALINA_PORTER_BY_SPACE = {
+    Office:     'For an office like yours, 1 porter usually covers it. But you decide!',
+    Medical:    'Medical spaces need tight sanitization \u2014 1 dedicated porter works for clinics, 2+ for larger facilities.',
+    Retail:     'For retail, 1 porter handles front-of-house freshness. Multi-floor stores usually go with 2.',
+    Restaurant: 'Restaurants often need 1\u20132 porters during service \u2014 one front, one back.',
+    Fitness:    'Gyms benefit from porters on equipment and locker rooms. 1\u20132 usually works.',
+    Other:      'Pick what fits your space \u2014 we\u2019ll fine-tune on the call.'
+  };
+
+  var ALINA_HOURS_BY_SPACE = {
+    Office:     'Set the hours for each porter. Most offices go 8 AM to 5 PM.',
+    Medical:    'Set the hours to match your patient-facing windows \u2014 usually 8 AM to 6 PM.',
+    Retail:     'Set the hours to match your store hours \u2014 usually 10 AM to 9 PM.',
+    Restaurant: 'Set the hours \u2014 restaurants typically need 11 AM to close.',
+    Fitness:    'Set the hours \u2014 gyms usually open 5 AM to 10 PM.',
+    Other:      'Set the hours that match your operation.'
   };
 
   var ALINA_WINDOW = {
@@ -364,10 +387,6 @@
     both:       'When should the janitorial team come in?'
   };
 
-  var ALINA_PORTER = {
-    dayporter: 'How many porters and what hours do you need them?',
-    both:      'Let\u2019s set up your day porter schedule.'
-  };
 
   var S4_TITLES = {
     janitorial: 'Which <em>days</em> should we clean?',
@@ -733,10 +752,23 @@
     // Set contextual Alina + title when entering days screen (no pre-selection)
     if (name === 'days') {
       var alinaEl = getAlinaTextEl('days');
-      if (alinaEl) alinaEl.textContent = ALINA_S4[STATE.service] || ALINA_S4.unsure;
+      if (alinaEl) alinaEl.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
       var s4title = document.getElementById('qfS4Title');
       if (s4title) s4title.innerHTML = S4_TITLES[STATE.service] || S4_TITLES.unsure;
       setTimeout(syncDaysUI, 80);
+    }
+
+    // Size step — personalize Alina by space type when entering (covers
+    // both forward navigation and scroll-back-into-view cases).
+    if (name === 'size' && STATE.space) {
+      var sizeAlinaEl = getAlinaTextEl('size');
+      if (sizeAlinaEl) sizeAlinaEl.textContent = ALINA_S3[STATE.space] || ALINA_S3.Other;
+    }
+
+    // Hours step — personalize by space type every time it's entered.
+    if (name === 'hours' && STATE.space) {
+      var hoursAlinaEl = getAlinaTextEl('hours');
+      if (hoursAlinaEl) hoursAlinaEl.textContent = ALINA_HOURS_BY_SPACE[STATE.space] || ALINA_HOURS_BY_SPACE.Other;
     }
 
     // Re-trigger stagger animations on new screen
@@ -1038,7 +1070,7 @@
         } else if (nextStep === 'days') {
           // Day Porter skips size — set days Alina message
           var alinaEl = getAlinaTextEl('days');
-          var s4msg = ALINA_S4[STATE.service] || ALINA_S4.unsure;
+          var s4msg = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
           if (alinaEl) alinaEl.textContent = s4msg;
           var s4title = document.getElementById('qfS4Title');
           if (s4title) s4title.innerHTML = S4_TITLES[STATE.service] || S4_TITLES.unsure;
@@ -1057,7 +1089,7 @@
 
       // Set Alina message for days step
       var alinaEl = getAlinaTextEl('days');
-      var s4msg = ALINA_S4[STATE.service] || ALINA_S4.janitorial;
+      var s4msg = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
       if (alinaEl) alinaEl.textContent = s4msg;
 
       // Set contextual title
@@ -1151,19 +1183,19 @@
       presetBtns.forEach(function (p) { if (p.dataset.preset === 'weekdays') p.classList.add('is-active'); });
     }
 
-    // Alina reacts only when user manually changes from the default
+    // Alina reacts only when user manually changes from the default. Don't
+    // override the space-tailored entry message just because no days are
+    // selected yet — the Continue button handles the "pick at least one"
+    // validation on submit.
     var alinaEl = getAlinaTextEl('days');
     if (alinaEl && STATE.currentStepName === 'days') {
       var n = STATE.days.length;
       if (n === 7) {
         alinaEl.textContent = 'Every day? That\u2019s serious coverage \u2014 love it.';
-      } else if (n === 0) {
-        alinaEl.textContent = 'Select at least one day to continue.';
-      } else if (!arraysEqual(STATE.days, WEEKDAYS)) {
-        // Only react if they changed from default weekdays
+      } else if (n > 0 && !arraysEqual(STATE.days, WEEKDAYS)) {
         alinaEl.textContent = n + ' day' + (n > 1 ? 's' : '') + ' selected. Adjust anytime.';
       }
-      // If weekdays selected, keep the initial message (don't override)
+      // n === 0 or weekdays-match: keep the space-tailored entry message.
     }
   }
 
@@ -1260,11 +1292,13 @@
       var count = STATE.porterCount === 'notsure' ? 1 : parseInt(STATE.porterCount) || 1;
       buildPorterRows(count);
 
+      // Combine space-tailored context with porter-count specifics.
       var hoursAlina = document.getElementById('qfAlinaSaysHours');
       if (hoursAlina) {
+        var spaceHint = ALINA_HOURS_BY_SPACE[STATE.space] || ALINA_HOURS_BY_SPACE.Other;
         hoursAlina.textContent = count === 1
-          ? 'Just set your porter\u2019s start and end time.'
-          : 'Set the hours for each of your ' + count + ' porters.';
+          ? spaceHint
+          : 'Set the hours for each of your ' + count + ' porters. ' + spaceHint;
       }
 
       var label = STATE.porterCount === 'notsure' ? 'TBD' : STATE.porterCount + ' porter' + (STATE.porterCount !== '1' ? 's' : '');
@@ -1278,15 +1312,7 @@
         if (m.target === SCREENS.porter && SCREENS.porter.classList.contains('is-active')) {
           var alina = document.getElementById('qfAlinaSaysPorter');
           if (!alina) return;
-          var PORTER_BY_SPACE = {
-            Office:     'For an office like yours, 1 porter usually covers it. But you decide!',
-            Medical:    'Medical facilities usually need 1\u20132 porters depending on patient flow.',
-            Retail:     'Retail spaces often benefit from 1 porter covering opening hours.',
-            Restaurant: 'Restaurants typically need 1\u20132 porters during service hours.',
-            Fitness:    'Fitness spaces run well with 1 porter rotating through high-use areas.',
-            Other:      'Most facilities your size do great with 1 porter \u2014 you pick!'
-          };
-          alina.textContent = PORTER_BY_SPACE[STATE.space] || PORTER_BY_SPACE.Other;
+          alina.textContent = ALINA_PORTER_BY_SPACE[STATE.space] || ALINA_PORTER_BY_SPACE.Other;
         }
       });
     });
@@ -1342,91 +1368,9 @@
     }
   }
 
-  /* =======================================================================
-     DETAILS step — Both services combined
-     ======================================================================= */
-  if (SCREENS.details) {
-    // Set Alina message when entering
-    var detailsObserver = new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
-        if (m.target === SCREENS.details && SCREENS.details.classList.contains('is-active')) {
-          var alinaEl = getAlinaTextEl('details');
-          if (alinaEl) alinaEl.textContent = ALINA_PORTER.both;
-        }
-      });
-    });
-    detailsObserver.observe(SCREENS.details, { attributes: true, attributeFilter: ['class'] });
-
-    // Porter count cards
-    SCREENS.details.querySelectorAll('.qf-service-card[data-porter-count]').forEach(function (card) {
-      card.addEventListener('click', function () {
-        STATE.porterCount = card.getAttribute('data-porter-count');
-        SCREENS.details.querySelectorAll('.qf-service-card[data-porter-count]').forEach(function (c) {
-          c.classList.remove('is-selected');
-        });
-        card.classList.add('is-selected');
-      });
-    });
-
-    // Time selects
-    var detailsStartSel = SCREENS.details.querySelector('[data-time="start"]');
-    var detailsEndSel   = SCREENS.details.querySelector('[data-time="end"]');
-    populateTimeSelect(detailsStartSel, '08:00');
-    populateTimeSelect(detailsEndSel, '17:00');
-
-    if (detailsStartSel) {
-      detailsStartSel.addEventListener('change', function () { STATE.timeStart = detailsStartSel.value; });
-    }
-    if (detailsEndSel) {
-      detailsEndSel.addEventListener('change', function () { STATE.timeEnd = detailsEndSel.value; });
-    }
-
-    // Quick presets
-    SCREENS.details.querySelectorAll('.qf-time-preset').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var preset = btn.getAttribute('data-preset');
-        if (preset === '8-5') {
-          setTimeSelects(detailsStartSel, detailsEndSel, '08:00', '17:00');
-        } else if (preset === '9-6') {
-          setTimeSelects(detailsStartSel, detailsEndSel, '09:00', '18:00');
-        }
-        SCREENS.details.querySelectorAll('.qf-time-preset').forEach(function (p) { p.classList.remove('is-active'); });
-        btn.classList.add('is-active');
-      });
-    });
-
-    // Cleaning window cards
-    SCREENS.details.querySelectorAll('.qf-service-card[data-window]').forEach(function (card) {
-      card.addEventListener('click', function () {
-        STATE.cleaningWindow = card.getAttribute('data-window');
-        SCREENS.details.querySelectorAll('.qf-service-card[data-window]').forEach(function (c) {
-          c.classList.remove('is-selected');
-        });
-        card.classList.add('is-selected');
-      });
-    });
-
-    // Continue button
-    var detailsContinue = SCREENS.details.querySelector('.qf-details-continue');
-    if (detailsContinue) {
-      detailsContinue.addEventListener('click', function () {
-        if (!STATE.porterCount) {
-          var firstCard = SCREENS.details.querySelector('.qf-service-card[data-porter-count]');
-          if (firstCard) firstCard.focus();
-          return;
-        }
-        if (!STATE.cleaningWindow) {
-          var firstWindow = SCREENS.details.querySelector('.qf-service-card[data-window]');
-          if (firstWindow) firstWindow.focus();
-          return;
-        }
-        STATE.timeStart = detailsStartSel ? detailsStartSel.value : '08:00';
-        STATE.timeEnd = detailsEndSel ? detailsEndSel.value : '17:00';
-        setRailValue('details', 'Configured');
-        goNext();
-      });
-    }
-  }
+  /* DETAILS step removed — the "Both services combined" screen was never
+     referenced by any FLOWS array. All four service flows use the standard
+     porter + hours + days sequence instead. */
 
   /* =======================================================================
      CONTACT/SUMMARY step — populate summary + handle submit
@@ -2076,7 +2020,7 @@
       }).catch(function(){ /* silent — backend may be offline */ })
         .finally(function () {
           if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
-          qfToast({ type:'success', title:'Link sent!', message:'Check ' + val + ' to finish your quote later.' });
+          qfToast({ type:'success', title:'We\u2019ve got your spot', message:'We\u2019ll follow up with ' + val + ' so you can pick this up later.' });
           if (exitOverlay) exitOverlay.hidden = true;
           // Save draft so resume banner works too
           STATE.userEmail = STATE.userEmail || val;
