@@ -383,16 +383,6 @@
   };
 
   /* -----------------------------------------------------------------------
-     Info tooltip content for Step 1 cards
-     ----------------------------------------------------------------------- */
-  var S1_CARD_INFO = {
-    janitorial: 'Overnight deep cleaning, 5\u20137x/week. Your team arrives to a spotless space every morning.',
-    dayporter:  'A dedicated porter on-site during business hours \u2014 lobbies, restrooms, common areas always fresh.',
-    both:       'Day porter + overnight janitorial = full 24/7 coverage. The most popular setup for premium offices.',
-    unsure:     'Not sure what you need? No worries \u2014 Alina will recommend the right mix based on your space.'
-  };
-
-  /* -----------------------------------------------------------------------
      Feature #1 + #14: Time-based greeting + random variation
      ----------------------------------------------------------------------- */
   // Always deterministic time-of-day greeting — avoids jarring random switches
@@ -825,8 +815,7 @@
   if (SCREENS.welcome) {
     SCREENS.welcome.querySelectorAll('.qf-service-card').forEach(function (card) {
       // Main click — select service
-      card.addEventListener('click', function (e) {
-        if (e.target.closest('.qf-info-btn')) return;
+      card.addEventListener('click', function () {
         STATE.service = card.getAttribute('data-service');
 
         // Build dynamic rail for this service
@@ -835,55 +824,9 @@
         goNext();
       });
 
-      // Info tooltip button
-      var serviceKey = card.getAttribute('data-service');
-      var infoText = S1_CARD_INFO[serviceKey];
-      if (infoText) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'qf-info-btn';
-        btn.setAttribute('aria-label', 'More info about ' + (card.getAttribute('data-service-label') || serviceKey));
-        btn.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r=".4" fill="currentColor"/></svg>';
-        card.appendChild(btn);
-
-        btn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          e.preventDefault();
-
-          // Close existing tooltip
-          var existing = document.querySelector('.qf-info-tooltip');
-          if (existing) { existing.remove(); return; }
-
-          // Create tooltip at stage level (avoids overflow:hidden clip)
-          var tooltip = document.createElement('div');
-          tooltip.className = 'qf-info-tooltip is-visible';
-          tooltip.setAttribute('role', 'tooltip');
-          tooltip.textContent = infoText;
-
-          var rect = btn.getBoundingClientRect();
-          var centerX = rect.left + rect.width / 2;
-          var topY = rect.top - 14;
-          var tooltipW = 240;
-          var safeLeft = Math.max(16, Math.min(centerX - tooltipW / 2, window.innerWidth - tooltipW - 16));
-
-          tooltip.style.cssText = 'position:fixed!important;left:' + safeLeft + 'px!important;top:' + topY + 'px!important;bottom:auto!important;transform:translateY(-100%)!important;max-width:' + tooltipW + 'px;width:max-content;z-index:100;opacity:1;background:#fff;border:1px solid #E8E4DE;border-radius:12px;padding:10px 14px;font-size:.78rem;line-height:1.45;color:#1F3556;box-shadow:0 12px 32px -8px rgba(11,29,56,.18);text-align:left;';
-
-          var stage = document.getElementById('qfStage');
-          if (stage) stage.appendChild(tooltip);
-
-          setTimeout(function () {
-            var closeOnce = function () {
-              if (tooltip.parentNode) tooltip.remove();
-              document.removeEventListener('click', closeOnce);
-            };
-            document.addEventListener('click', closeOnce);
-          }, 200);
-
-          setTimeout(function () {
-            if (tooltip.parentNode) tooltip.remove();
-          }, 6000);
-        });
-      }
+      // Info tooltip button removed per user request — the (i) icon's native
+      // aria-label tooltip (Chrome) was appearing on hover, and the card hint
+      // copy already explains what each service is.
     });
   }
 
