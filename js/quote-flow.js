@@ -2140,10 +2140,8 @@
     var draft = loadDraft();
     if (!draft || !draft.service || draft.currentStepName === 'welcome' || draft.currentStepName === 'success') return;
 
-    // Sprint 6 — pre-highlight the service the user chose last time.
-    var priorCard = document.querySelector('.qf-service-card[data-service="' + draft.service + '"]');
-    if (priorCard) priorCard.classList.add('qf-is-prior');
-
+    // (Pre-highlighting the prior card was removed — the green ring read as
+    // "selected" to users. The resume banner above is enough context.)
     var SERVICE_NAMES = { janitorial:'Janitorial', dayporter:'Day Porter', both:'Both Services', unsure:'that plan' };
     var niceName = SERVICE_NAMES[draft.service] || 'your plan';
     var greeting = draft.userName ? (draft.userName + ', welcome back!') : 'Welcome back!';
@@ -2181,7 +2179,6 @@
     });
     banner.querySelector('.qf-resume-start').addEventListener('click', function () {
       clearDraft();
-      if (priorCard) priorCard.classList.remove('qf-is-prior');
       banner.remove();
     });
   })();
