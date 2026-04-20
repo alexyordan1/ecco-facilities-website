@@ -809,6 +809,23 @@
         // keep scrollBehavior as auto (don't restore — CSS smooth fights programmatic scroll)
       });
     }, 120);
+
+    // Re-align the bubble after the previous screens finish their
+    // is-done collapse transition. The first scroll calculation above uses
+    // offsetTop values captured before the collapse settles, so the Alina
+    // bubble often lands ~300-400px below the flow bar (especially on the
+    // hours step where buildPorterRows also mutates the DOM mid-transition).
+    // This correction pass runs once the layout has settled.
+    setTimeout(function () {
+      if (STATE.currentStepName !== name) return;
+      var bubble = to.querySelector('.qf-alina-says');
+      if (!bubble) return;
+      var rect = bubble.getBoundingClientRect();
+      var flowBarH = flowBar && !flowBar.hidden ? flowBar.offsetHeight : 0;
+      var delta = rect.top - flowBarH - 8;
+      if (Math.abs(delta) <= 2) return;
+      window.scrollBy({ top: delta, behavior: 'smooth' });
+    }, 620);
   }
 
   function goNext() {
