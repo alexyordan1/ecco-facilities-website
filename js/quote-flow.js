@@ -902,8 +902,11 @@
   /* =======================================================================
      INFO step — Name + Email + Phone capture (with validation)
      ======================================================================= */
-  // Fix #20 — stricter email: must have at least 2-char TLD made of letters, and no leading/trailing dots
-  var EMAIL_RE = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24}$/;
+  // AYS Ola 3 #6 — strict email regex. MUST match functions/api/submit-quote.js
+  // EMAIL_RE byte-for-byte. Rejects `..user@`, `user..x@`, `user@-domain.com`,
+  // and trailing-hyphen domains. Client-first validation matches server so
+  // users see errors before a round-trip.
+  var EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
   // Common disposable domains — nice-to-have soft block
   var DISPOSABLE_EMAIL_DOMAINS = ['mailinator.com','tempmail.com','10minutemail.com','throwaway.email','guerrillamail.com','yopmail.com','fakeinbox.com','trashmail.com'];
   function isDisposableEmail(e) {
@@ -2141,24 +2144,57 @@
     // "selected" to users. The resume banner above is enough context.)
     var SERVICE_NAMES = { janitorial:'Janitorial', dayporter:'Day Porter', both:'Both Services', unsure:'that plan' };
     var niceName = SERVICE_NAMES[draft.service] || 'your plan';
-    var greeting = draft.userName ? (draft.userName + ', welcome back!') : 'Welcome back!';
 
-    // Build a small banner at the top of the stage
+    // AYS Ola 3 #1+#25 — XSS fix. The previous version inlined `draft.userName`
+    // and `niceName` into `innerHTML`, so any attacker who could seed
+    // localStorage (via malicious link that does `localStorage.setItem`
+    // then redirects here) achieved XSS in the eccofacilities.com origin.
+    // Now every user-derived value flows through `.textContent` and element
+    // creation, which browsers escape automatically.
     var banner = document.createElement('div');
     banner.className = 'qf-resume-banner qf-resume-smart';
     banner.setAttribute('role', 'region');
     banner.setAttribute('aria-label', 'Resume previous session');
-    banner.innerHTML =
-      '<div class="qf-resume-inner">' +
-        '<span class="qf-resume-ico" aria-hidden="true">\u23F1\uFE0F</span>' +
-        '<span class="qf-resume-text"><strong>' + greeting + '</strong> Last time you picked <em>' + niceName + '</em> — pick up where you left off?</span>' +
-        '<button type="button" class="qf-resume-btn qf-resume-resume">Resume</button>' +
-        '<button type="button" class="qf-resume-btn qf-resume-start">Start over</button>' +
-      '</div>';
+
+    var inner = document.createElement('div');
+    inner.className = 'qf-resume-inner';
+
+    var ico = document.createElement('span');
+    ico.className = 'qf-resume-ico';
+    ico.setAttribute('aria-hidden', 'true');
+    ico.textContent = '\u23F1\uFE0F';
+
+    var textWrap = document.createElement('span');
+    textWrap.className = 'qf-resume-text';
+    var strong = document.createElement('strong');
+    strong.textContent = draft.userName ? (draft.userName + ', welcome back!') : 'Welcome back!';
+    textWrap.appendChild(strong);
+    textWrap.appendChild(document.createTextNode(' Last time you picked '));
+    var em = document.createElement('em');
+    em.textContent = niceName;
+    textWrap.appendChild(em);
+    textWrap.appendChild(document.createTextNode(' \u2014 pick up where you left off?'));
+
+    var resumeBtn = document.createElement('button');
+    resumeBtn.type = 'button';
+    resumeBtn.className = 'qf-resume-btn qf-resume-resume';
+    resumeBtn.textContent = 'Resume';
+
+    var startBtn = document.createElement('button');
+    startBtn.type = 'button';
+    startBtn.className = 'qf-resume-btn qf-resume-start';
+    startBtn.textContent = 'Start over';
+
+    inner.appendChild(ico);
+    inner.appendChild(textWrap);
+    inner.appendChild(resumeBtn);
+    inner.appendChild(startBtn);
+    banner.appendChild(inner);
+
     var stage = document.getElementById('qfStage');
     if (stage) stage.insertBefore(banner, stage.firstChild);
 
-    banner.querySelector('.qf-resume-resume').addEventListener('click', function () {
+    resumeBtn.addEventListener('click', function () {
       // Merge saved state in
       Object.keys(draft).forEach(function (k) { STATE[k] = draft[k]; });
       buildRail(STATE.service);
@@ -2174,7 +2210,7 @@
       banner.remove();
       goToScreen(STATE.currentStepName);
     });
-    banner.querySelector('.qf-resume-start').addEventListener('click', function () {
+    startBtn.addEventListener('click', function () {
       clearDraft();
       banner.remove();
     });

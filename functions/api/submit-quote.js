@@ -3,24 +3,85 @@ const ALLOWED_ORIGINS = [
   'https://www.eccofacilities.com',
   'http://localhost:8080'
 ];
-function resolveCors(origin) {
+
+// AYS Ola 3 #5 — CORS tightening. We no longer accept any *.pages.dev origin,
+// only the specific preview branch defined via env. An attacker-owned
+// attacker.pages.dev can no longer post quotes from their page. Any request
+// from an unapproved origin falls back to the canonical production domain.
+function resolveCors(origin, env) {
   if (!origin) return 'https://eccofacilities.com';
   if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  if (/^https:\/\/[a-z0-9-]+\.pages\.dev$/.test(origin)) return origin;
+  const previewDomain = env && env.ALLOWED_PREVIEW_ORIGIN;
+  if (previewDomain && origin === previewDomain) return origin;
   return 'https://eccofacilities.com';
 }
 
+// AYS Ola 3 #18 — redact PII before logging. Never ship email/phone to
+// Logpush / Sentry / LogRocket without masking. Covers the three common shapes
+// found in error messages.
+function redactPII(s) {
+  if (s == null) return s;
+  return String(s)
+    .replace(/([A-Za-z0-9._%+\-]{1,2})[A-Za-z0-9._%+\-]*@([A-Za-z0-9.\-]+\.[A-Za-z]{2,24})/g, '$1***@$2')
+    .replace(/\b(\+?\d[\d\s\-().]{6,}\d)\b/g, '***phone***');
+}
+
+// AYS Ola 3 #6 — strict email regex. Rejects `..user@`, `user..name@`,
+// `user@-domain.com`, and trailing-hyphen domains. MUST match the client-side
+// regex in js/quote-flow.js (line ~906) byte-for-byte.
+const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
+
+// AYS Ola 3 #7 — rate-limit /api/submit-quote. Uses Cloudflare KV with hourly
+// buckets. Limit: 10 submits per IP per hour. Falls open (skip limit) if KV is
+// not bound — that way local dev still works, but production should always have
+// the RATE_LIMIT_KV binding configured.
+async function enforceRateLimit(request, env) {
+  const kv = env && env.RATE_LIMIT_KV;
+  if (!kv) return { ok: true };
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const hour = Math.floor(Date.now() / 3600000);
+  const key = `rl:quote:${ip}:${hour}`;
+  const current = parseInt(await kv.get(key) || '0', 10);
+  if (current >= 10) return { ok: false, retryAfter: 3600 - Math.floor((Date.now() / 1000) % 3600) };
+  await kv.put(key, String(current + 1), { expirationTtl: 3600 });
+  return { ok: true };
+}
+
+// AYS Ola 3 #27 — sanitize form data before embedding in HubSpot property.
+// Strips control chars that could break downstream JSON/CSV parsing.
+function safeStringify(obj) {
+  const clean = {};
+  for (const [k, v] of Object.entries(obj || {})) {
+    if (v == null) continue;
+    if (Array.isArray(v)) clean[k] = v.map(x => typeof x === 'string' ? x.replace(/[\x00-\x1F\x7F]/g, ' ') : x);
+    else if (typeof v === 'string') clean[k] = v.replace(/[\x00-\x1F\x7F]/g, ' ');
+    else clean[k] = v;
+  }
+  return JSON.stringify(clean);
+}
+
+const ALLOWED_FORM_TYPES = new Set(['janitorial', 'dayporter', 'both']);
+
 export async function onRequestPost(context) {
   const origin = context.request.headers.get('Origin');
+  const env = context.env;
   const corsHeaders = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store',
-    'Access-Control-Allow-Origin': resolveCors(origin),
+    'Access-Control-Allow-Origin': resolveCors(origin, env),
     'Vary': 'Origin'
   };
 
+  // AYS Ola 3 #7 — rate limit before parsing body
+  const rl = await enforceRateLimit(context.request, env);
+  if (!rl.ok) {
+    return new Response(JSON.stringify({ ok: false, error: 'Too many requests. Please try again later.' }), {
+      status: 429,
+      headers: { ...corsHeaders, 'Retry-After': String(rl.retryAfter || 3600) }
+    });
+  }
+
   try {
-    const env = context.env;
     let body;
     try { body = await context.request.json(); }
     catch { return new Response(JSON.stringify({ ok: false, error: 'Invalid JSON' }), { status: 400, headers: corsHeaders }); }
@@ -28,14 +89,19 @@ export async function onRequestPost(context) {
     const { em: email, fn: firstName, ln: lastName, ph: phone, co: company,
             turnstileToken, formType } = body;
 
-    // AYS Ola 2 #7+#10 — strict field validation + aligned client/server email regex
-    const EMAIL_RE = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24}$/;
+    // AYS Ola 3 #6 — strict email validation (regex hoisted to module scope)
     const MAX_STR = 500;
     if (!email || !EMAIL_RE.test(String(email))) {
       return new Response(JSON.stringify({ ok: false, error: 'Invalid email' }), { status: 400, headers: corsHeaders });
     }
     if (!firstName || !String(firstName).trim()) {
       return new Response(JSON.stringify({ ok: false, error: 'Missing first name' }), { status: 400, headers: corsHeaders });
+    }
+
+    // AYS Ola 3 #26 — formType whitelist. Unknown values (client tampering,
+    // bot probing) rejected instead of silently defaulting to janitorial.
+    if (formType && !ALLOWED_FORM_TYPES.has(String(formType))) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invalid form type' }), { status: 400, headers: corsHeaders });
     }
     // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
     const ALLOWED_KEYS = new Set([
@@ -51,8 +117,16 @@ export async function onRequestPost(context) {
       if (Array.isArray(v)) body[k] = v.slice(0, 20).map((s) => typeof s === 'string' ? s.slice(0, MAX_STR) : s);
     }
 
-    // 1. Validate Turnstile server-side (required in production when secret is set)
+    // AYS Ola 3 #4 — Turnstile fail-loud. Production MUST set CF_TURNSTILE_SECRET.
+    // If it's missing, the previous code silently skipped captcha validation —
+    // every submission accepted, bots sail through. Now we 503 until configured,
+    // except on localhost where the dev loop expects to work without Turnstile.
     const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
+    const isLocal = origin === 'http://localhost:8080';
+    if (!turnstileSecret && !isLocal) {
+      console.error('[submit-quote] CF_TURNSTILE_SECRET missing in production env');
+      return new Response(JSON.stringify({ ok: false, error: 'Captcha not configured. Please contact support.' }), { status: 503, headers: corsHeaders });
+    }
     if (turnstileSecret) {
       if (!turnstileToken) {
         return new Response(JSON.stringify({ ok: false, error: 'Captcha required' }), { status: 403, headers: corsHeaders });
@@ -72,7 +146,7 @@ export async function onRequestPost(context) {
           return new Response(JSON.stringify({ ok: false, error: 'Captcha verification failed' }), { status: 403, headers: corsHeaders });
         }
       } catch (verifyErr) {
-        console.error('[submit-quote] Turnstile verify error:', verifyErr.message);
+        console.error('[submit-quote] Turnstile verify error:', redactPII(verifyErr.message));
         return new Response(JSON.stringify({ ok: false, error: 'Captcha service unavailable' }), { status: 503, headers: corsHeaders });
       }
     }
@@ -158,7 +232,7 @@ export async function onRequestPost(context) {
           console.error('[submit-quote] Supabase error:', sbRes.status, errText);
         }
       } catch (dbErr) {
-        console.error('[submit-quote] Supabase DB error:', dbErr.message);
+        console.error('[submit-quote] Supabase DB error:', redactPII(dbErr.message));
       }
     }
 
@@ -197,7 +271,7 @@ export async function onRequestPost(context) {
           integrations.activecampaign = true;
         }
       } catch (e) {
-        console.error('[submit-quote] ActiveCampaign error:', e.message);
+        console.error('[submit-quote] ActiveCampaign error:', redactPII(e.message));
       }
     }
 
@@ -231,7 +305,7 @@ export async function onRequestPost(context) {
           ecco_space_type: formData.space_type || '',
           ecco_urgency: formData.urgency || '',
           ecco_lead_status: 'completed',
-          ecco_form_data: JSON.stringify(formData)
+          ecco_form_data: safeStringify(formData)
         };
 
         if (hsContactId) {
@@ -273,7 +347,7 @@ export async function onRequestPost(context) {
           integrations.hubspot = true;
         }
       } catch (e) {
-        console.error('[submit-quote] HubSpot error:', e.message);
+        console.error('[submit-quote] HubSpot error:', redactPII(e.message));
       }
     }
 
@@ -300,8 +374,14 @@ export async function onRequestPost(context) {
           })
         });
         if (pmRes.ok) integrations.postmark = true;
+        else {
+          // AYS Ola 3 #17 — Postmark non-ok silent. Log the status so Logpush
+          // surfaces delivery failures; integrations.postmark stays false and
+          // the aggregate-failure check at the bottom catches total outages.
+          console.error('[submit-quote] Postmark non-ok status:', pmRes.status);
+        }
       } catch (e) {
-        console.error('[submit-quote] Postmark client email error:', e.message);
+        console.error('[submit-quote] Postmark client email error:', redactPII(e.message));
       }
 
       // 7. Postmark: notification email to owner
@@ -336,7 +416,7 @@ export async function onRequestPost(context) {
           })
         });
       } catch (e) {
-        console.error('[submit-quote] Postmark owner email error:', e.message);
+        console.error('[submit-quote] Postmark owner email error:', redactPII(e.message));
       }
     }
 
@@ -354,7 +434,10 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ ok: true, ref: refNumber }), { status: 200, headers: corsHeaders });
 
   } catch (err) {
-    console.error('[submit-quote] Fatal error:', err.message, err.stack);
+    // AYS Ola 3 #18 — redact PII and strip stack (prevents path/logic leaks
+    // into external log destinations). Full stack available at Cloudflare's
+    // native error panel for debugging.
+    console.error('[submit-quote] Fatal error:', redactPII(err.message));
     return new Response(JSON.stringify({ ok: false, error: 'Server error' }), { status: 500, headers: corsHeaders });
   }
 }
