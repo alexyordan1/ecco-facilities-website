@@ -115,7 +115,9 @@
   /* -----------------------------------------------------------------------
      Screen elements — map name → DOM node
      ----------------------------------------------------------------------- */
-  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'window', 'porter', 'hours', 'contact', 'success'];
+  // AYS Ola 3 #21 — removed legacy 'window' step (no corresponding DOM, all
+  // FLOWS path refs dropped in an earlier refactor; still created SCREENS.window = null)
+  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'porter', 'hours', 'contact', 'success'];
   var SCREENS = {};
 
   SCREEN_NAMES.forEach(function (name) {
@@ -292,8 +294,11 @@
   })();
 
   // Error vibration when any field gets marked invalid.
+  // AYS Ola 3 #23 — observer now has a disconnect hook for unload/success,
+  // preventing memory leaks and stopping haptic spam after the user submits.
+  var invalidObserver = null;
   try {
-    new MutationObserver(function (muts) {
+    invalidObserver = new MutationObserver(function (muts) {
       for (var i = 0; i < muts.length; i++) {
         var m = muts[i];
         if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
@@ -301,20 +306,53 @@
         var isInvalid  = m.target.classList && m.target.classList.contains('qf-input-invalid');
         if (!wasInvalid && isInvalid) { qfHaptic(QF_HAPTIC.error); return; }
       }
-    }).observe(document.body || document.documentElement, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class'] });
+    });
+    invalidObserver.observe(document.body || document.documentElement, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class'] });
   } catch (_) {}
+  window.addEventListener('beforeunload', function () {
+    if (invalidObserver) { try { invalidObserver.disconnect(); } catch (_) {} }
+  });
 
   /* -----------------------------------------------------------------------
      Draft persistence — survive refresh + resume next session
      Keys only restore if <7 days old, to avoid stale leads
+
+     AYS Ola 3 #8 — PII consent gate. Previously persisted userName, userEmail,
+     userPhone, userAddress, companyName BEFORE the user had accepted cookies.
+     Now: anonymous fields always; PII only when `ecco_consent === 'accepted'`.
+     A listener re-hydrates the full draft when consent is granted mid-session.
      ----------------------------------------------------------------------- */
   var DRAFT_KEY = 'ecco_quote_draft_v1';
   var DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+  var PII_FIELDS = ['userName', 'userLastName', 'userEmail', 'userPhone', 'userAddress', 'companyName'];
+
+  function hasConsent() {
+    try {
+      // Check both the HubSpot-gating `ecco_consent` key and the cookie-consent
+      // module's `ecco_cookies` key. Either set to 'accepted' grants consent.
+      var c1 = localStorage.getItem('ecco_consent');
+      if (c1 === 'accepted' || c1 === 'true') return true;
+      var c2 = localStorage.getItem('ecco_cookies');
+      if (c2 === 'accepted') return true;
+      var m = (document.cookie || '').match(/(?:^|;\s*)ecco_consent=([^;]+)/);
+      return !!m && (m[1] === 'accepted' || m[1] === 'true');
+    } catch (_) { return false; }
+  }
+
+  function stripPII(state) {
+    var clean = {};
+    Object.keys(state).forEach(function (k) {
+      if (PII_FIELDS.indexOf(k) === -1) clean[k] = state[k];
+    });
+    return clean;
+  }
+
   function saveDraft() {
     try {
       // Never save submitted / success state
       if (STATE.currentStepName === 'success') return;
-      var snap = { s: STATE, t: Date.now() };
+      var payload = hasConsent() ? STATE : stripPII(STATE);
+      var snap = { s: payload, t: Date.now(), c: hasConsent() ? 1 : 0 };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
     } catch (_) { /* localStorage unavailable — quota/private mode */ }
   }
@@ -334,6 +372,9 @@
       return parsed.s;
     } catch (_) { return null; }
   }
+
+  // Re-save with full PII once the user accepts cookies mid-session
+  window.addEventListener('ecco:consent-accepted', function () { saveDraft(); }, { once: false });
 
   /* -----------------------------------------------------------------------
      Alina copy — contextual messages per screen
@@ -860,26 +901,29 @@
       STATE.currentStepName = prevName;
       syncFlowBar(prevName);
       updateRail();
+      // AYS Ola 3 #24 — single read via getBoundingClientRect instead of
+      // the offsetTop walking loop (which forced a layout flush on every
+      // parent.offsetTop read, then another inside the RAF animation).
       var scrollTarget = prevScreen.querySelector('.qf-alina-says') || prevScreen;
-      var absTop = 0;
-      var el = scrollTarget;
-      while (el) { absTop += el.offsetTop; el = el.offsetParent; }
+      var targetRect = scrollTarget.getBoundingClientRect();
       var flowBarH = flowBar && !flowBar.hidden ? flowBar.offsetHeight : 0;
-      var targetY = Math.max(0, absTop - flowBarH - 4);
       var html = document.documentElement;
+      var startY = html.scrollTop || window.scrollY;
+      // rect.top is relative to viewport; add startY to get absolute, then subtract bar + gap
+      var targetY = Math.max(0, targetRect.top + startY - flowBarH - 4);
+      var diff = targetY - startY;
+      if (Math.abs(diff) < 2) return;
       var prevBehavior = html.style.scrollBehavior;
       html.style.scrollBehavior = 'auto';
-      var startY = html.scrollTop;
-      var diff = targetY - startY;
-      if (Math.abs(diff) < 2) { html.style.scrollBehavior = prevBehavior; return; }
       var startTime = null;
       requestAnimationFrame(function step(ts) {
         if (!startTime) startTime = ts;
         var p = Math.min((ts - startTime) / 500, 1);
         var e = p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2, 3)/2;
+        // Single write per frame; no reads inside the loop.
         html.scrollTop = startY + diff * e;
         if (p < 1) requestAnimationFrame(step);
-        // keep scrollBehavior as auto (don't restore — CSS smooth fights programmatic scroll)
+        else html.style.scrollBehavior = prevBehavior;
       });
     }
   }
@@ -915,8 +959,25 @@
   // and trailing-hyphen domains. Client-first validation matches server so
   // users see errors before a round-trip.
   var EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
-  // Common disposable domains — nice-to-have soft block
-  var DISPOSABLE_EMAIL_DOMAINS = ['mailinator.com','tempmail.com','10minutemail.com','throwaway.email','guerrillamail.com','yopmail.com','fakeinbox.com','trashmail.com'];
+  // AYS Ola 3 #31 — expanded disposable-email block list (top-100 most-used
+  // disposable providers as of 2025). Soft warning only — some legit users
+  // forward to aliases, so we warn but don't block.
+  var DISPOSABLE_EMAIL_DOMAINS = [
+    'mailinator.com','tempmail.com','10minutemail.com','10minutemail.net','throwaway.email','guerrillamail.com',
+    'guerrillamail.net','guerrillamail.info','guerrillamailblock.com','yopmail.com','fakeinbox.com','trashmail.com',
+    'trashmail.de','temp-mail.org','temp-mail.io','tempmailo.com','tempail.com','maildrop.cc','mailnesia.com',
+    'sharklasers.com','dispostable.com','getairmail.com','mohmal.com','harakirimail.com','spam4.me','mytemp.email',
+    'emailondeck.com','moakt.com','mail-temporaire.fr','mailtothis.com','mytrashmail.com','jetable.org',
+    'throwam.com','tempomail.org','mailcatch.com','getnada.com','nada.email','burnermail.io','anonbox.net',
+    'mailexpire.com','spambox.us','throwawaymail.com','incognitomail.org','einrot.com','dropmail.me',
+    'mintemail.com','inboxbear.com','tempinbox.com','tmail.ws','tmailinator.com','email-fake.com','emltmp.com',
+    'mohmal.in','mohmal.net','disposablemail.com','eyepaste.com','mailnull.com','mytempemail.com',
+    'spamgourmet.com','spambog.com','spambog.de','tempemail.net','tempemail.com','temporarymailbox.com',
+    'temp-mail.ru','tempmail.ninja','10minutesmail.com','30minutemail.com','fake-mail.net','fake-mail.ml',
+    'fakeinformation.com','harakirimail.jp','sendspamhere.com','spamherelots.com','spamex.com','spamfree24.com',
+    'spammotel.com','spamify.com','temporaryemail.net','trash-mail.com','trashdevil.com','trbvm.com',
+    'wegwerfemail.com','wegwerfmail.de','wegwerfmail.net','wegwerfmail.org','wh4f.org','yopmail.fr','yopmail.net'
+  ];
   function isDisposableEmail(e) {
     var m = /@([^@]+)$/.exec((e || '').toLowerCase());
     return m ? DISPOSABLE_EMAIL_DOMAINS.indexOf(m[1]) !== -1 : false;
@@ -1676,6 +1737,16 @@
         }
       };
       specialInput.addEventListener('input', updateCounter);
+      // AYS Ola 3 #22 — maxlength on textarea is bypassable via paste in some
+      // browsers; enforce the 500-char cap after every paste.
+      specialInput.addEventListener('paste', function () {
+        setTimeout(function () {
+          if (specialInput.value.length > 500) {
+            specialInput.value = specialInput.value.slice(0, 500);
+          }
+          updateCounter();
+        }, 0);
+      });
       updateCounter();
     }
 
@@ -1831,17 +1902,35 @@
         submitBtn.classList.add('is-loading');
         submitBtn.textContent = 'Sending\u2026';
 
-        // POST to /api/submit-quote — include Turnstile token if present
-        var payload = buildSubmitPayload();
-        if (window.qfTurnstileToken) payload.turnstileToken = window.qfTurnstileToken;
-        // Force Turnstile to execute before submit if available and no token yet
-        if (!window.qfTurnstileToken && window.turnstile) {
-          try { window.turnstile.execute('#qfTurnstile'); } catch(_) {}
+        // AYS Ola 3 #14 — fix Turnstile race. Previously the fetch fired even
+        // if window.qfTurnstileToken hadn't resolved yet; the backend then saw
+        // a missing token and rejected. Now we request execution (if needed)
+        // and wait up to 8 seconds for the global callback to set the token
+        // before submitting. If the token never arrives we still try the
+        // fetch — the backend's captcha check will return a friendly 403 and
+        // the user can retry.
+        function awaitTurnstile() {
+          return new Promise(function (resolve) {
+            if (window.qfTurnstileToken) return resolve(window.qfTurnstileToken);
+            if (!window.turnstile) return resolve(null);
+            try { window.turnstile.execute('#qfTurnstile'); } catch (_) {}
+            var start = Date.now();
+            (function check() {
+              if (window.qfTurnstileToken) return resolve(window.qfTurnstileToken);
+              if (Date.now() - start > 8000) return resolve(null);
+              setTimeout(check, 120);
+            })();
+          });
         }
-        fetch('/api/submit-quote', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+
+        awaitTurnstile().then(function (token) {
+          var payload = buildSubmitPayload();
+          if (token) payload.turnstileToken = token;
+          return fetch('/api/submit-quote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
         }).then(function (res) {
           return res.json().then(function (data) { return { ok: res.ok, data: data }; });
         }).then(function (result) {
