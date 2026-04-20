@@ -1,8 +1,22 @@
+const ALLOWED_ORIGINS = [
+  'https://eccofacilities.com',
+  'https://www.eccofacilities.com',
+  'http://localhost:8080'
+];
+function resolveCors(origin) {
+  if (!origin) return 'https://eccofacilities.com';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  if (/^https:\/\/[a-z0-9-]+\.pages\.dev$/.test(origin)) return origin;
+  return 'https://eccofacilities.com';
+}
+
 export async function onRequestPost(context) {
+  const origin = context.request.headers.get('Origin');
   const corsHeaders = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store',
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': resolveCors(origin),
+    'Vary': 'Origin'
   };
 
   try {
@@ -14,15 +28,54 @@ export async function onRequestPost(context) {
     const { em: email, fn: firstName, ln: lastName, ph: phone, co: company,
             turnstileToken, formType } = body;
 
-    // Validate required fields
-    if (!email || !firstName) {
-      return new Response(JSON.stringify({ ok: false, error: 'Missing required fields' }), { status: 400, headers: corsHeaders });
+    // AYS Ola 2 #7+#10 — strict field validation + aligned client/server email regex
+    const EMAIL_RE = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24}$/;
+    const MAX_STR = 500;
+    if (!email || !EMAIL_RE.test(String(email))) {
+      return new Response(JSON.stringify({ ok: false, error: 'Invalid email' }), { status: 400, headers: corsHeaders });
+    }
+    if (!firstName || !String(firstName).trim()) {
+      return new Response(JSON.stringify({ ok: false, error: 'Missing first name' }), { status: 400, headers: corsHeaders });
+    }
+    // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
+    const ALLOWED_KEYS = new Set([
+      'em','fn','ln','ph','co','addr','referral','notes','contactPref','formType',
+      'space','spaceOther','urg','size','exactSize','janDays','addDayPorter','window',
+      'hrs','customHrs','startTime','dpDays','porters','porterCount','dpAreas','areaOther','addJanitorial',
+      'turnstileToken'
+    ]);
+    for (const k of Object.keys(body)) {
+      if (!ALLOWED_KEYS.has(k)) { delete body[k]; continue; }
+      const v = body[k];
+      if (typeof v === 'string' && v.length > MAX_STR) body[k] = v.slice(0, MAX_STR);
+      if (Array.isArray(v)) body[k] = v.slice(0, 20).map((s) => typeof s === 'string' ? s.slice(0, MAX_STR) : s);
     }
 
-    // 1. Validate Turnstile server-side (temporarily disabled — widget hanging, error 300030)
-    // TODO: re-enable after fixing Turnstile widget configuration
-    // const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
-    // if (turnstileSecret) { ... }
+    // 1. Validate Turnstile server-side (required in production when secret is set)
+    const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret) {
+      if (!turnstileToken) {
+        return new Response(JSON.stringify({ ok: false, error: 'Captcha required' }), { status: 403, headers: corsHeaders });
+      }
+      try {
+        const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            secret: turnstileSecret,
+            response: turnstileToken,
+            remoteip: context.request.headers.get('CF-Connecting-IP') || ''
+          })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success) {
+          return new Response(JSON.stringify({ ok: false, error: 'Captcha verification failed' }), { status: 403, headers: corsHeaders });
+        }
+      } catch (verifyErr) {
+        console.error('[submit-quote] Turnstile verify error:', verifyErr.message);
+        return new Response(JSON.stringify({ ok: false, error: 'Captcha service unavailable' }), { status: 503, headers: corsHeaders });
+      }
+    }
 
     // 2. Generate reference number
     const prefix = formType === 'dayporter' ? 'EDP-' : 'ECJ-';
@@ -38,12 +91,16 @@ export async function onRequestPost(context) {
       // Janitorial
       size: 'space_size', exactSize: 'exact_sqft',
       janDays: 'cleaning_days', addDayPorter: 'also_wants_dayporter',
+      window: 'cleaning_window',
       // Day Porter
       hrs: 'hours_per_day', customHrs: 'custom_hours',
       startTime: 'start_time', dpDays: 'coverage_days',
       porters: 'num_porters', porterCount: 'porter_count_custom',
       dpAreas: 'areas_covered', areaOther: 'area_custom',
       addJanitorial: 'also_wants_janitorial',
+    };
+    const WINDOW_MAP = {
+      before_hours: 'Before hours', after_hours: 'After hours', flexible: 'Flexible'
     };
     const URGENCY_MAP = {
       asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'
@@ -52,13 +109,26 @@ export async function onRequestPost(context) {
     for (const [k, v] of Object.entries(body)) {
       if (k.startsWith('_') || k === 'turnstileToken') continue;
       const label = KEY_MAP[k] || k;
-      formData[label] = (k === 'urg' && URGENCY_MAP[v]) ? URGENCY_MAP[v] : v;
+      let value = v;
+      if (k === 'urg' && URGENCY_MAP[v]) value = URGENCY_MAP[v];
+      else if (k === 'window' && WINDOW_MAP[v]) value = WINDOW_MAP[v];
+      formData[label] = value;
     }
 
     const service = formType === 'dayporter' ? 'dayporter' : 'janitorial';
 
+    // AYS Ola 2 #8 — track integration success so a total-failure (network blip,
+    // all services down) returns 502 to the client instead of a false-positive
+    // success. The user sees an error toast and can retry or email directly.
+    const integrations = { supabase: null, activecampaign: null, hubspot: null, postmark: null };
+    const anyConfigured = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY)
+      || !!(env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY)
+      || !!env.HUBSPOT_ACCESS_TOKEN
+      || !!env.POSTMARK_API_KEY;
+
     // 4. UPSERT into Supabase (via REST API — no npm package needed)
     if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+      integrations.supabase = false;
       try {
         const sbRes = await fetch(`${env.SUPABASE_URL}/rest/v1/leads?on_conflict=email,service`, {
           method: 'POST',
@@ -81,7 +151,9 @@ export async function onRequestPost(context) {
             completed_at: new Date().toISOString()
           })
         });
-        if (!sbRes.ok) {
+        if (sbRes.ok) {
+          integrations.supabase = true;
+        } else {
           const errText = await sbRes.text();
           console.error('[submit-quote] Supabase error:', sbRes.status, errText);
         }
@@ -92,6 +164,7 @@ export async function onRequestPost(context) {
 
     // 5. ActiveCampaign: sync contact + add "completed" tag
     if (env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY) {
+      integrations.activecampaign = false;
       try {
         const acHeaders = { 'Api-Token': env.ACTIVECAMPAIGN_API_KEY, 'Content-Type': 'application/json' };
 
@@ -121,6 +194,7 @@ export async function onRequestPost(context) {
               body: JSON.stringify({ contactTag: { contact: contactId, tag: tagId } })
             });
           }
+          integrations.activecampaign = true;
         }
       } catch (e) {
         console.error('[submit-quote] ActiveCampaign error:', e.message);
@@ -129,6 +203,7 @@ export async function onRequestPost(context) {
 
     // 6. HubSpot: create/update contact + create deal
     if (env.HUBSPOT_ACCESS_TOKEN) {
+      integrations.hubspot = false;
       try {
         const hsHeaders = {
           'Authorization': `Bearer ${env.HUBSPOT_ACCESS_TOKEN}`,
@@ -195,6 +270,7 @@ export async function onRequestPost(context) {
               { method: 'PUT', headers: hsHeaders }
             );
           }
+          integrations.hubspot = true;
         }
       } catch (e) {
         console.error('[submit-quote] HubSpot error:', e.message);
@@ -203,8 +279,9 @@ export async function onRequestPost(context) {
 
     // 7. Postmark: confirmation email to client
     if (env.POSTMARK_API_KEY) {
+      integrations.postmark = false;
       try {
-        await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        const pmRes = await fetch('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -222,6 +299,7 @@ export async function onRequestPost(context) {
             }
           })
         });
+        if (pmRes.ok) integrations.postmark = true;
       } catch (e) {
         console.error('[submit-quote] Postmark client email error:', e.message);
       }
@@ -260,6 +338,17 @@ export async function onRequestPost(context) {
       } catch (e) {
         console.error('[submit-quote] Postmark owner email error:', e.message);
       }
+    }
+
+    // AYS Ola 2 #8 — if integrations were configured but NONE succeeded, we lost
+    // the lead. Fail loudly so the user can retry instead of seeing confetti
+    // while the submission evaporated. When none are configured (local dev),
+    // skip the check and return ok — matches the "guest mode" behaviour.
+    const configuredOnes = Object.entries(integrations).filter(([, v]) => v !== null);
+    const anySucceeded = configuredOnes.some(([, v]) => v === true);
+    if (anyConfigured && configuredOnes.length > 0 && !anySucceeded) {
+      console.error('[submit-quote] All integrations failed', integrations);
+      return new Response(JSON.stringify({ ok: false, error: 'Lead services unavailable — please try again or email info@eccofacilities.com.' }), { status: 502, headers: corsHeaders });
     }
 
     return new Response(JSON.stringify({ ok: true, ref: refNumber }), { status: 200, headers: corsHeaders });

@@ -31,21 +31,62 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=13.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=20.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=21.0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
-<!-- Google Places Autocomplete — address suggestions as you type.
-     FIX #6 / #31 — Key restricted to: eccofacilities.com, *.eccofacilities.com, *.pages.dev, localhost:8080.
-     If the key becomes invalid the form gracefully falls back to plain text entry.
-     TODO: migrate to google.maps.places.PlaceAutocompleteElement when stable.
-     Ref: https://developers.google.com/maps/documentation/javascript/places-migration-overview -->
+<!-- Google Places — address suggestions. Prefers the modern
+     PlaceAutocompleteElement (GA since late 2024) and falls back to the
+     legacy Autocomplete (still receiving bug-fixes) for older SDK caches.
+     Key restricted to eccofacilities.com + *.pages.dev + localhost.
+     The deprecation warning from the legacy API is filtered from console
+     to avoid 20+ duplicate log entries per page load. -->
 <script>
+  // AYS Ola 2 #6 — scope-filter Google Maps deprecation warnings so they don't
+  // drown out real issues. Only silences the specific "Autocomplete deprecated"
+  // messages; everything else from Maps still logs normally.
+  (function () {
+    var origWarn = console.warn;
+    console.warn = function () {
+      var first = arguments[0];
+      if (typeof first === 'string' && first.indexOf('google.maps.places.Autocomplete is not available to new customers') !== -1) return;
+      return origWarn.apply(console, arguments);
+    };
+  })();
+
   window.qfInitPlaces = function () {
+    var input = document.getElementById('qfAddress');
+    if (!input) return;
+    if (!window.google || !window.google.maps || !window.google.maps.places) return;
+
+    // Prefer PlaceAutocompleteElement when available (modern API, GA since 2024).
     try {
-      if (!window.google || !window.google.maps || !window.google.maps.places) return;
-      var input = document.getElementById('qfAddress');
-      if (!input) return;
-      // Legacy API still works and receives bugfixes; wrap in try/catch so any
-      // future breakage degrades to manual entry rather than crashing the page.
+      if (typeof google.maps.places.PlaceAutocompleteElement === 'function') {
+        var pae = new google.maps.places.PlaceAutocompleteElement({
+          componentRestrictions: { country: 'us' },
+          types: ['address']
+        });
+        pae.style.display = 'none'; // keep the existing styled input, query via API
+        input.parentNode.appendChild(pae);
+        input.addEventListener('input', function () {
+          pae.value = input.value;
+        });
+        pae.addEventListener('gmp-placeselect', function (ev) {
+          var place = ev && ev.place ? ev.place : null;
+          if (!place) return;
+          (place.fetchFields ? place.fetchFields({ fields: ['formattedAddress'] }) : Promise.resolve()).then(function () {
+            var fa = place.formattedAddress || '';
+            if (fa) {
+              input.value = fa;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          });
+        });
+        return; // modern path done
+      }
+    } catch (modernErr) {
+      /* Fall through to legacy Autocomplete below */
+    }
+
+    try {
       var ac = new google.maps.places.Autocomplete(input, {
         types: ['address'],
         componentRestrictions: { country: 'us' },
@@ -107,29 +148,29 @@
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W2ZWXZ3T" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript><iframe class="qf-gtm-ns" src="https://www.googletagmanager.com/ns.html?id=GTM-W2ZWXZ3T" height="0" width="0"></iframe></noscript>
 <!-- Fallback for users with JS disabled — plain HTML form that POSTs to same endpoint -->
 <noscript>
-  <div class="qf-noscript" style="max-width:560px;margin:40px auto;padding:24px;font-family:system-ui,sans-serif">
-    <h1 style="margin-top:0">Request your free quote</h1>
+  <div class="qf-noscript">
+    <h1 class="qf-noscript-title">Request your free quote</h1>
     <p>We'll reply within 24 hours with a custom cleaning proposal. No JavaScript required.</p>
-    <form action="/api/submit-quote" method="POST" style="display:grid;gap:12px">
-      <label>First name <input name="fn" type="text" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></label>
-      <label>Last name <input name="ln" type="text" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></label>
-      <label>Email <input name="em" type="email" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></label>
-      <label>Phone (optional) <input name="ph" type="tel" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></label>
-      <label>Company <input name="co" type="text" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></label>
-      <label>Address or ZIP <input name="addr" type="text" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></label>
+    <form class="qf-noscript-form" action="/api/submit-quote" method="POST">
+      <label>First name <input class="qf-noscript-input" name="fn" type="text" required></label>
+      <label>Last name <input class="qf-noscript-input" name="ln" type="text"></label>
+      <label>Email <input class="qf-noscript-input" name="em" type="email" required></label>
+      <label>Phone (optional) <input class="qf-noscript-input" name="ph" type="tel"></label>
+      <label>Company <input class="qf-noscript-input" name="co" type="text"></label>
+      <label>Address or ZIP <input class="qf-noscript-input" name="addr" type="text" required></label>
       <label>Service
-        <select name="formType" required style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px">
+        <select class="qf-noscript-input" name="formType" required>
           <option value="janitorial">Janitorial (recurring cleaning)</option>
           <option value="dayporter">Day Porter (on-site during business hours)</option>
         </select>
       </label>
-      <label>Notes <textarea name="notes" rows="3" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px"></textarea></label>
-      <button type="submit" style="padding:14px;border:0;border-radius:6px;background:#38672F;color:#fff;font-size:1rem;font-weight:600;cursor:pointer">Send request</button>
+      <label>Notes <textarea class="qf-noscript-input" name="notes" rows="3"></textarea></label>
+      <button class="qf-noscript-btn" type="submit">Send request</button>
     </form>
-    <p style="margin-top:24px">Prefer to reach out directly?
+    <p class="qf-noscript-contact">Prefer to reach out directly?
       <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a>
       &middot;
       <a href="tel:+16463030816">(646) 303-0816</a>
@@ -222,7 +263,7 @@
       <!-- D1 · Compact pill (mobile) -->
       <div class="qf-rail-pill">
         <span class="qf-rail-pill-bar" id="qfRailPillBar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>
-        <span class="qf-rail-pill-label" id="qfRailPillLabel">Paso 1 de 7</span>
+        <span class="qf-rail-pill-label" id="qfRailPillLabel">Step 1 of 7</span>
       </div>
     </header>
 
@@ -619,7 +660,8 @@
         <!-- Hero header with Alina greeting -->
         <header class="qf-plan-hero">
           <div class="qf-plan-hero-avatar">
-            <picture><source type="image/avif" srcset="images/alina-avatar-192.avif 1x, images/alina-avatar-480.avif 2x"><source type="image/webp" srcset="images/alina-avatar-192.webp 1x, images/alina-avatar-480.webp 2x"><img src="images/alina-avatar-192.jpg" srcset="images/alina-avatar-192.jpg 1x, images/alina-avatar-480.jpg 2x" alt="" width="56" height="56" loading="lazy" decoding="async"></picture>
+            <!-- AYS Ola 3 #15 — right-size hero sources (96×1x / 192×2x) for a 56px render slot. -->
+            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="56" height="56" loading="lazy" decoding="async"></picture>
           </div>
           <div class="qf-plan-hero-text">
             <h2 class="qf-plan-hero-title" id="qfPlanHeroTitle">Looks good</h2>
@@ -1077,7 +1119,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=20.0"></script>
+<script src="js/quote-flow.js?v=21.0"></script>
 <script src="js/cookie-consent.js?v=1.0"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

@@ -1,8 +1,22 @@
+const ALLOWED_ORIGINS = [
+  'https://eccofacilities.com',
+  'https://www.eccofacilities.com',
+  'http://localhost:8080'
+];
+function resolveCors(origin) {
+  if (!origin) return 'https://eccofacilities.com';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  if (/^https:\/\/[a-z0-9-]+\.pages\.dev$/.test(origin)) return origin;
+  return 'https://eccofacilities.com';
+}
+
 export async function onRequestPost(context) {
+  const origin = context.request.headers.get('Origin');
   const corsHeaders = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store',
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': resolveCors(origin),
+    'Vary': 'Origin'
   };
 
   try {

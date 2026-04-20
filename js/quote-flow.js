@@ -205,7 +205,7 @@
       pillBar.style.setProperty('--qf-progress', pct + '%');
       pillBar.setAttribute('aria-valuenow', String(pct));
     }
-    if (pillLabel) pillLabel.textContent = 'Paso ' + displayStep + ' de ' + totalSteps;
+    if (pillLabel) pillLabel.textContent = 'Step ' + displayStep + ' of ' + totalSteps;
   }
 
   /* -----------------------------------------------------------------------
@@ -742,7 +742,10 @@
     updateRail();
     updateProgressRing(name);
 
-    // Smooth scroll so Alina message slides to the top
+    // Smooth scroll so Alina message slides to the top.
+    // AYS Ola 3 #11 — trim the 400ms pre-scroll delay to 120ms (lets the enter
+    // animation begin but not drag) and cut the scroll duration to 320ms.
+    // Perceived latency drops from ~900ms → ~440ms.
     setTimeout(function () {
       var scrollTarget = to.querySelector('.qf-alina-says') || to;
       var absTop = 0;
@@ -759,13 +762,13 @@
       var startTime = null;
       requestAnimationFrame(function step(ts) {
         if (!startTime) startTime = ts;
-        var p = Math.min((ts - startTime) / 500, 1);
+        var p = Math.min((ts - startTime) / 320, 1);
         var e = p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2, 3)/2;
         html.scrollTop = startY + diff * e;
         if (p < 1) requestAnimationFrame(step);
         // keep scrollBehavior as auto (don't restore — CSS smooth fights programmatic scroll)
       });
-    }, 400);
+    }, 120);
   }
 
   function goNext() {
@@ -1506,73 +1509,9 @@
       return STATE.days.map(function(d){return abbr[d] || d;}).join(', ');
     }
 
-    // ------- Dynamic price estimate (informational only, real quote in 24h) -------
-    // NYC commercial cleaning rates (conservative mid-market):
-    //   Janitorial: $0.03–$0.08 per sqft per visit (standard recurring)
-    //   Day Porter: $28–$45 per hour per porter
-    var SIZE_MIDPOINTS = {
-      'under3k':  2000,
-      '3k-6k':    4500,
-      '6k-9k':    7500,
-      '9k-12k':  10500,
-      '12k-15k': 13500,
-      'notsure':  7500
-    };
-    function sizeToSqft(raw) {
-      if (!raw) return 5000;
-      if (SIZE_MIDPOINTS[raw] !== undefined) return SIZE_MIDPOINTS[raw];
-      var n = parseInt(String(raw).replace(/\D/g, ''), 10);
-      return (!isNaN(n) && n > 0) ? n : 5000;
-    }
-    function hoursBetween(startHHMM, endHHMM) {
-      if (!startHHMM || !endHHMM) return 8;
-      var s = startHHMM.split(':').map(Number);
-      var e = endHHMM.split(':').map(Number);
-      var h = (e[0] + e[1]/60) - (s[0] + s[1]/60);
-      return h > 0 ? h : 8;
-    }
-    function fmtDollars(n) {
-      var rounded;
-      if (n < 1000) rounded = Math.round(n/25)*25;
-      else if (n < 10000) rounded = Math.round(n/50)*50;
-      else rounded = Math.round(n/100)*100;
-      return '$' + rounded.toLocaleString('en-US');
-    }
-    function computeEstimate() {
-      var daysPerWeek = STATE.days && STATE.days.length ? STATE.days.length : 5;
-      var weeksPerMonth = 4.33;
-      var janMonthly = 0, dpMonthly = 0;
-
-      if (STATE.service === 'janitorial' || STATE.service === 'both' || STATE.service === 'unsure') {
-        var sqft = sizeToSqft(STATE.size);
-        var perVisitLow  = sqft * 0.03;
-        var perVisitHigh = sqft * 0.08;
-        janMonthly = { lo: perVisitLow * daysPerWeek * weeksPerMonth, hi: perVisitHigh * daysPerWeek * weeksPerMonth };
-      }
-      if (STATE.service === 'dayporter' || STATE.service === 'both') {
-        var porters = STATE.porterCount === 'notsure' ? 1 : (parseInt(STATE.porterCount, 10) || 1);
-        var hrs = hoursBetween(STATE.timeStart, STATE.timeEnd);
-        dpMonthly = { lo: porters * hrs * 28 * daysPerWeek * weeksPerMonth,
-                      hi: porters * hrs * 45 * daysPerWeek * weeksPerMonth };
-      }
-      var lo = (janMonthly.lo || 0) + (dpMonthly.lo || 0);
-      var hi = (janMonthly.hi || 0) + (dpMonthly.hi || 0);
-      return lo > 0 && hi > 0 ? { lo: lo, hi: hi } : null;
-    }
-    function renderEstimate() {
-      var rangeEl = document.getElementById('qfPlanEstimateRange');
-      var noteEl  = document.getElementById('qfPlanEstimateNote');
-      if (!rangeEl) return;
-      var est = computeEstimate();
-      if (!est) {
-        rangeEl.textContent = 'We\u2019ll price this manually \u2014 your team will send a tailored quote.';
-        rangeEl.style.fontSize = '.95rem';
-        return;
-      }
-      rangeEl.style.fontSize = '';
-      rangeEl.innerHTML = fmtDollars(est.lo) + ' \u2013 ' + fmtDollars(est.hi) + ' <small>/ month</small>';
-      if (noteEl) noteEl.textContent = 'Ballpark based on ' + (STATE.days.length || 5) + ' day' + (STATE.days.length === 1 ? '' : 's') + '/week. Your real quote is refined by our team within 24 hours.';
-    }
+    // Price estimate block removed in Bento Grid review redesign — dollar amounts
+    // are handled manually by the sales team for every lead. Keeping the JS
+    // removed keeps the bundle lean and avoids running dead functions on submit.
 
     function populateSummary() {
       // Personalize the plan hero title
@@ -1917,6 +1856,23 @@
           return;
         }
 
+        // AYS Ola 3 #17 — client-side submit cooldown so a double-click or
+        // accidental retry can't spam the endpoint. 60s between completed submits
+        // per device. The real server-side rate limit should live in a Cloudflare
+        // Rule (Dashboard → Security → WAF → Rate limiting) since Workers can't
+        // persist counters without KV.
+        var SUBMIT_COOLDOWN_KEY = 'ecco_quote_last_submit_ts';
+        var SUBMIT_COOLDOWN_MS = 60 * 1000;
+        try {
+          var lastTs = parseInt(localStorage.getItem(SUBMIT_COOLDOWN_KEY) || '0', 10);
+          var elapsed = Date.now() - lastTs;
+          if (lastTs && elapsed < SUBMIT_COOLDOWN_MS) {
+            var wait = Math.ceil((SUBMIT_COOLDOWN_MS - elapsed) / 1000);
+            qfToast({ type:'warn', title:'Just a moment', message: 'Please wait ' + wait + 's before sending another request.', duration: 4000 });
+            return;
+          }
+        } catch (_) { /* localStorage may be disabled — ignore */ }
+
         // Loading state — Fix #47 aria-busy for screen readers
         var originalHTML = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -2011,6 +1967,7 @@
           submitBtn.classList.remove('is-loading');
           submitBtn.innerHTML = originalHTML;
           clearDraft();
+          try { localStorage.setItem(SUBMIT_COOLDOWN_KEY, String(Date.now())); } catch (_) {}
           // Sprint 5 — wire the share-a-colleague CTA on success.
           var shareBtn = document.getElementById('qfShareColleagueBtn');
           if (shareBtn && !shareBtn._qfWired) {
@@ -2109,12 +2066,27 @@
   if (exitOverlay && !sessionStorage.getItem('qf_exit_shown')) {
     // Delay exit intent — only arm after 20 seconds on page
     setTimeout(function () {
-      document.addEventListener('mouseleave', function (e) {
-        if (e.clientY > 5 || exitShown) return;
+      var showExit = function () {
+        if (exitShown) return;
         exitShown = true;
         sessionStorage.setItem('qf_exit_shown', '1');
         exitOverlay.hidden = false;
+      };
+      // Desktop: detect mouse leaving the top edge of the viewport
+      document.addEventListener('mouseleave', function (e) {
+        if (e.clientY > 5) return;
+        showExit();
       });
+      // AYS Ola 3 #16 — mobile equivalent: fire when the tab becomes hidden,
+      // which covers switching apps, pulling up the URL bar, or closing the tab.
+      // Gated to touch-first devices so desktop still uses mouseleave only.
+      if (qfTouchFirst) {
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'hidden' && STATE.currentStepName !== 'welcome' && STATE.currentStepName !== 'success') {
+            showExit();
+          }
+        });
+      }
     }, 20000);
   }
   if (exitClose) {
