@@ -7,3 +7,9 @@
 # Note: Cloudflare Pages auto-strips .html extensions
 # These redirects are only for paths that don't match actual files
 # Do NOT add redirects for pages that already exist as .html files
+
+# Old quote wizard pages → unified conversational quote
+/quote-janitorial.html  /quote.html?service=janitorial  301
+/quote-janitorial       /quote.html?service=janitorial  301
+/quote-dayporter.html   /quote.html?service=dayporter   301
+/quote-dayporter        /quote.html?service=dayporter   301
