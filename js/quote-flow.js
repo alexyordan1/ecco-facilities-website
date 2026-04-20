@@ -226,6 +226,24 @@
     var card = e.target.closest('.qf-service-card, .qf-day-card, .qf-s4-preset, .qf-preset-btn, .qf-rev-btn, .qf-info-continue, .qf-s5-continue, .qf-checkpoint-skip');
     if (card) qfHaptic(QF_HAPTIC.select);
   }, { capture: true, passive: true });
+
+  // Persistent "chosen" mark — single-select cards get a sage check badge the
+  // user can see even after scrolling back to a done step. Clears sibling
+  // cards in the same group so only one shows the check at a time.
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    var card = e.target.closest('.qf-service-card');
+    if (!card) return;
+    // Skip multi-select day cards — they use aria-pressed, not is-chosen.
+    if (card.classList.contains('qf-day-card')) return;
+    var parent = card.parentElement;
+    if (parent) {
+      parent.querySelectorAll('.qf-service-card').forEach(function (c) {
+        if (c !== card) c.classList.remove('is-chosen');
+      });
+    }
+    card.classList.add('is-chosen');
+  }, { capture: true });
   // Sprint 4 — magnetic hover on service cards (desktop only).
   (function setupMagnetic() {
     if (qfReducedMotion) return;
