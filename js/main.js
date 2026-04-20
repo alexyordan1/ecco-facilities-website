@@ -312,22 +312,75 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 })();
 
 /* ============================================================
-   HERO MORPH — Rotating words in headline
+   HERO ROTATE — 6-word animated title (unified mobile + desktop)
    ============================================================ */
-(function initHeroMorph() {
-  var el = document.querySelector('.hero-morph');
-  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 900) return;
-  var words = ['health.', 'future.', 'planet.', 'people.'];
-  var idx = 0;
-  function cycle() {
-    el.style.opacity = '0';
-    setTimeout(function() {
-      idx = (idx + 1) % words.length;
-      el.textContent = words[idx];
-      el.style.opacity = '1';
-    }, 400);
+(function initHeroRotate() {
+  var WORDS = [
+    { key: 'health', text: 'health.', anim: 'health' },
+    { key: 'team',   text: 'team.',   anim: 'team' },
+    { key: 'people', text: 'people.', anim: 'people' },
+    { key: 'planet', text: 'planet.', anim: 'planet' },
+    { key: 'future', text: 'future.', anim: 'future' },
+    { key: 'budget', text: 'budget.', anim: 'budget' }
+  ];
+  var CYCLE_MS = 3400;
+  var EXIT_MS = 320;
+  var wraps = document.querySelectorAll('.hero-rotate');
+  if (!wraps.length) return;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function buildWordDom(wrap, def) {
+    var kids = wrap.children;
+    for (var i = kids.length - 1; i >= 0; i--) {
+      var k = kids[i];
+      if (!k.classList || !k.classList.contains('sizer')) wrap.removeChild(k);
+    }
+    var layer = document.createElement('span');
+    layer.className = 'word-layer anim-' + def.anim;
+    layer.setAttribute('data-word', def.key);
+    if (def.anim === 'team' || def.anim === 'people') {
+      var chars = def.text.split('');
+      for (var j = 0; j < chars.length; j++) {
+        var s = document.createElement('span');
+        s.className = 'char';
+        s.textContent = chars[j];
+        layer.appendChild(s);
+      }
+    } else {
+      layer.textContent = def.text;
+    }
+    wrap.appendChild(layer);
+    void layer.offsetWidth;
+    requestAnimationFrame(function() { layer.classList.add('in'); });
   }
-  setInterval(cycle, 3000);
+
+  function exitLayer(layer) {
+    if (!layer) return;
+    layer.classList.remove('in');
+    layer.classList.add('out');
+    setTimeout(function() {
+      if (layer.parentNode) layer.parentNode.removeChild(layer);
+    }, EXIT_MS);
+  }
+
+  function showWord(idx) {
+    var def = WORDS[idx];
+    for (var w = 0; w < wraps.length; w++) {
+      (function(wrap) {
+        var existing = wrap.querySelectorAll('.word-layer');
+        for (var e = 0; e < existing.length; e++) exitLayer(existing[e]);
+        setTimeout(function() { buildWordDom(wrap, def); }, 180);
+      })(wraps[w]);
+    }
+  }
+
+  for (var k2 = 0; k2 < wraps.length; k2++) buildWordDom(wraps[k2], WORDS[0]);
+  if (reduced) return;
+  var idx = 0;
+  setInterval(function() {
+    idx = (idx + 1) % WORDS.length;
+    showWord(idx);
+  }, CYCLE_MS);
 })();
 
 /* ============================================================
@@ -353,21 +406,4 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   }, 5000);
 })();
 
-/* ============================================================
-   HERO TEST — Mobile word rotation (built from scratch)
-   ============================================================ */
-(function() {
-  var word = document.querySelector('.hero-word-mobile');
-  if (!word || window.innerWidth > 900) return;
-  var list = ['health.', 'future.', 'people.', 'planet.'];
-  var i = 0;
-  word.style.transition = 'opacity .4s ease';
-  setInterval(function() {
-    word.style.opacity = '0';
-    setTimeout(function() {
-      i = (i + 1) % list.length;
-      word.textContent = list[i];
-      word.style.opacity = '1';
-    }, 400);
-  }, 3000);
-})();
+/* (mobile word rotation removed — unified in initHeroRotate above) */
