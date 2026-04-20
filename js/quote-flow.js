@@ -203,6 +203,8 @@
     var pillLabel = document.getElementById('qfRailPillLabel');
     if (pillBar) {
       pillBar.style.setProperty('--qf-progress', pct + '%');
+      // Scale (0..1) for the transform:scaleX fill animation on mobile.
+      pillBar.style.setProperty('--qf-progress-scale', (pct / 100).toFixed(3));
       pillBar.setAttribute('aria-valuenow', String(pct));
     }
     if (pillLabel) pillLabel.textContent = 'Step ' + displayStep + ' of ' + totalSteps;
