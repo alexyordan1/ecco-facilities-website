@@ -1463,9 +1463,26 @@
       setVal('qfSumSize', formatSizeLabel(STATE.size) || '(not set)');
       setVal('qfSumService', SERVICE_LABELS[STATE.service] || STATE.service);
       setVal('qfSumPorters', formatPorters() || '(not set)');
-      setVal('qfSumWindow', formatWindow() || '(not set)');
       setVal('qfSumSchedule', formatDays());
       setVal('qfSumTime', formatTime() || '(not set)');
+
+      // Plan-at-a-glance chips — quick visual summary under the hero.
+      // Each chip shows a tiny emoji + label, hides cleanly when the field
+      // isn't applicable for the current service.
+      var setChip = function (id, emoji, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (!label) { el.hidden = true; el.textContent = ''; return; }
+        el.hidden = false;
+        el.textContent = emoji + '  ' + label;
+      };
+      var SERVICE_EMOJI = { janitorial: '\uD83E\uDDF9', dayporter: '\uD83D\uDC64', both: '\u2728', unsure: '\uD83E\uDD14' };
+      var SPACE_EMOJI = { Office: '\uD83C\uDFE2', Medical: '\uD83C\uDFE5', Retail: '\uD83D\uDECD\uFE0F', Restaurant: '\uD83C\uDF7D\uFE0F', Fitness: '\uD83C\uDFCB\uFE0F', Other: '\u2699\uFE0F' };
+      setChip('qfChipService', SERVICE_EMOJI[STATE.service] || '\u2728', SERVICE_LABELS[STATE.service] || STATE.service);
+      setChip('qfChipSpace', SPACE_EMOJI[STATE.space] || '\uD83D\uDCCD', STATE.space || '');
+      setChip('qfChipSize', '\uD83D\uDCCF', STATE.service !== 'dayporter' ? formatSizeLabel(STATE.size) : '');
+      setChip('qfChipDays', '\uD83D\uDCC5', formatDays() && formatDays() !== '(none selected)' ? formatDays() : '');
+      setChip('qfChipPorters', '\uD83D\uDC65', (STATE.service === 'dayporter' || STATE.service === 'both') ? formatPorters() : '');
 
       // Conditional rows
       var show = function (id, cond) {
@@ -1482,7 +1499,6 @@
       show('qfSumCompanyRow', !!STATE.companyName);
       show('qfSumSizeRow', STATE.service !== 'dayporter');
       show('qfSumPortersRow', STATE.service === 'dayporter' || STATE.service === 'both');
-      show('qfSumWindowRow', !!STATE.cleaningWindow);
       // Show time row for any dayporter-ish service (even if user never touched the hours screen)
       var needsTime = STATE.service === 'dayporter' || STATE.service === 'both';
       show('qfSumTimeRow', needsTime || !!(STATE.timeStart && STATE.timeEnd));
