@@ -35,26 +35,35 @@ const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:
 // buckets. Limit: 10 submits per IP per hour. Falls open (skip limit) if KV is
 // not bound — that way local dev still works, but production should always have
 // the RATE_LIMIT_KV binding configured.
+// AYS Ola 3 Commit G #36 — if CF-Connecting-IP is missing (direct-to-origin call
+// bypassing CF edge), fall back to a much stricter 2/hr limit so a single bot
+// can't exhaust the shared "unknown" bucket for everyone else.
 async function enforceRateLimit(request, env) {
   const kv = env && env.RATE_LIMIT_KV;
   if (!kv) return { ok: true };
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const ip = request.headers.get('CF-Connecting-IP');
+  const isUnknown = !ip;
+  const bucket = ip || 'unknown';
+  const limit = isUnknown ? 2 : 10;
   const hour = Math.floor(Date.now() / 3600000);
-  const key = `rl:quote:${ip}:${hour}`;
+  const key = `rl:quote:${bucket}:${hour}`;
   const current = parseInt(await kv.get(key) || '0', 10);
-  if (current >= 10) return { ok: false, retryAfter: 3600 - Math.floor((Date.now() / 1000) % 3600) };
+  if (current >= limit) return { ok: false, retryAfter: 3600 - Math.floor((Date.now() / 1000) % 3600) };
   await kv.put(key, String(current + 1), { expirationTtl: 3600 });
   return { ok: true };
 }
 
 // AYS Ola 3 #27 — sanitize form data before embedding in HubSpot property.
 // Strips control chars that could break downstream JSON/CSV parsing.
+// AYS Ola 3 Commit G #35 — preserve `\n` (0x0A) and `\t` (0x09) so multi-line
+// notes survive the round-trip to HubSpot's ecco_form_data property.
 function safeStringify(obj) {
+  const CTRL_RE = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g; // excludes \t (0x09) and \n (0x0A)
   const clean = {};
   for (const [k, v] of Object.entries(obj || {})) {
     if (v == null) continue;
-    if (Array.isArray(v)) clean[k] = v.map(x => typeof x === 'string' ? x.replace(/[\x00-\x1F\x7F]/g, ' ') : x);
-    else if (typeof v === 'string') clean[k] = v.replace(/[\x00-\x1F\x7F]/g, ' ');
+    if (Array.isArray(v)) clean[k] = v.map(x => typeof x === 'string' ? x.replace(CTRL_RE, ' ') : x);
+    else if (typeof v === 'string') clean[k] = v.replace(CTRL_RE, ' ');
     else clean[k] = v;
   }
   return JSON.stringify(clean);
@@ -121,8 +130,14 @@ export async function onRequestPost(context) {
     // If it's missing, the previous code silently skipped captcha validation —
     // every submission accepted, bots sail through. Now we 503 until configured,
     // except on localhost where the dev loop expects to work without Turnstile.
+    // AYS Ola 3 Commit G #37 — parse hostname so any dev port (3000, 5173, 8080,
+    // 127.0.0.1, etc.) is treated as local. Previously locked to :8080 only.
     const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
-    const isLocal = origin === 'http://localhost:8080';
+    let isLocal = false;
+    try {
+      const host = origin ? new URL(origin).hostname : '';
+      isLocal = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+    } catch (_) { isLocal = false; }
     if (!turnstileSecret && !isLocal) {
       console.error('[submit-quote] CF_TURNSTILE_SECRET missing in production env');
       return new Response(JSON.stringify({ ok: false, error: 'Captcha not configured. Please contact support.' }), { status: 503, headers: corsHeaders });
@@ -228,8 +243,10 @@ export async function onRequestPost(context) {
         if (sbRes.ok) {
           integrations.supabase = true;
         } else {
+          // AYS Ola 3 Commit G #34 — Supabase echoes the offending row on validation
+          // errors, so errText can contain user email/phone. Redact before logging.
           const errText = await sbRes.text();
-          console.error('[submit-quote] Supabase error:', sbRes.status, errText);
+          console.error('[submit-quote] Supabase error:', sbRes.status, redactPII(errText));
         }
       } catch (dbErr) {
         console.error('[submit-quote] Supabase DB error:', redactPII(dbErr.message));

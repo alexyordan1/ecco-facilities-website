@@ -2028,7 +2028,12 @@
           }
           goNext();
         }).catch(function (err) {
-          qfToast({ type:'error', title:'Network error', message:'Check your connection and try again, or email info@eccofacilities.com.', duration: 7000 });
+          // AYS Ola 3 Commit G #40 — differentiate captcha-timeout failures from
+          // pure network errors so users know whether to retry or contact support.
+          var msg = (err && /captcha|turnstile/i.test(err.message || ''))
+            ? 'Captcha didn\u2019t load. Please refresh and try again.'
+            : 'Check your connection and try again, or email info@eccofacilities.com.';
+          qfToast({ type:'error', title:'Submission failed', message: msg, duration: 7000 });
           submitBtn.disabled = false;
           submitBtn.removeAttribute('aria-busy');
           submitBtn.classList.remove('is-loading');
