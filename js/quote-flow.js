@@ -1808,6 +1808,27 @@
           document.getElementById('qfEditTimeEnd').value = STATE.timeEnd || '';
         }
         row.classList.add('is-editing');
+
+        // AYS Ola 8.3 — sync visibility of conditional fields inside the open panel.
+        // The populate hides porter/size/time rows based on current STATE; we mirror
+        // that here live when the user toggles the service dropdown.
+        var serviceSel = panel && panel.querySelector('#qfEditService');
+        if (serviceSel && !serviceSel.__qfRvListenerAttached) {
+          serviceSel.__qfRvListenerAttached = true;
+          serviceSel.addEventListener('change', function () {
+            var v = serviceSel.value;
+            var portersRow = document.getElementById('qfSumPortersRow');
+            var sizeRow = document.getElementById('qfSumSizeRow');
+            if (portersRow) portersRow.hidden = !(v === 'dayporter' || v === 'both');
+            if (sizeRow) sizeRow.hidden = (v === 'dayporter');
+          });
+          // Sync on open
+          var v0 = serviceSel.value;
+          var portersRow0 = document.getElementById('qfSumPortersRow');
+          var sizeRow0 = document.getElementById('qfSumSizeRow');
+          if (portersRow0) portersRow0.hidden = !(v0 === 'dayporter' || v0 === 'both');
+          if (sizeRow0) sizeRow0.hidden = (v0 === 'dayporter');
+        }
       });
     });
 
