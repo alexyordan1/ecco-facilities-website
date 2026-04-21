@@ -140,8 +140,8 @@ export async function onRequestPost(context) {
     // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
     const ALLOWED_KEYS = new Set([
       'em','fn','ln','ph','co','addr','referral','notes','contactPref','formType',
-      'space','spaceOther','urg','size','exactSize','janDays','addDayPorter',
-      'hrs','customHrs','startTime','dpDays','porters','porterCount','dpAreas','areaOther','addJanitorial',
+      'space','spaceOther','urg','size','exactSize','janDays',
+      'hrs','customHrs','startTime','porterHours','dpDays','porters','porterCount','dpAreas','areaOther',
       'turnstileToken'
     ]);
     for (const k of Object.keys(body)) {
@@ -220,13 +220,13 @@ export async function onRequestPost(context) {
       space: 'space_type', spaceOther: 'space_type_custom', urg: 'urgency',
       // Janitorial
       size: 'space_size', exactSize: 'exact_sqft',
-      janDays: 'cleaning_days', addDayPorter: 'also_wants_dayporter',
+      janDays: 'cleaning_days',
       // Day Porter
       hrs: 'hours_per_day', customHrs: 'custom_hours',
       startTime: 'start_time', dpDays: 'coverage_days',
+      porterHours: 'porter_hours',
       porters: 'num_porters', porterCount: 'porter_count_custom',
       dpAreas: 'areas_covered', areaOther: 'area_custom',
-      addJanitorial: 'also_wants_janitorial',
     };
     const URGENCY_MAP = {
       asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'

@@ -153,6 +153,7 @@
     porterCount:    null,
     timeStart:      null,
     timeEnd:        null,
+    porterHours:    [],
     currentStepName: 'welcome',
     userName:       '',
     userLastName:   '',
@@ -1421,28 +1422,45 @@
     function buildPorterRows(count) {
       var rowsEl = document.getElementById('qfPorterRows');
       if (!rowsEl) return;
+      // Ensure porterHours array matches count. Preserve existing entries so a
+      // rebuild (e.g. user goes back and re-selects the same count) keeps their
+      // prior schedules. New slots default to 08:00–17:00.
+      if (!Array.isArray(STATE.porterHours)) STATE.porterHours = [];
+      while (STATE.porterHours.length < count) STATE.porterHours.push({ start: '08:00', end: '17:00' });
+      if (STATE.porterHours.length > count) STATE.porterHours.length = count;
+
+      // Helper: pick a select's initial option to match STATE so a user who
+      // returns to this screen sees their stored times, not the 8/17 defaults.
+      function selectedAttr(optVal, current) {
+        var hhmm = String(optVal).length === 1 ? ('0' + optVal + ':00') : (optVal + ':00');
+        return hhmm === current ? ' selected' : '';
+      }
+
       var html = '';
       for (var i = 1; i <= count; i++) {
-        html += '<div class="qf-porter-row">' +
+        var ph = STATE.porterHours[i - 1];
+        var startHour = parseInt((ph.start || '08:00').split(':')[0], 10);
+        var endHour = parseInt((ph.end || '17:00').split(':')[0], 10);
+        html += '<div class="qf-porter-row" data-porter-row="' + i + '">' +
                 '<span class="qf-porter-row-label">Porter ' + i + '</span>' +
                 '<div class="qf-porter-row-times">' +
                 '<div class="qf-porter-row-field">' +
                 '<span class="qf-porter-row-sub">Start time</span>' +
-                '<select class="qf-s5-time-select" data-porter="' + i + '" data-time="start" aria-label="Porter ' + i + ' start time">' + timeOptions(8) + '</select>' +
+                '<select class="qf-s5-time-select" data-porter="' + i + '" data-time="start" aria-label="Porter ' + i + ' start time">' + timeOptions(startHour) + '</select>' +
                 '</div>' +
                 '<span class="qf-porter-row-sep">to</span>' +
                 '<div class="qf-porter-row-field">' +
                 '<span class="qf-porter-row-sub">End time</span>' +
-                '<select class="qf-s5-time-select" data-porter="' + i + '" data-time="end" aria-label="Porter ' + i + ' end time">' + timeOptions(17) + '</select>' +
+                '<select class="qf-s5-time-select" data-porter="' + i + '" data-time="end" aria-label="Porter ' + i + ' end time">' + timeOptions(endHour) + '</select>' +
                 '</div>' +
                 '</div></div>';
       }
       rowsEl.innerHTML = html;
-      // Pre-populate STATE with defaults so if the user doesn't change the selects,
-      // the time still gets captured ("08:00" / "17:00"). Previously STATE stayed null
-      // until the user triggered a change event, showing "(not set)" in the summary.
-      if (!STATE.timeStart) STATE.timeStart = '08:00';
-      if (!STATE.timeEnd)   STATE.timeEnd   = '17:00';
+
+      // Keep legacy single timeStart/timeEnd mirrors synced to porter 1 so
+      // downstream display helpers and payload compatibility code keep working.
+      STATE.timeStart = STATE.porterHours[0].start;
+      STATE.timeEnd = STATE.porterHours[0].end;
     }
 
     function advanceFromPorter(porterVal) {
@@ -1513,8 +1531,18 @@
       var sel = e.target.closest && e.target.closest('.qf-s5-time-select');
       if (!sel) return;
       var hhmm = sel.value.indexOf(':') >= 0 ? sel.value : (sel.value.length === 1 ? '0' + sel.value : sel.value) + ':00';
-      if (sel.getAttribute('data-time') === 'start') STATE.timeStart = hhmm;
-      else if (sel.getAttribute('data-time') === 'end') STATE.timeEnd = hhmm;
+      var porterIdx = parseInt(sel.getAttribute('data-porter'), 10) - 1;
+      var which = sel.getAttribute('data-time');
+      if (isNaN(porterIdx) || porterIdx < 0) return;
+      if (!Array.isArray(STATE.porterHours)) STATE.porterHours = [];
+      while (STATE.porterHours.length <= porterIdx) STATE.porterHours.push({ start: '08:00', end: '17:00' });
+      if (which === 'start') STATE.porterHours[porterIdx].start = hhmm;
+      else if (which === 'end') STATE.porterHours[porterIdx].end = hhmm;
+      // Mirror porter 1 into legacy fields
+      if (porterIdx === 0) {
+        if (which === 'start') STATE.timeStart = hhmm;
+        else if (which === 'end') STATE.timeEnd = hhmm;
+      }
       saveDraft();
     });
     var porterContinueBtn = document.getElementById('qfPorterContinue');
@@ -1622,27 +1650,64 @@
       var days = (formatDays && formatDays()) || '';
       var daysCount = Array.isArray(STATE.days) ? STATE.days.length : 0;
       var porterCount = STATE.porterCount && STATE.porterCount !== 'notsure' ? parseInt(STATE.porterCount) || 0 : 0;
-      var timeWin = (STATE.timeStart && STATE.timeEnd) ? (STATE.timeStart + '\u2013' + STATE.timeEnd) : '';
+
+      // Per-porter schedule description. When all porters share the same hours
+      // we collapse to a single "HH:MM–HH:MM". When they differ we list each:
+      // "Porter 1 08:00–12:00 · Porter 2 13:00–17:00". This preserves fidelity
+      // instead of silently flattening to the last-edited porter's schedule.
+      var phList = Array.isArray(STATE.porterHours)
+        ? STATE.porterHours.filter(function(p){ return p && p.start && p.end; })
+        : [];
+      var allSameHours = phList.length > 0 && phList.every(function(p){
+        return p.start === phList[0].start && p.end === phList[0].end;
+      });
+      var sharedWin = allSameHours ? (phList[0].start + '\u2013' + phList[0].end) : '';
+      var perPorterList = phList.map(function(p, i){
+        return 'Porter ' + (i + 1) + ' ' + p.start + '\u2013' + p.end;
+      }).join(' \u00b7 ');
+      // Back-compat variable used by service-row context strings below.
+      var timeWin = allSameHours ? sharedWin : '';
 
       // ---------- SERVICE row ----------
       // Primary = service name (serif italic, #qfSumService)
       // Primary meta (#qfRvSvcFreq) = frequency or porter count
       // Sub (#qfRvSvcSub) = context phrase
+
+      // Human-friendly frequency label: "Every day" (7), "Every weekday" (Mon-Fri
+      // exactly), "Weekends" (Sat+Sun exactly), otherwise "N days / week".
+      function cadenceLabel(count) {
+        if (count === 7) return 'Every day';
+        if (count === 0) return '';
+        var set = STATE.days || [];
+        var isWeekdays = count === 5 && ['Monday','Tuesday','Wednesday','Thursday','Friday']
+          .every(function(d){ return set.indexOf(d) > -1; });
+        if (isWeekdays) return 'Every weekday';
+        var isWeekends = count === 2 && set.indexOf('Saturday') > -1 && set.indexOf('Sunday') > -1;
+        if (isWeekends) return 'Weekends';
+        return count + ' day' + (count !== 1 ? 's' : '') + ' / week';
+      }
+      function portersLabel(n) {
+        if (STATE.porterCount === 'notsure') return 'Porters TBD';
+        if (!n) return '';
+        return n + ' porter' + (n !== 1 ? 's' : '');
+      }
+
       var svcName, svcFreq, svcSub;
       if (svc === 'janitorial') {
         svcName = 'Janitorial';
-        svcFreq = daysCount ? (daysCount + '\u00d7 weekly') : 'your schedule';
+        svcFreq = cadenceLabel(daysCount) || 'your schedule';
         svcSub = 'Eco-certified \u00b7 insured \u00b7 uniformed team';
       } else if (svc === 'dayporter') {
         svcName = 'Day Porter';
-        svcFreq = porterCount ? (porterCount + ' porter' + (porterCount !== 1 ? 's' : '')) : (STATE.porterCount === 'notsure' ? 'porters TBD' : 'on-site');
+        svcFreq = portersLabel(porterCount) || 'on-site';
         svcSub = (timeWin ? ('On-site ' + timeWin) : 'On-site during business hours') + ' \u00b7 uniformed team';
       } else if (svc === 'both') {
         svcName = 'Both services';
         var freqParts = [];
-        if (porterCount) freqParts.push(porterCount + ' porter' + (porterCount !== 1 ? 's' : ''));
-        else if (STATE.porterCount === 'notsure') freqParts.push('porters TBD');
-        if (daysCount) freqParts.push(daysCount + '\u00d7 janitorial');
+        var pLbl = portersLabel(porterCount);
+        if (pLbl) freqParts.push(pLbl);
+        var cLbl = cadenceLabel(daysCount);
+        if (cLbl) freqParts.push(cLbl + ' janitorial');
         svcFreq = freqParts.join(' + ') || 'your plan';
         svcSub = 'Day porter + janitorial \u00b7 eco-certified';
       } else {
@@ -1657,25 +1722,45 @@
       if (svcSubEl) svcSubEl.textContent = svcSub;
 
       // ---------- PREMISES row ----------
-      // Primary = address (b tag), Sub = space · size (dot hidden when size absent)
+      // Primary = address (b tag), Sub = space · size (dot + size both hidden when absent)
       var sizeLbl = formatSizeLabel(STATE.size);
+      var showSize = !!(hasSize && sizeLbl);
       setVal('qfSumSpace', STATE.space || '(not set)');
-      setVal('qfSumSize', hasSize && sizeLbl ? sizeLbl : '');
-      // Hide the · separator between space and size when size is absent/dayporter
+      var sumSizeEl = document.getElementById('qfSumSize');
+      if (sumSizeEl) {
+        sumSizeEl.textContent = showSize ? sizeLbl : '';
+        sumSizeEl.hidden = !showSize;
+      }
       var premDot = document.querySelector('[data-section="location"] .qf-rv-sum-dot');
-      if (premDot) premDot.style.display = (hasSize && sizeLbl) ? '' : 'none';
+      if (premDot) premDot.hidden = !showSize;
 
       // ---------- SCHEDULE row ----------
-      // Primary = days, Sub = window context (adapts to service)
+      // Primary = days, Sub = window context (adapts to service).
+      // When the user picked multiple porters with different hours we expand
+      // into "Porter 1 08:00–12:00 · Porter 2 13:00–17:00" so the review never
+      // flattens the schedules silently.
       setVal('qfSumSchedule', days || '(none selected)');
       var schedSubText = '';
       if (svc === 'janitorial' || svc === 'unsure') {
         schedSubText = '';
       } else if (svc === 'dayporter') {
-        schedSubText = timeWin ? ('On-site ' + timeWin) : 'On-site during business hours';
-        if (porterCount) schedSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
+        if (phList.length > 1 && !allSameHours) {
+          schedSubText = perPorterList;
+        } else if (sharedWin) {
+          schedSubText = 'On-site ' + sharedWin;
+          if (porterCount) schedSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
+        } else {
+          schedSubText = 'On-site during business hours';
+          if (porterCount) schedSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
+        }
       } else if (svc === 'both') {
-        schedSubText = timeWin ? ('porter on-site ' + timeWin) : 'porter on-site business hours';
+        if (phList.length > 1 && !allSameHours) {
+          schedSubText = perPorterList;
+        } else if (sharedWin) {
+          schedSubText = 'Porter on-site ' + sharedWin;
+        } else {
+          schedSubText = 'Porter on-site during business hours';
+        }
       }
       var schedTimeEl = document.getElementById('qfSumTime');
       if (schedTimeEl) schedTimeEl.textContent = schedSubText;
@@ -1786,13 +1871,33 @@
           document.getElementById('qfEditService').value = STATE.service || 'janitorial';
         } else if (field === 'porters') {
           document.getElementById('qfEditPorters').value = STATE.porterCount || '1';
-        } else if (field === 'days') {
+        } else if (field === 'days' || field === 'time') {
+          // Populate days checkboxes (only relevant when the days panel is open,
+          // but harmless for the 'time' alias too — the same panel hosts both).
           document.querySelectorAll('#qfEditDays input').forEach(function (cb) {
             cb.checked = STATE.days.indexOf(cb.value) > -1;
           });
-        } else if (field === 'time') {
-          document.getElementById('qfEditTimeStart').value = STATE.timeStart || '';
-          document.getElementById('qfEditTimeEnd').value = STATE.timeEnd || '';
+          // Render one time-input pair per porter when dayporter/both so
+          // different schedules stay editable directly from the review.
+          var wrap = document.getElementById('qfEditPorterHours');
+          if (wrap && (STATE.service === 'dayporter' || STATE.service === 'both')) {
+            var list = Array.isArray(STATE.porterHours) ? STATE.porterHours : [];
+            if (!list.length) list = [{ start: STATE.timeStart || '08:00', end: STATE.timeEnd || '17:00' }];
+            wrap.innerHTML = list.map(function (ph, idx) {
+              var s = (ph && ph.start) || '08:00';
+              var e = (ph && ph.end) || '17:00';
+              var n = idx + 1;
+              return '<div class="qf-rv-porter-hour-row" data-porter-row="' + n + '">' +
+                     '<span class="qf-rv-porter-hour-label">Porter ' + n + '</span>' +
+                     '<div class="qf-rv-field-row">' +
+                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="start" value="' + s + '" aria-label="Porter ' + n + ' start time">' +
+                     '<span class="qf-rv-field-sep">to</span>' +
+                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="end" value="' + e + '" aria-label="Porter ' + n + ' end time">' +
+                     '</div></div>';
+            }).join('');
+          } else if (wrap) {
+            wrap.innerHTML = '';
+          }
         }
         row.classList.add('is-editing');
 
@@ -1861,23 +1966,45 @@
           // Clear incompatible fields when service changes
           if (oldService !== newService) {
             if (newService === 'dayporter') {
-              STATE.size = null; // dayporter doesn't use size
+              // dayporter doesn't use size; stash the last known value so swapping
+              // back to janitorial/both/unsure can restore it instead of forcing
+              // the user to re-pick.
+              if (STATE.size) STATE._sizeBeforeDayporter = STATE.size;
+              STATE.size = null;
+            } else if (oldService === 'dayporter' && !STATE.size) {
+              // Coming back from dayporter — restore prior size if we stashed one,
+              // otherwise default to 'notsure' so validation for both/janitorial passes.
+              STATE.size = STATE._sizeBeforeDayporter || 'notsure';
             }
             if (newService === 'janitorial' || newService === 'unsure') {
               STATE.porterCount = null;
               STATE.timeStart = null;
               STATE.timeEnd = null;
+              STATE.porterHours = [];
             }
             // Rebuild rail for new service
             if (typeof buildRail === 'function') buildRail(newService);
           }
         } else if (field === 'porters') {
           STATE.porterCount = document.getElementById('qfEditPorters').value;
-        } else if (field === 'days') {
+        } else if (field === 'days' || field === 'time') {
+          // Save days selection
           STATE.days = Array.from(document.querySelectorAll('#qfEditDays input:checked')).map(function(cb){return cb.value;});
-        } else if (field === 'time') {
-          STATE.timeStart = document.getElementById('qfEditTimeStart').value;
-          STATE.timeEnd = document.getElementById('qfEditTimeEnd').value;
+          // Save per-porter hours when present (dayporter/both)
+          var rows = document.querySelectorAll('#qfEditPorterHours .qf-rv-porter-hour-row');
+          if (rows.length) {
+            var newHours = Array.prototype.map.call(rows, function (row) {
+              var s = row.querySelector('[data-time="start"]');
+              var e = row.querySelector('[data-time="end"]');
+              return {
+                start: (s && s.value) || '08:00',
+                end: (e && e.value) || '17:00'
+              };
+            });
+            STATE.porterHours = newHours;
+            STATE.timeStart = newHours[0].start;
+            STATE.timeEnd = newHours[0].end;
+          }
         }
         var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
         if (row) {
@@ -1937,7 +2064,11 @@
 
     // Build payload for /api/submit-quote endpoint
     function buildSubmitPayload() {
-      var formType = STATE.service === 'dayporter' ? 'dayporter' : 'janitorial';
+      // formType mirrors STATE.service 1:1 — backend ALLOWED_FORM_TYPES accepts
+      // janitorial / dayporter / both. 'unsure' defaults to 'janitorial' for routing.
+      var formType = STATE.service === 'dayporter' ? 'dayporter'
+                    : STATE.service === 'both' ? 'both'
+                    : 'janitorial';
       var payload = {
         em: STATE.userEmail,
         fn: STATE.userName,
@@ -1950,22 +2081,34 @@
         formType: formType,
         notes: STATE.specialInstructions || ''
       };
-      // Schedule days
+      // Schedule days — both services share STATE.days, but send under both keys
+      // for 'both' so downstream consumers (CRM/email templates) see either alone.
       if (STATE.days && STATE.days.length) {
-        if (formType === 'dayporter') payload.dpDays = STATE.days;
-        else payload.janDays = STATE.days;
-        // For "both", also send dpDays so dayporter schedule is captured
-        if (STATE.service === 'both') payload.dpDays = STATE.days;
+        if (formType === 'dayporter') {
+          payload.dpDays = STATE.days;
+        } else if (formType === 'both') {
+          payload.janDays = STATE.days;
+          payload.dpDays = STATE.days;
+        } else {
+          payload.janDays = STATE.days;
+        }
       }
-      // Porter fields
+      // Porter count
       if (STATE.porterCount) payload.porters = STATE.porterCount;
-      // Day Porter start/end time — sent as startTime + hrs range
-      if (STATE.timeStart) payload.startTime = STATE.timeStart;
-      if (STATE.timeStart && STATE.timeEnd) payload.hrs = STATE.timeStart + '-' + STATE.timeEnd;
-      // Service flag — if user picked "both", mark cross-sell
-      if (STATE.service === 'both') {
-        if (formType === 'janitorial') payload.addDayPorter = true;
-        else payload.addJanitorial = true;
+      // Per-porter hours (set in the hours step). Each entry is {start, end}.
+      // Legacy startTime/hrs kept for backend consumers that only know shared hours —
+      // populated from porter 1 when all porters share a schedule, else empty.
+      if (Array.isArray(STATE.porterHours) && STATE.porterHours.length) {
+        var nonEmpty = STATE.porterHours.filter(function(p){ return p && p.start && p.end; });
+        if (nonEmpty.length) {
+          payload.porterHours = nonEmpty.map(function(p){ return { start: p.start, end: p.end }; });
+          var first = nonEmpty[0];
+          var allSame = nonEmpty.every(function(p){ return p.start === first.start && p.end === first.end; });
+          if (allSame) {
+            payload.startTime = first.start;
+            payload.hrs = first.start + '-' + first.end;
+          }
+        }
       }
       // Drop empty/null fields so form_data stays clean
       Object.keys(payload).forEach(function (k) {

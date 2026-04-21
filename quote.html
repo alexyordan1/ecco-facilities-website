@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=27.6">
+<link rel="stylesheet" href="css/quote-flow.css?v=27.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -652,7 +652,7 @@
             <div class="qf-rv-sum-body">
               <div class="qf-rv-sum-primary"><b id="qfSumAddress">&mdash;</b></div>
               <div class="qf-rv-sum-sub">
-                <span id="qfSumSpace">&mdash;</span><span class="qf-rv-sum-dot">·</span><span id="qfSumSize">&mdash;</span>
+                <span id="qfSumSpace"></span><span class="qf-rv-sum-dot" hidden>·</span><span id="qfSumSize" hidden></span>
               </div>
             </div>
             <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="address" aria-label="Edit premises">Edit</button>
@@ -707,13 +707,10 @@
                   <label class="qf-rev-day-chip"><input type="checkbox" value="Sunday" aria-label="Sunday"> Sun</label>
                 </div>
               </label>
-              <label class="qf-rv-field" id="qfSumTimeRow" hidden><span class="qf-rv-field-label">Time window</span>
-                <div class="qf-rv-field-row">
-                  <input type="time" class="qf-rev-input" id="qfEditTimeStart" aria-label="Edit start time">
-                  <span class="qf-rv-field-sep">to</span>
-                  <input type="time" class="qf-rev-input" id="qfEditTimeEnd" aria-label="Edit end time">
-                </div>
-              </label>
+              <div class="qf-rv-field" id="qfSumTimeRow" hidden>
+                <span class="qf-rv-field-label">Porter hours</span>
+                <div id="qfEditPorterHours" class="qf-rv-porter-hours-edit" role="group" aria-label="Per-porter hours"></div>
+              </div>
               <div class="qf-rev-edit-actions">
                 <button type="button" class="qf-rev-save" data-save="days">Save</button>
                 <button type="button" class="qf-rev-cancel" data-cancel="days">Cancel</button>
@@ -947,7 +944,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=25.6"></script>
+<script src="js/quote-flow.js?v=25.8"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
