@@ -202,7 +202,14 @@ export async function onRequestPost(context) {
 
     // 2. Generate reference number
     const prefix = formType === 'dayporter' ? 'EDP-' : 'ECJ-';
-    const refNumber = prefix + Date.now().toString(36).toUpperCase();
+    // AYS Ola 4 Commit N ME-7 — append 4 random chars so two submits in the
+    // same millisecond don't collide (e.g. batch send from a CRM). Also makes
+    // the ref non-enumerable, hardening against social-engineering attacks
+    // that guess neighbor refs.
+    const randTail = Array.from(
+      crypto.getRandomValues(new Uint8Array(3))
+    ).map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 4).toUpperCase();
+    const refNumber = prefix + Date.now().toString(36).toUpperCase() + '-' + randTail;
 
     // 3. Build form_data with readable labels
     const KEY_MAP = {
@@ -243,7 +250,11 @@ export async function onRequestPost(context) {
     // AYS Ola 2 #8 — track integration success so a total-failure (network blip,
     // all services down) returns 502 to the client instead of a false-positive
     // success. The user sees an error toast and can retry or email directly.
-    const integrations = { supabase: null, activecampaign: null, hubspot: null, postmark: null };
+    // AYS Ola 4 Commit N ME-8 — split Postmark into client (user confirm) and
+    // owner (internal notification) tracks. Client still affects the
+    // user-facing "success" decision; owner failures are logged loudly but
+    // don't block the user — the CRM write is the source of truth for ops.
+    const integrations = { supabase: null, activecampaign: null, hubspot: null, postmark: null, postmark_owner: null };
     const anyConfigured = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY)
       || !!(env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY)
       || !!env.HUBSPOT_ACCESS_TOKEN
@@ -439,8 +450,9 @@ export async function onRequestPost(context) {
       }
 
       // 7. Postmark: notification email to owner
+      integrations.postmark_owner = false;
       try {
-        await fetchWithTimeout('https://api.postmarkapp.com/email/withTemplate', {
+        const ownerRes = await fetchWithTimeout('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -469,8 +481,20 @@ export async function onRequestPost(context) {
             }
           })
         });
+        if (ownerRes.ok) {
+          integrations.postmark_owner = true;
+        } else {
+          // AYS Ola 4 Commit N ME-8 — loud structured log so ops can alert on it.
+          console.error('[submit-quote] Postmark owner email non-ok:', {
+            status: ownerRes.status,
+            refNumber
+          });
+        }
       } catch (e) {
-        console.error('[submit-quote] Postmark owner email error:', redactPII(e.message));
+        console.error('[submit-quote] Postmark owner email error:', {
+          message: redactPII(e.message),
+          refNumber
+        });
       }
     }
 
@@ -484,6 +508,28 @@ export async function onRequestPost(context) {
       console.error('[submit-quote] All integrations failed', integrations);
       return new Response(JSON.stringify({ ok: false, error: 'Lead services unavailable — please try again or email info@eccofacilities.com.' }), { status: 502, headers: corsHeaders });
     }
+
+    // AYS Ola 4 Commit N ME-10 — structured JSON-line observability log. One
+    // line per successful submit so Logpush / Analytics Engine / external
+    // aggregators can parse without regex. No PII in this line: ref, service,
+    // formType, per-integration outcome, hashed IP for dedupe analytics.
+    // Hash rather than raw IP to stay GDPR-friendly.
+    const obsIpHash = await (async () => {
+      const rawIp = context.request.headers.get('CF-Connecting-IP') || '';
+      if (!rawIp || typeof crypto.subtle?.digest !== 'function') return 'na';
+      const data = new TextEncoder().encode(rawIp);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).slice(0, 6).map(b => b.toString(16).padStart(2,'0')).join('');
+    })();
+    console.log(JSON.stringify({
+      evt: 'submit_quote_ok',
+      ref: refNumber,
+      service,
+      formType: formType || 'janitorial',
+      integrations,
+      ipHash: obsIpHash,
+      ts: Date.now()
+    }));
 
     return new Response(JSON.stringify({ ok: true, ref: refNumber }), { status: 200, headers: corsHeaders });
 

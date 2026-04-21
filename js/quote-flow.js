@@ -2046,10 +2046,19 @@
           resetTurnstile();
           // Success: show success screen
           // Fix #30 — if backend didn't return a ref, generate a readable one client-side
-          var refNumber = result.data.ref || (
-            (STATE.service === 'dayporter' ? 'EDP-' : 'ECJ-') +
-            Date.now().toString(36).toUpperCase()
-          );
+          // AYS Ola 4 Commit N ME-7 — match backend format: prefix + timestamp + '-' + 4 random
+          var refNumber = result.data.ref || (function () {
+            var tail = '';
+            try {
+              var r = crypto.getRandomValues(new Uint8Array(3));
+              tail = Array.from(r).map(function (b) { return b.toString(36).padStart(2,'0'); }).join('').slice(0,4).toUpperCase();
+            } catch (_) {
+              tail = Math.random().toString(36).slice(2, 6).toUpperCase();
+            }
+            return (STATE.service === 'dayporter' ? 'EDP-' : 'ECJ-')
+                   + Date.now().toString(36).toUpperCase()
+                   + '-' + tail;
+          })();
           var successTitle = document.getElementById('qfSuccessTitle');
           var successSub = document.getElementById('qfSuccessSub');
           if (successTitle) {
