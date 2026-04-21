@@ -590,25 +590,39 @@
     </section>
 
     <!-- STEP 6 · SUMMARY + SUBMIT (Redesigned — premium plan card, standalone screen) -->
-    <section class="qf-screen step-contact" hidden id="qfScreen_contact" aria-label="Review and submit">
-      <div class="qf-screen-inner qf-plan-wrap">
+    <section class="qf-screen step-contact qf-rv" hidden id="qfScreen_contact" aria-label="Review and submit">
+      <div class="qf-screen-inner qf-plan-wrap qf-rv-wrap">
 
-        <!-- Hero header — Alina avatar removed; title + sub only. -->
-        <header class="qf-plan-hero">
-          <div class="qf-plan-hero-text">
-            <h2 class="qf-plan-hero-title" id="qfPlanHeroTitle">Looks good</h2>
-            <p class="qf-plan-hero-sub">Quick review of what we captured &mdash; tap any row to edit. Your custom quote lands in your inbox within 24 hours.</p>
-          </div>
+        <!-- Ola 6 — Review screen redesign: hero eyebrow + personalized headline -->
+        <header class="qf-plan-hero qf-rv-hero">
+          <span class="qf-rv-eyebrow">
+            <svg class="qf-rv-eyebrow-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3.5 3.5L13 5"/></svg>
+            Final review
+          </span>
+          <h2 class="qf-plan-hero-title qf-rv-title" id="qfPlanHeroTitle">Looks good?</h2>
+          <p class="qf-plan-hero-sub qf-rv-sub">Tap any field to edit. Your proposal lands in your inbox within 24 hours.</p>
         </header>
 
-        <!-- Plan-at-a-glance chip row — populated by populateSummary() -->
-        <div class="qf-plan-chips" id="qfPlanChips" aria-label="Your plan at a glance" role="list">
-          <span class="qf-plan-chip" id="qfChipService" role="listitem" hidden></span>
-          <span class="qf-plan-chip" id="qfChipSpace" role="listitem" hidden></span>
-          <span class="qf-plan-chip" id="qfChipSize" role="listitem" hidden></span>
-          <span class="qf-plan-chip" id="qfChipDays" role="listitem" hidden></span>
-          <span class="qf-plan-chip" id="qfChipPorters" role="listitem" hidden></span>
+        <!-- Service hero card — consolidates the at-a-glance chips into a premium "your plan" snapshot -->
+        <div class="qf-rv-service" aria-labelledby="qfRvServiceHeader">
+          <div class="qf-rv-service-glyph" id="qfChipService" aria-hidden="true"></div>
+          <div class="qf-rv-service-body">
+            <div class="qf-rv-service-label" id="qfRvServiceHeader">Your plan</div>
+            <div class="qf-rv-service-name-wrap">
+              <span class="qf-rv-service-name" id="qfSumService">&mdash;</span>
+              <button type="button" class="qf-rv-service-edit" data-edit="service" aria-label="Change service type">Change</button>
+            </div>
+            <ul class="qf-rv-service-facts" role="list">
+              <li class="qf-rv-fact" id="qfChipSpace" role="listitem" hidden></li>
+              <li class="qf-rv-fact" id="qfChipSize" role="listitem" hidden></li>
+              <li class="qf-rv-fact" id="qfChipDays" role="listitem" hidden></li>
+              <li class="qf-rv-fact" id="qfChipPorters" role="listitem" hidden></li>
+            </ul>
+          </div>
         </div>
+
+        <!-- Keep empty #qfPlanChips as a no-op anchor so populateSummary's floating-CTA recheck timer doesn't null-ref -->
+        <div class="qf-plan-chips qf-rv-chips-legacy" id="qfPlanChips" hidden></div>
 
         <!-- Summary card (single card, premium feel) -->
         <div class="qf-plan-card" id="qfSummaryCard">
@@ -861,44 +875,58 @@
 
           </div>
 
-          <!-- Special instructions — styled as a bento card with its own icon -->
-          <div class="qf-rev-cell qf-rev-special qf-rev-special-cell" data-section="notes">
+          <!-- Ola 6 — Notes card redesigned as standalone bento at the bottom -->
+          <div class="qf-rev-cell qf-rev-special qf-rev-special-cell qf-rv-notes" data-section="notes">
             <div class="qf-rev-cell-head">
               <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
-              <span class="qf-rev-cell-label">Notes</span>
+              <span class="qf-rev-cell-label">Anything we should know?</span>
               <span class="qf-rev-special-optional"><span id="qfSpecialCounter">0</span>/500</span>
             </div>
             <label for="qfSpecialInstructions" class="sr-only">Any special instructions?</label>
-            <textarea class="qf-rev-special-input" id="qfSpecialInstructions" placeholder="Focus areas, product preferences, building quirks — anything that helps us tailor your plan." rows="3" maxlength="500" aria-describedby="qfSpecialCounter qfSpecialHelp"></textarea>
+            <textarea class="qf-rev-special-input" id="qfSpecialInstructions" placeholder="Focus areas, product preferences, access quirks — anything that helps us tailor your plan. (Optional)" rows="3" maxlength="500" aria-describedby="qfSpecialCounter qfSpecialHelp"></textarea>
             <p id="qfSpecialHelp" class="sr-only">Optional. Up to 500 characters.</p>
           </div>
 
-          <!-- Footer — only the submit button; info block removed -->
-          <div class="qf-rev-foot qf-rev-foot-minimal">
-            <!-- Fix #45 — Cloudflare Turnstile invisible captcha (anti-bot) -->
-            <!-- AYS Ola 3 Commit J — Cloudflare deprecated data-size="invisible" (throws
-     TurnstileError in console). Switch to "flexible" which renders inline but
-     tiny — functionally equivalent for our low-friction use case. -->
-<div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
-            <button type="button" class="qf-rev-btn" id="qfContactSubmit">
-              Looks good &mdash; get my quote <span aria-hidden="true">&rarr;</span>
+          <!-- Ola 6 — Send block: trust strip INLINE in CTA footer (was floating loose below) -->
+          <div class="qf-rev-foot qf-rev-foot-minimal qf-rv-send">
+            <div class="qf-rv-send-trust" aria-hidden="true">
+              <span class="qf-rv-send-trust-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V4.5a3 3 0 0 1 6 0V7"/></svg>
+                No spam
+              </span>
+              <span class="qf-rv-send-trust-sep" aria-hidden="true"></span>
+              <span class="qf-rv-send-trust-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+                No commitment
+              </span>
+              <span class="qf-rv-send-trust-sep" aria-hidden="true"></span>
+              <span class="qf-rv-send-trust-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+                24h reply
+              </span>
+            </div>
+            <button type="button" class="qf-rev-btn qf-rv-send-btn" id="qfContactSubmit">
+              <span class="qf-rv-send-btn-label">Send my request</span>
+              <span class="qf-rv-send-btn-arrow" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+              </span>
             </button>
+            <!-- Turnstile widget (flexible size per Ola 3 Commit J — "invisible" was deprecated) -->
+            <div class="qf-rv-send-captcha">
+              <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
+            </div>
+            <p class="qf-rv-send-delivery" id="qfRvSendDelivery">We'll email your proposal within 24 hours.</p>
           </div>
 
-          <!-- Trust microcopy under the CTA -->
-          <div class="qf-plan-trust">
-            <span class="qf-plan-trust-item"><span aria-hidden="true">&#x1F512;</span> No spam, ever</span>
-            <span class="qf-plan-trust-item"><span aria-hidden="true">&#x2705;</span> No commitment</span>
-            <span class="qf-plan-trust-item"><span aria-hidden="true">&#x26A1;</span> Reply in 24h</span>
-          </div>
+          <!-- Ola 6 — Legacy trust strip removed (replaced by inline version inside .qf-rv-send block) -->
 
           </div><!-- /.qf-rev -->
         </div><!-- /.qf-plan-card -->
 
         <!-- Floating submit bar — appears once the inline CTA scrolls out of view -->
         <div class="qf-plan-floating-cta" id="qfPlanFloatingCta" aria-hidden="true">
-          <button type="button" class="qf-rev-btn qf-plan-floating-cta-btn" id="qfFloatingSubmitBtn">
-            Looks good &mdash; get my quote <span aria-hidden="true">&rarr;</span>
+          <button type="button" class="qf-rev-btn qf-plan-floating-cta-btn qf-rv-send-btn" id="qfFloatingSubmitBtn">
+            Send my request <span aria-hidden="true">&rarr;</span>
           </button>
         </div>
       </div><!-- /.qf-screen-inner -->
@@ -1033,7 +1061,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20));
 });
 </script>
-<script src="js/main.js?v=3.9"></script>
+<script src="js/main.js?v=4.0"></script>
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>

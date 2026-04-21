@@ -397,10 +397,11 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   if (!('IntersectionObserver' in window)) { fq.classList.add('visible'); return; }
   var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
+      // Once stats leaves the top of the viewport, show FQ permanently
+      // (no hiding on scroll-up — user decision: persist once visible)
       if (!e.isIntersecting && e.boundingClientRect.top < 0) {
         fq.classList.add('visible');
-      } else {
-        fq.classList.remove('visible');
+        obs.disconnect();
       }
     });
   }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
