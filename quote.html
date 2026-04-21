@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=27.2">
+<link rel="stylesheet" href="css/quote-flow.css?v=27.4">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -602,10 +602,8 @@
           </picture>
           <span class="qf-rv-hero-dot" aria-hidden="true"></span>
           <span class="qf-rv-hero-kicker"><span class="qf-rv-hero-kicker-pulse" aria-hidden="true"></span>Final step</span>
-          <h2 class="qf-plan-hero-title qf-rv-hero-title" id="qfPlanHeroTitle">
-            Got it, <em id="qfRvHeroName">there</em>.<br>Here&rsquo;s your snapshot.
-          </h2>
-          <p class="qf-rv-hero-sub" id="qfRvHeroSub">Tap anything that&rsquo;s off to edit. Your proposal lands within 24&nbsp;hours.</p>
+          <h2 class="qf-plan-hero-title qf-rv-hero-title" id="qfPlanHeroTitle">Got it, <em id="qfRvHeroName">there</em>. Here&rsquo;s your snapshot.</h2>
+          <p class="qf-rv-hero-sub" id="qfRvHeroSub">Tap anything that&rsquo;s off to edit.</p>
         </header>
 
         <!-- Summary card: 4 consolidated rows. Each row displays primary + sub from the JS-managed fields. -->
@@ -949,7 +947,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=25.0"></script>
+<script src="js/quote-flow.js?v=25.1"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

@@ -1585,7 +1585,7 @@
       // AYS Ola 8 — Idea 2 "Review with Alina as host". Single-column hero + summary card.
       var serviceFocus = SERVICE_LABELS[STATE.service] || STATE.service || '';
 
-      // Hero title: "Got it, <em>Priya</em>. Here's your snapshot."
+      // Hero title: "Got it, <em>Priya</em>. Here's your snapshot." (one line)
       var heroTitle = document.getElementById('qfPlanHeroTitle');
       if (heroTitle) {
         while (heroTitle.firstChild) heroTitle.removeChild(heroTitle.firstChild);
@@ -1595,18 +1595,13 @@
         em.id = 'qfRvHeroName';
         em.textContent = firstName || 'there';
         heroTitle.appendChild(em);
-        heroTitle.appendChild(document.createTextNode('.'));
-        heroTitle.appendChild(document.createElement('br'));
-        heroTitle.appendChild(document.createTextNode('Here\u2019s your snapshot.'));
+        heroTitle.appendChild(document.createTextNode('. Here\u2019s your snapshot.'));
       }
 
-      // Hero sub: personalized if we have a company name
+      // Hero sub: single line, short
       var heroSub = document.getElementById('qfRvHeroSub');
       if (heroSub) {
-        var subText = STATE.companyName
-          ? 'Tap anything that\u2019s off to edit. Your proposal for ' + STATE.companyName + ' lands within 24\u00a0hours.'
-          : 'Tap anything that\u2019s off to edit. Your proposal lands within 24\u00a0hours.';
-        heroSub.textContent = subText;
+        heroSub.textContent = 'Tap anything that\u2019s off to edit.';
       }
 
       // Re-evaluate floating CTA visibility once layout settles
