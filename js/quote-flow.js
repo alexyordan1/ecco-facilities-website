@@ -1670,19 +1670,19 @@
       setVal('qfSumSchedule', days || '(none selected)');
       var schedSubText = '';
       if (svc === 'janitorial' || svc === 'unsure') {
-        schedSubText = 'After-hours window \u00b7 onboarding week 1';
+        schedSubText = '';
       } else if (svc === 'dayporter') {
         schedSubText = timeWin ? ('On-site ' + timeWin) : 'On-site during business hours';
         if (porterCount) schedSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
       } else if (svc === 'both') {
-        var subBits = ['After-hours janitorial'];
-        if (timeWin) subBits.push('porter on-site ' + timeWin);
-        else subBits.push('porter on-site business hours');
-        schedSubText = subBits.join(' \u00b7 ');
+        schedSubText = timeWin ? ('porter on-site ' + timeWin) : 'porter on-site business hours';
       }
-      setVal('qfSumTime', schedSubText);
+      var schedTimeEl = document.getElementById('qfSumTime');
+      if (schedTimeEl) schedTimeEl.textContent = schedSubText;
+      var schedSubEl = document.getElementById('qfRvSchedSub');
+      if (schedSubEl) schedSubEl.hidden = !schedSubText;
       var schedMeta = document.getElementById('qfRvSchedMeta');
-      if (schedMeta) schedMeta.hidden = true; // we fold the meta into sub text above
+      if (schedMeta) schedMeta.hidden = true;
       var schedDot = document.getElementById('qfRvSchedDot');
       if (schedDot) schedDot.hidden = true;
 
