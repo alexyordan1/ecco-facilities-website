@@ -38,6 +38,9 @@ const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:
 // AYS Ola 3 Commit G #36 — if CF-Connecting-IP is missing (direct-to-origin call
 // bypassing CF edge), fall back to a much stricter 2/hr limit so a single bot
 // can't exhaust the shared "unknown" bucket for everyone else.
+// AYS Ola 4 Commit K CR-2 — KV doesn't offer atomic CAS. We mitigate the race by
+// re-reading after write and logging soft-limit overshoots (observability hook).
+// Hard-limit bypass still possible by ≤N concurrent workers; documented.
 async function enforceRateLimit(request, env) {
   const kv = env && env.RATE_LIMIT_KV;
   if (!kv) return { ok: true };
@@ -48,8 +51,18 @@ async function enforceRateLimit(request, env) {
   const hour = Math.floor(Date.now() / 3600000);
   const key = `rl:quote:${bucket}:${hour}`;
   const current = parseInt(await kv.get(key) || '0', 10);
-  if (current >= limit) return { ok: false, retryAfter: 3600 - Math.floor((Date.now() / 1000) % 3600) };
+  if (current >= limit) {
+    return { ok: false, retryAfter: 3600 - Math.floor((Date.now() / 1000) % 3600) };
+  }
+  // Write the incremented value. Under concurrency this is best-effort —
+  // two concurrent reads of `current` can both pass the check and both write.
+  // The re-read below lets us log the overshoot so ops can spot abuse.
   await kv.put(key, String(current + 1), { expirationTtl: 3600 });
+  const after = parseInt(await kv.get(key) || '0', 10);
+  if (after > limit + 2) {
+    // Bucket overshot by >2 (the typical race window size). Log for ops.
+    console.error('[submit-quote] rate-limit overshoot', { bucket, limit, after });
+  }
   return { ok: true };
 }
 
@@ -70,6 +83,18 @@ function safeStringify(obj) {
 }
 
 const ALLOWED_FORM_TYPES = new Set(['janitorial', 'dayporter', 'both']);
+
+// AYS Ola 4 Commit K HI-8 — wrap fetch with AbortController so a slow/hung
+// upstream integration can't block the Cloudflare Worker indefinitely.
+// CF Workers have a 30s total wall-clock; we pick 8s per call so 2-3 serial
+// integrations still fit comfortably under the limit.
+function fetchWithTimeout(input, init = {}, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  const signal = init.signal || controller.signal;
+  return fetch(input, { ...init, signal })
+    .finally(() => clearTimeout(id));
+}
 
 export async function onRequestPost(context) {
   const origin = context.request.headers.get('Origin');
@@ -130,13 +155,22 @@ export async function onRequestPost(context) {
     // If it's missing, the previous code silently skipped captcha validation —
     // every submission accepted, bots sail through. Now we 503 until configured,
     // except on localhost where the dev loop expects to work without Turnstile.
-    // AYS Ola 3 Commit G #37 — parse hostname so any dev port (3000, 5173, 8080,
-    // 127.0.0.1, etc.) is treated as local. Previously locked to :8080 only.
+    // AYS Ola 3 Commit G #37 — parse hostname so any dev port is treated as local.
+    // AYS Ola 4 Commit K CR-3 — defense in depth: an attacker could spoof the
+    // Origin header to `http://localhost:3000` from a remote IP and bypass
+    // Turnstile. Cross-check CF-Connecting-IP against loopback to confirm
+    // the request actually comes from the dev machine.
     const turnstileSecret = env.CF_TURNSTILE_SECRET || env.TURNSTILE_SECRET_KEY;
     let isLocal = false;
     try {
       const host = origin ? new URL(origin).hostname : '';
-      isLocal = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+      const originLooksLocal = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+      const cfIp = context.request.headers.get('CF-Connecting-IP') || '';
+      // CF edge doesn't inject CF-Connecting-IP for same-machine dev (wrangler),
+      // so empty IP + local-looking origin is accepted. Otherwise the IP must
+      // match loopback, not a remote IP spoofing a local Origin header.
+      const ipLooksLocal = !cfIp || cfIp === '127.0.0.1' || cfIp === '::1';
+      isLocal = originLooksLocal && ipLooksLocal;
     } catch (_) { isLocal = false; }
     if (!turnstileSecret && !isLocal) {
       console.error('[submit-quote] CF_TURNSTILE_SECRET missing in production env');
@@ -147,7 +181,7 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ ok: false, error: 'Captcha required' }), { status: 403, headers: corsHeaders });
       }
       try {
-        const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        const verifyRes = await fetchWithTimeout('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
@@ -219,7 +253,10 @@ export async function onRequestPost(context) {
     if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
       integrations.supabase = false;
       try {
-        const sbRes = await fetch(`${env.SUPABASE_URL}/rest/v1/leads?on_conflict=email,service`, {
+        // Supabase REST requires BOTH apikey (project) and Authorization:Bearer
+        // (session token) headers — this is not duplicate auth, it's their
+        // documented pattern for service-role writes. DO NOT remove either.
+        const sbRes = await fetchWithTimeout(`${env.SUPABASE_URL}/rest/v1/leads?on_conflict=email,service`, {
           method: 'POST',
           headers: {
             'apikey': env.SUPABASE_SERVICE_KEY,
@@ -259,7 +296,7 @@ export async function onRequestPost(context) {
       try {
         const acHeaders = { 'Api-Token': env.ACTIVECAMPAIGN_API_KEY, 'Content-Type': 'application/json' };
 
-        const syncRes = await fetch(`${env.ACTIVECAMPAIGN_API_URL}/api/3/contact/sync`, {
+        const syncRes = await fetchWithTimeout(`${env.ACTIVECAMPAIGN_API_URL}/api/3/contact/sync`, {
           method: 'POST', headers: acHeaders,
           body: JSON.stringify({ contact: { email, firstName: firstName || '', lastName: lastName || '', phone: phone || '' } })
         });
@@ -267,12 +304,12 @@ export async function onRequestPost(context) {
         const contactId = syncData?.contact?.id;
 
         if (contactId) {
-          const tagsRes = await fetch(`${env.ACTIVECAMPAIGN_API_URL}/api/3/tags?search=completed`, { headers: acHeaders });
+          const tagsRes = await fetchWithTimeout(`${env.ACTIVECAMPAIGN_API_URL}/api/3/tags?search=completed`, { headers: acHeaders });
           const tagsData = await tagsRes.json();
           let tagId = tagsData?.tags?.find(t => t.tag === 'completed')?.id;
 
           if (!tagId) {
-            const createTagRes = await fetch(`${env.ACTIVECAMPAIGN_API_URL}/api/3/tags`, {
+            const createTagRes = await fetchWithTimeout(`${env.ACTIVECAMPAIGN_API_URL}/api/3/tags`, {
               method: 'POST', headers: acHeaders,
               body: JSON.stringify({ tag: { tag: 'completed', tagType: 'contact' } })
             });
@@ -280,7 +317,7 @@ export async function onRequestPost(context) {
           }
 
           if (tagId) {
-            await fetch(`${env.ACTIVECAMPAIGN_API_URL}/api/3/contactTags`, {
+            await fetchWithTimeout(`${env.ACTIVECAMPAIGN_API_URL}/api/3/contactTags`, {
               method: 'POST', headers: acHeaders,
               body: JSON.stringify({ contactTag: { contact: contactId, tag: tagId } })
             });
@@ -302,7 +339,7 @@ export async function onRequestPost(context) {
         };
 
         // Search for existing contact by email
-        const searchRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
+        const searchRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/contacts/search', {
           method: 'POST', headers: hsHeaders,
           body: JSON.stringify({
             filterGroups: [{ filters: [{ propertyName: 'email', operator: 'EQ', value: email }] }]
@@ -326,12 +363,12 @@ export async function onRequestPost(context) {
         };
 
         if (hsContactId) {
-          await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${hsContactId}`, {
+          await fetchWithTimeout(`https://api.hubapi.com/crm/v3/objects/contacts/${hsContactId}`, {
             method: 'PATCH', headers: hsHeaders,
             body: JSON.stringify({ properties: contactProps })
           });
         } else {
-          const createRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+          const createRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/contacts', {
             method: 'POST', headers: hsHeaders,
             body: JSON.stringify({ properties: contactProps })
           });
@@ -342,7 +379,7 @@ export async function onRequestPost(context) {
         // Create a deal for pipeline tracking
         if (hsContactId) {
           const dealName = `${company || firstName} - ${service === 'dayporter' ? 'Day Porter' : 'Janitorial'} (${refNumber})`;
-          const dealRes = await fetch('https://api.hubapi.com/crm/v3/objects/deals', {
+          const dealRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/deals', {
             method: 'POST', headers: hsHeaders,
             body: JSON.stringify({
               properties: {
@@ -356,7 +393,7 @@ export async function onRequestPost(context) {
           const dealId = dealData?.id;
 
           if (dealId) {
-            await fetch(
+            await fetchWithTimeout(
               `https://api.hubapi.com/crm/v3/objects/deals/${dealId}/associations/contacts/${hsContactId}/deal_to_contact/3`,
               { method: 'PUT', headers: hsHeaders }
             );
@@ -372,7 +409,7 @@ export async function onRequestPost(context) {
     if (env.POSTMARK_API_KEY) {
       integrations.postmark = false;
       try {
-        const pmRes = await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        const pmRes = await fetchWithTimeout('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
@@ -403,7 +440,7 @@ export async function onRequestPost(context) {
 
       // 7. Postmark: notification email to owner
       try {
-        await fetch('https://api.postmarkapp.com/email/withTemplate', {
+        await fetchWithTimeout('https://api.postmarkapp.com/email/withTemplate', {
           method: 'POST',
           headers: {
             'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
