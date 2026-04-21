@@ -387,39 +387,22 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    HERO BADGE — Rotating social proof messages
    ============================================================ */
 (function initBadgeRotate() {
-  var textEl = document.querySelector('.hero-badge-text');
-  var icoEl = document.querySelector('.hero-badge-ico');
-  if (!textEl || window.innerWidth < 900) return;
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // SVG markup is author-authored hardcoded strings (no user input) — safe for innerHTML.
+  var el = document.querySelector('.hero-badge-text');
+  if (!el || window.innerWidth < 900) return;
   var msgs = [
-    { text: "NYC's Eco-Certified Facility Partner", ico: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' },
-    { text: '200+ Businesses Trust Us',              ico: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>' },
-    { text: '5.0 Rated on Google Reviews',           ico: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
-    { text: '12+ Years Serving All 5 Boroughs',      ico: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' }
+    "NYC's Eco-Certified Facility Partner",
+    '200+ Businesses Trust Us',
+    '5.0 Rated on Google Reviews',
+    '12+ Years Serving All 5 Boroughs'
   ];
   var idx = 0;
-  var ENTER_MS = 600;
   setInterval(function() {
-    textEl.classList.add('is-exit');
-    if (icoEl) icoEl.classList.add('is-exit');
-    textEl.classList.remove('is-enter');
-    if (icoEl) icoEl.classList.remove('is-enter');
+    el.style.opacity = '0';
     setTimeout(function() {
       idx = (idx + 1) % msgs.length;
-      textEl.textContent = msgs[idx].text;
-      if (icoEl) icoEl.innerHTML = msgs[idx].ico;
-      textEl.classList.remove('is-exit');
-      if (icoEl) icoEl.classList.remove('is-exit');
-      if (reduced) return;
-      void textEl.offsetWidth;
-      textEl.classList.add('is-enter');
-      if (icoEl) icoEl.classList.add('is-enter');
-      setTimeout(function() {
-        textEl.classList.remove('is-enter');
-        if (icoEl) icoEl.classList.remove('is-enter');
-      }, ENTER_MS);
-    }, 320);
+      el.textContent = msgs[idx];
+      el.style.opacity = '1';
+    }, 800);
   }, 5000);
 })();
 
