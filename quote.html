@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=26.2">
+<link rel="stylesheet" href="css/quote-flow.css?v=27.1">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -591,353 +591,222 @@
 
     <!-- STEP 6 · SUMMARY + SUBMIT (Redesigned — premium plan card, standalone screen) -->
     <section class="qf-screen step-contact qf-rv" hidden id="qfScreen_contact" aria-label="Review and submit">
-      <div class="qf-screen-inner qf-plan-wrap qf-rv-wrap">
+      <div class="qf-screen-inner qf-rv-wrap">
 
-        <!-- Ola 7 · Editorial review (C1) — proposal preview on paper -->
-        <article class="qf-rv-paper" id="qfSummaryCard">
+        <!-- Ola 8 · Review without chat (Idea 2). Alina as host — single column centered. -->
+        <header class="qf-rv-hero">
+          <picture class="qf-rv-hero-ava">
+            <source type="image/avif" srcset="images/alina-avatar-192.avif">
+            <source type="image/webp" srcset="images/alina-avatar-192.webp">
+            <img src="images/alina-avatar-192.jpg" alt="" width="72" height="72" loading="lazy" decoding="async">
+          </picture>
+          <span class="qf-rv-hero-dot" aria-hidden="true"></span>
+          <span class="qf-rv-hero-kicker"><span class="qf-rv-hero-kicker-pulse" aria-hidden="true"></span>Final step</span>
+          <h2 class="qf-plan-hero-title qf-rv-hero-title" id="qfPlanHeroTitle">
+            Got it, <em id="qfRvHeroName">there</em>.<br>Here&rsquo;s your snapshot.
+          </h2>
+          <p class="qf-rv-hero-sub" id="qfRvHeroSub">Tap anything that&rsquo;s off to edit. Your proposal lands within 24&nbsp;hours.</p>
+        </header>
 
-          <!-- Gold ribbon -->
-          <div class="qf-rv-ribbon" aria-hidden="true">Draft</div>
+        <!-- Summary card: 4 consolidated rows. Each row displays primary + sub from the JS-managed fields. -->
+        <div class="qf-rv-summary" id="qfSummaryCard">
 
-          <!-- Masthead -->
-          <header class="qf-rv-mast">
-            <div class="qf-rv-mast-l">
-              <div class="qf-rv-mast-name">Ecco <span class="qf-rv-mast-sub">Facilities &middot; Proposal</span></div>
+          <!-- Service row -->
+          <section class="qf-rv-sum-row" data-section="service" data-field="service">
+            <span class="qf-rv-sum-k">Service</span>
+            <div class="qf-rv-sum-body">
+              <div class="qf-rv-sum-primary">
+                <em id="qfSumService">&mdash;</em><span class="qf-rv-sum-sep" aria-hidden="true"></span><span id="qfRvSvcFreq" class="qf-rv-sum-primary-meta">your schedule</span>
+              </div>
+              <div class="qf-rv-sum-sub" id="qfRvSvcSub">Eco-certified · insured · uniformed team</div>
             </div>
-            <div class="qf-rv-mast-r">
-              <b id="qfRvMastDate">April 20, 2026</b>
-              Reference &middot; <span id="qfRvMastRef">ECJ-A7K3-2026</span>
+            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="service" aria-label="Edit service">Edit</button>
+            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
+              <label class="qf-rv-field"><span class="qf-rv-field-label">Service type</span>
+                <select class="qf-rev-select" id="qfEditService" aria-label="Choose service type">
+                  <option value="janitorial">Janitorial</option>
+                  <option value="dayporter">Day Porter</option>
+                  <option value="both">Both Services</option>
+                  <option value="unsure">Help me decide</option>
+                </select>
+              </label>
+              <label class="qf-rv-field" id="qfSumPortersRow" hidden><span class="qf-rv-field-label">Porters</span>
+                <select class="qf-rev-select" id="qfEditPorters" aria-label="Choose number of porters">
+                  <option value="1">1 porter</option>
+                  <option value="2">2 porters</option>
+                  <option value="3">3 porters</option>
+                  <option value="4">4 porters</option>
+                  <option value="5">5 porters</option>
+                  <option value="notsure">Not sure</option>
+                </select>
+                <span class="qf-rv-field-value" id="qfSumPorters" hidden>&mdash;</span>
+              </label>
+              <div class="qf-rev-edit-actions">
+                <button type="button" class="qf-rev-save" data-save="service">Save</button>
+                <button type="button" class="qf-rev-cancel" data-cancel="service">Cancel</button>
+              </div>
             </div>
-          </header>
+          </section>
 
-          <!-- Title block -->
-          <div class="qf-rv-title-block">
-            <span class="qf-rv-kicker" id="qfRvKicker">Prepared for your team</span>
-            <h2 class="qf-plan-hero-title qf-rv-title" id="qfPlanHeroTitle">A cleaning plan, tailored for <em id="qfRvTitleTarget">your space</em>.</h2>
-            <p class="qf-rv-sub">Drafted from the details you shared. Pricing and availability will follow within twenty-four hours &mdash; no commitment until you approve.</p>
+          <!-- Premises row -->
+          <section class="qf-rv-sum-row" data-section="location" data-field="address">
+            <span class="qf-rv-sum-k">Premises</span>
+            <div class="qf-rv-sum-body">
+              <div class="qf-rv-sum-primary"><b id="qfSumAddress">&mdash;</b></div>
+              <div class="qf-rv-sum-sub">
+                <span id="qfSumSpace">&mdash;</span><span class="qf-rv-sum-dot">·</span><span id="qfSumSize">&mdash;</span>
+              </div>
+            </div>
+            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="address" aria-label="Edit premises">Edit</button>
+            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
+              <label class="qf-rv-field"><span class="qf-rv-field-label">Address</span>
+                <input type="text" class="qf-rev-input" id="qfEditAddress" placeholder="Street, City, State" autocomplete="street-address">
+              </label>
+              <label class="qf-rv-field"><span class="qf-rv-field-label">Space type</span>
+                <select class="qf-rev-select" id="qfEditSpace" aria-label="Choose space type">
+                  <option value="Office">Office</option>
+                  <option value="Medical">Medical</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Fitness">Fitness</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+              <label class="qf-rv-field" id="qfSumSizeRow"><span class="qf-rv-field-label">Size</span>
+                <select class="qf-rev-select" id="qfEditSize" aria-label="Choose space size">
+                  <option value="under3k">Under 3K sqft</option>
+                  <option value="3k-6k">3K&ndash;6K sqft</option>
+                  <option value="6k-9k">6K&ndash;9K sqft</option>
+                  <option value="9k-12k">9K&ndash;12K sqft</option>
+                  <option value="12k-15k">12K&ndash;15K sqft</option>
+                  <option value="notsure">Not sure</option>
+                </select>
+              </label>
+              <div class="qf-rev-edit-actions">
+                <button type="button" class="qf-rev-save" data-save="address">Save</button>
+                <button type="button" class="qf-rev-cancel" data-cancel="address">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Schedule row -->
+          <section class="qf-rv-sum-row" data-section="schedule" data-field="days">
+            <span class="qf-rv-sum-k">Schedule</span>
+            <div class="qf-rv-sum-body">
+              <div class="qf-rv-sum-primary"><em id="qfSumSchedule">&mdash;</em></div>
+              <div class="qf-rv-sum-sub" id="qfRvSchedSub"><span id="qfSumTime">after-hours window</span><span class="qf-rv-sum-dot" id="qfRvSchedDot">·</span><span id="qfRvSchedMeta">onboarding week 1</span></div>
+            </div>
+            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="days" aria-label="Edit schedule">Edit</button>
+            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
+              <label class="qf-rv-field"><span class="qf-rv-field-label">Days</span>
+                <div class="qf-rev-days-picker" id="qfEditDays" role="group" aria-label="Select days of the week">
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Monday" aria-label="Monday"> Mon</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Tuesday" aria-label="Tuesday"> Tue</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Wednesday" aria-label="Wednesday"> Wed</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Thursday" aria-label="Thursday"> Thu</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Friday" aria-label="Friday"> Fri</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Saturday" aria-label="Saturday"> Sat</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Sunday" aria-label="Sunday"> Sun</label>
+                </div>
+              </label>
+              <label class="qf-rv-field" id="qfSumTimeRow" hidden><span class="qf-rv-field-label">Time window</span>
+                <div class="qf-rv-field-row">
+                  <input type="time" class="qf-rev-input" id="qfEditTimeStart" aria-label="Edit start time">
+                  <span class="qf-rv-field-sep">to</span>
+                  <input type="time" class="qf-rev-input" id="qfEditTimeEnd" aria-label="Edit end time">
+                </div>
+              </label>
+              <div class="qf-rev-edit-actions">
+                <button type="button" class="qf-rev-save" data-save="days">Save</button>
+                <button type="button" class="qf-rev-cancel" data-cancel="days">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Contact row -->
+          <section class="qf-rv-sum-row" data-section="contact" data-field="name">
+            <span class="qf-rv-sum-k">Contact</span>
+            <div class="qf-rv-sum-body">
+              <div class="qf-rv-sum-primary"><span id="qfSumName">&mdash;</span><span class="qf-rv-sum-dot" id="qfRvContactDot" hidden>·</span><span id="qfSumCompany" hidden></span></div>
+              <div class="qf-rv-sum-sub">
+                <b id="qfSumEmail">&mdash;</b><span class="qf-rv-sum-dot" id="qfRvContactDot2" hidden>·</span><span id="qfSumPhone"></span>
+              </div>
+            </div>
+            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="name" aria-label="Edit contact">Edit</button>
+            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
+              <div class="qf-rv-field-grid">
+                <label class="qf-rv-field"><span class="qf-rv-field-label">First name</span>
+                  <input type="text" class="qf-rev-input" id="qfEditFirstName" placeholder="First name" autocomplete="given-name">
+                </label>
+                <label class="qf-rv-field"><span class="qf-rv-field-label">Last name</span>
+                  <input type="text" class="qf-rev-input" id="qfEditLastName" placeholder="Last name" autocomplete="family-name">
+                </label>
+              </div>
+              <label class="qf-rv-field"><span class="qf-rv-field-label">Email</span>
+                <input type="email" class="qf-rev-input" id="qfEditEmail" placeholder="your@email.com" autocomplete="email">
+              </label>
+              <label class="qf-rv-field" id="qfSumPhoneRow"><span class="qf-rv-field-label">Phone <small>(optional)</small></span>
+                <input type="tel" class="qf-rev-input" id="qfEditPhone" placeholder="Phone number" inputmode="tel">
+              </label>
+              <label class="qf-rv-field" id="qfSumCompanyRow" hidden><span class="qf-rv-field-label">Company <small>(optional)</small></span>
+                <input type="text" class="qf-rev-input" id="qfEditCompany" placeholder="Company name" autocomplete="organization">
+              </label>
+              <div class="qf-rev-edit-actions">
+                <button type="button" class="qf-rev-save" data-save="name">Save</button>
+                <button type="button" class="qf-rev-cancel" data-cancel="name">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Notes card -->
+        <div class="qf-rv-notes" data-section="notes">
+          <div class="qf-rv-notes-k">
+            <span class="qf-rv-notes-k-label">Note for Alina · optional</span>
+            <span class="qf-rv-notes-k-count"><span id="qfSpecialCounter">0</span> / 500</span>
           </div>
+          <label for="qfSpecialInstructions" class="sr-only">Any special instructions?</label>
+          <textarea class="qf-rv-notes-input" id="qfSpecialInstructions" placeholder="Quirks, preferences, focus areas — anything that helps us tailor your plan." rows="3" maxlength="500" aria-describedby="qfSpecialCounter"></textarea>
+        </div>
 
-          <!-- Lede with drop cap -->
-          <div class="qf-rv-lede-wrap">
-            <p class="qf-rv-lede" id="qfRvLede">
-              Ecco's team will visit <b id="qfRvLedeAddr">your address</b> <em id="qfRvLedeFreq">on your chosen days</em> &mdash; after-hours, out of your tenants' way &mdash; to keep the space in crisp, eco-certified shape. The plan below captures what you told us. Edit anything that looks off, then send.
-            </p>
+        <!-- Send block -->
+        <div class="qf-rv-send">
+          <div class="qf-rv-send-trust" aria-hidden="true">
+            <span class="qf-rv-send-trust-item">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V4.5a3 3 0 0 1 6 0V7"/></svg>
+              No spam
+            </span>
+            <span class="qf-rv-send-trust-sep"></span>
+            <span class="qf-rv-send-trust-item">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+              No commitment
+            </span>
+            <span class="qf-rv-send-trust-sep"></span>
+            <span class="qf-rv-send-trust-item">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+              24h reply
+            </span>
           </div>
-
-          <!-- Keep empty #qfPlanChips for populateSummary back-compat (floating-CTA recheck) -->
-          <div class="qf-plan-chips qf-rv-chips-legacy" id="qfPlanChips" hidden></div>
-          <!-- Back-compat hidden glyph for populateSummary (sets textContent on the SERVICE icon) -->
-          <span id="qfChipService" hidden></span>
-          <!-- Back-compat hidden fact nodes -->
-          <span id="qfChipSpace" hidden></span>
-          <span id="qfChipSize" hidden></span>
-          <span id="qfChipDays" hidden></span>
-          <span id="qfChipPorters" hidden></span>
-
-          <!-- Sections (4 editorial rows) · data-sections preserved for populateSummary + JS edit handlers -->
-          <div class="qf-rev qf-rv-sections-outer" id="qfRevInternal" role="presentation">
-          <div class="qf-rev-grid qf-rv-sections">
-
-            <!-- Contact -->
-            <div class="qf-rev-cell" data-section="contact">
-              <div class="qf-rev-cell-head">
-                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-                <span class="qf-rev-cell-label">Contact</span>
-              </div>
-              <!-- Name -->
-              <div class="qf-rev-row" data-field="name">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Name</span>
-                  <span class="qf-rev-item-value" id="qfSumName">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="name" aria-label="Edit name">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <div class="qf-rev-edit-grp">
-                    <input type="text" class="qf-rev-input" id="qfEditFirstName" placeholder="First name" aria-label="Edit first name" autocomplete="given-name">
-                    <input type="text" class="qf-rev-input" id="qfEditLastName" placeholder="Last name" aria-label="Edit last name" autocomplete="family-name">
-                  </div>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="name">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="name">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Email -->
-              <div class="qf-rev-row" data-field="email">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Email</span>
-                  <span class="qf-rev-item-value" id="qfSumEmail">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="email">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <input type="email" class="qf-rev-input" id="qfEditEmail" placeholder="your@email.com" aria-label="Edit email address" autocomplete="email">
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="email">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="email">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Phone (optional) -->
-              <div class="qf-rev-row" data-field="phone" id="qfSumPhoneRow" hidden>
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Phone</span>
-                  <span class="qf-rev-item-value" id="qfSumPhone">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="phone">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <input type="tel" class="qf-rev-input" id="qfEditPhone" placeholder="Phone number" aria-label="Edit phone number" inputmode="tel">
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="phone">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="phone">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Company (optional) -->
-              <div class="qf-rev-row" data-field="company" id="qfSumCompanyRow" hidden>
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Company</span>
-                  <span class="qf-rev-item-value" id="qfSumCompany">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="company">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <input type="text" class="qf-rev-input" id="qfEditCompany" placeholder="Company name" aria-label="Edit company name" autocomplete="organization">
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="company">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="company">Cancel</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Location -->
-            <div class="qf-rev-cell" data-section="location">
-              <div class="qf-rev-cell-head">
-                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-                <span class="qf-rev-cell-label">Location</span>
-              </div>
-              <!-- Address -->
-              <div class="qf-rev-row" data-field="address">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Address</span>
-                  <span class="qf-rev-item-value" id="qfSumAddress">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="address">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <input type="text" class="qf-rev-input" id="qfEditAddress" placeholder="Street, City, State" aria-label="Edit address" autocomplete="street-address">
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="address">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="address">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Space type -->
-              <div class="qf-rev-row" data-field="space">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Space</span>
-                  <span class="qf-rev-item-value" id="qfSumSpace">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="space">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <select class="qf-rev-select" id="qfEditSpace" aria-label="Choose space type">
-                    <option value="Office">Office</option>
-                    <option value="Medical">Medical</option>
-                    <option value="Retail">Retail</option>
-                    <option value="Restaurant">Restaurant</option>
-                    <option value="Fitness">Fitness</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="space">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="space">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Size (hidden for dayporter) -->
-              <div class="qf-rev-row" data-field="size" id="qfSumSizeRow">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Size</span>
-                  <span class="qf-rev-item-value" id="qfSumSize">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="size">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <select class="qf-rev-select" id="qfEditSize" aria-label="Choose space size">
-                    <option value="under3k">Under 3K sqft</option>
-                    <option value="3k-6k">3K&ndash;6K sqft</option>
-                    <option value="6k-9k">6K&ndash;9K sqft</option>
-                    <option value="9k-12k">9K&ndash;12K sqft</option>
-                    <option value="12k-15k">12K&ndash;15K sqft</option>
-                    <option value="notsure">Not sure</option>
-                  </select>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="size">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="size">Cancel</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Service -->
-            <div class="qf-rev-cell" data-section="service">
-              <div class="qf-rev-cell-head">
-                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
-                <span class="qf-rev-cell-label">Service</span>
-              </div>
-              <!-- Service type -->
-              <div class="qf-rev-row" data-field="service">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Type</span>
-                  <span class="qf-rev-item-value qf-rev-item-green" id="qfSumService">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="service">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <select class="qf-rev-select" id="qfEditService" aria-label="Choose service type">
-                    <option value="janitorial">Janitorial</option>
-                    <option value="dayporter">Day Porter</option>
-                    <option value="both">Both Services</option>
-                    <option value="unsure">Help me decide</option>
-                  </select>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="service">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="service">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Porter count (dayporter/both only) -->
-              <div class="qf-rev-row" data-field="porters" id="qfSumPortersRow" hidden>
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Porters</span>
-                  <span class="qf-rev-item-value" id="qfSumPorters">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="porters">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <select class="qf-rev-select" id="qfEditPorters" aria-label="Choose number of porters">
-                    <option value="1">1 porter</option>
-                    <option value="2">2 porters</option>
-                    <option value="3">3 porters</option>
-                    <option value="4">4 porters</option>
-                    <option value="5">5 porters</option>
-                    <option value="notsure">Not sure</option>
-                  </select>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="porters">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="porters">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Window row removed — cleaning window is never captured in any current FLOWS path. -->
-            </div>
-
-            <!-- Schedule -->
-            <div class="qf-rev-cell" data-section="schedule">
-              <div class="qf-rev-cell-head">
-                <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-                <span class="qf-rev-cell-label">Schedule</span>
-              </div>
-              <!-- Days -->
-              <div class="qf-rev-row" data-field="days">
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Days</span>
-                  <span class="qf-rev-item-value qf-rev-item-green" id="qfSumSchedule">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="days">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <div class="qf-rev-days-picker" id="qfEditDays" role="group" aria-label="Select days of the week">
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Monday" aria-label="Monday"> Mon</label>
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Tuesday" aria-label="Tuesday"> Tue</label>
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Wednesday" aria-label="Wednesday"> Wed</label>
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Thursday" aria-label="Thursday"> Thu</label>
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Friday" aria-label="Friday"> Fri</label>
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Saturday" aria-label="Saturday"> Sat</label>
-                    <label class="qf-rev-day-chip"><input type="checkbox" value="Sunday" aria-label="Sunday"> Sun</label>
-                  </div>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="days">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="days">Cancel</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Time (optional) -->
-              <div class="qf-rev-row" data-field="time" id="qfSumTimeRow" hidden>
-                <div class="qf-rev-row-view">
-                  <span class="qf-rev-item-label">Time</span>
-                  <span class="qf-rev-item-value" id="qfSumTime">&mdash;</span>
-                  <button type="button" class="qf-rev-edit" data-edit="time">Edit</button>
-                </div>
-                <div class="qf-rev-row-edit" hidden>
-                  <div class="qf-rev-edit-grp">
-                    <input type="time" class="qf-rev-input" id="qfEditTimeStart" aria-label="Edit start time">
-                    <span class="qf-rev-sep">to</span>
-                    <input type="time" class="qf-rev-input" id="qfEditTimeEnd" aria-label="Edit end time">
-                  </div>
-                  <div class="qf-rev-edit-actions">
-                    <button type="button" class="qf-rev-save" data-save="time">Save</button>
-                    <button type="button" class="qf-rev-cancel" data-cancel="time">Cancel</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          <button type="button" class="qf-rev-btn qf-rv-send-btn" id="qfContactSubmit">
+            <span class="qf-rv-send-btn-label"><em>Send</em> to Alina</span>
+            <span class="qf-rv-send-btn-arrow" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+            </span>
+          </button>
+          <div class="qf-rv-send-captcha">
+            <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
           </div>
-          </div><!-- /.qf-rv-sections-outer -->
+          <p class="qf-rv-send-delivery" id="qfRvSendDelivery">We&rsquo;ll email your proposal within 24 hours.</p>
+        </div>
 
-          <!-- Notes card -->
-          <div class="qf-rev-cell qf-rev-special qf-rev-special-cell qf-rv-notes" data-section="notes">
-            <div class="qf-rev-cell-head">
-              <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
-              <span class="qf-rev-cell-label">Anything we should know?</span>
-              <span class="qf-rev-special-optional"><span id="qfSpecialCounter">0</span>/500</span>
-            </div>
-            <label for="qfSpecialInstructions" class="sr-only">Any special instructions?</label>
-            <textarea class="qf-rev-special-input" id="qfSpecialInstructions" placeholder="Focus areas, product preferences, access quirks — anything that helps us tailor your plan. (Optional)" rows="3" maxlength="500" aria-describedby="qfSpecialCounter qfSpecialHelp"></textarea>
-            <p id="qfSpecialHelp" class="sr-only">Optional. Up to 500 characters.</p>
-          </div>
-
-          <!-- Signature block -->
-          <div class="qf-rv-sig" aria-hidden="true">
-            <picture class="qf-rv-sig-ava">
-              <source type="image/avif" srcset="images/alina-avatar-192.avif">
-              <source type="image/webp" srcset="images/alina-avatar-192.webp">
-              <img src="images/alina-avatar-192.jpg" alt="" width="56" height="56" loading="lazy" decoding="async">
-            </picture>
-            <div class="qf-rv-sig-body">
-              <span class="qf-rv-sig-yours">Drafted by</span>
-              <span class="qf-rv-sig-name">Alina</span>
-              <span class="qf-rv-sig-role">AI Cleaning Experience Advisor &middot; Ecco Facilities</span>
-            </div>
-          </div>
-
-        </article><!-- /.qf-rv-paper -->
-
-        <!-- Send block outside the paper, attached below -->
-        <div class="qf-rev-foot qf-rev-foot-minimal qf-rv-send">
-            <div class="qf-rv-send-trust" aria-hidden="true">
-              <span class="qf-rv-send-trust-item">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V4.5a3 3 0 0 1 6 0V7"/></svg>
-                No spam
-              </span>
-              <span class="qf-rv-send-trust-sep" aria-hidden="true"></span>
-              <span class="qf-rv-send-trust-item">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
-                No commitment
-              </span>
-              <span class="qf-rv-send-trust-sep" aria-hidden="true"></span>
-              <span class="qf-rv-send-trust-item">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
-                24h reply
-              </span>
-            </div>
-            <button type="button" class="qf-rev-btn qf-rv-send-btn" id="qfContactSubmit">
-              <span class="qf-rv-send-btn-label">Send my request</span>
-              <span class="qf-rv-send-btn-arrow" aria-hidden="true">
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
-              </span>
-            </button>
-            <!-- Turnstile widget (flexible size per Ola 3 Commit J — "invisible" was deprecated) -->
-            <div class="qf-rv-send-captcha">
-              <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
-            </div>
-            <p class="qf-rv-send-delivery" id="qfRvSendDelivery">We'll email your proposal within 24 hours.</p>
-          </div>
+        <!-- Legacy anchors for populateSummary back-compat (JS still references these IDs) -->
+        <div class="qf-plan-chips qf-rv-chips-legacy" id="qfPlanChips" hidden></div>
+        <span id="qfChipService" hidden></span>
+        <span id="qfChipSpace" hidden></span>
+        <span id="qfChipSize" hidden></span>
+        <span id="qfChipDays" hidden></span>
+        <span id="qfChipPorters" hidden></span>
 
         <!-- Floating submit bar — appears once the inline CTA scrolls out of view -->
         <div class="qf-plan-floating-cta" id="qfPlanFloatingCta" aria-hidden="true">
@@ -947,7 +816,6 @@
         </div>
       </div><!-- /.qf-screen-inner -->
     </section>
-
     <!-- SUCCESS SCREEN -->
     <section class="qf-screen step-success" hidden id="qfScreen_success" aria-label="Success">
       <div class="qf-confetti" aria-hidden="true">
@@ -1081,7 +949,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=24.1"></script>
+<script src="js/quote-flow.js?v=25.0"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

@@ -1582,69 +1582,35 @@
     // removed keeps the bundle lean and avoids running dead functions on submit.
 
     function populateSummary() {
-      // AYS Ola 7 — C1 editorial review. Masthead + title + lede with personal data.
-      var escName = function (v) { return (v || '').replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); };
+      // AYS Ola 8 — Idea 2 "Review with Alina as host". Single-column hero + summary card.
       var serviceFocus = SERVICE_LABELS[STATE.service] || STATE.service || '';
-      var companyTarget = STATE.companyName || STATE.userName || 'your space';
 
-      // Title: "A cleaning plan, tailored for <em>Acme Real Estate</em>."
+      // Hero title: "Got it, <em>Priya</em>. Here's your snapshot."
       var heroTitle = document.getElementById('qfPlanHeroTitle');
       if (heroTitle) {
         while (heroTitle.firstChild) heroTitle.removeChild(heroTitle.firstChild);
-        heroTitle.appendChild(document.createTextNode('A cleaning plan, tailored for '));
+        var firstName = (STATE.userName || '').trim();
+        heroTitle.appendChild(document.createTextNode('Got it, '));
         var em = document.createElement('em');
-        em.id = 'qfRvTitleTarget';
-        em.textContent = companyTarget;
+        em.id = 'qfRvHeroName';
+        em.textContent = firstName || 'there';
         heroTitle.appendChild(em);
         heroTitle.appendChild(document.createTextNode('.'));
+        heroTitle.appendChild(document.createElement('br'));
+        heroTitle.appendChild(document.createTextNode('Here\u2019s your snapshot.'));
       }
 
-      // Kicker: "Prepared for Alex Smith · Acme Real Estate"
-      var kicker = document.getElementById('qfRvKicker');
-      if (kicker) {
-        var kicParts = ['Prepared for'];
-        var kicName = ((STATE.userName || '') + ' ' + (STATE.userLastName || '')).trim();
-        if (kicName) kicParts.push(kicName);
-        if (STATE.companyName && kicName) kicParts.push('\u00b7 ' + STATE.companyName);
-        else if (STATE.companyName) kicParts.push(STATE.companyName);
-        kicker.textContent = kicParts.length > 1 ? kicParts.join(' ') : 'Prepared for your team';
+      // Hero sub: personalized if we have a company name
+      var heroSub = document.getElementById('qfRvHeroSub');
+      if (heroSub) {
+        var subText = STATE.companyName
+          ? 'Tap anything that\u2019s off to edit. Your proposal for ' + STATE.companyName + ' lands within 24\u00a0hours.'
+          : 'Tap anything that\u2019s off to edit. Your proposal lands within 24\u00a0hours.';
+        heroSub.textContent = subText;
       }
 
-      // Masthead date + reference
-      var mastDate = document.getElementById('qfRvMastDate');
-      if (mastDate) {
-        try {
-          mastDate.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        } catch (_) { /* keep fallback */ }
-      }
-      var mastRef = document.getElementById('qfRvMastRef');
-      if (mastRef) {
-        // Preview reference — the real one comes from the backend on submit
-        var prefix = STATE.service === 'dayporter' ? 'ECD' : (STATE.service === 'both' ? 'ECB' : 'ECJ');
-        // 4-char stable pseudo-random based on day (same across the same session/day)
-        var seed = (STATE.userEmail || '') + new Date().toDateString();
-        var hash = 0;
-        for (var i = 0; i < seed.length; i++) { hash = ((hash << 5) - hash) + seed.charCodeAt(i); hash |= 0; }
-        var tail = Math.abs(hash).toString(36).toUpperCase().slice(0, 4).padEnd(4, 'X');
-        mastRef.textContent = prefix + '-' + tail + '-' + new Date().getFullYear();
-      }
-
-      // Lede interpolation: address + frequency
-      var ledeAddr = document.getElementById('qfRvLedeAddr');
-      if (ledeAddr) {
-        ledeAddr.textContent = STATE.userAddress || 'your space';
-      }
-      var ledeFreq = document.getElementById('qfRvLedeFreq');
-      if (ledeFreq) {
-        var freqText = 'on your schedule';
-        if (serviceFocus && formatDays && formatDays()) {
-          var days = formatDays();
-          if (days && days !== '(none selected)') {
-            freqText = serviceFocus.toLowerCase() + ' visits ' + days.toLowerCase();
-          }
-        }
-        ledeFreq.textContent = freqText;
-      }
+      // Re-evaluate floating CTA visibility once layout settles
+      setTimeout(function () { if (window.qfRecheckFloatingCta) window.qfRecheckFloatingCta(); }, 60);
 
       // Re-evaluate floating CTA visibility once layout settles
       setTimeout(function () { if (window.qfRecheckFloatingCta) window.qfRecheckFloatingCta(); }, 60);
@@ -1663,7 +1629,36 @@
       setVal('qfSumService', SERVICE_LABELS[STATE.service] || STATE.service);
       setVal('qfSumPorters', formatPorters() || '(not set)');
       setVal('qfSumSchedule', formatDays());
-      setVal('qfSumTime', formatTime() || '(not set)');
+      setVal('qfSumTime', formatTime() || 'after-hours window');
+
+      // AYS Ola 8 — frequency + sub text for Service row
+      var freqEl = document.getElementById('qfRvSvcFreq');
+      if (freqEl) {
+        var freqLabel = '';
+        if (STATE.service === 'janitorial') freqLabel = formatDays && formatDays() !== '(none selected)' ? '3\u00d7 weekly' : 'your schedule';
+        else if (STATE.service === 'dayporter') freqLabel = 'on-site, business hours';
+        else if (STATE.service === 'both') freqLabel = 'janitorial + day porter';
+        else freqLabel = 'help me decide';
+        // Derive from actual day count if available
+        var dayStr = formatDays && formatDays();
+        if (dayStr && dayStr !== '(none selected)') {
+          var n = (dayStr.match(/\u00b7/g) || []).length + 1;
+          if (n > 0 && n < 8 && STATE.service !== 'dayporter') freqLabel = n + '\u00d7 weekly';
+        }
+        freqEl.textContent = freqLabel;
+      }
+      var svcSubEl = document.getElementById('qfRvSvcSub');
+      if (svcSubEl) {
+        svcSubEl.textContent = 'Eco-certified \u00b7 insured \u00b7 uniformed team';
+      }
+
+      // Separators (only show when both sides are present)
+      var contactDot = document.getElementById('qfRvContactDot');
+      if (contactDot) contactDot.hidden = !(fullName.trim() && STATE.companyName);
+      var contactDot2 = document.getElementById('qfRvContactDot2');
+      if (contactDot2) contactDot2.hidden = !(STATE.userEmail && STATE.userPhone);
+      var companyEl = document.getElementById('qfSumCompany');
+      if (companyEl) companyEl.hidden = !STATE.companyName;
 
       // Plan-at-a-glance chips — quick visual summary under the hero.
       // Each chip shows a tiny emoji + label, hides cleanly when the field
@@ -1723,12 +1718,16 @@
       if (f && !b.getAttribute('aria-label')) b.setAttribute('aria-label', 'Edit ' + (FIELD_LABELS[f] || f));
     });
 
-    // Inline edit: open editor
+    // Inline edit: open editor. Supports both the legacy .qf-rev-row and
+    // the Ola 8 .qf-rv-sum-row wrappers. The edit panel inside may carry
+    // the `hidden` attribute — we flip it off when entering edit mode.
     document.querySelectorAll('[data-edit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var field = btn.getAttribute('data-edit');
-        var row = btn.closest('.qf-rev-row');
+        var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
         if (!row) return;
+        var panel = row.querySelector('.qf-rv-sum-edit-panel, .qf-rev-row-edit');
+        if (panel) panel.hidden = false;
         // Pre-fill input with current STATE value
         if (field === 'name') {
           document.getElementById('qfEditFirstName').value = STATE.userName || '';
@@ -1763,11 +1762,14 @@
       });
     });
 
-    // Inline edit: cancel
+    // Inline edit: cancel. Close the panel (.qf-rev-row-edit / .qf-rv-sum-edit-panel).
     document.querySelectorAll('[data-cancel]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var row = btn.closest('.qf-rev-row');
-        if (row) row.classList.remove('is-editing');
+        var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
+        if (!row) return;
+        row.classList.remove('is-editing');
+        var panel = row.querySelector('.qf-rv-sum-edit-panel, .qf-rev-row-edit');
+        if (panel) panel.hidden = true;
       });
     });
 
@@ -1823,8 +1825,12 @@
           STATE.timeStart = document.getElementById('qfEditTimeStart').value;
           STATE.timeEnd = document.getElementById('qfEditTimeEnd').value;
         }
-        var row = btn.closest('.qf-rev-row');
-        if (row) row.classList.remove('is-editing');
+        var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
+        if (row) {
+          row.classList.remove('is-editing');
+          var panel = row.querySelector('.qf-rv-sum-edit-panel, .qf-rev-row-edit');
+          if (panel) panel.hidden = true;
+        }
         populateSummary();
         // Update rail values to reflect edits
         try {
