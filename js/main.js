@@ -391,8 +391,9 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    FLOATING QUOTE — visible only after hero stats leave viewport
    ============================================================ */
 (function initFloatingQuoteReveal() {
-  // Bulletproof FQ reveal: shows on ANY scroll >100px OR after 2.5s fallback.
-  // Sets inline styles directly — bypasses any CSS class/transition issues.
+  // FQ reveal: display:none -> display:inline-flex via .visible class.
+  // Bulletproof across all browser contexts (doesn't rely on transitions
+  // or animations progressing — just a display switch).
   var fq = document.querySelector('.cta-float');
   if (!fq) return;
   var shown = false;
@@ -400,11 +401,6 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
     if (shown) return;
     shown = true;
     fq.classList.add('visible');
-    // Belt-and-suspenders: inline styles guarantee it's visible even if
-    // the CSS class rule has cascade issues on any browser.
-    fq.style.opacity = '1';
-    fq.style.transform = 'translateY(0)';
-    fq.style.pointerEvents = 'auto';
   }
   // Safety timer: after 2.5s, show it regardless of scroll.
   var safetyTimer = setTimeout(show, 2500);
