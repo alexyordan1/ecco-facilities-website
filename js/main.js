@@ -407,3 +407,23 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 })();
 
 /* (mobile word rotation removed — unified in initHeroRotate above) */
+
+/* ============================================================
+   FLOATING QUOTE — visible only after hero stats leave viewport
+   ============================================================ */
+(function initFloatingQuoteOnScroll() {
+  var stats = document.querySelector('.hero-stats');
+  var fq = document.querySelector('.cta-float');
+  if (!stats || !fq) return;
+  if (!('IntersectionObserver' in window)) { fq.classList.add('visible'); return; }
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting && e.boundingClientRect.top < 0) {
+        fq.classList.add('visible');
+      } else {
+        fq.classList.remove('visible');
+      }
+    });
+  }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
+  obs.observe(stats);
+})();
