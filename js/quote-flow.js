@@ -153,7 +153,6 @@
     porterCount:    null,
     timeStart:      null,
     timeEnd:        null,
-    cleaningWindow: null,
     currentStepName: 'welcome',
     userName:       '',
     userLastName:   '',
@@ -835,10 +834,6 @@
         if (sizeTxt && STATE.service !== 'dayporter') parts.push(sizeTxt);
         var daySummary = STATE.days.length === 7 ? 'every day' : STATE.days.length === 5 ? 'Mon\u2013Fri' : STATE.days.join(', ');
         if (daySummary) parts.push(daySummary);
-        if (STATE.cleaningWindow) {
-          var winMap = { before_hours: 'before hours', after_hours: 'after hours', flexible: 'flexible timing' };
-          parts.push(winMap[STATE.cleaningWindow] || STATE.cleaningWindow);
-        }
         if (STATE.porterCount) {
           var porterLbl = STATE.porterCount === 'notsure' ? 'porters TBD' : (STATE.porterCount + ' porter' + (STATE.porterCount !== '1' ? 's' : ''));
           parts.push(porterLbl);
@@ -1555,12 +1550,6 @@
       return STATE.porterCount + ' porter' + (STATE.porterCount !== '1' ? 's' : '');
     }
 
-    function formatWindow() {
-      if (!STATE.cleaningWindow) return '';
-      var map = { before_hours: 'Before hours', after_hours: 'After hours', flexible: 'Flexible' };
-      return map[STATE.cleaningWindow] || STATE.cleaningWindow;
-    }
-
     function formatTime() {
       if (STATE.timeStart && STATE.timeEnd) return STATE.timeStart + ' - ' + STATE.timeEnd;
       return '';
@@ -1760,7 +1749,7 @@
       name: 'name', email: 'email address', phone: 'phone number',
       company: 'company name', address: 'address', space: 'space type',
       size: 'space size', service: 'service type', porters: 'porter count',
-      window: 'cleaning window', days: 'schedule days', time: 'porter hours'
+      days: 'schedule days', time: 'porter hours'
     };
     document.querySelectorAll('.qf-rev-edit[data-edit]').forEach(function (b) {
       var f = b.getAttribute('data-edit');
@@ -1797,8 +1786,6 @@
           document.getElementById('qfEditService').value = STATE.service || 'janitorial';
         } else if (field === 'porters') {
           document.getElementById('qfEditPorters').value = STATE.porterCount || '1';
-        } else if (field === 'window') {
-          document.getElementById('qfEditWindow').value = STATE.cleaningWindow || 'flexible';
         } else if (field === 'days') {
           document.querySelectorAll('#qfEditDays input').forEach(function (cb) {
             cb.checked = STATE.days.indexOf(cb.value) > -1;
@@ -1878,7 +1865,6 @@
             }
             if (newService === 'janitorial' || newService === 'unsure') {
               STATE.porterCount = null;
-              STATE.cleaningWindow = null;
               STATE.timeStart = null;
               STATE.timeEnd = null;
             }
@@ -1887,8 +1873,6 @@
           }
         } else if (field === 'porters') {
           STATE.porterCount = document.getElementById('qfEditPorters').value;
-        } else if (field === 'window') {
-          STATE.cleaningWindow = document.getElementById('qfEditWindow').value;
         } else if (field === 'days') {
           STATE.days = Array.from(document.querySelectorAll('#qfEditDays input:checked')).map(function(cb){return cb.value;});
         } else if (field === 'time') {
@@ -1975,8 +1959,6 @@
       }
       // Porter fields
       if (STATE.porterCount) payload.porters = STATE.porterCount;
-      // Cleaning window (janitorial/both) — keep separate from porter hours
-      if (STATE.cleaningWindow) payload.window = STATE.cleaningWindow;
       // Day Porter start/end time — sent as startTime + hrs range
       if (STATE.timeStart) payload.startTime = STATE.timeStart;
       if (STATE.timeStart && STATE.timeEnd) payload.hrs = STATE.timeStart + '-' + STATE.timeEnd;
