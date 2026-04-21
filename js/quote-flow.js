@@ -143,6 +143,34 @@
   var exitForm     = document.getElementById('qfExitForm');
 
   /* -----------------------------------------------------------------------
+     Dev-only assertion — warn loudly if a critical summary/edit ID is missing
+     so a future HTML typo (e.g. qfSumAdress vs qfSumAddress) surfaces in the
+     console instead of silently falling back to the setVal() em-dash. Only
+     runs on localhost (production bundle stays quiet).
+     ----------------------------------------------------------------------- */
+  (function qfAssertIds() {
+    try {
+      var host = (window.location && window.location.hostname) || '';
+      if (host !== 'localhost' && host !== '127.0.0.1' && host !== '0.0.0.0') return;
+      var REQUIRED = [
+        'qfSumName','qfSumEmail','qfSumPhone','qfSumCompany','qfSumAddress',
+        'qfSumSpace','qfSumSize','qfSumSchedule','qfSumTime','qfSumService',
+        'qfRvSvcFreq','qfRvSvcSub','qfRvSchedSub','qfPlanHeroTitle',
+        'qfSumSizeRow','qfSumPortersRow','qfSumTimeRow','qfSumCompanyRow','qfSumPhoneRow',
+        'qfEditFirstName','qfEditLastName','qfEditEmail','qfEditPhone','qfEditCompany',
+        'qfEditAddress','qfEditSpace','qfEditSize','qfEditService','qfEditPorters',
+        'qfEditDays','qfEditPorterHours',
+        'qfContactSubmit','qfSpecialInstructions'
+      ];
+      var missing = REQUIRED.filter(function (id) { return !document.getElementById(id); });
+      if (missing.length) {
+        console.warn('[qf] Missing review/edit elements:', missing.join(', '),
+          '— setVal() will silently fall back to em-dash for these.');
+      }
+    } catch (_) { /* never break the form over an assertion */ }
+  })();
+
+  /* -----------------------------------------------------------------------
      STATE
      ----------------------------------------------------------------------- */
   var STATE = {
@@ -1783,23 +1811,10 @@
       var companyEl = document.getElementById('qfSumCompany');
       if (companyEl) companyEl.hidden = !STATE.companyName;
 
-      // Plan-at-a-glance chips — quick visual summary under the hero.
-      // Each chip shows a tiny emoji + label, hides cleanly when the field
-      // isn't applicable for the current service.
-      var setChip = function (id, emoji, label) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        if (!label) { el.hidden = true; el.textContent = ''; return; }
-        el.hidden = false;
-        el.textContent = emoji + '  ' + label;
-      };
-      var SERVICE_EMOJI = { janitorial: '\uD83E\uDDF9', dayporter: '\uD83D\uDC64', both: '\u2728', unsure: '\uD83E\uDD14' };
-      var SPACE_EMOJI = { Office: '\uD83C\uDFE2', Medical: '\uD83C\uDFE5', Retail: '\uD83D\uDECD\uFE0F', Restaurant: '\uD83C\uDF7D\uFE0F', Fitness: '\uD83C\uDFCB\uFE0F', Other: '\u2699\uFE0F' };
-      setChip('qfChipService', SERVICE_EMOJI[STATE.service] || '\u2728', SERVICE_LABELS[STATE.service] || STATE.service);
-      setChip('qfChipSpace', SPACE_EMOJI[STATE.space] || '\uD83D\uDCCD', STATE.space || '');
-      setChip('qfChipSize', '\uD83D\uDCCF', STATE.service !== 'dayporter' ? formatSizeLabel(STATE.size) : '');
-      setChip('qfChipDays', '\uD83D\uDCC5', formatDays() && formatDays() !== '(none selected)' ? formatDays() : '');
-      setChip('qfChipPorters', '\uD83D\uDC65', (STATE.service === 'dayporter' || STATE.service === 'both') ? formatPorters() : '');
+      // Legacy "plan-at-a-glance" chips (qfChipService/Space/Size/Days/Porters)
+      // are marked hidden in HTML and replaced by the 4-row summary above.
+      // Previously setChip() still reflowed them every populateSummary() — the
+      // work was invisible but cost layout passes. Skipping entirely.
 
       // Conditional rows
       var show = function (id, cond) {
@@ -1844,11 +1859,16 @@
     // Inline edit: open editor. Supports both the legacy .qf-rev-row and
     // the Ola 8 .qf-rv-sum-row wrappers. The edit panel inside may carry
     // the `hidden` attribute — we flip it off when entering edit mode.
+    // Track which Edit button opened each row so Cancel/Save can return focus
+    // back to it (a11y — Sprint 2 G3). Keyed by data-section on the row.
+    var _qfEditLastBtn = {};
     document.querySelectorAll('[data-edit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var field = btn.getAttribute('data-edit');
         var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
         if (!row) return;
+        var sectionKey = row.getAttribute('data-section') || field;
+        _qfEditLastBtn[sectionKey] = btn;
         var panel = row.querySelector('.qf-rv-sum-edit-panel, .qf-rev-row-edit');
         if (panel) panel.hidden = false;
         // Pre-fill input with current STATE value
@@ -1924,14 +1944,45 @@
       });
     });
 
-    // Inline edit: cancel. Close the panel (.qf-rev-row-edit / .qf-rv-sum-edit-panel).
+    // Inline edit: cancel. Close the panel, roll any inputs back to match STATE
+    // (so live-sync changes like the Service dropdown flipping size/porter rows
+    // don't leave a stale value), and return focus to the Edit button that
+    // opened the panel (a11y).
     document.querySelectorAll('[data-cancel]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
         if (!row) return;
+        var field = btn.getAttribute('data-cancel');
+        // Re-sync each edit input to STATE so the next open sees fresh data.
+        if (field === 'service') {
+          var svcSel = document.getElementById('qfEditService');
+          if (svcSel) svcSel.value = STATE.service || 'janitorial';
+          // Re-sync the live-sync'd conditional rows inside this panel.
+          var portersRow = document.getElementById('qfSumPortersRow');
+          var sizeRow = document.getElementById('qfSumSizeRow');
+          if (portersRow) portersRow.hidden = !(STATE.service === 'dayporter' || STATE.service === 'both');
+          if (sizeRow) sizeRow.hidden = (STATE.service === 'dayporter');
+        } else if (field === 'address') {
+          var a = document.getElementById('qfEditAddress'); if (a) a.value = STATE.userAddress || '';
+          var sp = document.getElementById('qfEditSpace'); if (sp) sp.value = STATE.space || 'Office';
+          var sz = document.getElementById('qfEditSize'); if (sz) sz.value = STATE.size || 'notsure';
+        } else if (field === 'days') {
+          document.querySelectorAll('#qfEditDays input').forEach(function (cb) {
+            cb.checked = (STATE.days || []).indexOf(cb.value) > -1;
+          });
+        } else if (field === 'name') {
+          var fn = document.getElementById('qfEditFirstName'); if (fn) fn.value = STATE.userName || '';
+          var ln = document.getElementById('qfEditLastName'); if (ln) ln.value = STATE.userLastName || '';
+          var em = document.getElementById('qfEditEmail'); if (em) em.value = STATE.userEmail || '';
+          var ph = document.getElementById('qfEditPhone'); if (ph) ph.value = STATE.userPhone || '';
+          var co = document.getElementById('qfEditCompany'); if (co) co.value = STATE.companyName || '';
+        }
         row.classList.remove('is-editing');
         var panel = row.querySelector('.qf-rv-sum-edit-panel, .qf-rev-row-edit');
         if (panel) panel.hidden = true;
+        var sectionKey = row.getAttribute('data-section') || field;
+        var openingBtn = _qfEditLastBtn[sectionKey];
+        if (openingBtn) setTimeout(function(){ try { openingBtn.focus(); } catch(_){} }, 0);
       });
     });
 
@@ -1940,11 +1991,27 @@
       btn.addEventListener('click', function () {
         var field = btn.getAttribute('data-save');
         if (field === 'name') {
-          STATE.userName = document.getElementById('qfEditFirstName').value.trim();
-          STATE.userLastName = document.getElementById('qfEditLastName').value.trim();
+          // The contact edit panel hosts five fields (firstName, lastName,
+          // email, phone, company) but only exposes a single Save button with
+          // data-save="name". Previously this branch only persisted the name
+          // fields, so any email/phone/company edit was silently dropped on
+          // Save. Now all five fields move to STATE together. Email is
+          // validated with the same EMAIL_RE used during the info step; the
+          // panel stays open if it fails.
+          var editEmail = document.getElementById('qfEditEmail');
+          var emailVal = editEmail ? editEmail.value.trim() : '';
+          if (emailVal && !EMAIL_RE.test(emailVal)) {
+            qfToast({ type:'warn', title:'Invalid email', message:'Please enter a valid email address.' });
+            return;
+          }
+          STATE.userName     = (document.getElementById('qfEditFirstName') || {value:''}).value.trim();
+          STATE.userLastName = (document.getElementById('qfEditLastName')  || {value:''}).value.trim();
+          STATE.userEmail    = emailVal;
+          STATE.userPhone    = (document.getElementById('qfEditPhone')     || {value:''}).value.trim();
+          STATE.companyName  = (document.getElementById('qfEditCompany')   || {value:''}).value.trim();
         } else if (field === 'email') {
           var email = document.getElementById('qfEditEmail').value.trim();
-          if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          if (email && !EMAIL_RE.test(email)) {
             qfToast({ type:'warn', title:'Invalid email', message:'Please enter a valid email address.' });
             return;
           }
@@ -2011,6 +2078,12 @@
           row.classList.remove('is-editing');
           var panel = row.querySelector('.qf-rv-sum-edit-panel, .qf-rev-row-edit');
           if (panel) panel.hidden = true;
+          // Sprint 2 G3 — return focus to the Edit button that opened this
+          // panel so keyboard and screen-reader users aren't dumped at
+          // document.body after save.
+          var sectionKey = row.getAttribute('data-section') || field;
+          var openingBtn = _qfEditLastBtn[sectionKey];
+          if (openingBtn) setTimeout(function(){ try { openingBtn.focus(); } catch(_){} }, 0);
         }
         populateSummary();
         // Update rail values to reflect edits
