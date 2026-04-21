@@ -1620,7 +1620,7 @@
       var hasPorters = svc === 'dayporter' || svc === 'both';
       var hasSize = svc !== 'dayporter';
       var days = (formatDays && formatDays()) || '';
-      var daysCount = (days && days !== '(none selected)') ? ((days.match(/\u00b7/g) || []).length + 1) : 0;
+      var daysCount = Array.isArray(STATE.days) ? STATE.days.length : 0;
       var porterCount = STATE.porterCount && STATE.porterCount !== 'notsure' ? parseInt(STATE.porterCount) || 0 : 0;
       var timeWin = (STATE.timeStart && STATE.timeEnd) ? (STATE.timeStart + '\u2013' + STATE.timeEnd) : '';
 
@@ -1644,7 +1644,7 @@
         else if (STATE.porterCount === 'notsure') freqParts.push('porters TBD');
         if (daysCount) freqParts.push(daysCount + '\u00d7 janitorial');
         svcFreq = freqParts.join(' + ') || 'your plan';
-        svcSub = 'Day porter + after-hours janitorial \u00b7 eco-certified';
+        svcSub = 'Day porter + janitorial \u00b7 eco-certified';
       } else {
         svcName = 'Help me decide';
         svcFreq = 'Alina will recommend';
