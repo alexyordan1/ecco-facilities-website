@@ -241,7 +241,7 @@
 <script>
 document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const filter=btn.dataset.filter;document.querySelectorAll('.test-card').forEach(card=>{if(filter==='all'||card.dataset.industry===filter){card.classList.add('visible')}else{card.classList.remove('visible')}})})});
 </script>
-<script src="js/chat-widget.js?v=3.9"></script>
+<script src="js/chat-widget.js?v=4.0"></script>
 
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- Start of HubSpot Embed Code -->
