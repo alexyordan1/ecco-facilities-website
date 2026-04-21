@@ -4,7 +4,7 @@ const CONFIG = {
   botName: 'Alina',
   botTitle: 'Cleaning Experience Advisor',
   avatar: 'images/alina-avatar.jpg',
-  greeting: "Hey! I'm Alina, your AI-powered Cleaning Experience Advisor at Ecco. I can help you find the right service, answer questions about pricing, or get you a free quote. What can I help with? 😊",
+  greeting: "Glad you stopped by! 👋\n\nI can help you find the right service, ballpark pricing, or line up a free quote in 24 hours.\n\nSo — what's on your mind?",
   placeholder: 'Ask Alina anything...',
   poweredBy: '🤖 AI-powered assistant · Not a real person'
 };
@@ -26,7 +26,7 @@ styles.textContent = `
 .ecco-chat-tooltip.show { opacity: 1; visibility: visible; transform: translateY(0); }
 .ecco-chat-tooltip .tip-name { font-weight: 700; color: #0B1D38; }
 .ecco-chat-tooltip .tip-close { position: absolute; top: .3rem; right: .5rem; background: none; border: none; color: #94A3B5; cursor: pointer; font-size: .9rem; padding: .2rem; }
-.ecco-chat-panel { position: fixed; top: 1rem; right: 1rem; bottom: 1rem; z-index: 998; width: 420px; max-height: none; height: calc(100vh - 2rem); height: calc(100dvh - 2rem); border-radius: 20px; background: #fff; border-radius: 20px; box-shadow: 0 16px 64px rgba(11,29,56,.18); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(20px) scale(.95); transition: all .35s cubic-bezier(.4,0,.2,1); overflow: hidden; }
+.ecco-chat-panel { position: fixed; top: 1rem; left: 1rem; bottom: 1rem; z-index: 998; width: 420px; max-height: none; height: calc(100vh - 2rem); height: calc(100dvh - 2rem); border-radius: 20px; background: #fff; border-radius: 20px; box-shadow: 0 16px 64px rgba(11,29,56,.18); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform-origin: bottom left; transform: translateY(20px) scale(.95); transition: all .35s cubic-bezier(.4,0,.2,1); overflow: hidden; }
 .ecco-chat-panel.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 .ecco-chat-header { background: linear-gradient(135deg, #0B1D38 0%, #1E3562 100%); padding: 1rem 1.2rem; display: flex; align-items: center; gap: .7rem; flex-shrink: 0; }
 .ecco-chat-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,.2); overflow: hidden; flex-shrink: 0; }
@@ -69,7 +69,7 @@ styles.textContent = `
 .ecco-quick-btn { padding: .4rem .75rem; border: 1.5px solid #DFE4EC; border-radius: 50px; background: #fff; color: #0B1D38; font-size: .75rem; font-weight: 500; cursor: pointer; font-family: 'DM Sans', system-ui, sans-serif; transition: all .2s; }
 .ecco-quick-btn:hover { border-color: #0B1D38; background: #0B1D38; color: #fff; }
 @media (max-width: 480px) {
-  .ecco-chat-panel { width: calc(100vw - 1.5rem); right: .75rem; bottom: 5.5rem; max-height: calc(100vh - 7rem); border-radius: 16px; }
+  .ecco-chat-panel { width: calc(100vw - 1.5rem); left: .75rem; right: auto; bottom: 5.5rem; max-height: calc(100vh - 7rem); border-radius: 16px; }
   .ecco-chat-toggle { bottom: 16px; left: 16px; padding: 6px 16px 6px 6px; font-size: .8rem; }
   .ecco-chat-toggle-avatar { width: 32px; height: 32px; }
   .ecco-chat-toggle-pulse { width: 32px; height: 32px; }
@@ -80,7 +80,7 @@ document.head.appendChild(styles);
 
 var widget = document.createElement('div');
 widget.id = 'ecco-chat-widget';
-widget.innerHTML = '<button class="ecco-chat-toggle" id="eccoChatToggle" aria-label="Ask Alina" title="Ask Alina"><span class="ecco-chat-toggle-pulse" aria-hidden="true"></span><span class="ecco-chat-toggle-avatar"><img src="' + CONFIG.avatar + '" alt="" width="38" height="38"></span><span class="ecco-chat-toggle-label">Ask Alina</span></button><div class="ecco-chat-tooltip" id="eccoChatTooltip"><button class="tip-close" id="eccoTipClose" aria-label="Dismiss">\u2715</button><span class="tip-name">Alina here!</span> Need help finding the right cleaning service? \uD83D\uDC4B</div><div class="ecco-chat-panel" id="eccoChatPanel" role="dialog" aria-modal="true" aria-label="Chat with Alina"><div class="ecco-chat-header"><div class="ecco-chat-avatar"><img src="' + CONFIG.avatar + '" alt="Alina" width="40" height="40"></div><div class="ecco-chat-header-info"><h4>' + CONFIG.botName + '</h4><div class="ecco-chat-header-title">' + CONFIG.botTitle + ' \u00B7 AI</div><div class="ecco-chat-header-status">Online now</div></div><div class="ecco-chat-actions"><button class="ecco-chat-reset" id="eccoChatReset" aria-label="New chat" title="New conversation">\u21BA</button><button class="ecco-chat-close" id="eccoChatClose" aria-label="Close chat">\u2715</button></div></div><div class="ecco-chat-messages" id="eccoChatMessages"></div><div class="ecco-chat-input-area"><textarea class="ecco-chat-input" id="eccoChatInput" placeholder="' + CONFIG.placeholder + '" rows="1"></textarea><button class="ecco-chat-send" id="eccoChatSend" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div><div class="ecco-chat-footer">' + CONFIG.poweredBy + '</div></div>';
+widget.innerHTML = '<button class="ecco-chat-toggle" id="eccoChatToggle" aria-label="Ask Alina" title="Ask Alina"><span class="ecco-chat-toggle-pulse" aria-hidden="true"></span><span class="ecco-chat-toggle-avatar"><img src="' + CONFIG.avatar + '" alt="" width="38" height="38"></span><span class="ecco-chat-toggle-label">Ask Alina</span></button><div class="ecco-chat-tooltip" id="eccoChatTooltip"><button class="tip-close" id="eccoTipClose" aria-label="Dismiss">\u2715</button><span class="tip-name">Hi, I\u2019m Alina \uD83D\uDC4B</span> Looking for the right cleaning fit for your space?</div><div class="ecco-chat-panel" id="eccoChatPanel" role="dialog" aria-modal="true" aria-label="Chat with Alina"><div class="ecco-chat-header"><div class="ecco-chat-avatar"><img src="' + CONFIG.avatar + '" alt="Alina" width="40" height="40"></div><div class="ecco-chat-header-info"><h4>' + CONFIG.botName + '</h4><div class="ecco-chat-header-title">' + CONFIG.botTitle + ' \u00B7 AI</div><div class="ecco-chat-header-status">Online now</div></div><div class="ecco-chat-actions"><button class="ecco-chat-reset" id="eccoChatReset" aria-label="New chat" title="New conversation">\u21BA</button><button class="ecco-chat-close" id="eccoChatClose" aria-label="Close chat">\u2715</button></div></div><div class="ecco-chat-messages" id="eccoChatMessages"></div><div class="ecco-chat-input-area"><textarea class="ecco-chat-input" id="eccoChatInput" placeholder="' + CONFIG.placeholder + '" rows="1"></textarea><button class="ecco-chat-send" id="eccoChatSend" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div><div class="ecco-chat-footer">' + CONFIG.poweredBy + '</div></div>';
 document.body.appendChild(widget);
 
 var toggle = document.getElementById('eccoChatToggle');
@@ -252,16 +252,16 @@ toggle.addEventListener('click', function() {
   panel.classList.toggle('open', isOpen);
   toggle.classList.toggle('open', isOpen);
   tooltip.classList.remove('show');
-  if (isOpen && !greeted) { greeted = true; setTimeout(function() { addMessage(CONFIG.greeting, 'bot'); messages.scrollTop = 0; showQuickReplies(); }, 400); }
+  if (isOpen && !greeted) { greeted = true; setTimeout(async function() { await addBotReplyChunked(CONFIG.greeting); showQuickReplies(); }, 400); }
   if (isOpen) input.focus();
 });
 closeBtn.addEventListener('click', function() { isOpen = false; panel.classList.remove('open'); toggle.classList.remove('open'); toggle.focus(); });
-resetBtn.addEventListener('click', function() { conversationHistory = []; msgCount = 0; messages.innerHTML = ''; greeted = false; setTimeout(function() { addMessage(CONFIG.greeting, 'bot'); showQuickReplies(); greeted = true; }, 300); });
+resetBtn.addEventListener('click', function() { conversationHistory = []; msgCount = 0; messages.innerHTML = ''; greeted = false; setTimeout(async function() { await addBotReplyChunked(CONFIG.greeting); showQuickReplies(); greeted = true; }, 300); });
 sendBtn.addEventListener('click', function() { handleSend(); });
 input.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
 input.addEventListener('input', autoResize);
 document.addEventListener('keydown', function(e) {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); isOpen = !isOpen; panel.classList.toggle('open', isOpen); toggle.classList.toggle('open', isOpen); tooltip.classList.remove('show'); if (isOpen && !greeted) { greeted = true; setTimeout(function() { addMessage(CONFIG.greeting, 'bot'); showQuickReplies(); }, 400); } if (isOpen) input.focus(); else toggle.focus(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); isOpen = !isOpen; panel.classList.toggle('open', isOpen); toggle.classList.toggle('open', isOpen); tooltip.classList.remove('show'); if (isOpen && !greeted) { greeted = true; setTimeout(async function() { await addBotReplyChunked(CONFIG.greeting); showQuickReplies(); }, 400); } if (isOpen) input.focus(); else toggle.focus(); }
   if (e.key === 'Escape' && isOpen) { isOpen = false; panel.classList.remove('open'); toggle.classList.remove('open'); toggle.focus(); }
   if (e.key === 'Tab' && isOpen) { var f = [closeBtn, resetBtn, input, sendBtn].filter(function(el) { return el && !el.disabled; }); var first = f[0]; var last = f[f.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } else if (!panel.contains(document.activeElement)) { e.preventDefault(); first.focus(); } }
 });
