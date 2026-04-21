@@ -388,29 +388,42 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 /* (mobile word rotation removed — unified in initHeroRotate above) */
 
 /* ============================================================
-   FLOATING QUOTE — visible only after hero stats leave viewport
+   FLOATING QUOTE — visible only when .hero-actions leaves viewport
    ============================================================ */
 (function initFloatingQuoteReveal() {
-  // FQ reveal: display:none -> display:inline-flex via .visible class.
-  // Bulletproof across all browser contexts (doesn't rely on transitions
-  // or animations progressing — just a display switch).
   var fq = document.querySelector('.cta-float');
   if (!fq) return;
-  var shown = false;
-  function show() {
-    if (shown) return;
-    shown = true;
-    fq.classList.add('visible');
+
+  var hero = document.querySelector('.hero-actions');
+
+  function show() { fq.classList.add('visible'); }
+  function hide() { fq.classList.remove('visible'); }
+
+  // Pages without .hero-actions fall back to a scroll threshold.
+  if (!hero) {
+    var onScrollFallback = function() {
+      if (window.scrollY > 400) { show(); } else { hide(); }
+    };
+    window.addEventListener('scroll', onScrollFallback, { passive: true });
+    onScrollFallback();
+    return;
   }
-  // Safety timer: after 2.5s, show it regardless of scroll.
-  var safetyTimer = setTimeout(show, 2500);
-  function onScroll() {
-    if (window.scrollY > 100) {
-      clearTimeout(safetyTimer);
-      show();
-      window.removeEventListener('scroll', onScroll);
-    }
+
+  // Legacy browsers without IntersectionObserver: reveal after 2s.
+  if (!('IntersectionObserver' in window)) {
+    setTimeout(show, 2000);
+    return;
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+
+  // rootMargin bottom -20%: reveal CTA slightly before hero fully scrolls out.
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) { hide(); } else { show(); }
+    });
+  }, {
+    rootMargin: '0px 0px -20% 0px',
+    threshold: 0
+  });
+
+  io.observe(hero);
 })();
