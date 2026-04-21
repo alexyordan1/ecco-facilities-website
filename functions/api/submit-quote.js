@@ -140,7 +140,7 @@ export async function onRequestPost(context) {
     // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
     const ALLOWED_KEYS = new Set([
       'em','fn','ln','ph','co','addr','referral','notes','contactPref','formType',
-      'space','spaceOther','urg','size','exactSize','janDays','addDayPorter','window',
+      'space','spaceOther','urg','size','exactSize','janDays','addDayPorter',
       'hrs','customHrs','startTime','dpDays','porters','porterCount','dpAreas','areaOther','addJanitorial',
       'turnstileToken'
     ]);
@@ -221,16 +221,12 @@ export async function onRequestPost(context) {
       // Janitorial
       size: 'space_size', exactSize: 'exact_sqft',
       janDays: 'cleaning_days', addDayPorter: 'also_wants_dayporter',
-      window: 'cleaning_window',
       // Day Porter
       hrs: 'hours_per_day', customHrs: 'custom_hours',
       startTime: 'start_time', dpDays: 'coverage_days',
       porters: 'num_porters', porterCount: 'porter_count_custom',
       dpAreas: 'areas_covered', areaOther: 'area_custom',
       addJanitorial: 'also_wants_janitorial',
-    };
-    const WINDOW_MAP = {
-      before_hours: 'Before hours', after_hours: 'After hours', flexible: 'Flexible'
     };
     const URGENCY_MAP = {
       asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'
@@ -241,7 +237,6 @@ export async function onRequestPost(context) {
       const label = KEY_MAP[k] || k;
       let value = v;
       if (k === 'urg' && URGENCY_MAP[v]) value = URGENCY_MAP[v];
-      else if (k === 'window' && WINDOW_MAP[v]) value = WINDOW_MAP[v];
       formData[label] = value;
     }
 
