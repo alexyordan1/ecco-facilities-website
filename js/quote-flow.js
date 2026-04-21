@@ -1620,34 +1620,88 @@
       setVal('qfSumCompany', STATE.companyName || '');
       setVal('qfSumAddress', STATE.userAddress || '(not provided)');
       setVal('qfSumSpace', STATE.space || '(not set)');
-      setVal('qfSumSize', formatSizeLabel(STATE.size) || '(not set)');
-      setVal('qfSumService', SERVICE_LABELS[STATE.service] || STATE.service);
-      setVal('qfSumPorters', formatPorters() || '(not set)');
-      setVal('qfSumSchedule', formatDays());
-      setVal('qfSumTime', formatTime() || 'after-hours window');
 
-      // AYS Ola 8 — frequency + sub text for Service row
+      // AYS Ola 8.2 — adapt each summary row to the actual flow.
+      // Flow paths:
+      //   janitorial → service, space, size, days (no porter, no hours)
+      //   dayporter  → service, space, days, porter, hours (no size)
+      //   both       → service, space, size, days, porter, hours
+      //   unsure     → service, space, size, days (like janitorial)
+      var svc = STATE.service;
+      var hasPorters = svc === 'dayporter' || svc === 'both';
+      var hasSize = svc !== 'dayporter';
+      var days = (formatDays && formatDays()) || '';
+      var daysCount = (days && days !== '(none selected)') ? ((days.match(/\u00b7/g) || []).length + 1) : 0;
+      var porterCount = STATE.porterCount && STATE.porterCount !== 'notsure' ? parseInt(STATE.porterCount) || 0 : 0;
+      var timeWin = (STATE.timeStart && STATE.timeEnd) ? (STATE.timeStart + '\u2013' + STATE.timeEnd) : '';
+
+      // ---------- SERVICE row ----------
+      // Primary = service name (serif italic, #qfSumService)
+      // Primary meta (#qfRvSvcFreq) = frequency or porter count
+      // Sub (#qfRvSvcSub) = context phrase
+      var svcName, svcFreq, svcSub;
+      if (svc === 'janitorial') {
+        svcName = 'Janitorial';
+        svcFreq = daysCount ? (daysCount + '\u00d7 weekly') : 'your schedule';
+        svcSub = 'Eco-certified \u00b7 insured \u00b7 uniformed team';
+      } else if (svc === 'dayporter') {
+        svcName = 'Day Porter';
+        svcFreq = porterCount ? (porterCount + ' porter' + (porterCount !== 1 ? 's' : '')) : (STATE.porterCount === 'notsure' ? 'porters TBD' : 'on-site');
+        svcSub = (timeWin ? ('On-site ' + timeWin) : 'On-site during business hours') + ' \u00b7 uniformed team';
+      } else if (svc === 'both') {
+        svcName = 'Both services';
+        var freqParts = [];
+        if (porterCount) freqParts.push(porterCount + ' porter' + (porterCount !== 1 ? 's' : ''));
+        else if (STATE.porterCount === 'notsure') freqParts.push('porters TBD');
+        if (daysCount) freqParts.push(daysCount + '\u00d7 janitorial');
+        svcFreq = freqParts.join(' + ') || 'your plan';
+        svcSub = 'Day porter + after-hours janitorial \u00b7 eco-certified';
+      } else {
+        svcName = 'Help me decide';
+        svcFreq = 'Alina will recommend';
+        svcSub = 'Based on your space + schedule, we\u2019ll propose the best fit';
+      }
+      setVal('qfSumService', svcName);
       var freqEl = document.getElementById('qfRvSvcFreq');
-      if (freqEl) {
-        var freqLabel = '';
-        if (STATE.service === 'janitorial') freqLabel = formatDays && formatDays() !== '(none selected)' ? '3\u00d7 weekly' : 'your schedule';
-        else if (STATE.service === 'dayporter') freqLabel = 'on-site, business hours';
-        else if (STATE.service === 'both') freqLabel = 'janitorial + day porter';
-        else freqLabel = 'help me decide';
-        // Derive from actual day count if available
-        var dayStr = formatDays && formatDays();
-        if (dayStr && dayStr !== '(none selected)') {
-          var n = (dayStr.match(/\u00b7/g) || []).length + 1;
-          if (n > 0 && n < 8 && STATE.service !== 'dayporter') freqLabel = n + '\u00d7 weekly';
-        }
-        freqEl.textContent = freqLabel;
-      }
+      if (freqEl) freqEl.textContent = svcFreq;
       var svcSubEl = document.getElementById('qfRvSvcSub');
-      if (svcSubEl) {
-        svcSubEl.textContent = 'Eco-certified \u00b7 insured \u00b7 uniformed team';
-      }
+      if (svcSubEl) svcSubEl.textContent = svcSub;
 
-      // Separators (only show when both sides are present)
+      // ---------- PREMISES row ----------
+      // Primary = address (b tag), Sub = space · size (dot hidden when size absent)
+      var sizeLbl = formatSizeLabel(STATE.size);
+      setVal('qfSumSpace', STATE.space || '(not set)');
+      setVal('qfSumSize', hasSize && sizeLbl ? sizeLbl : '');
+      // Hide the · separator between space and size when size is absent/dayporter
+      var premDot = document.querySelector('[data-section="location"] .qf-rv-sum-dot');
+      if (premDot) premDot.style.display = (hasSize && sizeLbl) ? '' : 'none';
+
+      // ---------- SCHEDULE row ----------
+      // Primary = days, Sub = window context (adapts to service)
+      setVal('qfSumSchedule', days || '(none selected)');
+      var schedSubText = '';
+      if (svc === 'janitorial' || svc === 'unsure') {
+        schedSubText = 'After-hours window \u00b7 onboarding week 1';
+      } else if (svc === 'dayporter') {
+        schedSubText = timeWin ? ('On-site ' + timeWin) : 'On-site during business hours';
+        if (porterCount) schedSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
+      } else if (svc === 'both') {
+        var subBits = ['After-hours janitorial'];
+        if (timeWin) subBits.push('porter on-site ' + timeWin);
+        else subBits.push('porter on-site business hours');
+        schedSubText = subBits.join(' \u00b7 ');
+      }
+      setVal('qfSumTime', schedSubText);
+      var schedMeta = document.getElementById('qfRvSchedMeta');
+      if (schedMeta) schedMeta.hidden = true; // we fold the meta into sub text above
+      var schedDot = document.getElementById('qfRvSchedDot');
+      if (schedDot) schedDot.hidden = true;
+
+      // Legacy setter used elsewhere (floating CTA recheck)
+      setVal('qfSumPorters', formatPorters() || '');
+
+      // ---------- CONTACT row ----------
+      // Separators visible only when both sides present
       var contactDot = document.getElementById('qfRvContactDot');
       if (contactDot) contactDot.hidden = !(fullName.trim() && STATE.companyName);
       var contactDot2 = document.getElementById('qfRvContactDot2');
