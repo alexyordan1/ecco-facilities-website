@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=27.8">
+<link rel="stylesheet" href="css/quote-flow.css?v=28.5">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -510,6 +510,47 @@
       </div>
     </section>
 
+    <!-- STEP 4b · PORTER DAYS (only in the 'both' flow) -->
+    <section class="qf-screen step-4b" hidden id="qfScreen_dpDays" aria-label="Which days do you need a porter on-site?">
+      <div class="qf-screen-inner">
+        <div class="qf-alina-says" id="qfAlinaSaysS4b" role="status" aria-live="polite">
+          <span class="qf-alina-says-avatar" aria-hidden="true">
+            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
+            <span class="qf-alina-says-dot"></span>
+          </span>
+          <div class="qf-alina-says-bubble">
+            <p class="qf-alina-says-text" id="qfAlinaSaysTextS4b">A porter is on-site during business hours. Pick the days you need one — tap &ldquo;Same as cleaning&rdquo; if the schedule matches.</p>
+          </div>
+        </div>
+        <h2 class="qf-s4-title">Which <em>days</em> do you need a porter on-site?</h2>
+
+        <div class="qf-s4-presets" role="group" aria-label="Quick day presets">
+          <button type="button" class="qf-s4-preset" data-preset-dp="same">Same as cleaning</button>
+          <button type="button" class="qf-s4-preset" data-preset-dp="weekdays">Mon&ndash;Fri</button>
+          <button type="button" class="qf-s4-preset" data-preset-dp="every">Every day</button>
+          <button type="button" class="qf-s4-preset" data-preset-dp="clear">Clear</button>
+        </div>
+
+        <div class="qf-s4-days" role="group" aria-label="Select days of the week">
+          <div class="qf-s4-day-group qf-s4-weekdays">
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Monday" aria-pressed="false"><span class="qf-service-card-label">Monday</span></button>
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Tuesday" aria-pressed="false"><span class="qf-service-card-label">Tuesday</span></button>
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Wednesday" aria-pressed="false"><span class="qf-service-card-label">Wednesday</span></button>
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Thursday" aria-pressed="false"><span class="qf-service-card-label">Thursday</span></button>
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Friday" aria-pressed="false"><span class="qf-service-card-label">Friday</span></button>
+          </div>
+          <div class="qf-s4-day-group qf-s4-weekend-group">
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card qf-day-weekend" data-day="Saturday" aria-pressed="false"><span class="qf-service-card-label">Saturday</span></button>
+            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card qf-day-weekend" data-day="Sunday" aria-pressed="false"><span class="qf-service-card-label">Sunday</span></button>
+          </div>
+        </div>
+        <div class="qf-s4-bottom">
+          <span class="qf-s4-count" id="qfDpDaysCount"></span>
+          <button type="button" class="qf-s4-continue" id="qfDpDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
+        </div>
+      </div>
+    </section>
+
     <!-- STEP 5b · PORTER COUNT (auto-advance) -->
     <section class="qf-screen step-porter" hidden id="qfScreen_porter" aria-label="How many porters?">
       <div class="qf-screen-inner">
@@ -687,9 +728,9 @@
             </div>
           </section>
 
-          <!-- Schedule row -->
+          <!-- Schedule row (label flips to "Cleaning" in 'both' flow) -->
           <section class="qf-rv-sum-row" data-section="schedule" data-field="days">
-            <span class="qf-rv-sum-k">Schedule</span>
+            <span class="qf-rv-sum-k" id="qfSumScheduleLabel">Schedule</span>
             <div class="qf-rv-sum-body">
               <div class="qf-rv-sum-primary"><em id="qfSumSchedule">&mdash;</em></div>
               <div class="qf-rv-sum-sub" id="qfRvSchedSub" hidden><span id="qfSumTime"></span><span class="qf-rv-sum-dot" id="qfRvSchedDot" hidden>·</span><span id="qfRvSchedMeta" hidden></span></div>
@@ -714,6 +755,39 @@
               <div class="qf-rev-edit-actions">
                 <button type="button" class="qf-rev-save" data-save="days">Save</button>
                 <button type="button" class="qf-rev-cancel" data-cancel="days">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Porter row — visible only in 'both' service. Its own days + hours
+               editor so clients with different cleaning vs porter schedules can
+               edit each independently. -->
+          <section class="qf-rv-sum-row" data-section="porter-schedule" data-field="dpDays" id="qfSumPorterRow" hidden>
+            <span class="qf-rv-sum-k">Porter</span>
+            <div class="qf-rv-sum-body">
+              <div class="qf-rv-sum-primary"><em id="qfSumPorterSchedule">&mdash;</em></div>
+              <div class="qf-rv-sum-sub" id="qfRvPorterSchedSub" hidden><span id="qfSumPorterTime"></span></div>
+            </div>
+            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="dpDays" aria-label="Edit porter schedule">Edit</button>
+            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
+              <label class="qf-rv-field"><span class="qf-rv-field-label">Porter days</span>
+                <div class="qf-rev-days-picker" id="qfEditDpDays" role="group" aria-label="Select porter days">
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Monday" aria-label="Monday"> Mon</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Tuesday" aria-label="Tuesday"> Tue</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Wednesday" aria-label="Wednesday"> Wed</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Thursday" aria-label="Thursday"> Thu</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Friday" aria-label="Friday"> Fri</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Saturday" aria-label="Saturday"> Sat</label>
+                  <label class="qf-rev-day-chip"><input type="checkbox" value="Sunday" aria-label="Sunday"> Sun</label>
+                </div>
+              </label>
+              <div class="qf-rv-field">
+                <span class="qf-rv-field-label">Porter hours</span>
+                <div id="qfEditDpPorterHours" class="qf-rv-porter-hours-edit" role="group" aria-label="Per-porter hours"></div>
+              </div>
+              <div class="qf-rev-edit-actions">
+                <button type="button" class="qf-rev-save" data-save="dpDays">Save</button>
+                <button type="button" class="qf-rev-cancel" data-cancel="dpDays">Cancel</button>
               </div>
             </div>
           </section>
@@ -944,7 +1018,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=26.1"></script>
+<script src="js/quote-flow.js?v=26.3"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

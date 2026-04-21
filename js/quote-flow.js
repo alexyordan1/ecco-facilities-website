@@ -61,7 +61,11 @@
   var FLOWS = {
     janitorial: ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'contact', 'success'],
     dayporter:  ['welcome', 'info', 'space', 'location', 'days', 'porter', 'hours', 'checkpoint', 'contact', 'success'],
-    both:       ['welcome', 'info', 'space', 'location', 'size', 'days', 'porter', 'hours', 'checkpoint', 'contact', 'success'],
+    // 'both' asks two day questions in sequence so clients with different
+    // cleaning vs porter schedules (e.g. restaurant: porter 7 days, cleaning
+    // Mon-Fri only) can express it. First visit = cleaning days, second visit
+    // = porter days (pre-filled with cleaning days via a "Same days" preset).
+    both:       ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'porter', 'hours', 'checkpoint', 'contact', 'success'],
     unsure:     ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'contact', 'success']
   };
 
@@ -96,8 +100,9 @@
       { key: 'space',    label: 'Space' },
       { key: 'location', label: 'Location' },
       { key: 'size',     label: 'Size' },
-      { key: 'days',     label: 'Schedule' },
-      { key: 'porter',   label: 'Porter' },
+      { key: 'days',     label: 'Cleaning' },
+      { key: 'dpDays',   label: 'Porter days' },
+      { key: 'porter',   label: 'Porters' },
       { key: 'hours',    label: 'Hours' },
       { key: 'contact',  label: 'Review' }
     ],
@@ -117,7 +122,7 @@
      ----------------------------------------------------------------------- */
   // AYS Ola 3 #21 — removed legacy 'window' step (no corresponding DOM, all
   // FLOWS path refs dropped in an earlier refactor; still created SCREENS.window = null)
-  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'porter', 'hours', 'contact', 'success'];
+  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'checkpoint', 'porter', 'hours', 'contact', 'success'];
   var SCREENS = {};
 
   SCREEN_NAMES.forEach(function (name) {
@@ -159,7 +164,8 @@
         'qfSumSizeRow','qfSumPortersRow','qfSumTimeRow','qfSumCompanyRow','qfSumPhoneRow',
         'qfEditFirstName','qfEditLastName','qfEditEmail','qfEditPhone','qfEditCompany',
         'qfEditAddress','qfEditSpace','qfEditSize','qfEditService','qfEditPorters',
-        'qfEditDays','qfEditPorterHours',
+        'qfEditDays','qfEditPorterHours','qfEditDpDays','qfEditDpPorterHours',
+        'qfSumPorterRow','qfSumPorterSchedule','qfSumPorterTime',
         'qfContactSubmit','qfSpecialInstructions'
       ];
       var missing = REQUIRED.filter(function (id) { return !document.getElementById(id); });
@@ -178,6 +184,7 @@
     space:          null,
     size:           null,
     days:           [],
+    dpDays:         [],
     porterCount:    null,
     timeStart:      null,
     timeEnd:        null,
@@ -489,7 +496,9 @@
   var S4_TITLES = {
     janitorial: { before: 'Which ', emphasis: 'days', after: ' should we clean?' },
     dayporter:  { before: 'Which ', emphasis: 'days', after: ' do you need your porter?' },
-    both:       { before: 'Which ', emphasis: 'days', after: ' do you need coverage?' },
+    // For 'both' the first days screen captures cleaning days; the porter
+    // days live on a separate qfScreen_dpDays in the flow.
+    both:       { before: 'Which ', emphasis: 'days', after: ' should we clean?' },
     unsure:     { before: 'Which ', emphasis: 'days', after: ' do you need service?' }
   };
   function renderS4Title(el, tpl) {
@@ -884,17 +893,46 @@
     // Set contextual Alina + title when entering days screen (no pre-selection)
     if (name === 'days') {
       var alinaEl = getAlinaTextEl('days');
-      if (alinaEl) alinaEl.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
+      if (alinaEl) {
+        // For 'both' the days screen captures only the cleaning schedule; a
+        // separate porter-days screen follows. Lead with that context so the
+        // client doesn't wonder why they'll pick days twice.
+        if (STATE.service === 'both') {
+          alinaEl.textContent = 'First, pick the days you want your space cleaned overnight. You\u2019ll choose porter days next.';
+        } else {
+          alinaEl.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
+        }
+      }
       var s4title = document.getElementById('qfS4Title');
       if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
       setTimeout(syncDaysUI, 80);
     }
 
+    // DP-days step — only reached in 'both' flow. The MutationObserver wired
+    // inside the dpDays block below handles pre-selection + sync; here we
+    // just refresh Alina's context copy based on what the client already
+    // answered on the prior (cleaning) days screen.
+    if (name === 'dpDays') {
+      var dpAlinaEl = document.getElementById('qfAlinaSaysTextS4b');
+      if (dpAlinaEl) {
+        dpAlinaEl.textContent = (Array.isArray(STATE.days) && STATE.days.length)
+          ? 'We pre-selected your cleaning days. Tap to adjust, or keep them if the porter schedule matches.'
+          : 'A porter is on-site during business hours. Pick the days you need one.';
+      }
+    }
+
     // Size step — personalize Alina by space type when entering (covers
-    // both forward navigation and scroll-back-into-view cases).
+    // both forward navigation and scroll-back-into-view cases). For the
+    // 'both' flow, prepend a note clarifying this size drives cleaning
+    // pricing (not porter coverage) so the client doesn't second-guess.
     if (name === 'size' && STATE.space) {
       var sizeAlinaEl = getAlinaTextEl('size');
-      if (sizeAlinaEl) sizeAlinaEl.textContent = ALINA_S3[STATE.space] || ALINA_S3.Other;
+      if (sizeAlinaEl) {
+        var base = ALINA_S3[STATE.space] || ALINA_S3.Other;
+        sizeAlinaEl.textContent = STATE.service === 'both'
+          ? 'This sizes your cleaning scope. ' + base
+          : base;
+      }
     }
 
     // Hours step — personalize by space type every time it's entered.
@@ -1442,7 +1480,99 @@
           : STATE.days.length + ' days';
         setRailValue('days', summary);
 
-        // Determine next screen from flow
+        // For 'both' service, seed porter days with cleaning days so the user
+        // sees their prior selection pre-filled on the next screen. They can
+        // adjust freely or use the "Same as cleaning" preset to re-sync.
+        if (STATE.service === 'both' && (!STATE.dpDays || !STATE.dpDays.length)) {
+          STATE.dpDays = STATE.days.slice();
+        }
+
+        goNext();
+      });
+    }
+  }
+
+  /* =======================================================================
+     DP-DAYS step — Second day picker, only in the 'both' flow. Lets the user
+     pick different days for the porter vs the janitorial cleaning captured
+     on the prior screen. Mirrors the days-screen UI and logic with its own
+     state slice (STATE.dpDays) and a "Same as cleaning" preset.
+     ======================================================================= */
+  if (SCREENS.dpDays) {
+    var dpDayBtns     = SCREENS.dpDays.querySelectorAll('.qf-dp-day-card');
+    var dpPresetBtns  = SCREENS.dpDays.querySelectorAll('.qf-s4-preset');
+    var dpCountEl     = document.getElementById('qfDpDaysCount');
+    var dpContinueBtn = document.getElementById('qfDpDaysContinue');
+
+    function syncDpDaysUI() {
+      dpDayBtns.forEach(function (btn) {
+        var selected = (STATE.dpDays || []).indexOf(btn.getAttribute('data-day')) !== -1;
+        btn.classList.toggle('is-selected', selected);
+        btn.setAttribute('aria-pressed', String(selected));
+      });
+      if (dpCountEl) {
+        var n = (STATE.dpDays || []).length;
+        dpCountEl.textContent = n > 0 ? (n + ' day' + (n > 1 ? 's' : '') + ' selected') : '';
+      }
+      if (dpContinueBtn) dpContinueBtn.disabled = !((STATE.dpDays || []).length);
+      dpPresetBtns.forEach(function (p) { p.classList.remove('is-active'); });
+      var dp = STATE.dpDays || [];
+      // Priority: when dp matches STATE.days, prefer the "Same as cleaning"
+      // chip — it communicates the semantic relation more clearly than a
+      // generic "Mon-Fri". Only fall through to Every/Weekdays if STATE.days
+      // doesn't match.
+      if (dp.length > 0 && arraysEqual(dp, STATE.days || [])) {
+        dpPresetBtns.forEach(function (p) { if (p.dataset.presetDp === 'same') p.classList.add('is-active'); });
+      } else if (dp.length === 7) {
+        dpPresetBtns.forEach(function (p) { if (p.dataset.presetDp === 'every') p.classList.add('is-active'); });
+      } else if (arraysEqual(dp, WEEKDAYS)) {
+        dpPresetBtns.forEach(function (p) { if (p.dataset.presetDp === 'weekdays') p.classList.add('is-active'); });
+      }
+    }
+
+    dpDayBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!Array.isArray(STATE.dpDays)) STATE.dpDays = [];
+        var day = btn.getAttribute('data-day');
+        var idx = STATE.dpDays.indexOf(day);
+        if (idx === -1) STATE.dpDays.push(day); else STATE.dpDays.splice(idx, 1);
+        syncDpDaysUI();
+      });
+    });
+
+    dpPresetBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var p = btn.dataset.presetDp;
+        if (p === 'same') STATE.dpDays = (STATE.days || []).slice();
+        else if (p === 'weekdays') STATE.dpDays = WEEKDAYS.slice();
+        else if (p === 'every') STATE.dpDays = ALL_DAYS.slice();
+        else if (p === 'clear') STATE.dpDays = [];
+        syncDpDaysUI();
+      });
+    });
+
+    // When the dpDays screen becomes active, pre-select whatever we already
+    // know — either a prior edit to STATE.dpDays or the cleaning days we
+    // copied on exit from the days screen.
+    var dpEnterObs = registerObserver(new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.target === SCREENS.dpDays && SCREENS.dpDays.classList.contains('is-active')) {
+          if (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length) {
+            STATE.dpDays = (STATE.days || []).slice();
+          }
+          syncDpDaysUI();
+        }
+      });
+    }));
+    dpEnterObs.observe(SCREENS.dpDays, { attributes: true, attributeFilter: ['class'] });
+
+    if (dpContinueBtn) {
+      dpContinueBtn.addEventListener('click', function () {
+        if (!(STATE.dpDays || []).length) return;
+        var summary = STATE.dpDays.length === 7 ? 'Every day'
+          : arraysEqual(STATE.dpDays, WEEKDAYS) ? 'Mon\u2013Fri'
+          : STATE.dpDays.length + ' days';
+        setRailValue('dpDays', summary);
         goNext();
       });
     }
@@ -1779,10 +1909,10 @@
       if (premDot) premDot.hidden = !showSize;
 
       // ---------- SCHEDULE row ----------
-      // Primary = days, Sub = window context (adapts to service).
-      // When the user picked multiple porters with different hours we expand
-      // into "Porter 1 08:00–12:00 · Porter 2 13:00–17:00" so the review never
-      // flattens the schedules silently.
+      // For 'both' the label flips to "Cleaning" (porter lives in its own
+      // row below). For everything else it stays "Schedule".
+      var schedLabel = document.getElementById('qfSumScheduleLabel');
+      if (schedLabel) schedLabel.textContent = (svc === 'both') ? 'Cleaning' : 'Schedule';
       setVal('qfSumSchedule', days || '(none selected)');
       var schedSubText = '';
       if (svc === 'janitorial' || svc === 'unsure') {
@@ -1798,13 +1928,9 @@
           if (porterCount) schedSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
         }
       } else if (svc === 'both') {
-        if (phList.length > 1 && !allSameHours) {
-          schedSubText = perPorterList;
-        } else if (sharedWin) {
-          schedSubText = 'Porter on-site ' + sharedWin;
-        } else {
-          schedSubText = 'Porter on-site during business hours';
-        }
+        // In 'both' this row is the cleaning schedule. Subline clarifies
+        // that we handle timing ourselves (overnight by default).
+        schedSubText = 'Overnight cleaning';
       }
       var schedTimeEl = document.getElementById('qfSumTime');
       if (schedTimeEl) schedTimeEl.textContent = schedSubText;
@@ -1814,6 +1940,46 @@
       if (schedMeta) schedMeta.hidden = true;
       var schedDot = document.getElementById('qfRvSchedDot');
       if (schedDot) schedDot.hidden = true;
+
+      // ---------- PORTER row (only 'both' flow) ----------
+      // Shows porter days + porter hours separately from the cleaning row so
+      // the client can clearly see — and edit — that porter schedules can
+      // differ from cleaning schedules.
+      var porterRowEl = document.getElementById('qfSumPorterRow');
+      if (porterRowEl) {
+        if (svc === 'both') {
+          porterRowEl.hidden = false;
+          var dpList = Array.isArray(STATE.dpDays) ? STATE.dpDays.slice() : [];
+          var dpDaysStr;
+          if (dpList.length === 0) {
+            dpDaysStr = '(none selected)';
+          } else if (dpList.length === 7) {
+            dpDaysStr = 'Every day';
+          } else if (dpList.length === 5 && ['Monday','Tuesday','Wednesday','Thursday','Friday'].every(function(d){return dpList.indexOf(d)>-1;})) {
+            dpDaysStr = 'Mon\u2013Fri';
+          } else {
+            var abbrM = { Monday:'Mon', Tuesday:'Tue', Wednesday:'Wed', Thursday:'Thu', Friday:'Fri', Saturday:'Sat', Sunday:'Sun' };
+            dpDaysStr = dpList.map(function(d){ return abbrM[d] || d; }).join(', ');
+          }
+          setVal('qfSumPorterSchedule', dpDaysStr);
+          var porterSubText;
+          if (phList.length > 1 && !allSameHours) {
+            porterSubText = perPorterList;
+          } else if (sharedWin) {
+            porterSubText = 'On-site ' + sharedWin;
+            if (porterCount) porterSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
+          } else {
+            porterSubText = 'On-site during business hours';
+            if (porterCount) porterSubText += ' \u00b7 ' + porterCount + ' porter' + (porterCount !== 1 ? 's' : '');
+          }
+          var porterTimeEl = document.getElementById('qfSumPorterTime');
+          if (porterTimeEl) porterTimeEl.textContent = porterSubText;
+          var porterSubEl = document.getElementById('qfRvPorterSchedSub');
+          if (porterSubEl) porterSubEl.hidden = !porterSubText;
+        } else {
+          porterRowEl.hidden = true;
+        }
+      }
 
       // Legacy setter used elsewhere (floating CTA recheck)
       setVal('qfSumPorters', formatPorters() || '');
@@ -1910,15 +2076,16 @@
         } else if (field === 'porters') {
           document.getElementById('qfEditPorters').value = STATE.porterCount || '1';
         } else if (field === 'days' || field === 'time') {
-          // Populate days checkboxes (only relevant when the days panel is open,
-          // but harmless for the 'time' alias too — the same panel hosts both).
+          // Days panel. In 'both' this represents CLEANING days only — the
+          // porter day picker + hours live in the separate dpDays edit panel.
           document.querySelectorAll('#qfEditDays input').forEach(function (cb) {
             cb.checked = STATE.days.indexOf(cb.value) > -1;
           });
-          // Render one time-input pair per porter when dayporter/both so
-          // different schedules stay editable directly from the review.
           var wrap = document.getElementById('qfEditPorterHours');
-          if (wrap && (STATE.service === 'dayporter' || STATE.service === 'both')) {
+          // Only 'dayporter' edits porter hours from this panel. For 'both'
+          // porter hours move to the dpDays edit panel so clients see a clean
+          // separation (cleaning here, porter there).
+          if (wrap && STATE.service === 'dayporter') {
             var list = Array.isArray(STATE.porterHours) ? STATE.porterHours : [];
             if (!list.length) list = [{ start: STATE.timeStart || '08:00', end: STATE.timeEnd || '17:00' }];
             wrap.innerHTML = list.map(function (ph, idx) {
@@ -1935,6 +2102,33 @@
             }).join('');
           } else if (wrap) {
             wrap.innerHTML = '';
+          }
+          // Hide the porter-hours sub-row entirely for 'both' (it owns its own
+          // panel now) so the cleaning edit stays focused on cleaning days.
+          var timeRowEl = document.getElementById('qfSumTimeRow');
+          if (timeRowEl) timeRowEl.hidden = (STATE.service !== 'dayporter');
+        } else if (field === 'dpDays') {
+          // Porter edit panel (only rendered in 'both' service). Populates
+          // porter days + per-porter hour inputs.
+          document.querySelectorAll('#qfEditDpDays input').forEach(function (cb) {
+            cb.checked = (STATE.dpDays || []).indexOf(cb.value) > -1;
+          });
+          var dpWrap = document.getElementById('qfEditDpPorterHours');
+          if (dpWrap) {
+            var phs = Array.isArray(STATE.porterHours) ? STATE.porterHours : [];
+            if (!phs.length) phs = [{ start: STATE.timeStart || '08:00', end: STATE.timeEnd || '17:00' }];
+            dpWrap.innerHTML = phs.map(function (ph, idx) {
+              var s = (ph && ph.start) || '08:00';
+              var e = (ph && ph.end) || '17:00';
+              var n = idx + 1;
+              return '<div class="qf-rv-porter-hour-row" data-porter-row="' + n + '">' +
+                     '<span class="qf-rv-porter-hour-label">Porter ' + n + '</span>' +
+                     '<div class="qf-rv-field-row">' +
+                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="start" value="' + s + '" aria-label="Porter ' + n + ' start time">' +
+                     '<span class="qf-rv-field-sep">to</span>' +
+                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="end" value="' + e + '" aria-label="Porter ' + n + ' end time">' +
+                     '</div></div>';
+            }).join('');
           }
         }
         row.classList.add('is-editing');
@@ -1987,6 +2181,10 @@
         } else if (field === 'days') {
           document.querySelectorAll('#qfEditDays input').forEach(function (cb) {
             cb.checked = (STATE.days || []).indexOf(cb.value) > -1;
+          });
+        } else if (field === 'dpDays') {
+          document.querySelectorAll('#qfEditDpDays input').forEach(function (cb) {
+            cb.checked = (STATE.dpDays || []).indexOf(cb.value) > -1;
           });
         } else if (field === 'name') {
           var fn = document.getElementById('qfEditFirstName'); if (fn) fn.value = STATE.userName || '';
@@ -2067,18 +2265,49 @@
               STATE.timeEnd = null;
               STATE.porterHours = [];
             }
+            // 'dpDays' only lives in the 'both' flow — clear it when leaving.
+            if (newService !== 'both') {
+              STATE.dpDays = [];
+            } else if (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length) {
+              // Entering 'both' from another flow — pre-fill dpDays with
+              // whatever janitorial days we already know so the porter row
+              // is valid from the start (user can still edit).
+              STATE.dpDays = (STATE.days || []).slice();
+            }
             // Rebuild rail for new service
             if (typeof buildRail === 'function') buildRail(newService);
           }
         } else if (field === 'porters') {
           STATE.porterCount = document.getElementById('qfEditPorters').value;
         } else if (field === 'days' || field === 'time') {
-          // Save days selection
+          // Save days selection — cleaning days for 'both', service days otherwise
           STATE.days = Array.from(document.querySelectorAll('#qfEditDays input:checked')).map(function(cb){return cb.value;});
-          // Save per-porter hours when present (dayporter/both)
-          var rows = document.querySelectorAll('#qfEditPorterHours .qf-rv-porter-hour-row');
-          if (rows.length) {
-            var newHours = Array.prototype.map.call(rows, function (row) {
+          // Save per-porter hours only in 'dayporter' (for 'both' this lives
+          // in the separate dpDays panel).
+          if (STATE.service === 'dayporter') {
+            var rows = document.querySelectorAll('#qfEditPorterHours .qf-rv-porter-hour-row');
+            if (rows.length) {
+              var newHours = Array.prototype.map.call(rows, function (row) {
+                var s = row.querySelector('[data-time="start"]');
+                var e = row.querySelector('[data-time="end"]');
+                return {
+                  start: (s && s.value) || '08:00',
+                  end: (e && e.value) || '17:00'
+                };
+              });
+              STATE.porterHours = newHours;
+              STATE.timeStart = newHours[0].start;
+              STATE.timeEnd = newHours[0].end;
+            }
+          }
+        } else if (field === 'dpDays') {
+          // Save porter days + per-porter hours from the dedicated 'both'
+          // panel. STATE.porterHours is shared with the hours-step capture,
+          // so this keeps hours and days in sync on the porter side.
+          STATE.dpDays = Array.from(document.querySelectorAll('#qfEditDpDays input:checked')).map(function(cb){return cb.value;});
+          var dpRows = document.querySelectorAll('#qfEditDpPorterHours .qf-rv-porter-hour-row');
+          if (dpRows.length) {
+            var dpHours = Array.prototype.map.call(dpRows, function (row) {
               var s = row.querySelector('[data-time="start"]');
               var e = row.querySelector('[data-time="end"]');
               return {
@@ -2086,9 +2315,9 @@
                 end: (e && e.value) || '17:00'
               };
             });
-            STATE.porterHours = newHours;
-            STATE.timeStart = newHours[0].start;
-            STATE.timeEnd = newHours[0].end;
+            STATE.porterHours = dpHours;
+            STATE.timeStart = dpHours[0].start;
+            STATE.timeEnd = dpHours[0].end;
           }
         }
         var row = btn.closest('.qf-rv-sum-row, .qf-rev-row');
@@ -2172,17 +2401,18 @@
         formType: formType,
         notes: STATE.specialInstructions || ''
       };
-      // Schedule days — both services share STATE.days, but send under both keys
-      // for 'both' so downstream consumers (CRM/email templates) see either alone.
-      if (STATE.days && STATE.days.length) {
-        if (formType === 'dayporter') {
-          payload.dpDays = STATE.days;
-        } else if (formType === 'both') {
-          payload.janDays = STATE.days;
-          payload.dpDays = STATE.days;
-        } else {
-          payload.janDays = STATE.days;
-        }
+      // Schedule days — 'both' now tracks two separate lists (cleaning +
+       // porter) so email templates and CRM can render them distinctly. The
+       // 'dayporter' flow writes STATE.days to dpDays (single list). The
+       // 'janitorial'/'unsure' flows write STATE.days to janDays.
+      if (formType === 'dayporter') {
+        if (STATE.days && STATE.days.length) payload.dpDays = STATE.days;
+      } else if (formType === 'both') {
+        if (STATE.days && STATE.days.length) payload.janDays = STATE.days;
+        var dpDaysArr = (Array.isArray(STATE.dpDays) && STATE.dpDays.length) ? STATE.dpDays : STATE.days;
+        if (dpDaysArr && dpDaysArr.length) payload.dpDays = dpDaysArr;
+      } else {
+        if (STATE.days && STATE.days.length) payload.janDays = STATE.days;
       }
       // Porter count
       if (STATE.porterCount) payload.porters = STATE.porterCount;
@@ -2225,6 +2455,12 @@
       if (!STATE.space) errs.push({ field: 'space', msg: 'Space type is missing.' });
       if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Space size is missing.' });
       if (!STATE.days || !STATE.days.length) errs.push({ field: 'days', msg: 'Please pick at least one service day.' });
+      // For 'both' we also require porter days. They may legitimately match
+      // cleaning days (the "Same as cleaning" preset copies them over), but
+      // the STATE slot must be populated so payload carries the right list.
+      if (STATE.service === 'both' && (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length)) {
+        errs.push({ field: 'dpDays', msg: 'Please pick the days you need your porter on-site.' });
+      }
       if ((STATE.service === 'dayporter' || STATE.service === 'both') && !STATE.porterCount) {
         errs.push({ field: 'porters', msg: 'Porter count is missing.' });
       }
