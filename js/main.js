@@ -391,22 +391,21 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    FLOATING QUOTE — visible only after hero stats leave viewport
    ============================================================ */
 (function initFloatingQuoteOnScroll() {
-  // Observe .hero itself (not .hero-stats) because stats is display:none on mobile.
-  // .hero is always rendered on both viewports.
-  var hero = document.querySelector('.hero');
+  // Scroll-position-based trigger (more reliable than IntersectionObserver
+  // across all browsers / edge cases). Shows FQ once user scrolls ~40% of
+  // viewport height, then persists (removes listener).
   var fq = document.querySelector('.cta-float');
-  if (!hero || !fq) return;
-  if (!('IntersectionObserver' in window)) { fq.classList.add('visible'); return; }
-  var obs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) {
-      // Fire when user has scrolled 70% through the hero — feels responsive
-      // without waiting for the full hero to leave viewport.
-      // Once visible, FQ persists (disconnect observer).
-      if (!e.isIntersecting && e.boundingClientRect.top < 0) {
-        fq.classList.add('visible');
-        obs.disconnect();
-      }
-    });
-  }, { threshold: 0, rootMargin: '-70% 0px 0px 0px' });
-  obs.observe(hero);
+  if (!fq) return;
+  var shown = false;
+  function onScroll() {
+    if (shown) return;
+    if (window.scrollY > window.innerHeight * 0.4) {
+      fq.classList.add('visible');
+      shown = true;
+      window.removeEventListener('scroll', onScroll);
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Trigger once in case page loads already scrolled (e.g. anchor, refresh)
+  onScroll();
 })();
