@@ -1080,6 +1080,12 @@
     var digits = normalizePhone(v);
     return digits.length >= 10 && digits.length <= 15;
   }
+  // Name normalizer — collapses internal runs of whitespace (tabs, newlines,
+  // multiple spaces) to a single space and trims. Applied to first/last name
+  // wherever the user can type into the form (info step + review edit panel).
+  // Company names keep internal spacing intact since "A.T. & T." style names
+  // can legitimately have double spaces/periods.
+  function cleanName(v) { return ((v == null) ? '' : String(v)).replace(/\s+/g, ' ').trim(); }
   function showInfoError(msg, offendingEl) {
     var errEl = document.getElementById('qfInfoErr');
     if (errEl) {
@@ -1122,7 +1128,7 @@
 
         clearInfoError();
 
-        var fnVal = firstName ? firstName.value.trim() : '';
+        var fnVal = firstName ? cleanName(firstName.value) : '';
         var emVal = email ? email.value.trim() : '';
 
         // Validate first name
@@ -1152,7 +1158,7 @@
 
         // Capture values
         STATE.userName = fnVal;
-        STATE.userLastName = (lastName && lastName.value.trim()) ? lastName.value.trim() : '';
+        STATE.userLastName = lastName ? cleanName(lastName.value) : '';
         STATE.userEmail = emVal;
         STATE.userPhone = phVal;
 
@@ -1214,12 +1220,22 @@
         // AYS Ola 4 Commit L HI-4 — stricter address validation. Reject inputs
         // that are just "1" or "x9x" or other garbage. Accept EITHER a 5-digit
         // US ZIP standalone OR a street-style line with a number + word chars.
+        // Sprint 3 D2 — didactic errors: when the user typed just digits we
+        // know they meant a ZIP; tell them exactly how many are missing.
         var isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(addr);
         var hasStreetShape = addr.length >= 6
           && /\d/.test(addr)
           && /[A-Za-z]{2,}/.test(addr);
         if (!isZip && !hasStreetShape) {
-          showLocErr('Include a street number + name or a 5-digit ZIP (e.g. "10001" or "350 5th Ave").', addressInput);
+          var digitsOnly = /^\s*\d+\s*$/.test(addr);
+          var msg;
+          if (digitsOnly) {
+            var n = addr.replace(/\D/g, '').length;
+            msg = 'A US ZIP code is 5 digits (you entered ' + n + '). Try your full ZIP or a street address.';
+          } else {
+            msg = 'Include a street number + name or a 5-digit ZIP (e.g. "10001" or "350 5th Ave").';
+          }
+          showLocErr(msg, addressInput);
           return;
         }
         clearLocErr();
@@ -1803,13 +1819,15 @@
       setVal('qfSumPorters', formatPorters() || '');
 
       // ---------- CONTACT row ----------
-      // Separators visible only when both sides present
+      // Separators visible only when both sides present. Treat whitespace-only
+      // companyName as empty so a stray space doesn't render an orphan dot.
+      var hasCompany = !!(STATE.companyName && STATE.companyName.trim());
       var contactDot = document.getElementById('qfRvContactDot');
-      if (contactDot) contactDot.hidden = !(fullName.trim() && STATE.companyName);
+      if (contactDot) contactDot.hidden = !(fullName.trim() && hasCompany);
       var contactDot2 = document.getElementById('qfRvContactDot2');
       if (contactDot2) contactDot2.hidden = !(STATE.userEmail && STATE.userPhone);
       var companyEl = document.getElementById('qfSumCompany');
-      if (companyEl) companyEl.hidden = !STATE.companyName;
+      if (companyEl) companyEl.hidden = !hasCompany;
 
       // Legacy "plan-at-a-glance" chips (qfChipService/Space/Size/Days/Porters)
       // are marked hidden in HTML and replaced by the 4-row summary above.
@@ -1828,7 +1846,7 @@
         // Fix #21 — the placeholder text is clickable to open the edit row
         phoneValEl.innerHTML = '<button type="button" class="qf-rev-add-link" data-edit="phone">Add phone number</button>';
       }
-      show('qfSumCompanyRow', !!STATE.companyName);
+      show('qfSumCompanyRow', hasCompany);
       show('qfSumSizeRow', STATE.service !== 'dayporter');
       show('qfSumPortersRow', STATE.service === 'dayporter' || STATE.service === 'both');
       // Show time row for any dayporter-ish service (even if user never touched the hours screen)
@@ -2004,8 +2022,8 @@
             qfToast({ type:'warn', title:'Invalid email', message:'Please enter a valid email address.' });
             return;
           }
-          STATE.userName     = (document.getElementById('qfEditFirstName') || {value:''}).value.trim();
-          STATE.userLastName = (document.getElementById('qfEditLastName')  || {value:''}).value.trim();
+          STATE.userName     = cleanName((document.getElementById('qfEditFirstName') || {value:''}).value);
+          STATE.userLastName = cleanName((document.getElementById('qfEditLastName')  || {value:''}).value);
           STATE.userEmail    = emailVal;
           STATE.userPhone    = (document.getElementById('qfEditPhone')     || {value:''}).value.trim();
           STATE.companyName  = (document.getElementById('qfEditCompany')   || {value:''}).value.trim();
