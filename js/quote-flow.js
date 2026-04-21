@@ -1582,17 +1582,70 @@
     // removed keeps the bundle lean and avoids running dead functions on submit.
 
     function populateSummary() {
-      // Personalize the plan hero title
+      // AYS Ola 7 — C1 editorial review. Masthead + title + lede with personal data.
+      var escName = function (v) { return (v || '').replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); };
+      var serviceFocus = SERVICE_LABELS[STATE.service] || STATE.service || '';
+      var companyTarget = STATE.companyName || STATE.userName || 'your space';
+
+      // Title: "A cleaning plan, tailored for <em>Acme Real Estate</em>."
       var heroTitle = document.getElementById('qfPlanHeroTitle');
       if (heroTitle) {
-        // Escape the name so it can safely be rendered with innerHTML (<em> tag)
-        var safeName = (STATE.userName || '').replace(/[&<>"']/g, function (c) {
-          return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c];
-        });
-        heroTitle.innerHTML = safeName
-          ? 'Looks good, <em>' + safeName + '</em>?'
-          : 'Looks good?';
+        while (heroTitle.firstChild) heroTitle.removeChild(heroTitle.firstChild);
+        heroTitle.appendChild(document.createTextNode('A cleaning plan, tailored for '));
+        var em = document.createElement('em');
+        em.id = 'qfRvTitleTarget';
+        em.textContent = companyTarget;
+        heroTitle.appendChild(em);
+        heroTitle.appendChild(document.createTextNode('.'));
       }
+
+      // Kicker: "Prepared for Alex Smith · Acme Real Estate"
+      var kicker = document.getElementById('qfRvKicker');
+      if (kicker) {
+        var kicParts = ['Prepared for'];
+        var kicName = ((STATE.userName || '') + ' ' + (STATE.userLastName || '')).trim();
+        if (kicName) kicParts.push(kicName);
+        if (STATE.companyName && kicName) kicParts.push('\u00b7 ' + STATE.companyName);
+        else if (STATE.companyName) kicParts.push(STATE.companyName);
+        kicker.textContent = kicParts.length > 1 ? kicParts.join(' ') : 'Prepared for your team';
+      }
+
+      // Masthead date + reference
+      var mastDate = document.getElementById('qfRvMastDate');
+      if (mastDate) {
+        try {
+          mastDate.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch (_) { /* keep fallback */ }
+      }
+      var mastRef = document.getElementById('qfRvMastRef');
+      if (mastRef) {
+        // Preview reference — the real one comes from the backend on submit
+        var prefix = STATE.service === 'dayporter' ? 'ECD' : (STATE.service === 'both' ? 'ECB' : 'ECJ');
+        // 4-char stable pseudo-random based on day (same across the same session/day)
+        var seed = (STATE.userEmail || '') + new Date().toDateString();
+        var hash = 0;
+        for (var i = 0; i < seed.length; i++) { hash = ((hash << 5) - hash) + seed.charCodeAt(i); hash |= 0; }
+        var tail = Math.abs(hash).toString(36).toUpperCase().slice(0, 4).padEnd(4, 'X');
+        mastRef.textContent = prefix + '-' + tail + '-' + new Date().getFullYear();
+      }
+
+      // Lede interpolation: address + frequency
+      var ledeAddr = document.getElementById('qfRvLedeAddr');
+      if (ledeAddr) {
+        ledeAddr.textContent = STATE.userAddress || 'your space';
+      }
+      var ledeFreq = document.getElementById('qfRvLedeFreq');
+      if (ledeFreq) {
+        var freqText = 'on your schedule';
+        if (serviceFocus && formatDays && formatDays()) {
+          var days = formatDays();
+          if (days && days !== '(none selected)') {
+            freqText = serviceFocus.toLowerCase() + ' visits ' + days.toLowerCase();
+          }
+        }
+        ledeFreq.textContent = freqText;
+      }
+
       // Re-evaluate floating CTA visibility once layout settles
       setTimeout(function () { if (window.qfRecheckFloatingCta) window.qfRecheckFloatingCta(); }, 60);
       var setVal = function (id, val) {
@@ -2351,6 +2404,43 @@
   updateProgressRing(STATE.currentStepName || 'welcome');
   // Animate the greeting after a tiny delay so the screen fade-in starts first
   setTimeout(animateGreeting, 280);
+
+  /* -----------------------------------------------------------------------
+     Prefill from chat widget handoff — reads ?firstName=&email=&phone=...
+     and auto-populates the personal info inputs. Does NOT overwrite any
+     user-entered data (setValueIfEmpty only fills blank fields).
+     ----------------------------------------------------------------------- */
+  (function prefillFromUrl() {
+    try {
+      if (!location.search) return;
+      var params = new URLSearchParams(location.search);
+      var setIfEmpty = function(id, value) {
+        if (!value) return;
+        var el = document.getElementById(id);
+        if (el && !el.value) {
+          el.value = value;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      };
+      setIfEmpty('qfUserFirstName', params.get('firstName'));
+      setIfEmpty('qfUserLastName', params.get('lastName'));
+      setIfEmpty('qfUserEmail', params.get('email'));
+      setIfEmpty('qfUserPhone', params.get('phone'));
+      setIfEmpty('qfCompanyName', params.get('company'));
+      setIfEmpty('qfAddress', params.get('address'));
+      /* Stash non-input params on STATE for the flow to pick up later */
+      var space = params.get('space');
+      var size = params.get('size');
+      var freq = params.get('freq');
+      var urgency = params.get('urgency');
+      if (typeof STATE !== 'undefined') {
+        if (space) STATE.prefillSpace = space;
+        if (size) STATE.prefillSize = size;
+        if (freq) STATE.prefillFreq = freq;
+        if (urgency) STATE.prefillUrgency = urgency;
+      }
+    } catch (e) {}
+  })();
 
   /* -----------------------------------------------------------------------
      Resume draft — personalized smart defaults when prior session exists.

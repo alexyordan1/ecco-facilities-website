@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=25.2">
+<link rel="stylesheet" href="css/quote-flow.css?v=26.1">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -593,46 +593,50 @@
     <section class="qf-screen step-contact qf-rv" hidden id="qfScreen_contact" aria-label="Review and submit">
       <div class="qf-screen-inner qf-plan-wrap qf-rv-wrap">
 
-        <!-- Ola 6 — Review screen redesign: hero eyebrow + personalized headline -->
-        <header class="qf-plan-hero qf-rv-hero">
-          <span class="qf-rv-eyebrow">
-            <svg class="qf-rv-eyebrow-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3.5 3.5L13 5"/></svg>
-            Final review
-          </span>
-          <h2 class="qf-plan-hero-title qf-rv-title" id="qfPlanHeroTitle">Looks good?</h2>
-          <p class="qf-plan-hero-sub qf-rv-sub">Tap any field to edit. Your proposal lands in your inbox within 24 hours.</p>
-        </header>
+        <!-- Ola 7 · Editorial review (C1) — proposal preview on paper -->
+        <article class="qf-rv-paper" id="qfSummaryCard">
 
-        <!-- Service hero card — consolidates the at-a-glance chips into a premium "your plan" snapshot -->
-        <div class="qf-rv-service" aria-labelledby="qfRvServiceHeader">
-          <div class="qf-rv-service-glyph" id="qfChipService" aria-hidden="true"></div>
-          <div class="qf-rv-service-body">
-            <div class="qf-rv-service-label" id="qfRvServiceHeader">Your plan</div>
-            <div class="qf-rv-service-name-wrap">
-              <span class="qf-rv-service-name" id="qfSumService">&mdash;</span>
-              <button type="button" class="qf-rv-service-edit" data-edit="service" aria-label="Change service type">Change</button>
+          <!-- Gold ribbon -->
+          <div class="qf-rv-ribbon" aria-hidden="true">Draft</div>
+
+          <!-- Masthead -->
+          <header class="qf-rv-mast">
+            <div class="qf-rv-mast-l">
+              <div class="qf-rv-mast-name">Ecco <span class="qf-rv-mast-sub">Facilities &middot; Proposal</span></div>
             </div>
-            <ul class="qf-rv-service-facts" role="list">
-              <li class="qf-rv-fact" id="qfChipSpace" role="listitem" hidden></li>
-              <li class="qf-rv-fact" id="qfChipSize" role="listitem" hidden></li>
-              <li class="qf-rv-fact" id="qfChipDays" role="listitem" hidden></li>
-              <li class="qf-rv-fact" id="qfChipPorters" role="listitem" hidden></li>
-            </ul>
+            <div class="qf-rv-mast-r">
+              <b id="qfRvMastDate">April 20, 2026</b>
+              Reference &middot; <span id="qfRvMastRef">ECJ-A7K3-2026</span>
+            </div>
+          </header>
+
+          <!-- Title block -->
+          <div class="qf-rv-title-block">
+            <span class="qf-rv-kicker" id="qfRvKicker">Prepared for your team</span>
+            <h2 class="qf-plan-hero-title qf-rv-title" id="qfPlanHeroTitle">A cleaning plan, tailored for <em id="qfRvTitleTarget">your space</em>.</h2>
+            <p class="qf-rv-sub">Drafted from the details you shared. Pricing and availability will follow within twenty-four hours &mdash; no commitment until you approve.</p>
           </div>
-        </div>
 
-        <!-- Keep empty #qfPlanChips as a no-op anchor so populateSummary's floating-CTA recheck timer doesn't null-ref -->
-        <div class="qf-plan-chips qf-rv-chips-legacy" id="qfPlanChips" hidden></div>
+          <!-- Lede with drop cap -->
+          <div class="qf-rv-lede-wrap">
+            <p class="qf-rv-lede" id="qfRvLede">
+              Ecco's team will visit <b id="qfRvLedeAddr">your address</b> <em id="qfRvLedeFreq">on your chosen days</em> &mdash; after-hours, out of your tenants' way &mdash; to keep the space in crisp, eco-certified shape. The plan below captures what you told us. Edit anything that looks off, then send.
+            </p>
+          </div>
 
-        <!-- Summary card (single card, premium feel) -->
-        <div class="qf-plan-card" id="qfSummaryCard">
+          <!-- Keep empty #qfPlanChips for populateSummary back-compat (floating-CTA recheck) -->
+          <div class="qf-plan-chips qf-rv-chips-legacy" id="qfPlanChips" hidden></div>
+          <!-- Back-compat hidden glyph for populateSummary (sets textContent on the SERVICE icon) -->
+          <span id="qfChipService" hidden></span>
+          <!-- Back-compat hidden fact nodes -->
+          <span id="qfChipSpace" hidden></span>
+          <span id="qfChipSize" hidden></span>
+          <span id="qfChipDays" hidden></span>
+          <span id="qfChipPorters" hidden></span>
 
-          <div class="qf-rev" id="qfRevInternal" role="presentation">
-
-          <!-- Old Request Summary header removed — replaced by the hero above -->
-
-          <!-- Grid with editable rows -->
-          <div class="qf-rev-grid">
+          <!-- Sections (4 editorial rows) · data-sections preserved for populateSummary + JS edit handlers -->
+          <div class="qf-rev qf-rv-sections-outer" id="qfRevInternal" role="presentation">
+          <div class="qf-rev-grid qf-rv-sections">
 
             <!-- Contact -->
             <div class="qf-rev-cell" data-section="contact">
@@ -874,8 +878,9 @@
             </div>
 
           </div>
+          </div><!-- /.qf-rv-sections-outer -->
 
-          <!-- Ola 6 — Notes card redesigned as standalone bento at the bottom -->
+          <!-- Notes card -->
           <div class="qf-rev-cell qf-rev-special qf-rev-special-cell qf-rv-notes" data-section="notes">
             <div class="qf-rev-cell-head">
               <span class="qf-rev-cell-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
@@ -887,8 +892,24 @@
             <p id="qfSpecialHelp" class="sr-only">Optional. Up to 500 characters.</p>
           </div>
 
-          <!-- Ola 6 — Send block: trust strip INLINE in CTA footer (was floating loose below) -->
-          <div class="qf-rev-foot qf-rev-foot-minimal qf-rv-send">
+          <!-- Signature block -->
+          <div class="qf-rv-sig" aria-hidden="true">
+            <picture class="qf-rv-sig-ava">
+              <source type="image/avif" srcset="images/alina-avatar-192.avif">
+              <source type="image/webp" srcset="images/alina-avatar-192.webp">
+              <img src="images/alina-avatar-192.jpg" alt="" width="56" height="56" loading="lazy" decoding="async">
+            </picture>
+            <div class="qf-rv-sig-body">
+              <span class="qf-rv-sig-yours">Drafted by</span>
+              <span class="qf-rv-sig-name">Alina</span>
+              <span class="qf-rv-sig-role">AI Cleaning Experience Advisor &middot; Ecco Facilities</span>
+            </div>
+          </div>
+
+        </article><!-- /.qf-rv-paper -->
+
+        <!-- Send block outside the paper, attached below -->
+        <div class="qf-rev-foot qf-rev-foot-minimal qf-rv-send">
             <div class="qf-rv-send-trust" aria-hidden="true">
               <span class="qf-rv-send-trust-item">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V4.5a3 3 0 0 1 6 0V7"/></svg>
@@ -917,11 +938,6 @@
             </div>
             <p class="qf-rv-send-delivery" id="qfRvSendDelivery">We'll email your proposal within 24 hours.</p>
           </div>
-
-          <!-- Ola 6 — Legacy trust strip removed (replaced by inline version inside .qf-rv-send block) -->
-
-          </div><!-- /.qf-rev -->
-        </div><!-- /.qf-plan-card -->
 
         <!-- Floating submit bar — appears once the inline CTA scrolls out of view -->
         <div class="qf-plan-floating-cta" id="qfPlanFloatingCta" aria-hidden="true">
@@ -1065,7 +1081,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=23.1"></script>
+<script src="js/quote-flow.js?v=24.1"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
