@@ -389,41 +389,50 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 
 /* ============================================================
    FLOATING QUOTE — visible only when .hero-actions leaves viewport
+   Deferred until DOM ready because .cta-float is parsed after this script.
    ============================================================ */
 (function initFloatingQuoteReveal() {
-  var fq = document.querySelector('.cta-float');
-  if (!fq) return;
+  function init() {
+    var fq = document.querySelector('.cta-float');
+    if (!fq) return;
 
-  var hero = document.querySelector('.hero-actions');
+    var hero = document.querySelector('.hero-actions');
 
-  function show() { fq.classList.add('visible'); }
-  function hide() { fq.classList.remove('visible'); }
+    function show() { fq.classList.add('visible'); }
+    function hide() { fq.classList.remove('visible'); }
 
-  // Pages without .hero-actions fall back to a scroll threshold.
-  if (!hero) {
-    var onScrollFallback = function() {
-      if (window.scrollY > 400) { show(); } else { hide(); }
-    };
-    window.addEventListener('scroll', onScrollFallback, { passive: true });
-    onScrollFallback();
-    return;
-  }
+    // Pages without .hero-actions fall back to a scroll threshold.
+    if (!hero) {
+      var onScrollFallback = function() {
+        if (window.scrollY > 400) { show(); } else { hide(); }
+      };
+      window.addEventListener('scroll', onScrollFallback, { passive: true });
+      onScrollFallback();
+      return;
+    }
 
-  // Legacy browsers without IntersectionObserver: reveal after 2s.
-  if (!('IntersectionObserver' in window)) {
-    setTimeout(show, 2000);
-    return;
-  }
+    // Legacy browsers without IntersectionObserver: reveal after 2s.
+    if (!('IntersectionObserver' in window)) {
+      setTimeout(show, 2000);
+      return;
+    }
 
-  // rootMargin bottom -20%: reveal CTA slightly before hero fully scrolls out.
-  var io = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) { hide(); } else { show(); }
+    // rootMargin bottom -20%: reveal CTA slightly before hero fully scrolls out.
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) { hide(); } else { show(); }
+      });
+    }, {
+      rootMargin: '0px 0px -20% 0px',
+      threshold: 0
     });
-  }, {
-    rootMargin: '0px 0px -20% 0px',
-    threshold: 0
-  });
 
-  io.observe(hero);
+    io.observe(hero);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
