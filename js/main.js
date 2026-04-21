@@ -391,19 +391,22 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
    FLOATING QUOTE — visible only after hero stats leave viewport
    ============================================================ */
 (function initFloatingQuoteOnScroll() {
-  var stats = document.querySelector('.hero-stats');
+  // Observe .hero itself (not .hero-stats) because stats is display:none on mobile.
+  // .hero is always rendered on both viewports.
+  var hero = document.querySelector('.hero');
   var fq = document.querySelector('.cta-float');
-  if (!stats || !fq) return;
+  if (!hero || !fq) return;
   if (!('IntersectionObserver' in window)) { fq.classList.add('visible'); return; }
   var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
-      // Once stats leaves the top of the viewport, show FQ permanently
-      // (no hiding on scroll-up — user decision: persist once visible)
+      // Fire when user has scrolled 70% through the hero — feels responsive
+      // without waiting for the full hero to leave viewport.
+      // Once visible, FQ persists (disconnect observer).
       if (!e.isIntersecting && e.boundingClientRect.top < 0) {
         fq.classList.add('visible');
         obs.disconnect();
       }
     });
-  }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
-  obs.observe(stats);
+  }, { threshold: 0, rootMargin: '-70% 0px 0px 0px' });
+  obs.observe(hero);
 })();
