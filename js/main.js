@@ -383,28 +383,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   }, CYCLE_MS);
 })();
 
-/* ============================================================
-   HERO BADGE — Rotating social proof messages
-   ============================================================ */
-(function initBadgeRotate() {
-  var el = document.querySelector('.hero-badge-text');
-  if (!el || window.innerWidth < 900) return;
-  var msgs = [
-    "NYC's Eco-Certified Facility Partner",
-    '200+ Businesses Trust Us',
-    '5.0 Rated on Google Reviews',
-    '12+ Years Serving All 5 Boroughs'
-  ];
-  var idx = 0;
-  setInterval(function() {
-    el.style.opacity = '0';
-    setTimeout(function() {
-      idx = (idx + 1) % msgs.length;
-      el.textContent = msgs[idx];
-      el.style.opacity = '1';
-    }, 800);
-  }, 5000);
-})();
+/* (hero badge removed from index.html — rotation logic no longer needed) */
 
 /* (mobile word rotation removed — unified in initHeroRotate above) */
 
