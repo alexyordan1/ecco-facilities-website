@@ -296,9 +296,18 @@
   // Error vibration when any field gets marked invalid.
   // AYS Ola 3 #23 — observer now has a disconnect hook for unload/success,
   // preventing memory leaks and stopping haptic spam after the user submits.
+  // AYS Ola 4 Commit L HI-1 — expose observers on a registry so the success
+  // transition and beforeunload can both disconnect them. Prevents memory
+  // growth when the user completes submits + navigates back.
+  var qfObservers = [];
+  function registerObserver(obs) { if (obs) qfObservers.push(obs); return obs; }
+  function disconnectAllObservers() {
+    qfObservers.forEach(function (o) { try { o.disconnect(); } catch (_) {} });
+    qfObservers = [];
+  }
   var invalidObserver = null;
   try {
-    invalidObserver = new MutationObserver(function (muts) {
+    invalidObserver = registerObserver(new MutationObserver(function (muts) {
       for (var i = 0; i < muts.length; i++) {
         var m = muts[i];
         if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
@@ -306,12 +315,10 @@
         var isInvalid  = m.target.classList && m.target.classList.contains('qf-input-invalid');
         if (!wasInvalid && isInvalid) { qfHaptic(QF_HAPTIC.error); return; }
       }
-    });
+    }));
     invalidObserver.observe(document.body || document.documentElement, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class'] });
   } catch (_) {}
-  window.addEventListener('beforeunload', function () {
-    if (invalidObserver) { try { invalidObserver.disconnect(); } catch (_) {} }
-  });
+  window.addEventListener('beforeunload', disconnectAllObservers);
 
   /* -----------------------------------------------------------------------
      Draft persistence — survive refresh + resume next session
@@ -373,8 +380,24 @@
     } catch (_) { return null; }
   }
 
-  // Re-save with full PII once the user accepts cookies mid-session
-  window.addEventListener('ecco:consent-accepted', function () { saveDraft(); }, { once: false });
+  // AYS Ola 4 Commit L LO-4 — keep named listener so we can remove on unload.
+  // Re-save with full PII once the user accepts cookies mid-session.
+  var onConsentAccepted = function () { saveDraft(); };
+  window.addEventListener('ecco:consent-accepted', onConsentAccepted);
+
+  // AYS Ola 4 Commit L ME-11 — when the user revokes consent mid-session,
+  // purge the existing draft so stale PII doesn't linger in localStorage.
+  var onConsentDeclined = function () { try { clearDraft(); } catch (_) {} };
+  window.addEventListener('ecco:consent-declined', onConsentDeclined);
+
+  // Clean up listeners on navigation away so we don't hold page-scope closures
+  // for the lifetime of the browser.
+  window.addEventListener('beforeunload', function () {
+    try {
+      window.removeEventListener('ecco:consent-accepted', onConsentAccepted);
+      window.removeEventListener('ecco:consent-declined', onConsentDeclined);
+    } catch (_) {}
+  });
 
   /* -----------------------------------------------------------------------
      Alina copy — contextual messages per screen
@@ -431,12 +454,25 @@
   };
 
 
+  // AYS Ola 4 Commit L ME-6 — S4_TITLES used to hold raw HTML ("Which <em>days</em>…")
+  // and be assigned via `s4title.innerHTML = …`. Safe today because strings are
+  // hard-coded, but one future refactor (loading from i18n JSON, CMS, localStorage)
+  // would turn this into an XSS. Now split into safe text segments.
   var S4_TITLES = {
-    janitorial: 'Which <em>days</em> should we clean?',
-    dayporter:  'Which <em>days</em> do you need your porter?',
-    both:       'Which <em>days</em> do you need coverage?',
-    unsure:     'Which <em>days</em> do you need service?'
+    janitorial: { before: 'Which ', emphasis: 'days', after: ' should we clean?' },
+    dayporter:  { before: 'Which ', emphasis: 'days', after: ' do you need your porter?' },
+    both:       { before: 'Which ', emphasis: 'days', after: ' do you need coverage?' },
+    unsure:     { before: 'Which ', emphasis: 'days', after: ' do you need service?' }
   };
+  function renderS4Title(el, tpl) {
+    if (!el || !tpl) return;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    el.appendChild(document.createTextNode(tpl.before));
+    var em = document.createElement('em');
+    em.textContent = tpl.emphasis;
+    el.appendChild(em);
+    el.appendChild(document.createTextNode(tpl.after));
+  }
 
   var SIZE_LABELS = {
     'under3k': 'Under 3,000 sq ft',
@@ -538,23 +574,38 @@
      Rail — dynamic rebuild + updates
      ----------------------------------------------------------------------- */
 
-  /** Build rail HTML for the given service */
+  /** Build rail DOM for the given service. AYS Ola 4 Commit L ME-5 —
+      no more innerHTML string concat. If RAIL_CONFIGS ever pulled from
+      an API or localStorage, the old pattern was one rename away from XSS. */
   function buildRail(service) {
     if (!railStations) return;
     var config = RAIL_CONFIGS[service] || RAIL_CONFIGS.unsure;
-    var html = '';
+    // Clear existing content
+    while (railStations.firstChild) railStations.removeChild(railStations.firstChild);
     config.forEach(function (station, i) {
-      // The first station ('welcome'/service) is already done once a service is picked
-      var cls = i === 0 ? ' is-done' : (i === 1 ? ' is-current' : '');
-      var val = i === 0 ? (SERVICE_LABELS[service] || 'Service') : (i === 1 ? 'Choose now' : '\u2014');
-      var pendingCls = i > 0 ? ' qf-rail-value-pending' : '';
-      html += '<li class="qf-rail-station' + cls + '" data-key="' + station.key + '">'
-            + '<span class="qf-rail-dot" aria-hidden="true"></span>'
-            + '<span class="qf-rail-label">' + station.label + '</span>'
-            + '<span class="qf-rail-value' + pendingCls + '">' + val + '</span>'
-            + '</li>';
+      var li = document.createElement('li');
+      li.className = 'qf-rail-station' + (i === 0 ? ' is-done' : (i === 1 ? ' is-current' : ''));
+      li.setAttribute('data-key', station.key);
+      if (i === 1) li.setAttribute('aria-current', 'step');
+
+      var dot = document.createElement('span');
+      dot.className = 'qf-rail-dot';
+      dot.setAttribute('aria-hidden', 'true');
+
+      var label = document.createElement('span');
+      label.className = 'qf-rail-label';
+      label.textContent = station.label;
+
+      var val = document.createElement('span');
+      val.className = 'qf-rail-value' + (i > 0 ? ' qf-rail-value-pending' : '');
+      val.textContent = i === 0 ? (SERVICE_LABELS[service] || 'Service')
+                      : (i === 1 ? 'Choose now' : '\u2014');
+
+      li.appendChild(dot);
+      li.appendChild(label);
+      li.appendChild(val);
+      railStations.appendChild(li);
     });
-    railStations.innerHTML = html;
   }
 
   /** Update progress ring on Alina avatars — shows % of flow completed */
@@ -735,6 +786,12 @@
   function goToScreen(name, direction) {
     var to = SCREENS[name];
     if (!to) return;
+    // AYS Ola 4 Commit L HI-1/HI-2 — release all Mutation/Intersection observers
+    // when we reach the success screen. The form is effectively done; no need
+    // to keep watching invalid states, floater button props, or section activation.
+    if (name === 'success') {
+      try { disconnectAllObservers(); } catch (_) {}
+    }
     // Sprint 3 — direction-aware transitions. Default 'fwd'.
     var dir = direction === 'back' ? 'back' : 'fwd';
     to.classList.remove('qf-screen--entering-fwd', 'qf-screen--entering-back');
@@ -805,7 +862,7 @@
       var alinaEl = getAlinaTextEl('days');
       if (alinaEl) alinaEl.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
       var s4title = document.getElementById('qfS4Title');
-      if (s4title) s4title.innerHTML = S4_TITLES[STATE.service] || S4_TITLES.unsure;
+      if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
       setTimeout(syncDaysUI, 80);
     }
 
@@ -1122,8 +1179,15 @@
           showLocErr('Please enter your address or ZIP code so we can match you with the right local team.', addressInput);
           return;
         }
-        if (addr.length < 5 || !/\d/.test(addr)) {
-          showLocErr('Include a street number or a 5-digit ZIP (e.g. "10001" or "350 5th Ave").', addressInput);
+        // AYS Ola 4 Commit L HI-4 — stricter address validation. Reject inputs
+        // that are just "1" or "x9x" or other garbage. Accept EITHER a 5-digit
+        // US ZIP standalone OR a street-style line with a number + word chars.
+        var isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(addr);
+        var hasStreetShape = addr.length >= 6
+          && /\d/.test(addr)
+          && /[A-Za-z]{2,}/.test(addr);
+        if (!isZip && !hasStreetShape) {
+          showLocErr('Include a street number + name or a 5-digit ZIP (e.g. "10001" or "350 5th Ave").', addressInput);
           return;
         }
         clearLocErr();
@@ -1164,7 +1228,7 @@
           var s4msg = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
           if (alinaEl) alinaEl.textContent = s4msg;
           var s4title = document.getElementById('qfS4Title');
-          if (s4title) s4title.innerHTML = S4_TITLES[STATE.service] || S4_TITLES.unsure;
+          if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
         }
         goNext();
       });
@@ -1185,7 +1249,7 @@
 
       // Set contextual title
       var s4title = SCREENS.days ? SCREENS.days.querySelector('.qf-s4-title, [id="qfS4Title"]') : null;
-      if (s4title) s4title.innerHTML = S4_TITLES[STATE.service] || S4_TITLES.unsure;
+      if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
 
       syncDaysUI();
 
@@ -1398,7 +1462,7 @@
     }
 
     // When the porter screen becomes active, personalize Alina's line by space type
-    var porterEnterObs = new MutationObserver(function (mutations) {
+    var porterEnterObs = registerObserver(new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
         if (m.target === SCREENS.porter && SCREENS.porter.classList.contains('is-active')) {
           var alina = document.getElementById('qfAlinaSaysPorter');
@@ -1406,7 +1470,7 @@
           alina.textContent = ALINA_PORTER_BY_SPACE[STATE.space] || ALINA_PORTER_BY_SPACE.Other;
         }
       });
-    });
+    }));
     porterEnterObs.observe(SCREENS.porter, { attributes: true, attributeFilter: ['class'] });
 
     // Quick-pick cards — auto-advance
@@ -1468,13 +1532,13 @@
      ======================================================================= */
   if (SCREENS.contact) {
     // Populate summary when screen becomes active
-    var contactObserver = new MutationObserver(function (mutations) {
+    var contactObserver = registerObserver(new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
         if (m.target === SCREENS.contact && SCREENS.contact.classList.contains('is-active')) {
           populateSummary();
         }
       });
-    });
+    }));
     contactObserver.observe(SCREENS.contact, { attributes: true, attributeFilter: ['class'] });
 
     function formatPorters() {
@@ -1800,7 +1864,11 @@
       if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email is missing or invalid.' });
       if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'First name is missing.' });
       if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone number is invalid.' });
-      if (!STATE.userAddress || STATE.userAddress.length < 5 || !/\d/.test(STATE.userAddress)) errs.push({ field: 'address', msg: 'A valid address or ZIP is missing.' });
+      // AYS Ola 4 Commit L HI-4 — mirror the stricter check from the location step.
+      var _a = STATE.userAddress || '';
+      var _isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(_a);
+      var _hasStreet = _a.length >= 6 && /\d/.test(_a) && /[A-Za-z]{2,}/.test(_a);
+      if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'A valid address or ZIP is missing.' });
       if (!STATE.space) errs.push({ field: 'space', msg: 'Space type is missing.' });
       if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Space size is missing.' });
       if (!STATE.days || !STATE.days.length) errs.push({ field: 'days', msg: 'Please pick at least one service day.' });
@@ -1828,7 +1896,10 @@
         if (mainBtn.hasAttribute('aria-busy')) floaterBtn.setAttribute('aria-busy', 'true');
         else floaterBtn.removeAttribute('aria-busy');
       };
-      new MutationObserver(mirrorState).observe(mainBtn, { attributes: true, attributeFilter: ['disabled', 'aria-busy'] });
+      // AYS Ola 4 Commit L HI-2 — register observer for global cleanup so
+      // success transitions and unload can disconnect it.
+      var floaterMirrorObs = registerObserver(new MutationObserver(mirrorState));
+      floaterMirrorObs.observe(mainBtn, { attributes: true, attributeFilter: ['disabled', 'aria-busy'] });
 
       // Decide visibility based on scroll position + viewport
       var rafPending = false;
@@ -1909,18 +1980,44 @@
         // before submitting. If the token never arrives we still try the
         // fetch — the backend's captcha check will return a friendly 403 and
         // the user can retry.
+        // AYS Ola 4 Commit L HI-3 — cancel pending setTimeout chain when the
+        // Promise resolves early (token arrived or timeout). Previous
+        // implementation let orphaned timers fire after resolve, touching
+        // stale state and leaking closures.
         function awaitTurnstile() {
           return new Promise(function (resolve) {
             if (window.qfTurnstileToken) return resolve(window.qfTurnstileToken);
             if (!window.turnstile) return resolve(null);
             try { window.turnstile.execute('#qfTurnstile'); } catch (_) {}
             var start = Date.now();
+            var timerId = null;
+            var settled = false;
+            function done(v) {
+              if (settled) return;
+              settled = true;
+              if (timerId) { clearTimeout(timerId); timerId = null; }
+              resolve(v);
+            }
             (function check() {
-              if (window.qfTurnstileToken) return resolve(window.qfTurnstileToken);
-              if (Date.now() - start > 8000) return resolve(null);
-              setTimeout(check, 120);
+              if (settled) return;
+              if (window.qfTurnstileToken) return done(window.qfTurnstileToken);
+              if (Date.now() - start > 8000) return done(null);
+              timerId = setTimeout(check, 120);
             })();
           });
+        }
+
+        // AYS Ola 4 Commit L CR-1 — Turnstile tokens are single-use. After each
+        // submit attempt (success OR error), clear the cached token and reset
+        // the widget so the next retry requests a fresh one. Prevents the
+        // "backend 403: token already used" loop on resubmit.
+        function resetTurnstile() {
+          window.qfTurnstileToken = null;
+          try {
+            if (window.turnstile && typeof window.turnstile.reset === 'function') {
+              window.turnstile.reset('#qfTurnstile');
+            }
+          } catch (_) {}
         }
 
         awaitTurnstile().then(function (token) {
@@ -1935,6 +2032,7 @@
           return res.json().then(function (data) { return { ok: res.ok, data: data }; });
         }).then(function (result) {
           if (!result.ok || !result.data || !result.data.ok) {
+            resetTurnstile();
             var msg = (result.data && result.data.error) || 'Please try again or email info@eccofacilities.com.';
             qfToast({ type:'error', title:'Submission failed', message: msg, duration: 7000 });
             submitBtn.disabled = false;
@@ -1943,6 +2041,9 @@
             submitBtn.innerHTML = originalHTML;
             return;
           }
+          // Success path — also reset so a quick nav-back-and-resubmit doesn't
+          // reuse a stale token (edge case but keeps state clean).
+          resetTurnstile();
           // Success: show success screen
           // Fix #30 — if backend didn't return a ref, generate a readable one client-side
           var refNumber = result.data.ref || (
@@ -2028,8 +2129,9 @@
           }
           goNext();
         }).catch(function (err) {
-          // AYS Ola 3 Commit G #40 — differentiate captcha-timeout failures from
-          // pure network errors so users know whether to retry or contact support.
+          // AYS Ola 3 Commit G #40 + Ola 4 Commit L CR-1 — differentiate captcha
+          // failures from network errors AND reset the stale token so retry works.
+          resetTurnstile();
           var msg = (err && /captcha|turnstile/i.test(err.message || ''))
             ? 'Captcha didn\u2019t load. Please refresh and try again.'
             : 'Check your connection and try again, or email info@eccofacilities.com.';
