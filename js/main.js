@@ -390,22 +390,31 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 /* ============================================================
    FLOATING QUOTE — visible only after hero stats leave viewport
    ============================================================ */
-(function initFloatingQuoteOnScroll() {
-  // Scroll-position-based trigger (more reliable than IntersectionObserver
-  // across all browsers / edge cases). Shows FQ once user scrolls ~40% of
-  // viewport height, then persists (removes listener).
+(function initFloatingQuoteReveal() {
+  // Bulletproof FQ reveal: shows on ANY scroll >100px OR after 2.5s fallback.
+  // Sets inline styles directly — bypasses any CSS class/transition issues.
   var fq = document.querySelector('.cta-float');
   if (!fq) return;
   var shown = false;
-  function onScroll() {
+  function show() {
     if (shown) return;
-    if (window.scrollY > window.innerHeight * 0.4) {
-      fq.classList.add('visible');
-      shown = true;
+    shown = true;
+    fq.classList.add('visible');
+    // Belt-and-suspenders: inline styles guarantee it's visible even if
+    // the CSS class rule has cascade issues on any browser.
+    fq.style.opacity = '1';
+    fq.style.transform = 'translateY(0)';
+    fq.style.pointerEvents = 'auto';
+  }
+  // Safety timer: after 2.5s, show it regardless of scroll.
+  var safetyTimer = setTimeout(show, 2500);
+  function onScroll() {
+    if (window.scrollY > 100) {
+      clearTimeout(safetyTimer);
+      show();
       window.removeEventListener('scroll', onScroll);
     }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
-  // Trigger once in case page loads already scrolled (e.g. anchor, refresh)
   onScroll();
 })();
