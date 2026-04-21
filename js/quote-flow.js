@@ -1016,9 +1016,14 @@
   // and trailing-hyphen domains. Client-first validation matches server so
   // users see errors before a round-trip.
   var EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
-  // AYS Ola 3 #31 — expanded disposable-email block list (top-100 most-used
-  // disposable providers as of 2025). Soft warning only — some legit users
-  // forward to aliases, so we warn but don't block.
+  // AYS Ola 3 #31 — disposable-email block list. Soft warning only — some legit
+  // users forward to aliases, so we warn but don't block.
+  //
+  // LAST_REVIEWED: 2026-04-20 (Ola 5). Review quarterly. When refreshing, cross-
+  // check against https://github.com/disposable-email-domains/disposable-email-domains
+  // (MIT-licensed community list). Expected growth: ~5-10 domains per quarter.
+  // Adding more than the top-100 hurts first-load cost without preventing real
+  // fraud — bots that rotate domains beat any static list anyway.
   var DISPOSABLE_EMAIL_DOMAINS = [
     'mailinator.com','tempmail.com','10minutemail.com','10minutemail.net','throwaway.email','guerrillamail.com',
     'guerrillamail.net','guerrillamail.info','guerrillamailblock.com','yopmail.com','fakeinbox.com','trashmail.com',
@@ -1033,7 +1038,10 @@
     'temp-mail.ru','tempmail.ninja','10minutesmail.com','30minutemail.com','fake-mail.net','fake-mail.ml',
     'fakeinformation.com','harakirimail.jp','sendspamhere.com','spamherelots.com','spamex.com','spamfree24.com',
     'spammotel.com','spamify.com','temporaryemail.net','trash-mail.com','trashdevil.com','trbvm.com',
-    'wegwerfemail.com','wegwerfmail.de','wegwerfmail.net','wegwerfmail.org','wh4f.org','yopmail.fr','yopmail.net'
+    'wegwerfemail.com','wegwerfmail.de','wegwerfmail.net','wegwerfmail.org','wh4f.org','yopmail.fr','yopmail.net',
+    // 2026 Q2 additions — newly popular disposable providers detected in the wild
+    'tempmail.plus','inboxkitten.com','linshiyouxiang.net','emailfake.com','tempail.top','mail.tm',
+    'tempr.email','minuteinbox.com','luxusmail.org','sute.jp','gufum.com','trashmail.ws'
   ];
   function isDisposableEmail(e) {
     var m = /@([^@]+)$/.exec((e || '').toLowerCase());
