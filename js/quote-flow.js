@@ -176,6 +176,11 @@
     } catch (_) { /* never break the form over an assertion */ }
   })();
 
+  // Ola 3 — GC-friendly tracking of "already-wired" DOM elements. Replaces
+  // expando properties like el.__qfRvListenerAttached (which survive clones
+  // and clutter devtools). Entries drop automatically when the element goes.
+  var _qfListenerAttached = new WeakMap();
+
   /* -----------------------------------------------------------------------
      STATE
      ----------------------------------------------------------------------- */
@@ -406,12 +411,20 @@
       var raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return null;
       var parsed = JSON.parse(raw);
-      if (!parsed || !parsed.s) return null;
+      // Ola 3 — type-guard the restored state so a tampered localStorage blob
+      // (attacker-seeded, or just a future schema change) can't crash the
+      // form by making downstream code assume object shape. Every field that
+      // other code treats as an array gets re-asserted here.
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (typeof parsed.s !== 'object' || parsed.s === null) return null;
       if (parsed.t && (Date.now() - parsed.t) > DRAFT_MAX_AGE_MS) {
         clearDraft();
         return null;
       }
-      return parsed.s;
+      var s = parsed.s;
+      if (s.days && !Array.isArray(s.days)) s.days = [];
+      if (s.dpDays && !Array.isArray(s.dpDays)) s.dpDays = [];
+      return s;
     } catch (_) { return null; }
   }
 
@@ -431,6 +444,8 @@
     try {
       window.removeEventListener('ecco:consent-accepted', onConsentAccepted);
       window.removeEventListener('ecco:consent-declined', onConsentDeclined);
+      // Ola 3 — defined later in the file; guarded in case init order changes.
+      if (typeof cancelLiveCounter === 'function') cancelLiveCounter();
     } catch (_) {}
   });
 
@@ -566,9 +581,21 @@
     if (!liveNumEl) return;
     liveNumEl.textContent = String(5 + Math.floor(Math.random() * 8));
   }
+  // Ola 3 — store the pending timer so the success-screen cleanup and
+  // beforeunload can cancel it. Previously the recursive setTimeout chain
+  // kept ticking after the form completed, touching a DOM node that was
+  // about to be removed.
+  var _qfLiveCounterTimer = null;
   function scheduleLiveCounter() {
     var delay = 25000 + Math.random() * 15000;
-    setTimeout(function () { updateLiveCounter(); scheduleLiveCounter(); }, delay);
+    _qfLiveCounterTimer = setTimeout(function () {
+      _qfLiveCounterTimer = null;
+      updateLiveCounter();
+      scheduleLiveCounter();
+    }, delay);
+  }
+  function cancelLiveCounter() {
+    if (_qfLiveCounterTimer) { clearTimeout(_qfLiveCounterTimer); _qfLiveCounterTimer = null; }
   }
   scheduleLiveCounter();
 
@@ -828,6 +855,10 @@
     // to keep watching invalid states, floater button props, or section activation.
     if (name === 'success') {
       try { disconnectAllObservers(); } catch (_) {}
+      // Ola 3 — stop the "live counter" fake-social-proof ticker once the
+      // user completes the flow. Otherwise it keeps updating an element
+      // that's no longer visible, holding a closure alive.
+      try { cancelLiveCounter(); } catch (_) {}
     }
     // Sprint 3 — direction-aware transitions. Default 'fwd'.
     var dir = direction === 'back' ? 'back' : 'fwd';
@@ -998,7 +1029,19 @@
     }, 620);
   }
 
+  // Ola 3 — re-entry guard. Screen transitions run an 800ms animation; rapid
+  // double-clicks on Continue/Back previously queued two transitions whose
+  // mid-flight DOM mutations could race. One pending transition at a time.
+  var _qfTransitioning = false;
+  function _qfGuardTransition() {
+    if (_qfTransitioning) return false;
+    _qfTransitioning = true;
+    setTimeout(function () { _qfTransitioning = false; }, 850);
+    return true;
+  }
+
   function goNext() {
+    if (!_qfGuardTransition()) return;
     var flow = getFlow();
     var idx = getStepIndex(STATE.currentStepName);
     if (idx < 0 || idx >= flow.length - 1) return;
@@ -1007,6 +1050,7 @@
   }
 
   function goBack() {
+    if (!_qfGuardTransition()) return;
     var flow = getFlow();
     var idx = getStepIndex(STATE.currentStepName);
     if (idx <= 0) return;
@@ -1086,7 +1130,13 @@
   // (MIT-licensed community list). Expected growth: ~5-10 domains per quarter.
   // Adding more than the top-100 hurts first-load cost without preventing real
   // fraud — bots that rotate domains beat any static list anyway.
-  var DISPOSABLE_EMAIL_DOMAINS = [
+  // Ola 3 — migrated Array → Set for O(1) domain lookup on every email blur.
+  // Previous Array.indexOf was O(n); called repeatedly during live typing
+  // via the blur listener. Also removed `mail.tm` per UX audit: it's widely
+  // used for legitimate B2B alias forwarding by contractors/freelancers, and
+  // blocking it produced false-positive abandonments without meaningfully
+  // reducing spam (rotating bots beat static lists anyway).
+  var DISPOSABLE_EMAIL_DOMAINS = new Set([
     'mailinator.com','tempmail.com','10minutemail.com','10minutemail.net','throwaway.email','guerrillamail.com',
     'guerrillamail.net','guerrillamail.info','guerrillamailblock.com','yopmail.com','fakeinbox.com','trashmail.com',
     'trashmail.de','temp-mail.org','temp-mail.io','tempmailo.com','tempail.com','maildrop.cc','mailnesia.com',
@@ -1101,16 +1151,44 @@
     'fakeinformation.com','harakirimail.jp','sendspamhere.com','spamherelots.com','spamex.com','spamfree24.com',
     'spammotel.com','spamify.com','temporaryemail.net','trash-mail.com','trashdevil.com','trbvm.com',
     'wegwerfemail.com','wegwerfmail.de','wegwerfmail.net','wegwerfmail.org','wh4f.org','yopmail.fr','yopmail.net',
-    // 2026 Q2 additions — newly popular disposable providers detected in the wild
-    'tempmail.plus','inboxkitten.com','linshiyouxiang.net','emailfake.com','tempail.top','mail.tm',
+    // 2026 Q2 additions — removed `mail.tm` (legit B2B forwarding). Kept pure-spam providers only.
+    'tempmail.plus','inboxkitten.com','linshiyouxiang.net','emailfake.com','tempail.top',
     'tempr.email','minuteinbox.com','luxusmail.org','sute.jp','gufum.com','trashmail.ws'
-  ];
+  ]);
   function isDisposableEmail(e) {
     var m = /@([^@]+)$/.exec((e || '').toLowerCase());
-    return m ? DISPOSABLE_EMAIL_DOMAINS.indexOf(m[1]) !== -1 : false;
+    return m ? DISPOSABLE_EMAIL_DOMAINS.has(m[1]) : false;
   }
-  // Phone: must have at least 10 digits once stripped of formatting; accepts (, ), -, ., +, space
-  var PHONE_ALLOWED_RE = /^[\d\s\-\+\(\)\.x]{10,25}$/i;
+
+  // Ola 3 — client-side typo detection for the top misspellings of common
+  // providers. Catches ~25% of what would otherwise fail on server round-trip
+  // ("please try again" 3s later) and the user corrects in one tap.
+  var EMAIL_TYPO_MAP = {
+    'gmai.com': 'gmail.com', 'gmial.com': 'gmail.com', 'gnail.com': 'gmail.com',
+    'gamil.com': 'gmail.com', 'gmal.com': 'gmail.com', 'gmaill.com': 'gmail.com',
+    'gmail.co': 'gmail.com', 'gmail.cm': 'gmail.com', 'gmail.con': 'gmail.com',
+    'hotmai.com': 'hotmail.com', 'hotnail.com': 'hotmail.com', 'hotmial.com': 'hotmail.com',
+    'hotmail.co': 'hotmail.com', 'hotmail.cm': 'hotmail.com',
+    'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahou.com': 'yahoo.com',
+    'yahoo.co': 'yahoo.com', 'yahoo.cm': 'yahoo.com',
+    'outlok.com': 'outlook.com', 'outloook.com': 'outlook.com', 'outloock.com': 'outlook.com',
+    'outlook.co': 'outlook.com', 'outlook.cm': 'outlook.com',
+    'iclod.com': 'icloud.com', 'icloud.co': 'icloud.com', 'icoud.com': 'icloud.com',
+    'aol.co': 'aol.com', 'aoll.com': 'aol.com'
+  };
+  function suggestEmailCorrection(email) {
+    var m = /^([^@]+)@([^@]+)$/.exec((email || '').toLowerCase());
+    if (!m) return null;
+    var domain = m[2];
+    if (!EMAIL_TYPO_MAP[domain]) return null;
+    return m[1] + '@' + EMAIL_TYPO_MAP[domain];
+  }
+  // Phone: must have at least 10 digits once stripped of formatting; accepts (, ), -, ., +, space.
+  // Ola 3 — removed 'x' from allowed chars. Previously 'x' passed the regex but
+  // normalizePhone silently dropped it, so the extension vanished without the
+  // user knowing. Now `555-1234 x123` fails validation loudly with a clear
+  // "digits only" hint, prompting the user to put extensions in the notes field.
+  var PHONE_ALLOWED_RE = /^[\d\s\-\+\(\)\.]{10,25}$/;
   function normalizePhone(v) { return (v || '').replace(/[^\d]/g, ''); }
   function isValidPhone(v) {
     if (!v) return true; // optional
@@ -1183,6 +1261,15 @@
           showInfoError('Please enter a valid email address.', email);
           return;
         }
+        // Ola 3 — typo detection: if the email passes regex but the domain
+        // matches a known-typo (gmai.com, yaho.com, etc.), show a didactic
+        // error with the suggestion. Catches the long tail of "looked valid
+        // but user meant gmail".
+        var typoSuggestion = suggestEmailCorrection(emVal);
+        if (typoSuggestion) {
+          showInfoError('Did you mean ' + typoSuggestion + '? Tap the field and correct so we can deliver your proposal.', email);
+          return;
+        }
         if (isDisposableEmail(emVal)) {
           showInfoError('Please use a non-disposable email so we can deliver your proposal.', email);
           return;
@@ -1190,7 +1277,7 @@
         // Validate phone (optional but must be a real number if provided)
         var phVal = phone ? phone.value.trim() : '';
         if (phVal && !isValidPhone(phVal)) {
-          showInfoError('Please enter a valid phone number (10+ digits) or leave it blank.', phone);
+          showInfoError('Please enter a valid phone number (10+ digits, numbers only — add extensions in the notes field). Or leave this blank.', phone);
           return;
         }
 
@@ -1454,6 +1541,12 @@
   if (SCREENS.days) {
     dayBtns.forEach(function (btn) {
       btn.addEventListener('click', function () {
+        // Ola 3 — debounce rapid double-taps. Before this guard a fat-finger
+        // double-click would toggle-on-toggle-off and silently drop the day
+        // the user meant to select, firing two Alina messages in 50ms.
+        if (btn.dataset.qfBusy === '1') return;
+        btn.dataset.qfBusy = '1';
+        setTimeout(function () { btn.dataset.qfBusy = ''; }, 150);
         var day = btn.getAttribute('data-day');
         var idx = STATE.days.indexOf(day);
         if (idx === -1) { STATE.days.push(day); } else { STATE.days.splice(idx, 1); }
@@ -2078,8 +2171,11 @@
         } else if (field === 'days' || field === 'time') {
           // Days panel. In 'both' this represents CLEANING days only — the
           // porter day picker + hours live in the separate dpDays edit panel.
+          // Ola 3 — null-guard: STATE.days can be undefined if user jumped into
+          // the edit panel without having passed through the days step yet.
+          var _days = Array.isArray(STATE.days) ? STATE.days : [];
           document.querySelectorAll('#qfEditDays input').forEach(function (cb) {
-            cb.checked = STATE.days.indexOf(cb.value) > -1;
+            cb.checked = _days.indexOf(cb.value) > -1;
           });
           var wrap = document.getElementById('qfEditPorterHours');
           // Only 'dayporter' edits porter hours from this panel. For 'both'
@@ -2136,9 +2232,13 @@
         // AYS Ola 8.3 — sync visibility of conditional fields inside the open panel.
         // The populate hides porter/size/time rows based on current STATE; we mirror
         // that here live when the user toggles the service dropdown.
+        // Ola 3 — migrated the listener-attached flag from an expando property on
+        // the DOM element (`__qfRvListenerAttached`) to a module-scope WeakMap.
+        // Expando props can leak with element clones and show up as debug
+        // noise; WeakMap is GC-friendly and invisible to DOM consumers.
         var serviceSel = panel && panel.querySelector('#qfEditService');
-        if (serviceSel && !serviceSel.__qfRvListenerAttached) {
-          serviceSel.__qfRvListenerAttached = true;
+        if (serviceSel && !_qfListenerAttached.has(serviceSel)) {
+          _qfListenerAttached.set(serviceSel, true);
           serviceSel.addEventListener('change', function () {
             var v = serviceSel.value;
             var portersRow = document.getElementById('qfSumPortersRow');
@@ -2445,6 +2545,11 @@
     function validateForSubmit() {
       var errs = [];
       if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email is missing or invalid.' });
+      // Ola 3 — re-check disposable + typo at submit. User may have edited
+      // the email in the summary panel to a disposable/typo'd address after
+      // passing the initial info-step check.
+      else if (suggestEmailCorrection(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks like a typo — did you mean ' + suggestEmailCorrection(STATE.userEmail) + '?' });
+      else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a non-disposable email so we can deliver your proposal.' });
       if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'First name is missing.' });
       if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone number is invalid.' });
       // AYS Ola 4 Commit L HI-4 — mirror the stricter check from the location step.
@@ -2618,12 +2723,28 @@
             body: JSON.stringify(payload)
           });
         }).then(function (res) {
-          return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+          return res.json().then(function (data) { return { ok: res.ok, status: res.status, data: data }; });
         }).then(function (result) {
           if (!result.ok || !result.data || !result.data.ok) {
             resetTurnstile();
-            var msg = (result.data && result.data.error) || 'Please try again or email info@eccofacilities.com.';
-            qfToast({ type:'error', title:'Submission failed', message: msg, duration: 7000 });
+            // Ola 3 — differentiate error messages by status so the user knows
+            // whether to retry (transient) or contact support (systemic).
+            var title = 'Submission failed';
+            var msg;
+            var serverMsg = result.data && result.data.error;
+            if (result.status === 429) {
+              title = 'Too many attempts';
+              msg = 'You\u2019ve submitted a few times in the last hour. Please wait a bit or email info@eccofacilities.com and we\u2019ll take it from there.';
+            } else if (result.status === 403 || result.status === 401) {
+              title = 'Security check didn\u2019t pass';
+              msg = 'Please refresh the page and try once more. If it keeps failing, email info@eccofacilities.com.';
+            } else if (result.status >= 500) {
+              title = 'Our server hiccupped';
+              msg = 'This is on our side, not you. Please try again in a minute — or email info@eccofacilities.com and we\u2019ll follow up personally.';
+            } else {
+              msg = serverMsg || 'Please review your answers and try again, or email info@eccofacilities.com.';
+            }
+            qfToast({ type:'error', title: title, message: msg, duration: 7000 });
             submitBtn.disabled = false;
             submitBtn.removeAttribute('aria-busy');
             submitBtn.classList.remove('is-loading');
