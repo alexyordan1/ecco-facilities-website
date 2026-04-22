@@ -2808,19 +2808,35 @@
      ======================================================================= */
   var exitShown = false;
 
+  // Ola 2 — a11y: track the element that had focus before the modal
+  // opened so we can restore it on close.
+  var exitPrevFocus = null;
+  function qfExitClose() {
+    if (!exitOverlay || exitOverlay.hidden) return;
+    exitOverlay.hidden = true;
+    if (exitPrevFocus && typeof exitPrevFocus.focus === 'function') {
+      try { exitPrevFocus.focus(); } catch (e) { /* ignore */ }
+    }
+    exitPrevFocus = null;
+  }
+  function qfExitOpen() {
+    if (!exitOverlay || exitShown) return;
+    exitShown = true;
+    sessionStorage.setItem('qf_exit_shown', '1');
+    exitPrevFocus = document.activeElement;
+    exitOverlay.hidden = false;
+    // Focus the email input on open so keyboard users land inside the dialog.
+    var firstInput = exitOverlay.querySelector('input, button');
+    if (firstInput) setTimeout(function () { try { firstInput.focus(); } catch (e) {} }, 0);
+  }
+
   if (exitOverlay && !sessionStorage.getItem('qf_exit_shown')) {
     // Delay exit intent — only arm after 20 seconds on page
     setTimeout(function () {
-      var showExit = function () {
-        if (exitShown) return;
-        exitShown = true;
-        sessionStorage.setItem('qf_exit_shown', '1');
-        exitOverlay.hidden = false;
-      };
       // Desktop: detect mouse leaving the top edge of the viewport
       document.addEventListener('mouseleave', function (e) {
         if (e.clientY > 5) return;
-        showExit();
+        qfExitOpen();
       });
       // AYS Ola 3 #16 — mobile equivalent: fire when the tab becomes hidden,
       // which covers switching apps, pulling up the URL bar, or closing the tab.
@@ -2828,15 +2844,27 @@
       if (qfTouchFirst) {
         document.addEventListener('visibilitychange', function () {
           if (document.visibilityState === 'hidden' && STATE.currentStepName !== 'welcome' && STATE.currentStepName !== 'success') {
-            showExit();
+            qfExitOpen();
           }
         });
       }
     }, 20000);
   }
   if (exitClose) {
-    exitClose.addEventListener('click', function () {
-      if (exitOverlay) exitOverlay.hidden = true;
+    exitClose.addEventListener('click', qfExitClose);
+  }
+  // Ola 2 — ESC closes the dialog; Tab is trapped inside the dialog so
+  // keyboard users can't walk into stale form controls behind it.
+  if (exitOverlay) {
+    document.addEventListener('keydown', function (e) {
+      if (exitOverlay.hidden) return;
+      if (e.key === 'Escape') { e.preventDefault(); qfExitClose(); return; }
+      if (e.key !== 'Tab') return;
+      var focusables = exitOverlay.querySelectorAll('input, button, a[href], [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
   }
   if (exitForm) {
@@ -2861,7 +2889,7 @@
         .finally(function () {
           if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
           qfToast({ type:'success', title:'We\u2019ve got your spot', message:'We\u2019ll follow up with ' + val + ' so you can pick this up later.' });
-          if (exitOverlay) exitOverlay.hidden = true;
+          qfExitClose();
           // Save draft so resume banner works too
           STATE.userEmail = STATE.userEmail || val;
           saveDraft();

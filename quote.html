@@ -31,7 +31,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/alina-avatar-192.webp" type="image/webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=28.5">
+<link rel="stylesheet" href="css/quote-flow.css?v=28.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -504,7 +504,7 @@
           </div>
         </div>
         <div class="qf-s4-bottom">
-          <span class="qf-s4-count" id="qfDaysCount"></span>
+          <span class="qf-s4-count" id="qfDaysCount" aria-live="polite" aria-atomic="true"></span>
           <button type="button" class="qf-s4-continue" id="qfDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
         </div>
       </div>
@@ -545,7 +545,7 @@
           </div>
         </div>
         <div class="qf-s4-bottom">
-          <span class="qf-s4-count" id="qfDpDaysCount"></span>
+          <span class="qf-s4-count" id="qfDpDaysCount" aria-live="polite" aria-atomic="true"></span>
           <button type="button" class="qf-s4-continue" id="qfDpDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
         </div>
       </div>
@@ -833,7 +833,7 @@
         <div class="qf-rv-notes" data-section="notes">
           <div class="qf-rv-notes-k">
             <span class="qf-rv-notes-k-label">Note for Alina · optional</span>
-            <span class="qf-rv-notes-k-count"><span id="qfSpecialCounter">0</span> / 500</span>
+            <span class="qf-rv-notes-k-count" aria-live="polite" aria-atomic="true"><span id="qfSpecialCounter">0</span> / 500</span>
           </div>
           <label for="qfSpecialInstructions" class="sr-only">Any special instructions?</label>
           <textarea class="qf-rv-notes-input" id="qfSpecialInstructions" placeholder="Quirks, preferences, focus areas — anything that helps us tailor your plan." rows="3" maxlength="500" aria-describedby="qfSpecialCounter"></textarea>
@@ -958,16 +958,19 @@
     </section>
 
   </section>
-  <!-- Exit intent modal (feature #13) -->
-  <div class="qf-exit-overlay" id="qfExitOverlay" hidden>
+  <!-- Exit intent modal (feature #13).
+       Ola 2 · dialog semantics: role + aria-modal + labelledby so screen
+       readers announce it as a modal and ESC is expected to close it
+       (handler in js/quote-flow.js). -->
+  <div class="qf-exit-overlay" id="qfExitOverlay" role="dialog" aria-modal="true" aria-labelledby="qfExitTitle" hidden>
     <div class="qf-exit-card">
-      <h3 class="qf-exit-title">Don&rsquo;t lose your <em>spot</em></h3>
+      <h3 class="qf-exit-title" id="qfExitTitle">Don&rsquo;t lose your <em>spot</em></h3>
       <p class="qf-exit-sub">Drop your email and we&rsquo;ll follow up so you can finish this later.</p>
       <form class="qf-exit-form" id="qfExitForm">
         <input class="qf-exit-input" type="email" placeholder="your@email.com" required aria-label="Your email">
         <button class="qf-exit-btn" type="submit">Send link</button>
       </form>
-      <button class="qf-exit-close" id="qfExitClose" type="button">No thanks, I&rsquo;ll stay</button>
+      <button class="qf-exit-close" id="qfExitClose" type="button" aria-label="Close recovery prompt">No thanks, I&rsquo;ll stay</button>
     </div>
   </div>
 </main>
@@ -1018,7 +1021,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script src="js/quote-flow.js?v=26.3"></script>
+<script defer src="js/quote-flow.js?v=27.0"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
