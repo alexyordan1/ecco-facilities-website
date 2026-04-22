@@ -26,6 +26,20 @@ function sanitizeSearch(str) {
   return str.replace(/[%_\\*]/g, '');
 }
 
+// Ola 1 #6 — escape user input destined for CRM activity log. Prevents
+// stored-XSS into the admin dashboard if descriptions are ever rendered
+// as HTML (e.g. via innerHTML in a renderer). Escapes the 5 HTML-significant
+// chars plus length-caps to 500 to avoid log-bloat abuse.
+function escapeForLog(s) {
+  if (s == null) return '';
+  return String(s).slice(0, 500)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function parseCount(contentRange) {
   if (!contentRange) return 0;
   const parts = contentRange.split('/');
@@ -178,7 +192,7 @@ export async function onRequestPatch(context) {
       activities.push({
         lead_id: parseInt(id, 10),
         type: 'stage_change',
-        description: 'Stage changed to ' + update.pipeline_stage,
+        description: 'Stage changed to ' + escapeForLog(update.pipeline_stage),
         metadata: {}
       });
     }
@@ -196,7 +210,7 @@ export async function onRequestPatch(context) {
       activities.push({
         lead_id: parseInt(id, 10),
         type: 'stage_change',
-        description: 'Lost reason: ' + update.lost_reason,
+        description: 'Lost reason: ' + escapeForLog(update.lost_reason),
         metadata: {}
       });
     }
@@ -205,7 +219,7 @@ export async function onRequestPatch(context) {
       activities.push({
         lead_id: parseInt(id, 10),
         type: 'field_updated',
-        description: 'Estimated value set to $' + update.estimated_value,
+        description: 'Estimated value set to $' + escapeForLog(update.estimated_value),
         metadata: {}
       });
     }

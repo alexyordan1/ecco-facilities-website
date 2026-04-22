@@ -1,3 +1,20 @@
+// Ola 1 #1 — CORS tightening. Previously used indexOf() substring matching,
+// which allowed attacker-registered domains like `evil-eccofacilities.com` or
+// `attacker.pages.dev` to bypass cross-origin protection. Now: exact-match
+// allowlist + single preview origin from env, matching submit-quote.js.
+const ALLOWED_ORIGINS = [
+  'https://eccofacilities.com',
+  'https://www.eccofacilities.com',
+  'http://localhost:8080'
+];
+function resolveCorsOrigin(origin, env) {
+  if (!origin) return 'https://eccofacilities.com';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  const previewDomain = env && env.ALLOWED_PREVIEW_ORIGIN;
+  if (previewDomain && origin === previewDomain) return origin;
+  return 'https://eccofacilities.com';
+}
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   const path = url.pathname;
@@ -6,14 +23,17 @@ export async function onRequest(context) {
     return context.next();
   }
 
+  const requestOrigin = context.request.headers.get('Origin');
+
   if (context.request.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
       headers: {
-        'Access-Control-Allow-Origin': (url.origin.indexOf('eccofacilities.com') !== -1 || url.origin.indexOf('pages.dev') !== -1) ? url.origin : 'https://eccofacilities.com',
+        'Access-Control-Allow-Origin': resolveCorsOrigin(requestOrigin, context.env),
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400'
+        'Access-Control-Max-Age': '86400',
+        'Vary': 'Origin'
       }
     });
   }

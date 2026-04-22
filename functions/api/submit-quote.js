@@ -47,7 +47,9 @@ async function enforceRateLimit(request, env) {
   const ip = request.headers.get('CF-Connecting-IP');
   const isUnknown = !ip;
   const bucket = ip || 'unknown';
-  const limit = isUnknown ? 2 : 10;
+  // Ola 1 #5 — tightened from 10→8/hr to narrow the concurrency-race bypass
+  // window. Real businesses rarely need >8 submits/hr; spammers need much more.
+  const limit = isUnknown ? 2 : 8;
   const hour = Math.floor(Date.now() / 3600000);
   const key = `rl:quote:${bucket}:${hour}`;
   const current = parseInt(await kv.get(key) || '0', 10);
@@ -59,8 +61,8 @@ async function enforceRateLimit(request, env) {
   // The re-read below lets us log the overshoot so ops can spot abuse.
   await kv.put(key, String(current + 1), { expirationTtl: 3600 });
   const after = parseInt(await kv.get(key) || '0', 10);
-  if (after > limit + 2) {
-    // Bucket overshot by >2 (the typical race window size). Log for ops.
+  // Ola 1 #5 — tightened overshoot threshold +2→+1 for earlier alerting.
+  if (after > limit + 1) {
     console.error('[submit-quote] rate-limit overshoot', { bucket, limit, after });
   }
   return { ok: true };
