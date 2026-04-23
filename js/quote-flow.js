@@ -221,7 +221,13 @@
     var doneSteps = flow.slice(0, currentIdx + 1).filter(function (n) { return n !== 'checkpoint' && n !== 'success'; }).length;
     // Clamp to avoid "Step 0 of N" at welcome.
     var displayStep = Math.max(1, Math.min(doneSteps, totalSteps));
-    stepEl.textContent = 'Step ' + displayStep + ' of ' + totalSteps;
+    // Ola 5 — on the contact (review/submit) screen, "Step N of N" feels
+    // like one more question is coming. Swap in "Last step" so users
+    // mentally commit to the final CTA instead of bracing for another page.
+    var isFinalInteractive = STATE.currentStepName === 'contact';
+    stepEl.textContent = isFinalInteractive
+      ? 'Last step'
+      : 'Step ' + displayStep + ' of ' + totalSteps;
     if (timeEl) {
       var remaining = Math.max(0, totalSteps - doneSteps);
       // ~18s/step is our empirical median; round up to the next minute, clamp to [1, 3].
@@ -249,7 +255,9 @@
       pillBar.style.setProperty('--qf-progress-scale', (pct / 100).toFixed(3));
       pillBar.setAttribute('aria-valuenow', String(pct));
     }
-    if (pillLabel) pillLabel.textContent = 'Step ' + displayStep + ' of ' + totalSteps;
+    if (pillLabel) pillLabel.textContent = isFinalInteractive
+      ? 'Last step'
+      : 'Step ' + displayStep + ' of ' + totalSteps;
   }
 
   /* -----------------------------------------------------------------------
@@ -446,6 +454,30 @@
       window.removeEventListener('ecco:consent-declined', onConsentDeclined);
       // Ola 3 — defined later in the file; guarded in case init order changes.
       if (typeof cancelLiveCounter === 'function') cancelLiveCounter();
+    } catch (_) {}
+  });
+
+  // Ola 5 — abandonment safety: if the user has started answering but hasn't
+  // submitted, prompt the native browser "Leave site?" dialog. Most browsers
+  // ignore the custom message and show their own, but any prompt is enough
+  // to rescue an accidental close. Gated: no prompt at welcome (haven't
+  // invested anything) or success (already submitted). Draft is still saved
+  // to localStorage regardless, so a user who dismisses the prompt and
+  // returns later still resumes where they left off.
+  window.addEventListener('beforeunload', function (e) {
+    try {
+      var step = STATE && STATE.currentStepName;
+      if (!step || step === 'welcome' || step === 'success') return;
+      // Only warn if the user has actually typed/selected something — spare
+      // a prompt for a visitor who opened the page and closed it immediately.
+      var hasInput = (STATE.service && STATE.service !== null) ||
+                     STATE.userEmail || STATE.userName || STATE.space ||
+                     (Array.isArray(STATE.days) && STATE.days.length);
+      if (!hasInput) return;
+      e.preventDefault();
+      // Legacy string (Chrome <51, Edge) — modern browsers show their own copy.
+      e.returnValue = 'Your progress is saved — you can pick up where you left off anytime.';
+      return e.returnValue;
     } catch (_) {}
   });
 
@@ -1465,7 +1497,14 @@
         var n = Number(val);
         if (!val || isNaN(n)) { showSizeErr('Please enter a number.'); return; }
         if (n < 100) { showSizeErr('Sizes under 100 sq ft look unusual \u2014 pick a range instead?'); return; }
-        if (n > 1000000) { showSizeErr('That\u2019s bigger than most NYC campuses. Try a smaller number?'); return; }
+        if (n > 1000000) {
+          // Ola 5 — previously a blocking "try smaller" without giving the
+          // user a next step. Facilities over 1M sq ft are legitimately
+          // common for campuses, so we route them to a direct call instead
+          // of losing the lead outright.
+          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly — call (646) 303-0816 or email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
+          return;
+        }
         clearSizeErr();
         proceedFromSize(Math.round(n) + 'sqft');
         sizeInput.style.borderColor = '';
