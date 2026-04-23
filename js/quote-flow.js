@@ -1290,15 +1290,29 @@
     }
     if (offendingEl) {
       offendingEl.classList.add('qf-input-invalid');
+      // Ola 8 — wire aria-describedby so screen readers announce the error
+      // message in context with the input, not as an orphaned live-region
+      // update 50ms later. We also set aria-invalid for AT that relies on
+      // that semantic instead of the visual class.
+      offendingEl.setAttribute('aria-describedby', 'qfInfoErr');
+      offendingEl.setAttribute('aria-invalid', 'true');
       offendingEl.focus();
     }
   }
   function clearInfoError() {
     var errEl = document.getElementById('qfInfoErr');
     if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
-    ['qfUserFirstName','qfUserEmail','qfUserPhone'].forEach(function(id){
+    // Ola 8 — clear across ALL info-step inputs (was 3, missed last name
+    // and company). Also strip the aria-describedby + aria-invalid that
+    // showInfoError attached so the SR doesn't keep announcing a stale
+    // error after the user corrected the field.
+    ['qfUserFirstName','qfUserLastName','qfUserEmail','qfUserPhone','qfUserCompany'].forEach(function(id){
       var el = document.getElementById(id);
-      if (el) el.classList.remove('qf-input-invalid');
+      if (el) {
+        el.classList.remove('qf-input-invalid');
+        el.removeAttribute('aria-describedby');
+        el.removeAttribute('aria-invalid');
+      }
     });
   }
   if (SCREENS.info) {

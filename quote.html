@@ -36,7 +36,7 @@
      gave Safari's LCP heuristic the wrong candidate. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=29.1">
+<link rel="stylesheet" href="css/quote-flow.css?v=29.2">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -307,11 +307,17 @@
         </div>
         <h2 class="qf-info-title">Tell me a little <em>about you</em></h2>
         <p class="qf-info-sub">So I can make this feel like yours.</p>
-        <div class="qf-info-cards">
+        <!-- Ola 8 · group semantics for assistive tech. Fieldset+legend
+             would visually break the card grid, so we use role="group" with
+             an aria-label mirroring the h2 intent. -->
+        <div class="qf-info-cards" role="group" aria-label="Your contact details">
           <div class="qf-info-card">
             <span class="qf-info-card-ico" aria-hidden="true">&#x1F464;</span>
             <div class="qf-info-card-fields">
-              <input type="text" class="qf-info-card-input" id="qfUserFirstName" placeholder="First name *" autocomplete="given-name" aria-label="First name (required)" maxlength="60" required>
+              <!-- Ola 8 — removed redundant "*" from placeholder. SR already
+                   hears "(required)" from aria-label; the asterisk was read
+                   aloud as "star" which confused NVDA users. -->
+              <input type="text" class="qf-info-card-input" id="qfUserFirstName" placeholder="First name" autocomplete="given-name" aria-label="First name (required)" maxlength="60" required>
               <input type="text" class="qf-info-card-input" id="qfUserLastName" placeholder="Last name (optional)" autocomplete="family-name" aria-label="Last name (optional)" maxlength="60">
             </div>
           </div>
@@ -400,7 +406,7 @@
         </div>
         <h2 class="qf-info-title">Where is your <em>space</em>?</h2>
         <p class="qf-info-sub">So we can assign the right local team.</p>
-        <div class="qf-info-cards">
+        <div class="qf-info-cards" role="group" aria-label="Company and location">
           <div class="qf-info-card">
             <span class="qf-info-card-ico" aria-hidden="true">&#x1F3E2;</span>
             <input type="text" class="qf-info-card-input qf-info-card-input-full" id="qfCompanyName" placeholder="Company or building name" autocomplete="organization" aria-label="Company name" maxlength="120">
@@ -943,30 +949,36 @@
           Reference <strong id="qfSuccessRefNum">&mdash;</strong>
         </div>
 
-        <!-- What's next timeline -->
-        <div class="qf-success-timeline" aria-label="What happens next">
-          <div class="qf-success-timeline-item">
+        <!-- What's next timeline.
+             Ola 8 · semantic list. A SR previously heard "What happens next,
+             three regions with no relationship" because the wrapping div
+             didn't imply a list. Switching to <ol>/<li> gives AT the
+             implicit structure (N of M, ordered progression) the visual
+             design conveys. CSS targeted the item class, not div specifically,
+             so no style regression. -->
+        <ol class="qf-success-timeline" aria-label="What happens next">
+          <li class="qf-success-timeline-item">
             <div class="qf-success-timeline-ico" aria-hidden="true">&#x1F4E7;</div>
             <div class="qf-success-timeline-text">
               <span class="qf-success-timeline-when">Within 24 hours</span>
               <span class="qf-success-timeline-what">Custom proposal lands in your inbox</span>
             </div>
-          </div>
-          <div class="qf-success-timeline-item">
+          </li>
+          <li class="qf-success-timeline-item">
             <div class="qf-success-timeline-ico" aria-hidden="true">&#x1F4DE;</div>
             <div class="qf-success-timeline-text">
               <span class="qf-success-timeline-when">Within 48 hours</span>
               <span class="qf-success-timeline-what">Quick call to finalize details</span>
             </div>
-          </div>
-          <div class="qf-success-timeline-item">
+          </li>
+          <li class="qf-success-timeline-item">
             <div class="qf-success-timeline-ico" aria-hidden="true">&#x2728;</div>
             <div class="qf-success-timeline-text">
               <span class="qf-success-timeline-when">Week 1</span>
               <span class="qf-success-timeline-what">Your eco-certified service begins</span>
             </div>
-          </div>
-        </div>
+          </li>
+        </ol>
 
         <div class="qf-success-summary" id="qfSuccessSummary"></div>
         <div class="qf-success-ctas qf-cinematic-ctas">
@@ -1046,7 +1058,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=27.3"></script>
+<script defer src="js/quote-flow.js?v=27.4"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
