@@ -23,7 +23,11 @@ function jsonErr(error, status) {
 }
 
 function sanitizeSearch(str) {
-  return str.replace(/[%_\\*]/g, '');
+  // Ola 7 — extended to strip `;`, `#`, and `--` (comment markers) in addition
+  // to the PostgREST LIKE wildcards. Supabase REST uses encoded URL params so
+  // injection via these chars is already unlikely, but defense-in-depth costs
+  // nothing.
+  return str.replace(/[%_\\*;#]|--/g, '');
 }
 
 // Ola 1 #6 — escape user input destined for CRM activity log. Prevents
@@ -90,7 +94,11 @@ export async function onRequestGet(context) {
   }
 
   // List leads with filters + pagination
-  const page = Math.max(1, parseInt(params.get('page'), 10) || 1);
+  // Ola 7 — cap `page` at 1000 so an attacker sending `page=9999999` can't
+  // force Supabase to scan far past the result set. Legitimate CRM use caps
+  // well below this (100 leads/page * 1000 pages = 100K leads — plenty of
+  // headroom for years of data).
+  const page = Math.min(1000, Math.max(1, parseInt(params.get('page'), 10) || 1));
   const perPage = Math.min(100, Math.max(1, parseInt(params.get('per_page'), 10) || 25));
   const offset = (page - 1) * perPage;
 

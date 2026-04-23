@@ -53,12 +53,24 @@ export async function onRequest(context) {
   const token = authHeader.slice(7);
 
   try {
-    const userRes = await fetch(`${context.env.SUPABASE_URL}/auth/v1/user`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'apikey': context.env.SUPABASE_SERVICE_KEY
-      }
-    });
+    // Ola 7 — timeout the token-verification fetch. Without it, a slow or
+    // hung Supabase response would pin the worker until CF's 30s wall-clock
+    // limit, blocking every /api/crm-* request behind this middleware and
+    // amounting to an indirect DoS vector. 5s is generous for a token check.
+    const verifyController = new AbortController();
+    const verifyTimeout = setTimeout(() => verifyController.abort(), 5000);
+    let userRes;
+    try {
+      userRes = await fetch(`${context.env.SUPABASE_URL}/auth/v1/user`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'apikey': context.env.SUPABASE_SERVICE_KEY
+        },
+        signal: verifyController.signal
+      });
+    } finally {
+      clearTimeout(verifyTimeout);
+    }
 
     if (!userRes.ok) {
       return new Response(JSON.stringify({ ok: false, error: 'Invalid or expired token' }), {

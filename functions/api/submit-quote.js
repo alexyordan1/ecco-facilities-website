@@ -108,6 +108,34 @@ export async function onRequestPost(context) {
     'Vary': 'Origin'
   };
 
+  // Ola 7 — defense-in-depth: although Cloudflare routes onRequestPost to
+  // POST-only, a misconfigured route / wrangler dev / proxy could still
+  // surface other methods. Reject them explicitly so no accidental GET
+  // leaks server state. Same idea for the content-type check: any client
+  // sending text/plain with JSON-shaped bytes shouldn't sneak through.
+  if (context.request.method !== 'POST') {
+    return new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Allow': 'POST' }
+    });
+  }
+  const contentType = context.request.headers.get('Content-Type') || '';
+  if (!contentType.toLowerCase().includes('application/json')) {
+    return new Response(JSON.stringify({ ok: false, error: 'Content-Type must be application/json' }), {
+      status: 415, headers: corsHeaders
+    });
+  }
+  // Ola 7 — body size cap. CF default is 100MB but our payload is at most
+  // a few KB; a larger body is either abuse or a misconfigured client and
+  // shouldn't be stored. `content-length` is advisory (a malicious client
+  // may lie), but rejecting declared >50KB short-circuits 99% of abuse.
+  const contentLength = parseInt(context.request.headers.get('Content-Length') || '0', 10);
+  if (contentLength > 50000) {
+    return new Response(JSON.stringify({ ok: false, error: 'Request body too large' }), {
+      status: 413, headers: corsHeaders
+    });
+  }
+
   // AYS Ola 3 #7 — rate limit before parsing body
   const rl = await enforceRateLimit(context.request, env);
   if (!rl.ok) {
@@ -204,14 +232,17 @@ export async function onRequestPost(context) {
 
     // 2. Generate reference number
     const prefix = formType === 'dayporter' ? 'EDP-' : 'ECJ-';
-    // AYS Ola 4 Commit N ME-7 — append 4 random chars so two submits in the
-    // same millisecond don't collide (e.g. batch send from a CRM). Also makes
-    // the ref non-enumerable, hardening against social-engineering attacks
-    // that guess neighbor refs.
-    const randTail = Array.from(
-      crypto.getRandomValues(new Uint8Array(3))
-    ).map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 4).toUpperCase();
-    const refNumber = prefix + Date.now().toString(36).toUpperCase() + '-' + randTail;
+    // Ola 7 — switched to a UUID-derived tail. `Date.now().toString(36)` +
+    // 3 random bytes had a theoretical collision window (same-millisecond
+    // submits with correlated entropy from shared seeds). crypto.randomUUID
+    // gives 122 bits of entropy; we slice 12 hex chars (48 bits) into the
+    // tail — still enumeration-resistant, still short enough for the user
+    // to copy from an email, and mathematically collision-free at our scale.
+    const uuid = (crypto.randomUUID && crypto.randomUUID()) ||
+                 Array.from(crypto.getRandomValues(new Uint8Array(8)))
+                   .map(b => b.toString(16).padStart(2, '0')).join('');
+    const refTail = uuid.replace(/-/g, '').slice(0, 12).toUpperCase();
+    const refNumber = prefix + refTail;
 
     // 3. Build form_data with readable labels
     const KEY_MAP = {
