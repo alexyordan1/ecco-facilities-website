@@ -181,6 +181,54 @@
   // and clutter devtools). Entries drop automatically when the element goes.
   var _qfListenerAttached = new WeakMap();
 
+  // Ola 6 — safe row builder. Replaces two `innerHTML = list.map(…).join('')`
+  // sites in the edit panel that interpolated STATE.porterHours entries —
+  // values originate from draft localStorage and are attacker-controllable
+  // (an attacker-seeded set in another tab + redirect = XSS via the
+  // value="…" attribute). This helper uses createElement + setAttribute +
+  // textContent so nothing ever touches the HTML parser, making the
+  // patterns immune to injection even if the data shape drifts.
+  function renderPorterHourRows(target, hours) {
+    var frag = document.createDocumentFragment();
+    hours.forEach(function (ph, idx) {
+      var n = idx + 1;
+      var s = (ph && ph.start) || '08:00';
+      var e = (ph && ph.end) || '17:00';
+      var row = document.createElement('div');
+      row.className = 'qf-rv-porter-hour-row';
+      row.setAttribute('data-porter-row', String(n));
+      var label = document.createElement('span');
+      label.className = 'qf-rv-porter-hour-label';
+      label.textContent = 'Porter ' + n;
+      row.appendChild(label);
+      var fieldRow = document.createElement('div');
+      fieldRow.className = 'qf-rv-field-row';
+      var startInput = document.createElement('input');
+      startInput.type = 'time';
+      startInput.className = 'qf-rev-input';
+      startInput.setAttribute('data-porter', String(n));
+      startInput.setAttribute('data-time', 'start');
+      startInput.value = s;
+      startInput.setAttribute('aria-label', 'Porter ' + n + ' start time');
+      fieldRow.appendChild(startInput);
+      var sep = document.createElement('span');
+      sep.className = 'qf-rv-field-sep';
+      sep.textContent = 'to';
+      fieldRow.appendChild(sep);
+      var endInput = document.createElement('input');
+      endInput.type = 'time';
+      endInput.className = 'qf-rev-input';
+      endInput.setAttribute('data-porter', String(n));
+      endInput.setAttribute('data-time', 'end');
+      endInput.value = e;
+      endInput.setAttribute('aria-label', 'Porter ' + n + ' end time');
+      fieldRow.appendChild(endInput);
+      row.appendChild(fieldRow);
+      frag.appendChild(row);
+    });
+    target.replaceChildren(frag);
+  }
+
   /* -----------------------------------------------------------------------
      STATE
      ----------------------------------------------------------------------- */
@@ -2223,20 +2271,9 @@
           if (wrap && STATE.service === 'dayporter') {
             var list = Array.isArray(STATE.porterHours) ? STATE.porterHours : [];
             if (!list.length) list = [{ start: STATE.timeStart || '08:00', end: STATE.timeEnd || '17:00' }];
-            wrap.innerHTML = list.map(function (ph, idx) {
-              var s = (ph && ph.start) || '08:00';
-              var e = (ph && ph.end) || '17:00';
-              var n = idx + 1;
-              return '<div class="qf-rv-porter-hour-row" data-porter-row="' + n + '">' +
-                     '<span class="qf-rv-porter-hour-label">Porter ' + n + '</span>' +
-                     '<div class="qf-rv-field-row">' +
-                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="start" value="' + s + '" aria-label="Porter ' + n + ' start time">' +
-                     '<span class="qf-rv-field-sep">to</span>' +
-                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="end" value="' + e + '" aria-label="Porter ' + n + ' end time">' +
-                     '</div></div>';
-            }).join('');
+            renderPorterHourRows(wrap, list);
           } else if (wrap) {
-            wrap.innerHTML = '';
+            wrap.replaceChildren();
           }
           // Hide the porter-hours sub-row entirely for 'both' (it owns its own
           // panel now) so the cleaning edit stays focused on cleaning days.
@@ -2252,18 +2289,7 @@
           if (dpWrap) {
             var phs = Array.isArray(STATE.porterHours) ? STATE.porterHours : [];
             if (!phs.length) phs = [{ start: STATE.timeStart || '08:00', end: STATE.timeEnd || '17:00' }];
-            dpWrap.innerHTML = phs.map(function (ph, idx) {
-              var s = (ph && ph.start) || '08:00';
-              var e = (ph && ph.end) || '17:00';
-              var n = idx + 1;
-              return '<div class="qf-rv-porter-hour-row" data-porter-row="' + n + '">' +
-                     '<span class="qf-rv-porter-hour-label">Porter ' + n + '</span>' +
-                     '<div class="qf-rv-field-row">' +
-                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="start" value="' + s + '" aria-label="Porter ' + n + ' start time">' +
-                     '<span class="qf-rv-field-sep">to</span>' +
-                     '<input type="time" class="qf-rev-input" data-porter="' + n + '" data-time="end" value="' + e + '" aria-label="Porter ' + n + ' end time">' +
-                     '</div></div>';
-            }).join('');
+            renderPorterHourRows(dpWrap, phs);
           }
         }
         row.classList.add('is-editing');
