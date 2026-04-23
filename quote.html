@@ -22,9 +22,11 @@
 <meta name="twitter:title" content="Request a Free Quote — Ecco Facilities LLC">
 <meta name="twitter:description" content="Chat with Alina, our AI cleaning advisor — customized proposals within 24 hours.">
 <meta name="twitter:image" content="https://eccofacilities.com/images/logo-vertical.png">
-<link rel="icon" href="images/favicon-32.png" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
-<link rel="shortcut icon" href="images/favicon-32.png">
+<!-- Ola 9 — consolidated 3 redundant favicon <link> tags into the canonical
+     pair. Browsers pick the best match from sizes, and the deprecated
+     `rel="shortcut icon"` isn't needed for anything newer than IE9. -->
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Ola 4 — dropped the duplicate `<link rel="preload" as="style">` for the
@@ -129,9 +131,13 @@
     }
   };
 </script>
-<script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFGpnMAmgg3SGpLrcMKp5_N9DoOEVWJXg&libraries=places&callback=qfInitPlaces&loading=async"
-  onerror="console.warn('[quote] Google Places autocomplete failed to load. Form still works \u2014 users type address manually.')"></script>
+<!-- Ola 9 · Google Places ~220KB bundle was loaded on every page view even
+     when the user never reached the location step. Moved to lazy load: see
+     the `focus` listener on #qfAddress in js/quote-flow.js, which injects
+     the script only once, only if/when the user lands on that field. First
+     paint no longer pays for autocomplete. -->
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="preconnect" href="https://maps.googleapis.com" crossorigin>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -1058,7 +1064,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=27.4"></script>
+<script defer src="js/quote-flow.js?v=27.5"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

@@ -1398,6 +1398,39 @@
   /* =======================================================================
      LOCATION step — Company name + Address
      ======================================================================= */
+  // Ola 9 — lazy-load Google Places. Previously loaded via a static <script
+  // async defer> in the head, forcing ~220KB on every page view even if the
+  // user never reached the address step. Now: inject the script the first
+  // time the address field gets focus. The inline `window.qfInitPlaces`
+  // callback defined in quote.html runs once the library finishes loading.
+  (function wireLazyPlaces() {
+    var addr = document.getElementById('qfAddress');
+    if (!addr) return;
+    var GOOGLE_MAPS_KEY = 'AIzaSyBFGpnMAmgg3SGpLrcMKp5_N9DoOEVWJXg';
+    var PLACES_SRC = 'https://maps.googleapis.com/maps/api/js?key=' +
+      encodeURIComponent(GOOGLE_MAPS_KEY) +
+      '&libraries=places&callback=qfInitPlaces&loading=async';
+    var loaded = false;
+    function loadPlaces() {
+      if (loaded) return;
+      loaded = true;
+      var s = document.createElement('script');
+      s.src = PLACES_SRC;
+      s.async = true;
+      s.defer = true;
+      s.onerror = function () {
+        // Match the previous inline onerror behaviour — form still works,
+        // just without autocomplete.
+        try { console.warn('[quote] Google Places failed to load; manual address entry only.'); } catch (_) {}
+      };
+      document.head.appendChild(s);
+    }
+    // Load on first focus, or if the user starts typing before focus fires
+    // (keyboard-paste into an unfocused field is rare but possible).
+    addr.addEventListener('focus', loadPlaces, { once: true });
+    addr.addEventListener('input', loadPlaces, { once: true });
+  })();
+
   if (SCREENS.location) {
     var locationContinueBtn = document.getElementById('qfLocationContinue');
     var locAddr = document.getElementById('qfAddress');
