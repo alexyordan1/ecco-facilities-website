@@ -36,9 +36,13 @@
      Also dropped the alina-avatar-192.webp preload: the welcome screen
      renders the 96w variant, so the 192w preload was wasted bandwidth and
      gave Safari's LCP heuristic the wrong candidate. -->
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<!-- V2 2026-04-25 — added Fraunces (display serif for the rebuilt Janitorial
+     screens) and Caveat (handwritten "Alina voice"). Cormorant kept for back-
+     compat with non-Janitorial flows that still reference it. DM Sans range
+     widened slightly to include the full opsz range used by hero titles. -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=29.2">
+<link rel="stylesheet" href="css/quote-flow.css?v=35.0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -257,285 +261,625 @@
     </header>
 
     <!-- STEP 1 · WELCOME -->
-    <section class="qf-screen step-1 is-active is-typing" id="qfScreen_welcome" aria-label="Welcome">
-      <div class="qf-screen-inner">
-        <div class="qf-hero-avatar">
-          <picture><source type="image/avif" srcset="images/alina-avatar-192.avif 1x, images/alina-avatar-480.avif 2x"><source type="image/webp" srcset="images/alina-avatar-192.webp 1x, images/alina-avatar-480.webp 2x"><img src="images/alina-avatar-192.jpg" srcset="images/alina-avatar-192.jpg 1x, images/alina-avatar-480.jpg 2x" alt="Alina — your Cleaning Experience Advisor" width="100" height="100" fetchpriority="high" decoding="async"></picture>
-          <span class="qf-hero-status" aria-label="Active now"></span>
+    <!-- V2 2026-04-25 — rebuilt from mockup G. Uses qf2- design system
+         (peach/cream palette, Alina pill, hero card-on-card, service cards
+         with circular sage avatars, "Not sure?" mini-quiz panel, trust strip).
+         The qf2-stage class scopes the V2 styles. is-welcome variant hides
+         the flow-bar (no bar on step 1, per user-preference rule). -->
+    <section class="qf-screen step-1 is-active qf2-stage is-welcome" id="qfScreen_welcome" aria-label="Welcome">
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/avif" srcset="images/alina-avatar-96.avif">
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" fetchpriority="high" decoding="async">
+            </picture>
+          </div>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; Hi there &mdash; let&rsquo;s start here &rarr;
+          </div>
         </div>
-        <div class="qf-typing-dots" id="qfTypingDots" aria-label="Alina is typing"><span></span><span></span><span></span></div>
-        <h2 class="qf-s1-greeting" id="qfGreeting">Hi, I&rsquo;m <em>Alina</em> <span class="qf-wave" aria-hidden="true">&#x1F44B;</span></h2>
-        <p class="qf-s1-role-tag">AI Cleaning Experience Advisor</p>
-        <p class="qf-s1-guide" id="qfGuideText">I&rsquo;ll walk you through a few quick questions to build your <em>custom plan</em>.</p>
-        <h2 class="qf-s1-title">What brings you to <em>Ecco</em> today?</h2>
-        <p class="qf-s1-sub">2 minutes &middot; a few questions &middot; custom proposal within 24 hours.</p>
-        <div class="qf-s1-cards" role="group" aria-label="Choose a service">
-          <button type="button" class="qf-service-card" data-service="janitorial" data-service-label="Janitorial">
-            <span class="qf-popular-badge" aria-label="Most popular choice"><span class="qf-popular-badge-star" aria-hidden="true">&#x2605;</span> Most popular</span>
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F9F9;</span>
-            <span class="qf-service-card-label">Janitorial</span>
-            <span class="qf-service-card-hint">Recurring after-hours cleaning</span>
-          </button>
-          <button type="button" class="qf-service-card" data-service="dayporter" data-service-label="Day Porter">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F464;</span>
-            <span class="qf-service-card-label">Day Porter</span>
-            <span class="qf-service-card-hint">On-site during business hours</span>
-          </button>
-          <button type="button" class="qf-service-card" data-service="both" data-service-label="Both Services">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x2728;</span>
-            <span class="qf-service-card-label">Both Services</span>
-            <span class="qf-service-card-hint">Day porter + overnight cleaning</span>
-            <!-- Ola 5 — value prop: surfaces the combined-plan discount so
-                 users don't assume 'both' means 2x the price. -->
-            <span class="qf-service-card-sub">Combined plan often saves 15&ndash;20%</span>
-          </button>
-          <button type="button" class="qf-service-card" data-service="unsure" data-service-label="Help me decide">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F914;</span>
-            <span class="qf-service-card-label">Help me decide</span>
-            <span class="qf-service-card-hint">I&rsquo;ll explain the options</span>
-          </button>
-        </div>
-        <!-- meta chips removed — persistent trust footer handles this -->
       </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title">What brings you to <em>Ecco</em>?</h1>
+          <p class="qf2-prompt-sub">Pick what kind of care you&rsquo;re looking for.</p>
+        </div>
+        <div class="qf2-grid-3" role="group" aria-label="Choose a service">
+          <button type="button" class="qf2-card" data-service="janitorial" data-service-label="Janitorial" aria-label="Janitorial — recurring cleaning">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18v13H3z"/><path d="M8 8V5a4 4 0 018 0v3"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Janitorial</span>
+              <span class="qf2-card-hint">Recurring cleaning &mdash; evenings, weekends</span>
+            </span>
+          </button>
+          <button type="button" class="qf2-card" data-service="dayporter" data-service-label="Day Porter" aria-label="Day Porter — on-site during business hours">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Day Porter</span>
+              <span class="qf2-card-hint">On-site during business hours</span>
+            </span>
+          </button>
+          <button type="button" class="qf2-card" data-service="both" data-service-label="Combined" aria-label="Combined — day porter plus janitorial">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M17 4v16M3 8h18"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Combined</span>
+              <span class="qf2-card-hint">Both &mdash; full coverage</span>
+            </span>
+          </button>
+        </div>
+        <button type="button" class="qf2-not-sure-link" id="qf2QuizToggle" aria-expanded="false" aria-controls="qf2QuizPanel">
+          Not sure? I can help you pick &sim;
+        </button>
+        <div class="qf2-quiz-panel" id="qf2QuizPanel" hidden role="region" aria-label="Service recommender">
+          <p class="qf2-quiz-q">
+            <span class="qf2-quiz-q-desktop">Do you need someone on-site during your business hours?</span>
+            <span class="qf2-quiz-q-mobile">On-site during business hours?</span>
+          </p>
+          <div class="qf2-quiz-chips" role="group" aria-label="On-site coverage">
+            <button type="button" class="qf2-quiz-chip" data-quiz-pick="dayporter">Yes &mdash; day coverage</button>
+            <button type="button" class="qf2-quiz-chip" data-quiz-pick="janitorial">No &mdash; cleaning only</button>
+            <button type="button" class="qf2-quiz-chip" data-quiz-pick="both">Both</button>
+          </div>
+          <div class="qf2-quiz-result" id="qf2QuizResult" hidden aria-live="polite">
+            <span class="qf2-quiz-result-hand">Sounds like:</span>
+            <strong id="qf2QuizResultName"></strong> <span id="qf2QuizResultBlurb"></span>
+          </div>
+        </div>
+      </div>
+      <!-- V2 — "Ask Alina" floating pill (bottom-left). Present on every
+           screen per mockup G. Opens the chat widget on click. -->
+      <button type="button" class="qf2-ask-alina-float" id="qf2AskAlinaFloat" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
 
-    <!-- STEP 2 · GET TO KNOW YOU -->
-    <section class="qf-screen step-info" hidden id="qfScreen_info" aria-label="Tell us about yourself">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysInfo">Before we dive in, let me get to know you so I can personalize this.</p>
+    <!-- STEP 3 · INFO / YOU — V2 mockup G rebuild -->
+    <section class="qf-screen step-info qf2-stage" hidden id="qfScreen_info" aria-label="Let's get acquainted">
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-done" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station is-active" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station" data-station="size"><span class="qf2-flowbar-dot"></span>Size</li>
+          <li class="qf2-flowbar-station" data-station="days"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Step 3 of 7</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:42%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Step 3 of 7</div>
+        </div>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
+          </div>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; Now the friendly part &rarr;
           </div>
         </div>
-        <h2 class="qf-info-title">Tell me a little <em>about you</em></h2>
-        <p class="qf-info-sub">So I can make this feel like yours.</p>
-        <!-- Ola 8 · group semantics for assistive tech. Fieldset+legend
-             would visually break the card grid, so we use role="group" with
-             an aria-label mirroring the h2 intent. -->
-        <div class="qf-info-cards" role="group" aria-label="Your contact details">
-          <div class="qf-info-card">
-            <span class="qf-info-card-ico" aria-hidden="true">&#x1F464;</span>
-            <div class="qf-info-card-fields">
-              <!-- Ola 8 — removed redundant "*" from placeholder. SR already
-                   hears "(required)" from aria-label; the asterisk was read
-                   aloud as "star" which confused NVDA users. -->
-              <input type="text" class="qf-info-card-input" id="qfUserFirstName" placeholder="First name" autocomplete="given-name" aria-label="First name (required)" maxlength="60" required>
-              <input type="text" class="qf-info-card-input" id="qfUserLastName" placeholder="Last name (optional)" autocomplete="family-name" aria-label="Last name (optional)" maxlength="60">
-            </div>
-          </div>
-          <div class="qf-info-card">
-            <span class="qf-info-card-ico" aria-hidden="true">&#x2709;&#xFE0F;</span>
-            <input type="email" class="qf-info-card-input qf-info-card-input-full" id="qfUserEmail" placeholder="your@email.com" autocomplete="email" aria-label="Email address" maxlength="254" required>
-          </div>
-          <div class="qf-info-card">
-            <span class="qf-info-card-ico" aria-hidden="true">&#x1F4DE;</span>
-            <input type="tel" class="qf-info-card-input qf-info-card-input-full" id="qfUserPhone" placeholder="Phone (optional)" autocomplete="tel" aria-label="Phone number" inputmode="tel" maxlength="25">
-          </div>
-        </div>
-        <p class="qf-info-err" id="qfInfoErr" hidden role="alert" aria-live="polite"></p>
-        <!-- Ola 5 — directional copy so the user knows info is captured
-             and the next step is about their space, not another detail form. -->
-        <button type="button" class="qf-info-continue" id="qfInfoContinue">Next: Your space <span aria-hidden="true">&rarr;</span></button>
       </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title">Let&rsquo;s get <em>acquainted</em>.</h1>
+          <p class="qf2-prompt-sub">
+            <span class="qf2-prompt-sub-desktop">I&rsquo;ll save your progress as we go.</span>
+            <span class="qf2-prompt-sub-mobile">I&rsquo;ll save as we go.</span>
+          </p>
+        </div>
+        <div class="qf2-fields" role="group" aria-label="Your contact details">
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/></svg>
+            </span>
+            <input type="text" id="qfUserFirstName" placeholder="First name" autocomplete="given-name" aria-label="First name (required)" maxlength="60" required>
+          </div>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H4M12 7a4 4 0 100 8 4 4 0 000-8z"/></svg>
+            </span>
+            <input type="text" id="qfUserLastName" placeholder="Last name" autocomplete="family-name" aria-label="Last name (required)" maxlength="60" required>
+          </div>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+            </span>
+            <input type="email" id="qfUserEmail" placeholder="Email address" autocomplete="email" aria-label="Email address (required)" maxlength="254" required>
+          </div>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
+            </span>
+            <input type="text" id="qfUserPosition" placeholder="Your role (e.g. Facilities Manager)" autocomplete="organization-title" aria-label="Your role (required)" maxlength="80" required>
+          </div>
+        </div>
+        <p class="qf2-field-err" id="qf2InfoErr" role="alert" hidden></p>
+        <button type="button" class="qf2-cta" id="qfInfoContinue">Nice to meet you <span aria-hidden="true">&rarr;</span></button>
+        <p class="qf2-cta-hint">We&rsquo;re almost there &sim;</p>
+        <!-- Phone is captured later (review screen). Keep hidden so existing JS that may read STATE.userPhone doesn't break. -->
+        <input type="tel" id="qfUserPhone" hidden aria-hidden="true" tabindex="-1">
+      </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
 
-    <!-- STEP 3 · SPACE TYPE -->
-    <section class="qf-screen step-2" hidden id="qfScreen_space" aria-label="What kind of space are we caring for?">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" id="qfAlinaSays" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysText">Pick the space that fits you best. I&rsquo;ll tailor the plan from there.</p>
+    <!-- STEP 3 · SPACE TYPE — V2 mockup G rebuild -->
+    <section class="qf-screen step-2 qf2-stage" hidden id="qfScreen_space" aria-label="What kind of space are we caring for?">
+      <!-- V2 desktop flow-bar (back arrow + 7 stations + step counter + skip) -->
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-active" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station" data-station="size"><span class="qf2-flowbar-dot"></span>Size</li>
+          <li class="qf2-flowbar-station" data-station="days"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Step 2 of 7</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <!-- V2 mobile flow-bar (compact) -->
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:28%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Step 2 of 7</div>
+        </div>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
+          </div>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; What are we caring for?
           </div>
         </div>
-        <h2 class="qf-s2-title">What kind of <em>space</em> are we caring for?</h2>
-        <div class="qf-s2-cards" role="group" aria-label="Choose your space type">
-          <button type="button" class="qf-service-card" data-space="Office"
-            data-hover-msg="Offices love our eco-certified products &mdash; non-toxic for open floor plans and teams with air sensitivities. I&rsquo;ll match you with a crew that already cleans corporate and coworking spaces daily.">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F3E2;</span>
-            <span class="qf-service-card-label">Office</span>
-            <span class="qf-service-card-hint">Corporate or coworking</span>
+      </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title">What kind of <em>space</em>?</h1>
+          <p class="qf2-prompt-sub">
+            <span class="qf2-prompt-sub-desktop">Pick the closest match &mdash; I&rsquo;ll tailor the plan.</span>
+            <span class="qf2-prompt-sub-mobile">Pick the closest.</span>
+          </p>
+        </div>
+        <div class="qf2-grid-6" role="group" aria-label="Choose your space type">
+          <button type="button" class="qf2-card" data-space="Office" aria-label="Office — corporate or coworking">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M8 4v16"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Office</span>
+              <span class="qf2-card-hint">Corporate, coworking</span>
+            </span>
           </button>
-          <button type="button" class="qf-service-card" data-space="Medical"
-            data-hover-msg="Medical spaces need hospital-grade disinfection and strict cross-contamination protocols. We&rsquo;re certified for clinics, labs, surgical centers, and dental offices across NYC.">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F3E5;</span>
-            <span class="qf-service-card-label">Medical</span>
-            <span class="qf-service-card-hint">Clinical-grade care</span>
+          <button type="button" class="qf2-card" data-space="Medical" aria-label="Medical — clinics and labs">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Medical</span>
+              <span class="qf2-card-hint">Clinics &amp; labs</span>
+            </span>
           </button>
-          <button type="button" class="qf-service-card" data-space="Retail"
-            data-hover-msg="Retail is all about first impressions &mdash; sparkling floors, dust-free displays, spotless windows. We know the pace of customer-facing spaces and time our work around your hours.">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F6CD;&#xFE0F;</span>
-            <span class="qf-service-card-label">Retail</span>
-            <span class="qf-service-card-hint">Customer-facing space</span>
+          <button type="button" class="qf2-card" data-space="Retail" aria-label="Retail — storefronts">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9M4 9v11h16V9"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Retail</span>
+              <span class="qf2-card-hint">Storefronts</span>
+            </span>
           </button>
-          <button type="button" class="qf-service-card" data-space="Restaurant"
-            data-hover-msg="Food service has the strictest health codes in NYC. We handle grease traps, kitchen deep-cleans, and front-of-house polish &mdash; all with DOH-compliant products and certified teams.">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F37D;&#xFE0F;</span>
-            <span class="qf-service-card-label">Restaurant</span>
-            <span class="qf-service-card-hint">Food service</span>
+          <button type="button" class="qf2-card" data-space="Restaurant" aria-label="Restaurant — cafés and kitchens">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-2 12H6zM8 8V4a4 4 0 018 0v4"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Restaurant</span>
+              <span class="qf2-card-hint">Caf&eacute;s &amp; kitchens</span>
+            </span>
           </button>
-          <button type="button" class="qf-service-card" data-space="Fitness"
-            data-hover-msg="Gyms and studios need constant equipment sanitization and locker-room refresh. We handle sweat zones, mat rotation, and high-touch surfaces without disrupting your classes.">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F3CB;&#xFE0F;</span>
-            <span class="qf-service-card-label">Fitness</span>
-            <span class="qf-service-card-hint">Gyms and studios</span>
+          <button type="button" class="qf2-card" data-space="Fitness" aria-label="Fitness — gyms and studios">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10v4M18 10v4M8 8v8M16 8v8"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Fitness</span>
+              <span class="qf2-card-hint">Gyms &amp; studios</span>
+            </span>
           </button>
-          <button type="button" class="qf-service-card" data-space="Other"
-            data-hover-msg="Unusual space? We love a challenge. We&rsquo;ve cleaned everything from art galleries to film sets to biotech labs &mdash; tell me more and we&rsquo;ll figure it out together.">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x2699;&#xFE0F;</span>
-            <span class="qf-service-card-label">Something else</span>
-            <span class="qf-service-card-hint">We&rsquo;ve seen it all</span>
+          <button type="button" class="qf2-card" data-space="Other" aria-label="Something else">
+            <span class="qf2-card-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4"/></svg>
+            </span>
+            <span class="qf2-card-body">
+              <span class="qf2-card-label">Something else</span>
+              <span class="qf2-card-hint">I&rsquo;ll surprise you</span>
+            </span>
           </button>
         </div>
+        <!-- V2 inline reveal when "Something else" is selected -->
+        <div class="qf2-space-other-wrap" id="qf2SpaceOtherWrap" hidden>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            </span>
+            <input type="text" id="qf2SpaceOther" placeholder="Briefly describe your space" maxlength="120" aria-label="Describe your space">
+          </div>
+          <p class="qf2-field-helper" id="qf2SpaceOtherHelper" hidden>Nice &mdash; I&rsquo;ll pass that to our crew &sim;</p>
+          <p class="qf2-field-err" id="qf2SpaceOtherErr" role="alert" hidden></p>
+        </div>
+        <button type="button" class="qf2-cta" id="qf2SpaceContinue" hidden>Continue <span aria-hidden="true">&rarr;</span></button>
       </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
 
     <!-- STEP 3 · SPACE SIZE -->
     <!-- STEP · LOCATION (company name + address) -->
-    <section class="qf-screen step-location" hidden id="qfScreen_location" aria-label="Where is your space?">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysLocation">Great choice. Now tell me where this space is so I can match you with the nearest team.</p>
+    <!-- STEP 6 · LOCATION — V2 mockup G rebuild -->
+    <section class="qf-screen step-location qf2-stage" hidden id="qfScreen_location" aria-label="Tell me about your business">
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-done" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station is-done" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station is-done" data-station="size"><span class="qf2-flowbar-dot"></span>Size</li>
+          <li class="qf2-flowbar-station is-done" data-station="days"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station is-active" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Step 6 of 7</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:85%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Step 6 of 7</div>
+        </div>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
+          </div>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; One last thing &rarr;
           </div>
         </div>
-        <h2 class="qf-info-title">Where is your <em>space</em>?</h2>
-        <p class="qf-info-sub">So we can assign the right local team.</p>
-        <div class="qf-info-cards" role="group" aria-label="Company and location">
-          <div class="qf-info-card">
-            <span class="qf-info-card-ico" aria-hidden="true">&#x1F3E2;</span>
-            <input type="text" class="qf-info-card-input qf-info-card-input-full" id="qfCompanyName" placeholder="Company or building name" autocomplete="organization" aria-label="Company name" maxlength="120">
-          </div>
-          <div class="qf-info-card">
-            <span class="qf-info-card-ico" aria-hidden="true">&#x1F4CD;</span>
-            <input type="text" class="qf-info-card-input qf-info-card-input-full" id="qfAddress" placeholder="Address or ZIP code" autocomplete="street-address" aria-label="Address" maxlength="200">
-          </div>
-        </div>
-        <!-- Ola 5 — location is the last data-entry step before the summary.
-             "Review my answers" signals that commitment so the user readies
-             themselves for the final review instead of another question. -->
-        <button type="button" class="qf-info-continue" id="qfLocationContinue">Review my answers <span aria-hidden="true">&rarr;</span></button>
       </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title">Tell me about your <em>business</em>.</h1>
+          <p class="qf2-prompt-sub">
+            <span class="qf2-prompt-sub-desktop">Company name + the address where we&rsquo;ll clean.</span>
+            <span class="qf2-prompt-sub-mobile">Company + where we go.</span>
+          </p>
+        </div>
+        <div class="qf2-location-hint">
+          <span class="qf2-hand-label">
+            <span class="qf2-prompt-sub-desktop">For property managers &sim;</span>
+            <span class="qf2-prompt-sub-mobile">Property managers &sim;</span>
+          </span>
+          <span class="qf2-prompt-sub-desktop">Use the service location, not your own office.</span>
+          <span class="qf2-prompt-sub-mobile">Use the service location.</span>
+        </div>
+        <div class="qf2-fields" role="group" aria-label="Company and address">
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/></svg>
+            </span>
+            <input type="text" id="qfCompanyName" placeholder="Company or organization" autocomplete="organization" aria-label="Company or organization (required)" maxlength="120" required>
+          </div>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 00-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <input type="text" id="qfAddress" placeholder="Service address" autocomplete="street-address" aria-label="Service address (required)" maxlength="200" required>
+          </div>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></svg>
+            </span>
+            <input type="text" id="qfSuite" placeholder="Suite / Floor (optional)" autocomplete="address-line2" aria-label="Suite or floor number" maxlength="60">
+          </div>
+        </div>
+        <p class="qf2-field-err" id="qf2LocErr" role="alert" hidden></p>
+        <button type="button" class="qf2-cta" id="qfLocationContinue">Review my answers <span aria-hidden="true">&rarr;</span></button>
+      </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
 
-    <section class="qf-screen step-3" hidden id="qfScreen_size" aria-label="How big is your space?">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" id="qfAlinaSaysS3" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysTextS3">Pick the closest size range, or enter the exact sq ft below.</p>
+    <!-- STEP 4 · SIZE — V2 mockup G rebuild -->
+    <section class="qf-screen step-3 qf2-stage" hidden id="qfScreen_size" aria-label="How much space?">
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-done" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station is-done" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station is-active" data-station="size"><span class="qf2-flowbar-dot"></span>Size</li>
+          <li class="qf2-flowbar-station" data-station="days"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Step 4 of 7</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:57%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Step 4 of 7</div>
+        </div>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
+          </div>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; How much space?
           </div>
         </div>
-        <h2 class="qf-s3-title">How big is your <em>space</em>?</h2>
-        <div class="qf-s3-cards" role="group" aria-label="Choose your space size">
-          <button type="button" class="qf-service-card" data-size="under3k">
-            <span class="qf-service-card-label">Under 3,000 sq ft</span>
-            <span class="qf-service-card-hint">Small suite, 1&ndash;15 people</span>
-          </button>
-          <button type="button" class="qf-service-card" data-size="3k-6k">
-            <span class="qf-service-card-label">3,000 &ndash; 6,000 sq ft</span>
-            <span class="qf-service-card-hint">Mid-size office, 15&ndash;30 people</span>
-          </button>
-          <button type="button" class="qf-service-card" data-size="6k-9k">
-            <span class="qf-service-card-label">6,000 &ndash; 9,000 sq ft</span>
-            <span class="qf-service-card-hint">Full suite or partial floor</span>
-          </button>
-          <button type="button" class="qf-service-card" data-size="9k-12k">
-            <span class="qf-service-card-label">9,000 &ndash; 12,000 sq ft</span>
-            <span class="qf-service-card-hint">Large office, one full floor</span>
-          </button>
-          <button type="button" class="qf-service-card" data-size="12k-15k">
-            <span class="qf-service-card-label">12,000 &ndash; 15,000 sq ft</span>
-            <span class="qf-service-card-hint">Multi-area or multi-floor</span>
-          </button>
-          <button type="button" class="qf-service-card qf-s3-notsure" data-size="notsure">
-            <span class="qf-service-card-label">Not sure?</span>
-            <span class="qf-service-card-hint">We&rsquo;ll size it on the call</span>
-          </button>
-        </div>
-        <div class="qf-s3-or">
-          <span class="qf-s3-or-line"></span>
-          <span class="qf-s3-or-text">or enter exact size</span>
-          <span class="qf-s3-or-line"></span>
-        </div>
-        <div class="qf-s3-input-wrap">
-          <input type="number" class="qf-s3-input" id="qfSizeCustom" placeholder="Enter sq ft" min="100" max="1000000" inputmode="numeric" aria-label="Enter exact square footage">
-          <button type="button" class="qf-s3-input-btn" id="qfSizeSubmit">Continue <span aria-hidden="true">&rarr;</span></button>
-        </div>
       </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title">
+            <span class="qf2-prompt-sub-desktop">How much space are we <em>cleaning</em>?</span>
+            <span class="qf2-prompt-sub-mobile">How much <em>space</em>?</span>
+          </h1>
+          <p class="qf2-prompt-sub">
+            <span class="qf2-prompt-sub-desktop">Pick the closest range, or tell me exactly if you know it.</span>
+          </p>
+        </div>
+        <div class="qf2-size-grid" role="group" aria-label="Pick your size range">
+          <button type="button" class="qf2-size-card" data-size="under3k">
+            <span class="qf2-size-sqft-value">Under 3K</span>
+            <span class="qf2-size-sqft-unit">sq ft</span>
+          </button>
+          <button type="button" class="qf2-size-card" data-size="3k-6k">
+            <span class="qf2-size-sqft-value">3 &ndash; 6K</span>
+            <span class="qf2-size-sqft-unit">sq ft</span>
+          </button>
+          <button type="button" class="qf2-size-card" data-size="6k-9k">
+            <span class="qf2-size-sqft-value">6 &ndash; 9K</span>
+            <span class="qf2-size-sqft-unit">sq ft</span>
+          </button>
+          <button type="button" class="qf2-size-card" data-size="9k-12k">
+            <span class="qf2-size-sqft-value">9 &ndash; 12K</span>
+            <span class="qf2-size-sqft-unit">sq ft</span>
+          </button>
+          <button type="button" class="qf2-size-card" data-size="12k-15k">
+            <span class="qf2-size-sqft-value">12 &ndash; 15K</span>
+            <span class="qf2-size-sqft-unit">sq ft</span>
+          </button>
+          <button type="button" class="qf2-size-card qf2-size-card--15-20" data-size="15k-20k">
+            <span class="qf2-size-sqft-value">15 &ndash; 20K</span>
+            <span class="qf2-size-sqft-unit">sq ft</span>
+          </button>
+          <!-- Visit card: compact 6th-slot card on both desktop and mobile
+               (per user pref 2026-04-25 to match mobile layout everywhere). -->
+          <button type="button" class="qf2-size-card qf2-size-visit-card" data-size="visit_required" aria-label="Not sure — schedule a visit">
+            <span class="qf2-size-visit-body">
+              <span class="qf2-size-visit-label">Not sure</span>
+              <span class="qf2-size-visit-hint">schedule visit</span>
+            </span>
+          </button>
+        </div>
+        <div class="qf2-numeric-wrap">
+          <label class="qf2-numeric-label" for="qfSizeCustom">Prefer exact? &sim;</label>
+          <input type="number" class="qf2-numeric-input" id="qfSizeCustom" placeholder="Type your sq ft" min="100" max="1000000" inputmode="numeric" aria-label="Enter exact square footage">
+        </div>
+        <div class="qf2-walk-hint" id="qf2WalkHint" hidden role="status" aria-live="polite">
+          <span class="qf2-walk-hint-avatar" aria-hidden="true">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="" width="22" height="22" decoding="async">
+            </picture>
+          </span>
+          <span>Big space &mdash; let&rsquo;s book a visit so I can size it accurately &sim;</span>
+        </div>
+        <p class="qf2-multi-loc-hint">
+          <span class="qf2-prompt-sub-desktop">Multiple locations? Size the largest &mdash; we&rsquo;ll cover the rest on the call &sim;</span>
+          <span class="qf2-prompt-sub-mobile">Multiple locations? Size the largest &sim;</span>
+        </p>
+        <button type="button" class="qf2-cta" id="qf2SizeContinue">Continue <span aria-hidden="true">&rarr;</span></button>
+      </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
 
     <!-- STEP 4 · SCHEDULE (Days) -->
-    <section class="qf-screen step-4" hidden id="qfScreen_days" aria-label="Which days do you need service?">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" id="qfAlinaSaysS4" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysTextS4">Pick the days that match your schedule.</p>
-          </div>
+    <!-- STEP 5 · SCHEDULE (days + time) — V2 mockup G rebuild -->
+    <section class="qf-screen step-4 qf2-stage" hidden id="qfScreen_days" aria-label="When do you need service?">
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-done" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station is-done" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station is-done" data-station="size"><span class="qf2-flowbar-dot"></span>Size</li>
+          <li class="qf2-flowbar-station is-active" data-station="days"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Step 5 of 7</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:71%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Step 5 of 7</div>
         </div>
-        <h2 class="qf-s4-title" id="qfS4Title">Which <em>days</em> do you need service?</h2>
-
-        <!-- Quick presets -->
-        <div class="qf-s4-presets" role="group" aria-label="Quick day presets">
-          <button type="button" class="qf-s4-preset" data-preset="weekdays">Mon&ndash;Fri</button>
-          <button type="button" class="qf-s4-preset" data-preset="every">Every day</button>
-          <button type="button" class="qf-s4-preset" data-preset="clear">Clear</button>
-        </div>
-
-        <!-- Days grouped by weekday/weekend -->
-        <div class="qf-s4-days" role="group" aria-label="Select days of the week">
-          <div class="qf-s4-day-group qf-s4-weekdays">
-            <button type="button" class="qf-service-card qf-day-card" data-day="Monday" aria-pressed="false">
-              <span class="qf-service-card-label">Monday</span>
-            </button>
-            <button type="button" class="qf-service-card qf-day-card" data-day="Tuesday" aria-pressed="false">
-              <span class="qf-service-card-label">Tuesday</span>
-            </button>
-            <button type="button" class="qf-service-card qf-day-card" data-day="Wednesday" aria-pressed="false">
-              <span class="qf-service-card-label">Wednesday</span>
-            </button>
-            <button type="button" class="qf-service-card qf-day-card" data-day="Thursday" aria-pressed="false">
-              <span class="qf-service-card-label">Thursday</span>
-            </button>
-            <button type="button" class="qf-service-card qf-day-card" data-day="Friday" aria-pressed="false">
-              <span class="qf-service-card-label">Friday</span>
-            </button>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
           </div>
-          <div class="qf-s4-day-group qf-s4-weekend-group">
-            <!-- Ola 5 — label clarifies weekends are optional so users with
-                 Mon-Fri-only needs don't feel obligated to tap them. -->
-            <span class="qf-s4-group-label">Weekends <small>(if needed)</small></span>
-            <button type="button" class="qf-service-card qf-day-card qf-day-weekend" data-day="Saturday" aria-pressed="false">
-              <span class="qf-service-card-label">Saturday</span>
-            </button>
-            <button type="button" class="qf-service-card qf-day-card qf-day-weekend" data-day="Sunday" aria-pressed="false">
-              <span class="qf-service-card-label">Sunday</span>
-            </button>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; When works best?
           </div>
-        </div>
-        <div class="qf-s4-bottom">
-          <span class="qf-s4-count" id="qfDaysCount" aria-live="polite" aria-atomic="true"></span>
-          <button type="button" class="qf-s4-continue" id="qfDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
         </div>
       </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title" id="qfS4Title">When do you need <em>service</em>?</h1>
+          <p class="qf2-prompt-sub">
+            <span class="qf2-prompt-sub-desktop">Pick the days and times that fit. We can adjust later.</span>
+          </p>
+        </div>
+        <div class="qf2-section-label">
+          <span class="qf2-prompt-sub-desktop">Which days</span>
+          <span class="qf2-prompt-sub-mobile">Days</span>
+        </div>
+        <div class="qf2-chip-row" role="group" aria-label="Select days">
+          <button type="button" class="qf2-chip qf-day-card" data-day="Monday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Monday</span><span class="qf2-prompt-sub-mobile">Mon</span></button>
+          <button type="button" class="qf2-chip qf-day-card" data-day="Tuesday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Tuesday</span><span class="qf2-prompt-sub-mobile">Tue</span></button>
+          <button type="button" class="qf2-chip qf-day-card" data-day="Wednesday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Wednesday</span><span class="qf2-prompt-sub-mobile">Wed</span></button>
+          <button type="button" class="qf2-chip qf-day-card" data-day="Thursday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Thursday</span><span class="qf2-prompt-sub-mobile">Thu</span></button>
+          <button type="button" class="qf2-chip qf-day-card" data-day="Friday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Friday</span><span class="qf2-prompt-sub-mobile">Fri</span></button>
+          <button type="button" class="qf2-chip qf-day-card" data-day="Saturday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Saturday</span><span class="qf2-prompt-sub-mobile">Sat</span></button>
+          <button type="button" class="qf2-chip qf-day-card" data-day="Sunday" aria-pressed="false"><span class="qf2-prompt-sub-desktop">Sunday</span><span class="qf2-prompt-sub-mobile">Sun</span></button>
+        </div>
+        <div class="qf2-chip-row" role="group" aria-label="Quick day presets">
+          <button type="button" class="qf2-chip qf2-chip-preset qf-s4-preset" data-preset="weekdays">Mon&ndash;Fri</button>
+          <button type="button" class="qf2-chip qf2-chip-preset qf-s4-preset" data-preset="every">Every day</button>
+          <button type="button" class="qf2-chip qf2-chip-preset qf-s4-preset" data-preset="clear">Clear</button>
+        </div>
+        <div class="qf2-section-label">
+          <span class="qf2-prompt-sub-desktop">What time</span>
+          <span class="qf2-prompt-sub-mobile">Time</span>
+        </div>
+        <div class="qf2-chip-row" role="group" aria-label="Time of day">
+          <button type="button" class="qf2-chip qf2-chip-time" data-time="morning" aria-pressed="false">
+            <span class="qf2-chip-time-label">Morning</span>
+            <span class="qf2-chip-time-range">6 am &ndash; 12 pm</span>
+          </button>
+          <button type="button" class="qf2-chip qf2-chip-time" data-time="afternoon" aria-pressed="false">
+            <span class="qf2-chip-time-label">Afternoon</span>
+            <span class="qf2-chip-time-range">12 &ndash; 5 pm</span>
+          </button>
+          <button type="button" class="qf2-chip qf2-chip-time is-selected" data-time="evening" aria-pressed="true">
+            <span class="qf2-chip-time-label">Evening</span>
+            <span class="qf2-chip-time-range">5 &ndash; 10 pm</span>
+          </button>
+          <button type="button" class="qf2-chip qf2-chip-time qf2-chip-time--flexible" data-time="flexible" aria-pressed="false">
+            <span class="qf2-chip-time-label">Flexible</span>
+            <span class="qf2-chip-time-range">we&rsquo;ll coordinate</span>
+          </button>
+        </div>
+        <p class="qf2-time-toast" id="qf2TimeToast" hidden role="status" aria-live="polite"></p>
+        <span class="qf-s4-count" id="qfDaysCount" aria-live="polite" aria-atomic="true" hidden></span>
+        <button type="button" class="qf2-cta" id="qfDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
+      </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
 
     <!-- STEP 4b · PORTER DAYS (only in the 'both' flow) -->
@@ -658,345 +1002,230 @@
       </div>
     </section>
 
-    <!-- STEP 6 · SUMMARY + SUBMIT (Redesigned — premium plan card, standalone screen) -->
-    <section class="qf-screen step-contact qf-rv" hidden id="qfScreen_contact" aria-label="Review and submit">
-      <div class="qf-screen-inner qf-rv-wrap">
 
-        <!-- Ola 8 · Review without chat (Idea 2). Alina as host — single column centered. -->
-        <header class="qf-rv-hero">
-          <picture class="qf-rv-hero-ava">
-            <source type="image/avif" srcset="images/alina-avatar-192.avif">
-            <source type="image/webp" srcset="images/alina-avatar-192.webp">
-            <img src="images/alina-avatar-192.jpg" alt="" width="72" height="72" loading="lazy" decoding="async">
-          </picture>
-          <span class="qf-rv-hero-dot" aria-hidden="true"></span>
-          <span class="qf-rv-hero-kicker"><span class="qf-rv-hero-kicker-pulse" aria-hidden="true"></span>Final step</span>
-          <h2 class="qf-plan-hero-title qf-rv-hero-title" id="qfPlanHeroTitle">Got it, <em id="qfRvHeroName">there</em>. Here&rsquo;s your snapshot.</h2>
-          <p class="qf-rv-hero-sub" id="qfRvHeroSub">Tap anything that&rsquo;s off to edit.</p>
-        </header>
-
-        <!-- Summary card: 4 consolidated rows. Each row displays primary + sub from the JS-managed fields. -->
-        <div class="qf-rv-summary">
-
-          <!-- Service row -->
-          <section class="qf-rv-sum-row" data-section="service" data-field="service">
-            <span class="qf-rv-sum-k">Service</span>
-            <div class="qf-rv-sum-body">
-              <div class="qf-rv-sum-primary">
-                <em id="qfSumService">&mdash;</em><span class="qf-rv-sum-sep" aria-hidden="true"></span><span id="qfRvSvcFreq" class="qf-rv-sum-primary-meta">your schedule</span>
-              </div>
-              <div class="qf-rv-sum-sub" id="qfRvSvcSub">Eco-certified · insured · uniformed team</div>
-            </div>
-            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="service" aria-label="Edit service">Edit</button>
-            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
-              <label class="qf-rv-field"><span class="qf-rv-field-label">Service type</span>
-                <select class="qf-rev-select" id="qfEditService" aria-label="Choose service type">
-                  <option value="janitorial">Janitorial</option>
-                  <option value="dayporter">Day Porter</option>
-                  <option value="both">Both Services</option>
-                  <option value="unsure">Help me decide</option>
-                </select>
-              </label>
-              <label class="qf-rv-field" id="qfSumPortersRow" hidden><span class="qf-rv-field-label">Porters</span>
-                <select class="qf-rev-select" id="qfEditPorters" aria-label="Choose number of porters">
-                  <option value="1">1 porter</option>
-                  <option value="2">2 porters</option>
-                  <option value="3">3 porters</option>
-                  <option value="4">4 porters</option>
-                  <option value="5">5 porters</option>
-                  <option value="notsure">Not sure</option>
-                </select>
-                <span class="qf-rv-field-value" id="qfSumPorters" hidden>&mdash;</span>
-              </label>
-              <div class="qf-rev-edit-actions">
-                <button type="button" class="qf-rev-save" data-save="service">Save</button>
-                <button type="button" class="qf-rev-cancel" data-cancel="service">Cancel</button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Premises row -->
-          <section class="qf-rv-sum-row" data-section="location" data-field="address">
-            <span class="qf-rv-sum-k">Premises</span>
-            <div class="qf-rv-sum-body">
-              <div class="qf-rv-sum-primary"><b id="qfSumAddress">&mdash;</b></div>
-              <div class="qf-rv-sum-sub">
-                <span id="qfSumSpace"></span><span class="qf-rv-sum-dot" hidden>·</span><span id="qfSumSize" hidden></span>
-              </div>
-            </div>
-            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="address" aria-label="Edit premises">Edit</button>
-            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
-              <label class="qf-rv-field"><span class="qf-rv-field-label">Address</span>
-                <input type="text" class="qf-rev-input" id="qfEditAddress" placeholder="Street, City, State" autocomplete="street-address">
-              </label>
-              <label class="qf-rv-field"><span class="qf-rv-field-label">Space type</span>
-                <select class="qf-rev-select" id="qfEditSpace" aria-label="Choose space type">
-                  <option value="Office">Office</option>
-                  <option value="Medical">Medical</option>
-                  <option value="Retail">Retail</option>
-                  <option value="Restaurant">Restaurant</option>
-                  <option value="Fitness">Fitness</option>
-                  <option value="Other">Other</option>
-                </select>
-              </label>
-              <label class="qf-rv-field" id="qfSumSizeRow"><span class="qf-rv-field-label">Size</span>
-                <select class="qf-rev-select" id="qfEditSize" aria-label="Choose space size">
-                  <option value="under3k">Under 3K sqft</option>
-                  <option value="3k-6k">3K&ndash;6K sqft</option>
-                  <option value="6k-9k">6K&ndash;9K sqft</option>
-                  <option value="9k-12k">9K&ndash;12K sqft</option>
-                  <option value="12k-15k">12K&ndash;15K sqft</option>
-                  <option value="notsure">Not sure</option>
-                </select>
-              </label>
-              <div class="qf-rev-edit-actions">
-                <button type="button" class="qf-rev-save" data-save="address">Save</button>
-                <button type="button" class="qf-rev-cancel" data-cancel="address">Cancel</button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Schedule row (label flips to "Cleaning" in 'both' flow) -->
-          <section class="qf-rv-sum-row" data-section="schedule" data-field="days">
-            <span class="qf-rv-sum-k" id="qfSumScheduleLabel">Schedule</span>
-            <div class="qf-rv-sum-body">
-              <div class="qf-rv-sum-primary"><em id="qfSumSchedule">&mdash;</em></div>
-              <div class="qf-rv-sum-sub" id="qfRvSchedSub" hidden><span id="qfSumTime"></span><span class="qf-rv-sum-dot" id="qfRvSchedDot" hidden>·</span><span id="qfRvSchedMeta" hidden></span></div>
-            </div>
-            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="days" aria-label="Edit schedule">Edit</button>
-            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
-              <label class="qf-rv-field"><span class="qf-rv-field-label">Days</span>
-                <div class="qf-rev-days-picker" id="qfEditDays" role="group" aria-label="Select days of the week">
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Monday" aria-label="Monday"> Mon</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Tuesday" aria-label="Tuesday"> Tue</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Wednesday" aria-label="Wednesday"> Wed</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Thursday" aria-label="Thursday"> Thu</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Friday" aria-label="Friday"> Fri</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Saturday" aria-label="Saturday"> Sat</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Sunday" aria-label="Sunday"> Sun</label>
-                </div>
-              </label>
-              <div class="qf-rv-field" id="qfSumTimeRow" hidden>
-                <span class="qf-rv-field-label">Porter hours</span>
-                <div id="qfEditPorterHours" class="qf-rv-porter-hours-edit" role="group" aria-label="Per-porter hours"></div>
-              </div>
-              <div class="qf-rev-edit-actions">
-                <button type="button" class="qf-rev-save" data-save="days">Save</button>
-                <button type="button" class="qf-rev-cancel" data-cancel="days">Cancel</button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Porter row — visible only in 'both' service. Its own days + hours
-               editor so clients with different cleaning vs porter schedules can
-               edit each independently. -->
-          <section class="qf-rv-sum-row" data-section="porter-schedule" data-field="dpDays" id="qfSumPorterRow" hidden>
-            <span class="qf-rv-sum-k">Porter</span>
-            <div class="qf-rv-sum-body">
-              <div class="qf-rv-sum-primary"><em id="qfSumPorterSchedule">&mdash;</em></div>
-              <div class="qf-rv-sum-sub" id="qfRvPorterSchedSub" hidden><span id="qfSumPorterTime"></span></div>
-            </div>
-            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="dpDays" aria-label="Edit porter schedule">Edit</button>
-            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
-              <label class="qf-rv-field"><span class="qf-rv-field-label">Porter days</span>
-                <div class="qf-rev-days-picker" id="qfEditDpDays" role="group" aria-label="Select porter days">
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Monday" aria-label="Monday"> Mon</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Tuesday" aria-label="Tuesday"> Tue</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Wednesday" aria-label="Wednesday"> Wed</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Thursday" aria-label="Thursday"> Thu</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Friday" aria-label="Friday"> Fri</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Saturday" aria-label="Saturday"> Sat</label>
-                  <label class="qf-rev-day-chip"><input type="checkbox" value="Sunday" aria-label="Sunday"> Sun</label>
-                </div>
-              </label>
-              <div class="qf-rv-field">
-                <span class="qf-rv-field-label">Porter hours</span>
-                <div id="qfEditDpPorterHours" class="qf-rv-porter-hours-edit" role="group" aria-label="Per-porter hours"></div>
-              </div>
-              <div class="qf-rev-edit-actions">
-                <button type="button" class="qf-rev-save" data-save="dpDays">Save</button>
-                <button type="button" class="qf-rev-cancel" data-cancel="dpDays">Cancel</button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Contact row -->
-          <section class="qf-rv-sum-row" data-section="contact" data-field="name">
-            <span class="qf-rv-sum-k">Contact</span>
-            <div class="qf-rv-sum-body">
-              <div class="qf-rv-sum-primary"><span id="qfSumName">&mdash;</span><span class="qf-rv-sum-dot" id="qfRvContactDot" hidden>·</span><span id="qfSumCompany" hidden></span></div>
-              <div class="qf-rv-sum-sub">
-                <b id="qfSumEmail">&mdash;</b><span class="qf-rv-sum-dot" id="qfRvContactDot2" hidden>·</span><span id="qfSumPhone"></span>
-              </div>
-            </div>
-            <button type="button" class="qf-rev-edit qf-rv-sum-edit-btn" data-edit="name" aria-label="Edit contact">Edit</button>
-            <div class="qf-rv-sum-edit-panel qf-rev-row-edit" hidden>
-              <div class="qf-rv-field-grid">
-                <label class="qf-rv-field"><span class="qf-rv-field-label">First name</span>
-                  <input type="text" class="qf-rev-input" id="qfEditFirstName" placeholder="First name" autocomplete="given-name">
-                </label>
-                <label class="qf-rv-field"><span class="qf-rv-field-label">Last name</span>
-                  <input type="text" class="qf-rev-input" id="qfEditLastName" placeholder="Last name" autocomplete="family-name">
-                </label>
-              </div>
-              <label class="qf-rv-field"><span class="qf-rv-field-label">Email</span>
-                <input type="email" class="qf-rev-input" id="qfEditEmail" placeholder="your@email.com" autocomplete="email">
-              </label>
-              <label class="qf-rv-field" id="qfSumPhoneRow"><span class="qf-rv-field-label">Phone <small>(optional)</small></span>
-                <input type="tel" class="qf-rev-input" id="qfEditPhone" placeholder="Phone number" inputmode="tel">
-              </label>
-              <label class="qf-rv-field" id="qfSumCompanyRow" hidden><span class="qf-rv-field-label">Company <small>(optional)</small></span>
-                <input type="text" class="qf-rev-input" id="qfEditCompany" placeholder="Company name" autocomplete="organization">
-              </label>
-              <div class="qf-rev-edit-actions">
-                <button type="button" class="qf-rev-save" data-save="name">Save</button>
-                <button type="button" class="qf-rev-cancel" data-cancel="name">Cancel</button>
-              </div>
-            </div>
-          </section>
-
+    <!-- STEP 7 · REVIEW — V2 mockup G rebuild -->
+    <section class="qf-screen step-contact qf-rv qf2-stage" hidden id="qfScreen_contact" aria-label="Review and submit">
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-done" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station is-done" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station is-done" data-station="size"><span class="qf2-flowbar-dot"></span>Size</li>
+          <li class="qf2-flowbar-station is-done" data-station="days"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station is-done" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station is-active" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Last step</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:100%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Last step</div>
         </div>
-
-        <!-- Notes card -->
-        <div class="qf-rv-notes" data-section="notes">
-          <div class="qf-rv-notes-k">
-            <span class="qf-rv-notes-k-label">Note for Alina · optional</span>
-            <span class="qf-rv-notes-k-count" aria-live="polite" aria-atomic="true"><span id="qfSpecialCounter">0</span> / 500</span>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
           </div>
-          <label for="qfSpecialInstructions" class="sr-only">Any special instructions?</label>
-          <textarea class="qf-rv-notes-input" id="qfSpecialInstructions" placeholder="Quirks, preferences, focus areas — anything that helps us tailor your plan." rows="3" maxlength="500" aria-describedby="qfSpecialCounter"></textarea>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; One last look &rarr;
+          </div>
         </div>
-
-        <!-- Send block -->
-        <div class="qf-rv-send">
-          <div class="qf-rv-send-trust" aria-hidden="true">
-            <span class="qf-rv-send-trust-item">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V4.5a3 3 0 0 1 6 0V7"/></svg>
-              No spam
-            </span>
-            <span class="qf-rv-send-trust-sep"></span>
-            <span class="qf-rv-send-trust-item">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
-              No commitment
-            </span>
-            <span class="qf-rv-send-trust-sep"></span>
-            <span class="qf-rv-send-trust-item">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
-              24h reply
-            </span>
-          </div>
-          <!-- Ola 5 · privacy reassurance above the submit CTA. The final
-               step is where trust-sensitive users hesitate; making the data-
-               handling commitment visible at the last click removes one
-               documented abandonment reason. -->
-          <p class="qf-rv-privacy-note">
-            <span aria-hidden="true">🔒</span>
-            Your info is encrypted. We&rsquo;ll email your proposal and may call to discuss details.
-            <a href="privacy.html">Privacy</a>
+      </div>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h1 class="qf2-prompt-title">
+            <span class="qf2-prompt-sub-desktop">Here&rsquo;s your <em>snapshot</em>.</span>
+            <span class="qf2-prompt-sub-mobile">Your <em>snapshot</em>.</span>
+          </h1>
+          <p class="qf2-prompt-sub">
+            <span class="qf2-prompt-sub-desktop">Anything off? Tap a section to tweak it.</span>
           </p>
-          <button type="button" class="qf-rev-btn qf-rv-send-btn" id="qfContactSubmit">
-            <span class="qf-rv-send-btn-label">Request my quote</span>
-            <span class="qf-rv-send-btn-arrow" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
-            </span>
-          </button>
-          <div class="qf-rv-send-captcha">
-            <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
+        </div>
+        <div class="qf2-summary" role="region" aria-label="Quote summary">
+          <div class="qf2-sum-row" data-section="service">
+            <div class="qf2-sum-row-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            </div>
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">The service</div>
+              <div class="qf2-sum-row-value" id="qf2SumService">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="service">Edit</button>
           </div>
-          <p class="qf-rv-send-delivery" id="qfRvSendDelivery">We&rsquo;ll email your proposal within 24 hours.</p>
+          <div class="qf2-sum-row" data-section="info">
+            <div class="qf2-sum-row-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/></svg>
+            </div>
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">You</div>
+              <div class="qf2-sum-row-value" id="qf2SumYou">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="info">Edit</button>
+          </div>
+          <div class="qf2-sum-row" data-section="space">
+            <div class="qf2-sum-row-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M8 4v16"/></svg>
+            </div>
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">Your space</div>
+              <div class="qf2-sum-row-value" id="qf2SumSpace">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="space">Edit</button>
+          </div>
+          <div class="qf2-sum-row" data-section="schedule">
+            <div class="qf2-sum-row-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">When</div>
+              <div class="qf2-sum-row-value" id="qf2SumWhen">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="days">Edit</button>
+          </div>
+          <div class="qf2-sum-row" data-section="location">
+            <div class="qf2-sum-row-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 00-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">Where</div>
+              <div class="qf2-sum-row-value" id="qf2SumWhere">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="location">Edit</button>
+          </div>
         </div>
-
-        <!-- Legacy anchors for populateSummary back-compat (JS still references these IDs) -->
-        <div class="qf-plan-chips qf-rv-chips-legacy" id="qfPlanChips" hidden></div>
-        <span id="qfChipService" hidden></span>
-        <span id="qfChipSpace" hidden></span>
-        <span id="qfChipSize" hidden></span>
-        <span id="qfChipDays" hidden></span>
-        <span id="qfChipPorters" hidden></span>
-
-        <!-- Floating submit bar — appears once the inline CTA scrolls out of view -->
-        <div class="qf-plan-floating-cta" id="qfPlanFloatingCta" aria-hidden="true">
-          <button type="button" class="qf-rev-btn qf-plan-floating-cta-btn qf-rv-send-btn" id="qfFloatingSubmitBtn">
-            Send my request <span aria-hidden="true">&rarr;</span>
-          </button>
+        <button type="button" class="qf2-phone-optin-link" id="qf2PhoneOptinToggle" aria-expanded="false" aria-controls="qf2PhoneOptinExpanded">+ add your phone number &sim;</button>
+        <div class="qf2-phone-optin-expanded" id="qf2PhoneOptinExpanded" hidden>
+          <div class="qf2-field">
+            <span class="qf2-field-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+            </span>
+            <input type="tel" id="qfUserPhone" placeholder="Phone (optional)" autocomplete="tel" aria-label="Phone number" inputmode="tel" maxlength="25">
+          </div>
         </div>
-      </div><!-- /.qf-screen-inner -->
+        <div class="qf2-textarea-wrap">
+          <textarea id="qfSpecialInstructions" placeholder="Anything else I should know? Elevator access, security quirks..." maxlength="500"></textarea>
+          <div class="qf2-textarea-counter" id="qf2NotesCounter">0 / 500</div>
+        </div>
+        <div class="qf2-trust" aria-label="Trust signals">
+          <span class="qf2-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+            <span class="qf2-prompt-sub-desktop">Licensed &amp; insured</span>
+            <span class="qf2-prompt-sub-mobile">Licensed</span>
+          </span>
+          <span class="qf2-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>
+            24h response
+          </span>
+          <span class="qf2-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/></svg>
+            <span class="qf2-prompt-sub-desktop">Privacy-first</span>
+            <span class="qf2-prompt-sub-mobile">Private</span>
+          </span>
+        </div>
+        <button type="button" class="qf2-cta qf-rv-send-btn" id="qfContactSubmit">
+          <span class="qf-rv-send-btn-label">Send it to Alina</span>
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+        <p class="qf2-cta-hint">Talk soon &sim;</p>
+        <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback" style="margin-top:12px"></div>
+      </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
     <!-- SUCCESS SCREEN -->
-    <section class="qf-screen step-success" hidden id="qfScreen_success" aria-label="Success">
-      <div class="qf-confetti" aria-hidden="true">
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
-        <span class="qf-confetti-piece"></span>
+    <!-- STEP 8 · SUCCESS — V2 mockup G rebuild -->
+    <section class="qf-screen step-success qf2-stage is-success" hidden id="qfScreen_success" aria-label="Success">
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" decoding="async">
+            </picture>
+          </div>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; Got it &mdash; talk soon &sim;
+          </div>
+        </div>
       </div>
-      <div class="qf-screen-inner qf-cinematic">
-        <div class="qf-success-avatar qf-cinematic-avatar">
-          <picture><source type="image/avif" srcset="images/alina-avatar-480.avif"><source type="image/webp" srcset="images/alina-avatar-480.webp"><img src="images/alina-avatar-480.jpg" alt="Alina — your Cleaning Experience Advisor" width="120" height="120" loading="lazy" decoding="async"></picture>
-          <svg class="qf-cinematic-check" viewBox="0 0 52 52" aria-hidden="true"><circle class="qf-cinematic-check-circle" cx="26" cy="26" r="24" fill="none"/><path class="qf-cinematic-check-path" fill="none" d="M14 27l8 8 16-18"/></svg>
-        </div>
-        <h2 class="qf-success-title qf-cinematic-title" id="qfSuccessTitle">Your proposal is on its way!</h2>
-        <p class="qf-success-sub qf-cinematic-sub" id="qfSuccessSub">Check your email &mdash; your custom plan will be there within 24 hours.</p>
-
-        <!-- Reference number hero (populated by JS) -->
-        <div class="qf-success-ref" id="qfSuccessRef" hidden>
-          Reference <strong id="qfSuccessRefNum">&mdash;</strong>
-        </div>
-
-        <!-- What's next timeline.
-             Ola 8 · semantic list. A SR previously heard "What happens next,
-             three regions with no relationship" because the wrapping div
-             didn't imply a list. Switching to <ol>/<li> gives AT the
-             implicit structure (N of M, ordered progression) the visual
-             design conveys. CSS targeted the item class, not div specifically,
-             so no style regression. -->
-        <ol class="qf-success-timeline" aria-label="What happens next">
-          <li class="qf-success-timeline-item">
-            <div class="qf-success-timeline-ico" aria-hidden="true">&#x1F4E7;</div>
-            <div class="qf-success-timeline-text">
-              <span class="qf-success-timeline-when">Within 24 hours</span>
-              <span class="qf-success-timeline-what">Custom proposal lands in your inbox</span>
+      <div class="qf2-body qf2-success-body">
+        <h1 class="qf2-success-title">Thanks, <em id="qf2SuccessName">there</em>!</h1>
+        <p class="qf2-success-subtitle">
+          <span class="qf2-prompt-sub-desktop">Your request is with me. I&rsquo;ll reach out within 24 hours.</span>
+          <span class="qf2-prompt-sub-mobile">I&rsquo;ll reach out within 24 hours.</span>
+        </p>
+        <div class="qf2-timeline">
+          <div class="qf2-timeline-item">
+            <div class="qf2-timeline-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
             </div>
-          </li>
-          <li class="qf-success-timeline-item">
-            <div class="qf-success-timeline-ico" aria-hidden="true">&#x1F4DE;</div>
-            <div class="qf-success-timeline-text">
-              <span class="qf-success-timeline-when">Within 48 hours</span>
-              <span class="qf-success-timeline-what">Quick call to finalize details</span>
+            <div class="qf2-timeline-text">
+              <div class="qf2-timeline-when">Today</div>
+              <div class="qf2-timeline-what">
+                <span class="qf2-prompt-sub-desktop">Your quote is being prepared.</span>
+                <span class="qf2-prompt-sub-mobile">Quote prepared.</span>
+              </div>
             </div>
-          </li>
-          <li class="qf-success-timeline-item">
-            <div class="qf-success-timeline-ico" aria-hidden="true">&#x2728;</div>
-            <div class="qf-success-timeline-text">
-              <span class="qf-success-timeline-when">Week 1</span>
-              <span class="qf-success-timeline-what">Your eco-certified service begins</span>
+          </div>
+          <div class="qf2-timeline-item">
+            <div class="qf2-timeline-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
             </div>
-          </li>
-        </ol>
-
-        <div class="qf-success-summary" id="qfSuccessSummary"></div>
-        <div class="qf-success-ctas qf-cinematic-ctas">
-          <button type="button" class="qf-success-cta-primary" id="qfShareColleagueBtn">
-            <span class="qf-success-cta-ico" aria-hidden="true">&#x1F4E4;</span>
-            Share Ecco with a colleague
-          </button>
-          <a href="https://linkedin.com/company/eccofacilities" target="_blank" rel="noopener noreferrer" class="qf-success-cta-secondary">
-            <span class="qf-success-cta-ico" aria-hidden="true">&#x1F517;</span>
-            Follow us on LinkedIn
-          </a>
+            <div class="qf2-timeline-text">
+              <div class="qf2-timeline-when">
+                <span class="qf2-prompt-sub-desktop">Within 24h</span>
+                <span class="qf2-prompt-sub-mobile">24h</span>
+              </div>
+              <div class="qf2-timeline-what">
+                <span class="qf2-prompt-sub-desktop">I&rsquo;ll email you with your custom quote.</span>
+                <span class="qf2-prompt-sub-mobile">Alina emails you.</span>
+              </div>
+            </div>
+          </div>
+          <div class="qf2-timeline-item">
+            <div class="qf2-timeline-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 9h18"/></svg>
+            </div>
+            <div class="qf2-timeline-text">
+              <div class="qf2-timeline-when">Next</div>
+              <div class="qf2-timeline-what">
+                <span class="qf2-prompt-sub-desktop">30-min call or site walk.</span>
+                <span class="qf2-prompt-sub-mobile">Call or site walk.</span>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="qf2-reference-id">
+          <span class="qf2-prompt-sub-desktop">Your quote reference: </span>
+          <span class="qf2-prompt-sub-mobile">Ref: </span>
+          <strong id="qf2SuccessRef" title="Save this — useful if you need to reach out about your quote">&mdash;</strong>
+        </div>
+        <p class="qf2-spam-hint">
+          <span class="qf2-prompt-sub-desktop">Check spam &mdash; it comes from </span>
+          <span class="qf2-prompt-sub-mobile">Check spam &mdash; from </span>
+          <strong>alina@eccofacilities.com</strong>
+        </p>
+        <a href="/" class="qf2-back-link">&larr; Back to Ecco</a>
       </div>
     </section>
 
@@ -1064,7 +1293,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=27.5"></script>
+<script defer src="js/quote-flow.js?v=30.0"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

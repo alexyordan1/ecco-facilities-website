@@ -170,7 +170,7 @@ export async function onRequestPost(context) {
     // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
     // V2 2026-04-24 — added timeOfDay, serviceCertainty, needsSiteWalk, scheduleAtypical.
     const ALLOWED_KEYS = new Set([
-      'em','fn','ln','ph','co','pos','addr','referral','notes','contactPref','formType',
+      'em','fn','ln','ph','co','pos','addr','suite','referral','notes','contactPref','formType',
       'space','spaceOther','urg','size','exactSize','janDays',
       'hrs','customHrs','startTime','porterHours','dpDays','porters','porterCount','dpAreas','areaOther',
       'timeOfDay','serviceCertainty','needsSiteWalk','scheduleAtypical',
@@ -261,7 +261,7 @@ export async function onRequestPost(context) {
     // 3. Build form_data with readable labels
     const KEY_MAP = {
       fn: 'first_name', ln: 'last_name', em: 'email', ph: 'phone',
-      co: 'company', pos: 'job_title', addr: 'address', referral: 'how_heard', notes: 'notes',
+      co: 'company', pos: 'job_title', addr: 'address', suite: 'suite', referral: 'how_heard', notes: 'notes',
       contactPref: 'contact_preference', formType: 'form_type',
       // Shared
       space: 'space_type', spaceOther: 'space_type_custom', urg: 'urgency',

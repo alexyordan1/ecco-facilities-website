@@ -263,6 +263,7 @@
     userPosition:   '',
     companyName:    '',
     userAddress:    '',
+    userSuite:      '',
     userPhone:      '',
     specialInstructions: '',
     serviceCertainty: null,
@@ -1224,21 +1225,69 @@
   var supportsHover = window.matchMedia('(hover: hover)').matches;
 
   if (SCREENS.welcome) {
-    SCREENS.welcome.querySelectorAll('.qf-service-card').forEach(function (card) {
-      // Main click — select service
+    // V2 2026-04-25 — service cards selected by [data-service]. The new
+    // .qf2-card uses the same attribute so this delegated query catches both
+    // the V2 cards and any back-compat ones.
+    SCREENS.welcome.querySelectorAll('[data-service]').forEach(function (card) {
       card.addEventListener('click', function () {
         STATE.service = card.getAttribute('data-service');
-
-        // Build dynamic rail for this service
         buildRail(STATE.service);
-
         goNext();
       });
-
-      // Info tooltip button removed per user request — the (i) icon's native
-      // aria-label tooltip (Chrome) was appearing on hover, and the card hint
-      // copy already explains what each service is.
     });
+
+    // V2 2026-04-25 — "Not sure?" mini-quiz. The toggle expands a panel with
+    // 3 chips; each chip recommends a service, sets serviceCertainty so CRM
+    // knows the lead was guided, and routes after a brief confirmation pause.
+    var qf2QuizToggle = document.getElementById('qf2QuizToggle');
+    var qf2QuizPanel  = document.getElementById('qf2QuizPanel');
+    var qf2QuizResult = document.getElementById('qf2QuizResult');
+    var qf2QuizResultName = document.getElementById('qf2QuizResultName');
+    var qf2QuizResultBlurb = document.getElementById('qf2QuizResultBlurb');
+    var qf2QuizChips = qf2QuizPanel ? qf2QuizPanel.querySelectorAll('.qf2-quiz-chip') : [];
+
+    if (qf2QuizToggle && qf2QuizPanel) {
+      qf2QuizToggle.addEventListener('click', function () {
+        var open = !qf2QuizPanel.hidden;
+        qf2QuizPanel.hidden = open;
+        qf2QuizToggle.setAttribute('aria-expanded', String(!open));
+        if (!open) {
+          var first = qf2QuizPanel.querySelector('.qf2-quiz-chip');
+          if (first) first.focus();
+        }
+      });
+    }
+
+    if (qf2QuizChips.length) {
+      var QF2_QUIZ_LABELS = {
+        janitorial: { name: 'Janitorial', blurb: '· recurring cleaning after hours.' },
+        dayporter:  { name: 'Day Porter', blurb: '· on-site during business hours.' },
+        both:       { name: 'Combined',   blurb: '· day porter + janitorial.' }
+      };
+      qf2QuizChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var pick = chip.getAttribute('data-quiz-pick');
+          if (!pick) return;
+          // Visually mark the picked chip + clear siblings.
+          qf2QuizChips.forEach(function (c) { c.classList.toggle('is-selected', c === chip); });
+
+          STATE.service = pick;
+          STATE.serviceCertainty = 'guided_via_quiz';
+
+          // Show the recommendation via textContent (XSS-safe).
+          if (qf2QuizResult && qf2QuizResultName && qf2QuizResultBlurb) {
+            var meta = QF2_QUIZ_LABELS[pick] || { name: pick, blurb: '' };
+            qf2QuizResultName.textContent = meta.name;
+            qf2QuizResultBlurb.textContent = meta.blurb;
+            qf2QuizResult.hidden = false;
+          }
+
+          buildRail(STATE.service);
+          // Brief pause so the user reads the recommendation before transition.
+          setTimeout(function () { goNext(); }, 600);
+        });
+      });
+    }
   }
 
   /* =======================================================================
@@ -1363,72 +1412,74 @@
     });
   }
   if (SCREENS.info) {
+    // V2 — error display. Falls back to legacy showInfoError if the V2 element
+    // doesn't exist (e.g. on dayporter/both/unsure flows that still use v1 HTML).
+    var qf2InfoErr = document.getElementById('qf2InfoErr');
+    function qf2ShowInfoErr(msg, focusEl) {
+      if (qf2InfoErr) {
+        qf2InfoErr.textContent = msg;
+        qf2InfoErr.hidden = false;
+      } else {
+        showInfoError(msg, focusEl);
+      }
+      if (focusEl) {
+        try { focusEl.focus(); focusEl.classList.add('qf-input-invalid'); } catch(e){}
+      }
+    }
+    function qf2ClearInfoErr() {
+      if (qf2InfoErr) qf2InfoErr.hidden = true;
+      else clearInfoError();
+      ['qfUserFirstName','qfUserLastName','qfUserEmail','qfUserPosition'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.classList.remove('qf-input-invalid');
+      });
+    }
+
     var emailField = document.getElementById('qfUserEmail');
     if (emailField) {
       emailField.addEventListener('blur', function () {
         var val = emailField.value.trim();
-        if (val && !EMAIL_RE.test(val)) {
-          showInfoError('Please enter a valid email address.', emailField);
-        } else {
-          clearInfoError();
-        }
+        if (val && !EMAIL_RE.test(val)) qf2ShowInfoErr("Hmm, that email doesn't look right — double-check?", emailField);
+        else qf2ClearInfoErr();
       });
-      emailField.addEventListener('input', clearInfoError);
+      emailField.addEventListener('input', qf2ClearInfoErr);
     }
+    ['qfUserFirstName','qfUserLastName','qfUserPosition'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', qf2ClearInfoErr);
+    });
+
     var infoContinueBtn = document.getElementById('qfInfoContinue');
     if (infoContinueBtn) {
       infoContinueBtn.addEventListener('click', function () {
         var firstName = document.getElementById('qfUserFirstName');
-        var lastName = document.getElementById('qfUserLastName');
-        var email = document.getElementById('qfUserEmail');
-        var phone = document.getElementById('qfUserPhone');
+        var lastName  = document.getElementById('qfUserLastName');
+        var email     = document.getElementById('qfUserEmail');
+        var position  = document.getElementById('qfUserPosition');
 
-        clearInfoError();
+        qf2ClearInfoErr();
 
-        var fnVal = firstName ? cleanName(firstName.value) : '';
-        var emVal = email ? email.value.trim() : '';
+        var fnVal  = firstName ? cleanName(firstName.value) : '';
+        var lnVal  = lastName  ? cleanName(lastName.value)  : '';
+        var emVal  = email     ? email.value.trim()         : '';
+        var posVal = position  ? position.value.trim()      : '';
 
-        // Validate first name
-        if (!fnVal) {
-          showInfoError('Please enter your first name.', firstName);
-          return;
-        }
-        // Validate email
-        if (!emVal) {
-          showInfoError('Please enter your email address.', email);
-          return;
-        }
-        if (!EMAIL_RE.test(emVal)) {
-          showInfoError('Please enter a valid email address.', email);
-          return;
-        }
-        // Ola 3 — typo detection: if the email passes regex but the domain
-        // matches a known-typo (gmai.com, yaho.com, etc.), show a didactic
-        // error with the suggestion. Catches the long tail of "looked valid
-        // but user meant gmail".
+        if (!fnVal) { qf2ShowInfoErr("I'll need your first name to send your quote.", firstName); return; }
+        if (!lnVal) { qf2ShowInfoErr("And your last name — keeps the records tidy.", lastName); return; }
+        if (!emVal) { qf2ShowInfoErr("Drop me your email so I can send the quote over.", email); return; }
+        if (!EMAIL_RE.test(emVal)) { qf2ShowInfoErr("Hmm, that email doesn't look right — double-check?", email); return; }
         var typoSuggestion = suggestEmailCorrection(emVal);
-        if (typoSuggestion) {
-          showInfoError('Did you mean ' + typoSuggestion + '? Tap the field and correct so we can deliver your proposal.', email);
-          return;
-        }
-        if (isDisposableEmail(emVal)) {
-          showInfoError('Please use a non-disposable email so we can deliver your proposal.', email);
-          return;
-        }
-        // Validate phone (optional but must be a real number if provided)
-        var phVal = phone ? phone.value.trim() : '';
-        if (phVal && !isValidPhone(phVal)) {
-          showInfoError('Please enter a valid phone number (10+ digits, numbers only — add extensions in the notes field). Or leave this blank.', phone);
-          return;
-        }
+        if (typoSuggestion) { qf2ShowInfoErr('Did you mean ' + typoSuggestion + '? Tap to fix it.', email); return; }
+        if (isDisposableEmail(emVal)) { qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", email); return; }
+        if (!posVal || posVal.length < 2) { qf2ShowInfoErr("I'll need your role — even 'Owner' or 'Manager' works.", position); return; }
+        if (posVal.length > 80) posVal = posVal.slice(0, 80);
 
-        // Capture values
-        STATE.userName = fnVal;
-        STATE.userLastName = lastName ? cleanName(lastName.value) : '';
-        STATE.userEmail = emVal;
-        STATE.userPhone = phVal;
+        STATE.userName     = fnVal;
+        STATE.userLastName = lnVal;
+        STATE.userEmail    = emVal;
+        STATE.userPosition = posVal;
 
-        // Personalize Alina for next screen
+        // Personalize Alina for the next step
         var alinaEl = getAlinaTextEl('space');
         if (alinaEl) {
           var greeting = STATE.userName ? (STATE.userName + ', ') : '';
@@ -1440,6 +1491,17 @@
         goNext();
       });
     }
+
+    // V2 — Back arrow + Save for later in the V2 flowbar
+    SCREENS.info.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+    SCREENS.info.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+      });
+    });
   }
 
   /* =======================================================================
@@ -1480,51 +1542,46 @@
 
   if (SCREENS.location) {
     var locationContinueBtn = document.getElementById('qfLocationContinue');
-    var locAddr = document.getElementById('qfAddress');
     if (locationContinueBtn) {
+      // V2 — error display via dedicated qf2LocErr element (falls back to legacy if missing).
+      var qf2LocErr = document.getElementById('qf2LocErr');
       var showLocErr = function (msg, el) {
-        // Inline hint under the address row — reuses info error styles
-        var err = document.getElementById('qfLocationErr');
-        if (!err) {
-          err = document.createElement('p');
-          err.id = 'qfLocationErr';
-          err.className = 'qf-info-err';
-          err.setAttribute('role', 'alert');
-          err.setAttribute('aria-live', 'polite');
-          var parent = locationContinueBtn.parentNode;
-          parent.insertBefore(err, locationContinueBtn);
+        if (qf2LocErr) {
+          qf2LocErr.textContent = msg;
+          qf2LocErr.hidden = false;
         }
-        err.textContent = msg;
-        err.hidden = false;
-        if (el) { el.classList.add('qf-input-invalid'); el.focus(); }
+        if (el) { try { el.classList.add('qf-input-invalid'); el.focus(); } catch(e){} }
       };
       var clearLocErr = function () {
-        var err = document.getElementById('qfLocationErr');
-        if (err) { err.textContent = ''; err.hidden = true; }
-        var addr = document.getElementById('qfAddress');
-        if (addr) addr.classList.remove('qf-input-invalid');
+        if (qf2LocErr) { qf2LocErr.textContent = ''; qf2LocErr.hidden = true; }
+        ['qfCompanyName','qfAddress'].forEach(function(id){
+          var el = document.getElementById(id);
+          if (el) el.classList.remove('qf-input-invalid');
+        });
       };
       var locAddrField = document.getElementById('qfAddress');
+      var locCompanyField = document.getElementById('qfCompanyName');
       if (locAddrField) locAddrField.addEventListener('input', clearLocErr);
+      if (locCompanyField) locCompanyField.addEventListener('input', clearLocErr);
 
       locationContinueBtn.addEventListener('click', function () {
         var companyInput = document.getElementById('qfCompanyName');
         var addressInput = document.getElementById('qfAddress');
+        var companyVal = companyInput ? companyInput.value.trim() : '';
         var addr = addressInput ? addressInput.value.trim() : '';
-        // Require meaningful address: at least 5 chars AND at least one digit (street number or ZIP)
+
+        if (!companyVal) {
+          showLocErr("Whose space are we cleaning? (Even your own name works ~)", companyInput);
+          return;
+        }
+        if (companyVal.length > 120) companyVal = companyVal.slice(0, 120);
+
         if (!addr) {
           showLocErr('Please enter your address or ZIP code so we can match you with the right local team.', addressInput);
           return;
         }
-        // AYS Ola 4 Commit L HI-4 — stricter address validation. Reject inputs
-        // that are just "1" or "x9x" or other garbage. Accept EITHER a 5-digit
-        // US ZIP standalone OR a street-style line with a number + word chars.
-        // Sprint 3 D2 — didactic errors: when the user typed just digits we
-        // know they meant a ZIP; tell them exactly how many are missing.
         var isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(addr);
-        var hasStreetShape = addr.length >= 6
-          && /\d/.test(addr)
-          && /[A-Za-z]{2,}/.test(addr);
+        var hasStreetShape = addr.length >= 6 && /\d/.test(addr) && /[A-Za-z]{2,}/.test(addr);
         if (!isZip && !hasStreetShape) {
           var digitsOnly = /^\s*\d+\s*$/.test(addr);
           var msg;
@@ -1538,46 +1595,134 @@
           return;
         }
         clearLocErr();
-        if (companyInput) STATE.companyName = companyInput.value.trim();
+        STATE.companyName = companyVal;
         STATE.userAddress = addr;
+        // V2 — capture optional suite/floor
+        var suiteInput = document.getElementById('qfSuite');
+        STATE.userSuite = suiteInput ? suiteInput.value.trim().slice(0, 60) : '';
         setRailValue('location', STATE.userAddress || STATE.companyName || 'Done');
         goNext();
       });
     }
+
+    // V2 — Back arrow + Save for later in the V2 flowbar
+    SCREENS.location.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+    SCREENS.location.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+      });
+    });
   }
 
   /* =======================================================================
      STEP 3 — SPACE TYPE
      ======================================================================= */
   if (SCREENS.space) {
-    SCREENS.space.querySelectorAll('.qf-service-card').forEach(function (card) {
+    var qf2SpaceCards = SCREENS.space.querySelectorAll('.qf2-card[data-space], .qf-service-card[data-space]');
+    var qf2SpaceOtherWrap = document.getElementById('qf2SpaceOtherWrap');
+    var qf2SpaceOther     = document.getElementById('qf2SpaceOther');
+    var qf2SpaceOtherErr  = document.getElementById('qf2SpaceOtherErr');
+    var qf2SpaceOtherHelp = document.getElementById('qf2SpaceOtherHelper');
+    var qf2SpaceContinue  = document.getElementById('qf2SpaceContinue');
+
+    function qf2AdvanceFromSpace() {
+      // Capture email if user typed it inline anywhere (back-compat).
+      var emailInput = document.getElementById('qfUserEmail');
+      if (emailInput && emailInput.value.trim()) STATE.userEmail = emailInput.value.trim();
+
+      var rail = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : STATE.space;
+      setRailValue('space', rail);
+
+      var flow = getFlow();
+      var nextStep = flow[flow.indexOf('space') + 1];
+      if (nextStep === 'size') {
+        var alinaSize = getAlinaTextEl('size');
+        if (alinaSize) alinaSize.textContent = ALINA_S3[STATE.space] || ALINA_S3.Office;
+      } else if (nextStep === 'days') {
+        var alinaDays = getAlinaTextEl('days');
+        if (alinaDays) alinaDays.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
+        var s4title = document.getElementById('qfS4Title');
+        if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
+      }
+      goNext();
+    }
+
+    qf2SpaceCards.forEach(function (card) {
       card.addEventListener('click', function () {
         STATE.space = card.getAttribute('data-space');
 
-        // Capture email from inline input
-        var emailInput = document.getElementById('qfUserEmail');
-        if (emailInput && emailInput.value.trim()) {
-          STATE.userEmail = emailInput.value.trim();
+        // Visual selection: clear all + mark this one
+        qf2SpaceCards.forEach(function (c) {
+          c.classList.toggle('is-selected', c === card);
+          c.setAttribute('aria-pressed', String(c === card));
+        });
+
+        if (STATE.space === 'Other') {
+          // V2 — reveal the inline free-text + Continue CTA. Don't advance.
+          if (qf2SpaceOtherWrap) qf2SpaceOtherWrap.hidden = false;
+          if (qf2SpaceContinue) qf2SpaceContinue.hidden = false;
+          if (qf2SpaceOther) {
+            setTimeout(function () { qf2SpaceOther.focus(); }, 50);
+          }
+          return;
         }
 
-        setRailValue('space', STATE.space);
+        // Other space picked — clear any prior "Other" details + hide reveal.
+        STATE.spaceOther = '';
+        if (qf2SpaceOtherWrap) qf2SpaceOtherWrap.hidden = true;
+        if (qf2SpaceContinue) qf2SpaceContinue.hidden = true;
+        if (qf2SpaceOther) qf2SpaceOther.value = '';
+        if (qf2SpaceOtherErr) qf2SpaceOtherErr.hidden = true;
 
-        // Set Alina messages for upcoming steps
-        var flow = getFlow();
-        var nextStep = flow[flow.indexOf('space') + 1];
-        if (nextStep === 'size') {
-          var alinaEl = getAlinaTextEl('size');
-          var s3msg = ALINA_S3[STATE.space] || ALINA_S3.Office;
-          if (alinaEl) alinaEl.textContent = s3msg;
-        } else if (nextStep === 'days') {
-          // Day Porter skips size — set days Alina message
-          var alinaEl = getAlinaTextEl('days');
-          var s4msg = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
-          if (alinaEl) alinaEl.textContent = s4msg;
-          var s4title = document.getElementById('qfS4Title');
-          if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
+        qf2AdvanceFromSpace();
+      });
+    });
+
+    if (qf2SpaceOther) {
+      qf2SpaceOther.addEventListener('input', function () {
+        var v = qf2SpaceOther.value.trim();
+        STATE.spaceOther = v.slice(0, 120);
+        if (qf2SpaceOtherErr) qf2SpaceOtherErr.hidden = true;
+        if (qf2SpaceOtherHelp) qf2SpaceOtherHelp.hidden = !(v.length >= 3);
+      });
+      qf2SpaceOther.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && qf2SpaceContinue) {
+          e.preventDefault();
+          qf2SpaceContinue.click();
         }
-        goNext();
+      });
+    }
+
+    if (qf2SpaceContinue) {
+      qf2SpaceContinue.addEventListener('click', function () {
+        var v = (qf2SpaceOther && qf2SpaceOther.value || '').trim();
+        if (v.length < 3) {
+          if (qf2SpaceOtherErr) {
+            qf2SpaceOtherErr.textContent = "A few more letters so I know what we're walking into.";
+            qf2SpaceOtherErr.hidden = false;
+          }
+          if (qf2SpaceOther) qf2SpaceOther.focus();
+          return;
+        }
+        STATE.spaceOther = v.slice(0, 120);
+        qf2AdvanceFromSpace();
+      });
+    }
+
+    // V2 — Back arrow on flow-bar (delegated to any [data-qf2-back] in space).
+    SCREENS.space.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+
+    // V2 — Save for later (delegated to any .qf2-flowbar-skip in space).
+    SCREENS.space.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        // Soft confirmation — alert is non-modal but minimal effort here.
+        try { btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = 'Save for later'; }, 1800); } catch(e){}
       });
     });
   }
@@ -1648,6 +1793,7 @@
           return;
         }
         clearSizeErr();
+        STATE.sizeExact = Math.round(n);
         proceedFromSize(Math.round(n) + 'sqft');
         sizeInput.style.borderColor = '';
       });
@@ -1656,6 +1802,55 @@
       });
       sizeInput.addEventListener('input', function () { sizeInput.style.borderColor = ''; clearSizeErr(); });
     }
+
+    // V2 mockup G — additional handlers for the rebuilt size screen.
+    var qf2SizeCards = SCREENS.size.querySelectorAll('.qf2-size-card[data-size]');
+    var qf2WalkHint = document.getElementById('qf2WalkHint');
+    var qf2SizeContinue = document.getElementById('qf2SizeContinue');
+
+    qf2SizeCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        qf2SizeCards.forEach(function (c) {
+          c.classList.toggle('is-selected', c === card);
+          c.setAttribute('aria-pressed', String(c === card));
+        });
+        if (sizeInput) { sizeInput.value = ''; sizeInput.classList.remove('has-value'); }
+        if (qf2WalkHint) qf2WalkHint.hidden = true;
+        STATE.sizeExact = null;
+        var s = card.getAttribute('data-size');
+        if (s === 'visit_required') STATE.needsSiteWalk = true;
+        proceedFromSize(s);
+      });
+    });
+
+    // Numeric input — toggle walk hint when > 15K
+    if (sizeInput) {
+      sizeInput.addEventListener('input', function () {
+        var n = Number(sizeInput.value.replace(/,/g, '')) || 0;
+        sizeInput.classList.toggle('has-value', n > 0);
+        qf2SizeCards.forEach(function (c) { c.classList.remove('is-selected'); c.setAttribute('aria-pressed', 'false'); });
+        if (qf2WalkHint) qf2WalkHint.hidden = !(n > 15000);
+        STATE.needsSiteWalk = (n > 15000);
+      });
+    }
+
+    // V2 Continue button — delegates to legacy sizeSubmit when numeric typed
+    if (qf2SizeContinue && sizeInput && sizeSubmit) {
+      qf2SizeContinue.addEventListener('click', function () {
+        if (sizeInput.value.trim()) sizeSubmit.click();
+      });
+    }
+
+    // V2 — Back arrow + Save for later in the V2 flowbar
+    SCREENS.size.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+    SCREENS.size.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+      });
+    });
   }
 
   /* =======================================================================
@@ -1754,6 +1949,11 @@
           : STATE.days.length + ' days';
         setRailValue('days', summary);
 
+        // V2 — capture timeOfDay from selected chips
+        var selectedTimes = Array.from(SCREENS.days.querySelectorAll('.qf2-chip-time.is-selected')).map(c => c.getAttribute('data-time'));
+        STATE.timeOfDay = selectedTimes;
+        STATE.scheduleAtypical = computeScheduleAtypical(STATE.space, STATE.timeOfDay);
+
         // For 'both' service, seed porter days with cleaning days so the user
         // sees their prior selection pre-filled on the next screen. They can
         // adjust freely or use the "Same as cleaning" preset to re-sync.
@@ -1764,6 +1964,63 @@
         goNext();
       });
     }
+
+    // V2 — Time-of-day chips (Morning / Afternoon / Evening / Flexible).
+    // Multi-select for the first three; clicking Flexible clears them and
+    // becomes the only selection. Toast announces the exclusion.
+    var qf2TimeChips = SCREENS.days.querySelectorAll('.qf2-chip-time');
+    var qf2TimeToast = document.getElementById('qf2TimeToast');
+    function qf2HideToastSoon() {
+      if (!qf2TimeToast) return;
+      setTimeout(function(){ qf2TimeToast.hidden = true; }, 2400);
+    }
+    function qf2ShowToast(msg) {
+      if (!qf2TimeToast) return;
+      qf2TimeToast.textContent = msg;
+      qf2TimeToast.hidden = false;
+      qf2HideToastSoon();
+    }
+    qf2TimeChips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var t = chip.getAttribute('data-time');
+        var isFlexible = (t === 'flexible');
+        var allChips = Array.from(qf2TimeChips);
+        if (isFlexible) {
+          // Toggle Flexible exclusively — clear all, set this one.
+          var hadOthers = allChips.some(c => c !== chip && c.classList.contains('is-selected'));
+          allChips.forEach(c => { c.classList.remove('is-selected'); c.setAttribute('aria-pressed', 'false'); });
+          chip.classList.add('is-selected');
+          chip.setAttribute('aria-pressed', 'true');
+          if (hadOthers) qf2ShowToast('Cleared others — flexible it is ~');
+        } else {
+          // Toggle this one. If Flexible was selected, deselect it.
+          var flex = allChips.find(c => c.getAttribute('data-time') === 'flexible');
+          if (flex && flex.classList.contains('is-selected')) {
+            flex.classList.remove('is-selected');
+            flex.setAttribute('aria-pressed', 'false');
+          }
+          var currentlyOn = chip.classList.toggle('is-selected');
+          chip.setAttribute('aria-pressed', String(currentlyOn));
+          // Don't allow zero selections — re-add Evening as fallback.
+          var anyOn = allChips.some(c => c.classList.contains('is-selected'));
+          if (!anyOn) {
+            var ev = allChips.find(c => c.getAttribute('data-time') === 'evening');
+            if (ev) { ev.classList.add('is-selected'); ev.setAttribute('aria-pressed', 'true'); }
+          }
+        }
+      });
+    });
+
+    // V2 — Back arrow + Save for later in the V2 flowbar
+    SCREENS.days.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+    SCREENS.days.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+      });
+    });
   }
 
   /* =======================================================================
@@ -2015,10 +2272,135 @@
       mutations.forEach(function (m) {
         if (m.target === SCREENS.contact && SCREENS.contact.classList.contains('is-active')) {
           populateSummary();
+          if (typeof qf2PopulateSummary === 'function') qf2PopulateSummary();
         }
       });
     }));
     contactObserver.observe(SCREENS.contact, { attributes: true, attributeFilter: ['class'] });
+
+    // V2 mockup G — populate the qf2-sum-* rows (Service / You / Space / When
+    // / Where) using current STATE. XSS-safe via textContent. Called whenever
+    // the contact screen activates (above) and after edit-panel saves.
+    function qf2PopulateSummary() {
+      function setText(id, text) {
+        var el = document.getElementById(id);
+        if (el) { el.textContent = text || '—'; }
+      }
+      // SERVICE: "Janitorial · recurring" (or similar)
+      var SERVICE_NAMES = { janitorial: 'Janitorial', dayporter: 'Day Porter', both: 'Combined', unsure: 'Help me decide' };
+      var svcName = SERVICE_NAMES[STATE.service] || (STATE.service || '');
+      var svcTail = STATE.service === 'janitorial' ? ' · recurring'
+                  : STATE.service === 'dayporter'  ? ' · on-site'
+                  : STATE.service === 'both'       ? ' · day porter + janitorial'
+                  : '';
+      setText('qf2SumService', svcName + svcTail);
+
+      // YOU: "First Last · Role / email"
+      var fullName = (STATE.userName || '') + (STATE.userLastName ? ' ' + STATE.userLastName : '');
+      var youParts = [];
+      if (fullName.trim()) youParts.push(fullName.trim());
+      if (STATE.userPosition) youParts.push(STATE.userPosition);
+      var youLine = youParts.join(' · ');
+      var youEl = document.getElementById('qf2SumYou');
+      if (youEl) {
+        while (youEl.firstChild) youEl.removeChild(youEl.firstChild);
+        youEl.appendChild(document.createTextNode(youLine || '—'));
+        if (STATE.userEmail) {
+          youEl.appendChild(document.createElement('br'));
+          var em = document.createElement('span');
+          em.className = 'qf2-sec';
+          em.textContent = STATE.userEmail;
+          youEl.appendChild(em);
+        }
+      }
+
+      // SPACE: "Office · 6 – 9K sq ft" (or with spaceOther)
+      var spaceLabel = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : (STATE.space || '');
+      var sizeLabel = STATE.size === 'visit_required' ? 'visit booked'
+                    : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
+      var spaceLine = [spaceLabel, sizeLabel].filter(Boolean).join(' · ');
+      setText('qf2SumSpace', spaceLine);
+
+      // WHEN: "Mon-Fri · Evening" (days summary + time-of-day)
+      var DAY_ABBR = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
+      var WEEKDAYS_ARR = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      var daysSummary = '';
+      if (STATE.days && STATE.days.length === 7) daysSummary = 'Every day';
+      else if (STATE.days && STATE.days.length === 5 && WEEKDAYS_ARR.every(function(d){ return STATE.days.indexOf(d) > -1; })) daysSummary = 'Mon–Fri';
+      else if (STATE.days && STATE.days.length) daysSummary = STATE.days.map(function(d){ return DAY_ABBR[d] || d; }).join(', ');
+      var TIME_LABEL = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', flexible: 'Flexible' };
+      var timeSummary = (STATE.timeOfDay || []).map(function(t){ return TIME_LABEL[t] || t; }).join(', ');
+      var whenLine = [daysSummary, timeSummary].filter(Boolean).join(' · ');
+      setText('qf2SumWhen', whenLine);
+
+      // WHERE: "Westway Holdings\n150 Broadway, NY · Suite 4"
+      var whereEl = document.getElementById('qf2SumWhere');
+      if (whereEl) {
+        while (whereEl.firstChild) whereEl.removeChild(whereEl.firstChild);
+        if (STATE.companyName) {
+          whereEl.appendChild(document.createTextNode(STATE.companyName));
+          whereEl.appendChild(document.createElement('br'));
+        }
+        var addrParts = [];
+        if (STATE.userAddress) addrParts.push(STATE.userAddress);
+        if (STATE.userSuite) addrParts.push('Suite ' + STATE.userSuite);
+        var sec = document.createElement('span');
+        sec.className = 'qf2-sec';
+        sec.textContent = addrParts.join(' · ') || '—';
+        whereEl.appendChild(sec);
+      }
+    }
+
+    // V2 — wire phone opt-in toggle, textarea counter, edit buttons,
+    // back arrow, save-for-later in the V2 review screen.
+    var qf2PhoneToggle = document.getElementById('qf2PhoneOptinToggle');
+    var qf2PhoneExpanded = document.getElementById('qf2PhoneOptinExpanded');
+    if (qf2PhoneToggle && qf2PhoneExpanded) {
+      qf2PhoneToggle.addEventListener('click', function () {
+        var open = !qf2PhoneExpanded.hidden;
+        qf2PhoneExpanded.hidden = open;
+        qf2PhoneToggle.setAttribute('aria-expanded', String(!open));
+        if (!open) {
+          qf2PhoneToggle.hidden = true;
+          var ph = document.getElementById('qfUserPhone');
+          if (ph && !ph.hasAttribute('hidden')) setTimeout(function(){ ph.focus(); }, 50);
+        }
+      });
+    }
+
+    var qf2NotesArea = document.getElementById('qfSpecialInstructions');
+    var qf2NotesCounter = document.getElementById('qf2NotesCounter');
+    if (qf2NotesArea && qf2NotesCounter) {
+      var updateCounter = function () {
+        qf2NotesCounter.textContent = (qf2NotesArea.value.length) + ' / 500';
+      };
+      qf2NotesArea.addEventListener('input', updateCounter);
+      updateCounter();
+    }
+
+    // Edit buttons — route back to the relevant step
+    SCREENS.contact.querySelectorAll('.qf2-edit-btn[data-edit]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var section = btn.getAttribute('data-edit');
+        var TARGET = { service: 'welcome', info: 'info', space: 'space', size: 'size', days: 'days', location: 'location' };
+        var targetStep = TARGET[section];
+        if (!targetStep) return;
+        if (typeof goToScreen === 'function') {
+          try { goToScreen(targetStep, 'back'); } catch(e){}
+        }
+      });
+    });
+
+    // Back arrow + Save for later in V2 flowbar
+    SCREENS.contact.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+    SCREENS.contact.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+      });
+    });
 
     function formatPorters() {
       if (!STATE.porterCount) return '';
@@ -2690,6 +3072,8 @@
       if (STATE.scheduleAtypical) payload.scheduleAtypical = true;
       if (STATE.sizeExact) payload.exactSize = STATE.sizeExact;
       if (STATE.spaceOther) payload.spaceOther = STATE.spaceOther;
+      // V2 2026-04-25 — optional suite/floor for multi-tenant buildings
+      if (STATE.userSuite) payload.suite = STATE.userSuite;
       // Per-porter hours (set in the hours step). Each entry is {start, end}.
       // Legacy startTime/hrs kept for backend consumers that only know shared hours —
       // populated from porter 1 when all porters share a schedule, else empty.
@@ -2953,6 +3337,11 @@
           if (successSub && STATE.userEmail) {
             successSub.textContent = 'Check ' + STATE.userEmail + ' \u2014 your custom plan will be there shortly.';
           }
+          // V2 \u2014 populate the qf2 success markup (XSS-safe via textContent)
+          var qf2Name = document.getElementById('qf2SuccessName');
+          var qf2Ref  = document.getElementById('qf2SuccessRef');
+          if (qf2Name) qf2Name.textContent = STATE.userName || 'there';
+          if (qf2Ref) qf2Ref.textContent = refNumber || '\u2014';
           // Show reference number hero with count-up reveal (Sprint 5 cinematic).
           var refBox = document.getElementById('qfSuccessRef');
           var refNumEl = document.getElementById('qfSuccessRefNum');
