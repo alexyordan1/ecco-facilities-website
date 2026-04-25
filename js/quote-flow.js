@@ -1960,8 +1960,10 @@
     SCREENS.space.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         saveDraft();
-        // Soft confirmation — alert is non-modal but minimal effort here.
-        try { btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = 'Save for later'; }, 1800); } catch(e){}
+        // Match the pattern used on every other screen: capture the original
+        // label so the mobile/desktop variants ("Save" vs "Save for later")
+        // both restore correctly instead of being clobbered to one string.
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
   }
