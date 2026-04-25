@@ -1420,8 +1420,19 @@
           // Visually mark the picked chip + clear siblings.
           qf2QuizChips.forEach(function (c) { c.classList.toggle('is-selected', c === chip); });
 
+          // Same defensive flow as the service-card handler: a stale resume
+          // banner means STATE.currentStepName still points at a late step
+          // from the prior draft, so goNext() would no-op. Treat the quiz
+          // pick as a fresh start when the banner is up.
+          var resumeBanner = document.querySelector('.qf-resume-banner');
+          if (resumeBanner) {
+            try { clearDraft(); } catch(e){}
+            resumeBanner.remove();
+          }
+
           STATE.service = pick;
           STATE.serviceCertainty = 'guided_via_quiz';
+          STATE.currentStepName = 'welcome';
 
           // Show the recommendation via textContent (XSS-safe).
           if (qf2QuizResult && qf2QuizResultName && qf2QuizResultBlurb) {
