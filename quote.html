@@ -1232,17 +1232,6 @@
        Ola 2 · dialog semantics: role + aria-modal + labelledby so screen
        readers announce it as a modal and ESC is expected to close it
        (handler in js/quote-flow.js). -->
-  <div class="qf-exit-overlay" id="qfExitOverlay" role="dialog" aria-modal="true" aria-labelledby="qfExitTitle" hidden>
-    <div class="qf-exit-card">
-      <h3 class="qf-exit-title" id="qfExitTitle">Don&rsquo;t lose your <em>spot</em></h3>
-      <p class="qf-exit-sub">Drop your email and we&rsquo;ll follow up so you can finish this later.</p>
-      <form class="qf-exit-form" id="qfExitForm">
-        <input class="qf-exit-input" type="email" placeholder="your@email.com" required aria-label="Your email">
-        <button class="qf-exit-btn" type="submit">Send link</button>
-      </form>
-      <button class="qf-exit-close" id="qfExitClose" type="button" aria-label="Close recovery prompt">No thanks, I&rsquo;ll stay</button>
-    </div>
-  </div>
 </main>
 
 <footer class="footer q-flow-footer-hidden" id="siteFooter" hidden>
@@ -1291,7 +1280,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=30.3"></script>
+<script defer src="js/quote-flow.js?v=30.4"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

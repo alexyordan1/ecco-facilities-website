@@ -148,9 +148,11 @@
   var typingDots   = document.getElementById('qfTypingDots');
   var liveNumEl    = document.getElementById('qfLiveNum');
   var askAlinaBtn  = document.getElementById('qfAskAlinaBtn');
-  var exitOverlay  = document.getElementById('qfExitOverlay');
-  var exitClose    = document.getElementById('qfExitClose');
-  var exitForm     = document.getElementById('qfExitForm');
+  // V1 exit overlay retired — V2 wireExitIntent() builds the modal at runtime.
+  // Variables kept null so the legacy handlers below short-circuit harmlessly.
+  var exitOverlay  = null;
+  var exitClose    = null;
+  var exitForm     = null;
 
   /* -----------------------------------------------------------------------
      Dev-only assertion — warn loudly if a critical summary/edit ID is missing
@@ -351,11 +353,30 @@
       noBtn.addEventListener('click', close);
       yesBtn.addEventListener('click', function () {
         var v = input.value.trim();
-        if (!v || v.indexOf('@') === -1) { input.focus(); input.classList.add('qf-input-invalid'); return; }
+        if (!v || !EMAIL_RE.test(v)) {
+          input.focus();
+          input.classList.add('qf-input-invalid');
+          qfToast({ type:'warn', title:'Valid email needed', message:'We need a real email to send your resume link.', duration: 4500 });
+          return;
+        }
         STATE.userEmail = v;
         if (prevEmail) prevEmail.value = v;
         try { saveDraft(); } catch(e){}
-        close();
+        // Persist the partial lead so we can follow up (mirrors legacy V1 behaviour).
+        var originalText = yesBtn.textContent;
+        yesBtn.disabled = true;
+        yesBtn.textContent = 'Sending…';
+        fetch('/api/capture-partial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: v, firstName: STATE.userName || '', phone: STATE.userPhone || '' })
+        }).catch(function(){ /* silent — backend may be offline */ })
+          .finally(function () {
+            yesBtn.disabled = false;
+            yesBtn.textContent = originalText;
+            qfToast({ type:'success', title:'We’ve got your spot', message:'We’ll follow up with ' + v + ' so you can pick this up later.' });
+            close();
+          });
       });
       overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
       document.addEventListener('keydown', function escClose(e) {
@@ -1292,12 +1313,9 @@
     var prevName = flow[idx - 1];
     var prevScreen = SCREENS[prevName];
     if (prevScreen) {
-      // Sprint 3 — back-direction entrance animation.
-      prevScreen.classList.remove('qf-screen--entering-fwd', 'qf-screen--entering-back');
-      prevScreen.classList.add('qf-screen--entering-back');
-      setTimeout(function () { prevScreen.classList.remove('qf-screen--entering-back'); }, 800);
-      STATE.currentStepName = prevName;
-      syncFlowBar(prevName);
+      // Actually swap which screen is .is-active. Without this the state
+      // pointer moves but the user keeps seeing the current screen.
+      goToScreen(prevName, 'back');
       updateRail();
       // AYS Ola 3 #24 — single read via getBoundingClientRect instead of
       // the offsetTop walking loop (which forced a layout flush on every
