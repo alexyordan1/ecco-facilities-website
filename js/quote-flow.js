@@ -271,6 +271,120 @@
     scheduleAtypical: false
   };
 
+  /** V2 2026-04-25 — exit-intent modal (mockup G demo B). Desktop only.
+   * Fires when the cursor exits via the top edge of the viewport before the
+   * user has supplied an email. One-shot per session. Renders a centered
+   * modal with email input + "No thanks" / "Send it" actions. On submit
+   * we capture STATE.userEmail, save the draft, and close the modal so the
+   * user can pick up later via the resume banner.
+   */
+  (function wireExitIntent() {
+    if (typeof window === 'undefined') return;
+    if (!matchMedia || !matchMedia('(min-width: 768px)').matches) return; // desktop only
+    var fired = false;
+    var SHOWN_KEY = 'ecco_quote_exit_shown_v1';
+    try { if (sessionStorage.getItem(SHOWN_KEY)) fired = true; } catch (_) {}
+
+    function shouldFire() {
+      if (fired) return false;
+      // Don't fire if already on review/success or after we have email
+      var active = document.querySelector('.qf-screen.is-active');
+      if (active && (active.id === 'qfScreen_contact' || active.id === 'qfScreen_success')) return false;
+      // Don't fire if user already typed an email
+      var emailEl = document.getElementById('qfUserEmail');
+      if (emailEl && emailEl.value && emailEl.value.indexOf('@') > -1) return false;
+      return true;
+    }
+
+    function showModal() {
+      if (!shouldFire()) return;
+      fired = true;
+      try { sessionStorage.setItem(SHOWN_KEY, '1'); } catch (_) {}
+
+      var overlay = document.createElement('div');
+      overlay.className = 'qf2-exit-overlay';
+      var modal = document.createElement('div');
+      modal.className = 'qf2-exit-modal';
+      var ava = document.createElement('div');
+      ava.className = 'qf2-exit-modal-avatar';
+      var img = document.createElement('img');
+      img.src = 'images/alina-avatar-96.jpg';
+      img.alt = '';
+      img.width = 56; img.height = 56;
+      ava.appendChild(img);
+      modal.appendChild(ava);
+
+      var hand = document.createElement('span');
+      hand.className = 'qf2-exit-modal-hand';
+      hand.textContent = 'Hey — leaving so soon?';
+      modal.appendChild(hand);
+
+      var h2 = document.createElement('h2');
+      h2.appendChild(document.createTextNode('Drop your '));
+      var em = document.createElement('em');
+      em.textContent = 'email';
+      h2.appendChild(em);
+      modal.appendChild(h2);
+
+      var p = document.createElement('p');
+      p.textContent = "I'll send you the form to finish later, no pressure.";
+      modal.appendChild(p);
+
+      var fieldWrap = document.createElement('div');
+      fieldWrap.className = 'qf2-field';
+      var input = document.createElement('input');
+      input.type = 'email';
+      input.placeholder = 'you@company.com';
+      input.id = 'qf2ExitEmail';
+      input.setAttribute('aria-label', 'Email address');
+      var prevEmail = document.getElementById('qfUserEmail');
+      if (prevEmail && prevEmail.value) input.value = prevEmail.value;
+      fieldWrap.appendChild(input);
+      modal.appendChild(fieldWrap);
+
+      var actions = document.createElement('div');
+      actions.className = 'qf2-exit-modal-actions';
+      var noBtn = document.createElement('button');
+      noBtn.type = 'button';
+      noBtn.className = 'qf2-exit-modal-no';
+      noBtn.textContent = 'No thanks';
+      var yesBtn = document.createElement('button');
+      yesBtn.type = 'button';
+      yesBtn.className = 'qf2-exit-modal-yes';
+      yesBtn.textContent = 'Send it →';
+
+      function close() { try { overlay.remove(); } catch(e){} }
+
+      noBtn.addEventListener('click', close);
+      yesBtn.addEventListener('click', function () {
+        var v = input.value.trim();
+        if (!v || v.indexOf('@') === -1) { input.focus(); input.classList.add('qf-input-invalid'); return; }
+        STATE.userEmail = v;
+        if (prevEmail) prevEmail.value = v;
+        try { saveDraft(); } catch(e){}
+        close();
+      });
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+      document.addEventListener('keydown', function escClose(e) {
+        if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escClose); }
+      });
+
+      actions.appendChild(noBtn);
+      actions.appendChild(yesBtn);
+      modal.appendChild(actions);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+      setTimeout(function(){ input.focus(); }, 80);
+    }
+
+    document.addEventListener('mouseleave', function (e) {
+      // Only fire when cursor exits via the top of the viewport
+      if (e.clientY > 0) return;
+      // Add a tiny delay so accidental scroll-to-tab-bar doesn't fire it
+      showModal();
+    });
+  })();
+
   /** V2 2026-04-25 — pure heuristic: returns true if the picked space + time
    * combo is unusual enough to warrant a heads-up on the site visit. Pure
    * function (no DOM, no STATE references) so any handler can call it.
@@ -1615,6 +1729,120 @@
         try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
+
+    // V2 — Atypical schedule heads-up (mockup G demo G). When the user
+    // reaches the Location step and STATE.scheduleAtypical is set, inject
+    // an Alina mini-bubble at the top of the body warning them that we'll
+    // double-check the schedule. Idempotent — only injects once per visit.
+    var locObserver = registerObserver(new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        if (m.target === SCREENS.location && SCREENS.location.classList.contains('is-active')) {
+          renderAtypicalHeadsUp();
+        }
+      });
+    }));
+    locObserver.observe(SCREENS.location, { attributes: true, attributeFilter: ['class'] });
+
+    function renderAtypicalHeadsUp() {
+      var body = SCREENS.location.querySelector('.qf2-body');
+      if (!body) return;
+      var existing = body.querySelector('.qf2-atypical-heads-up');
+      if (existing) existing.remove();
+      if (!STATE.scheduleAtypical) return;
+      var SPACE_LABEL = { Office: 'Office', Medical: 'Medical', Restaurant: 'Restaurant' };
+      var TIME_LABEL = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', flexible: 'Flexible' };
+      var sp = SPACE_LABEL[STATE.space] || (STATE.space || 'this space');
+      var t = (STATE.timeOfDay && STATE.timeOfDay.length === 1) ? TIME_LABEL[STATE.timeOfDay[0]] : 'this schedule';
+      var bubble = document.createElement('div');
+      bubble.className = 'qf2-atypical-heads-up';
+      var ava = document.createElement('div');
+      ava.className = 'qf2-atypical-heads-up-avatar';
+      var img = document.createElement('img');
+      img.src = 'images/alina-avatar-96.jpg';
+      img.alt = '';
+      img.width = 26; img.height = 26;
+      ava.appendChild(img);
+      var text = document.createElement('div');
+      text.className = 'qf2-atypical-heads-up-text';
+      text.textContent = sp + ' + ' + t + " is a bit unusual — most " + sp.toLowerCase() + "s clean evenings or after hours. I'll double-check with you when I prepare the quote, no worries ~";
+      bubble.appendChild(ava);
+      bubble.appendChild(text);
+      // Insert after the prompt
+      var prompt = body.querySelector('.qf2-prompt');
+      if (prompt) prompt.insertAdjacentElement('afterend', bubble);
+      else body.insertBefore(bubble, body.firstChild);
+    }
+
+    // V2 — Out-of-area warning (mockup G demo F). On address blur, detect
+    // non-NYC inputs (NJ/CT/PA/etc) and show an Alina warning bubble with
+    // "Yes, waitlist me" and "Continue anyway" actions.
+    var addrField = document.getElementById('qfAddress');
+    var fieldsWrap = SCREENS.location.querySelector('.qf2-fields');
+    function isOutOfNYC(addr) {
+      if (!addr) return false;
+      var lower = addr.toLowerCase();
+      // Detect explicit non-NY state mentions or borough/city outside NYC
+      var outStates = /\b(nj|new jersey|ct|connecticut|pa|pennsylvania|jersey city|hoboken|newark|stamford|yonkers|white plains|long island|nassau|suffolk)\b/i;
+      if (outStates.test(lower)) return true;
+      // ZIP detection: NYC ZIPs are 100xx-104xx + 11xxx (Brooklyn/Queens/SI). Outside = different.
+      var zipMatch = lower.match(/\b(\d{5})(?:-\d{4})?\b/);
+      if (zipMatch) {
+        var zip = parseInt(zipMatch[1], 10);
+        // NYC-area ZIPs: 10000-10499 (Manhattan/Bronx), 11000-11499 (Brooklyn/Queens/SI)
+        if (zip >= 10000 && zip <= 10499) return false;
+        if (zip >= 11000 && zip <= 11499) return false;
+        return true;
+      }
+      return false;
+    }
+    function renderOutOfArea() {
+      if (!fieldsWrap) return;
+      var existing = SCREENS.location.querySelector('.qf2-out-of-area');
+      if (existing) existing.remove();
+      if (!addrField || !isOutOfNYC(addrField.value)) return;
+      var bubble = document.createElement('div');
+      bubble.className = 'qf2-out-of-area';
+      var ava = document.createElement('div');
+      ava.className = 'qf2-out-of-area-avatar';
+      var img = document.createElement('img');
+      img.src = 'images/alina-avatar-96.jpg';
+      img.alt = '';
+      img.width = 26; img.height = 26;
+      ava.appendChild(img);
+      var text = document.createElement('div');
+      text.className = 'qf2-out-of-area-text';
+      var hand = document.createElement('span');
+      hand.className = 'qf2-hand';
+      hand.textContent = 'Hmm —';
+      text.appendChild(hand);
+      text.appendChild(document.createTextNode(" that's outside NYC. Want me to add you to the waitlist?"));
+      var actions = document.createElement('div');
+      actions.className = 'qf2-out-of-area-actions';
+      var yesBtn = document.createElement('button');
+      yesBtn.type = 'button';
+      yesBtn.className = 'qf2-primary';
+      yesBtn.textContent = 'Yes, waitlist me';
+      var noBtn = document.createElement('button');
+      noBtn.type = 'button';
+      noBtn.textContent = 'Continue anyway';
+      yesBtn.addEventListener('click', function () {
+        STATE.outOfArea = 'waitlist';
+        bubble.remove();
+      });
+      noBtn.addEventListener('click', function () {
+        STATE.outOfArea = 'continue';
+        bubble.remove();
+      });
+      actions.appendChild(yesBtn);
+      actions.appendChild(noBtn);
+      text.appendChild(actions);
+      bubble.appendChild(ava);
+      bubble.appendChild(text);
+      fieldsWrap.insertAdjacentElement('afterend', bubble);
+    }
+    if (addrField) {
+      addrField.addEventListener('blur', renderOutOfArea);
+    }
   }
 
   /* =======================================================================
@@ -2435,16 +2663,156 @@
       updateCounter();
     }
 
-    // Edit buttons — route back to the relevant step
+    // V2 — Edit inline panel (mockup G demo D). Click Edit → expand a panel
+    // below the row with fields scoped to that section. Cancel closes.
+    // Save updates STATE + re-populates the summary in place.
     SCREENS.contact.querySelectorAll('.qf2-edit-btn[data-edit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var section = btn.getAttribute('data-edit');
-        var TARGET = { service: 'welcome', info: 'info', space: 'space', size: 'size', days: 'days', location: 'location' };
-        var targetStep = TARGET[section];
-        if (!targetStep) return;
-        if (typeof goToScreen === 'function') {
-          try { goToScreen(targetStep, 'back'); } catch(e){}
+        var row = btn.closest('.qf2-sum-row');
+        if (!row) return;
+
+        // Toggle: if already editing, close.
+        var existingPanel = row.nextElementSibling && row.nextElementSibling.classList.contains('qf2-sum-edit-panel') ? row.nextElementSibling : null;
+        if (existingPanel) {
+          existingPanel.remove();
+          row.classList.remove('is-editing');
+          btn.textContent = 'Edit';
+          return;
         }
+
+        // Close any other open panel first
+        SCREENS.contact.querySelectorAll('.qf2-sum-edit-panel').forEach(function(p){ p.remove(); });
+        SCREENS.contact.querySelectorAll('.qf2-sum-row.is-editing').forEach(function(r){
+          r.classList.remove('is-editing');
+          var b = r.querySelector('.qf2-edit-btn');
+          if (b) b.textContent = 'Edit';
+        });
+
+        row.classList.add('is-editing');
+        btn.textContent = 'Cancel';
+
+        // Build the edit panel
+        var panel = document.createElement('div');
+        panel.className = 'qf2-sum-edit-panel';
+
+        var header = document.createElement('p');
+        header.className = 'qf2-sum-edit-header';
+        header.textContent = "Let's tweak this ~";
+        panel.appendChild(header);
+
+        var fieldsWrap = document.createElement('div');
+        fieldsWrap.className = 'qf2-sum-edit-fields';
+        panel.appendChild(fieldsWrap);
+
+        // Helper: build a labeled .qf2-field input
+        function fieldRow(id, type, value, placeholder, ariaLabel, max) {
+          var f = document.createElement('div');
+          f.className = 'qf2-field';
+          var input = document.createElement('input');
+          input.type = type;
+          input.id = id;
+          input.className = 'qf2-edit-input';
+          input.value = value || '';
+          if (placeholder) input.placeholder = placeholder;
+          if (ariaLabel) input.setAttribute('aria-label', ariaLabel);
+          if (max) input.maxLength = max;
+          f.appendChild(input);
+          return f;
+        }
+
+        var inputs = {};
+        if (section === 'info') {
+          fieldsWrap.appendChild(fieldRow('qf2EditFn', 'text', STATE.userName, 'First name', 'First name', 60));
+          fieldsWrap.appendChild(fieldRow('qf2EditLn', 'text', STATE.userLastName, 'Last name', 'Last name', 60));
+          fieldsWrap.appendChild(fieldRow('qf2EditEm', 'email', STATE.userEmail, 'Email', 'Email', 254));
+          fieldsWrap.appendChild(fieldRow('qf2EditPos', 'text', STATE.userPosition, 'Role', 'Role', 80));
+        } else if (section === 'location') {
+          fieldsWrap.appendChild(fieldRow('qf2EditCo', 'text', STATE.companyName, 'Company or organization', 'Company', 120));
+          fieldsWrap.appendChild(fieldRow('qf2EditAddr', 'text', STATE.userAddress, 'Service address', 'Service address', 200));
+          fieldsWrap.appendChild(fieldRow('qf2EditSuite', 'text', STATE.userSuite, 'Suite / Floor (optional)', 'Suite or floor', 60));
+        } else if (section === 'space') {
+          var note = document.createElement('p');
+          note.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          note.textContent = "Hop back to the Space step to switch type.";
+          fieldsWrap.appendChild(note);
+        } else if (section === 'service') {
+          var n2 = document.createElement('p');
+          n2.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          n2.textContent = "Hop back to the start to switch service.";
+          fieldsWrap.appendChild(n2);
+        } else if (section === 'days') {
+          var n3 = document.createElement('p');
+          n3.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          n3.textContent = "Hop back to the Schedule step to adjust days/times.";
+          fieldsWrap.appendChild(n3);
+        } else if (section === 'size') {
+          var n4 = document.createElement('p');
+          n4.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          n4.textContent = "Hop back to the Size step to adjust.";
+          fieldsWrap.appendChild(n4);
+        }
+
+        // Action buttons
+        var actions = document.createElement('div');
+        actions.className = 'qf2-sum-edit-actions';
+        var cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'qf2-sum-edit-cancel';
+        cancelBtn.textContent = 'Cancel';
+        var saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'qf2-sum-edit-save';
+        // For sections without inline-editable fields, the Save button instead
+        // routes back to that step.
+        var routeBack = (section === 'space' || section === 'service' || section === 'days' || section === 'size');
+        saveBtn.textContent = routeBack ? 'Hop back' : 'Save changes';
+
+        cancelBtn.addEventListener('click', function () {
+          panel.remove();
+          row.classList.remove('is-editing');
+          btn.textContent = 'Edit';
+        });
+        saveBtn.addEventListener('click', function () {
+          if (routeBack) {
+            var TARGET = { service: 'welcome', space: 'space', days: 'days', size: 'size' };
+            var step = TARGET[section];
+            panel.remove();
+            row.classList.remove('is-editing');
+            btn.textContent = 'Edit';
+            if (step && typeof goToScreen === 'function') {
+              try { goToScreen(step, 'back'); } catch(e){}
+            }
+            return;
+          }
+          if (section === 'info') {
+            var fn = document.getElementById('qf2EditFn').value.trim().slice(0,60);
+            var ln = document.getElementById('qf2EditLn').value.trim().slice(0,60);
+            var em = document.getElementById('qf2EditEm').value.trim();
+            var pos = document.getElementById('qf2EditPos').value.trim().slice(0,80);
+            STATE.userName = fn; STATE.userLastName = ln; STATE.userEmail = em; STATE.userPosition = pos;
+          } else if (section === 'location') {
+            var co = document.getElementById('qf2EditCo').value.trim().slice(0,120);
+            var addr = document.getElementById('qf2EditAddr').value.trim().slice(0,200);
+            var suite = document.getElementById('qf2EditSuite').value.trim().slice(0,60);
+            STATE.companyName = co; STATE.userAddress = addr; STATE.userSuite = suite;
+          }
+          // Re-populate summary + close
+          if (typeof qf2PopulateSummary === 'function') qf2PopulateSummary();
+          panel.remove();
+          row.classList.remove('is-editing');
+          btn.textContent = 'Edit';
+        });
+        actions.appendChild(cancelBtn);
+        actions.appendChild(saveBtn);
+        panel.appendChild(actions);
+
+        // Insert after the row
+        row.insertAdjacentElement('afterend', panel);
+
+        // Focus first input
+        var first = panel.querySelector('input');
+        if (first) setTimeout(function(){ first.focus(); }, 50);
       });
     });
 
