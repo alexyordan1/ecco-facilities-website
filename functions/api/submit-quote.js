@@ -168,10 +168,12 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ ok: false, error: 'Invalid form type' }), { status: 400, headers: corsHeaders });
     }
     // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
+    // V2 2026-04-24 — added timeOfDay, serviceCertainty, needsSiteWalk, scheduleAtypical.
     const ALLOWED_KEYS = new Set([
-      'em','fn','ln','ph','co','addr','referral','notes','contactPref','formType',
+      'em','fn','ln','ph','co','pos','addr','referral','notes','contactPref','formType',
       'space','spaceOther','urg','size','exactSize','janDays',
       'hrs','customHrs','startTime','porterHours','dpDays','porters','porterCount','dpAreas','areaOther',
+      'timeOfDay','serviceCertainty','needsSiteWalk','scheduleAtypical',
       'turnstileToken'
     ]);
     for (const k of Object.keys(body)) {
@@ -179,6 +181,18 @@ export async function onRequestPost(context) {
       const v = body[k];
       if (typeof v === 'string' && v.length > MAX_STR) body[k] = v.slice(0, MAX_STR);
       if (Array.isArray(v)) body[k] = v.slice(0, 20).map((s) => typeof s === 'string' ? s.slice(0, MAX_STR) : s);
+    }
+    // V2 2026-04-24 — pos validation: trim + max 80 chars (free-text role field).
+    if (typeof body.pos === 'string') {
+      body.pos = body.pos.trim().slice(0, 80);
+      if (body.pos.length < 2) delete body.pos;
+    }
+    // V2 2026-04-24 — coerce booleans for new flag fields (frontend sends true/false; backend stores boolean).
+    if (body.needsSiteWalk !== undefined) body.needsSiteWalk = !!body.needsSiteWalk;
+    if (body.scheduleAtypical !== undefined) body.scheduleAtypical = !!body.scheduleAtypical;
+    // V2 2026-04-24 — serviceCertainty: only allow specific enum values.
+    if (body.serviceCertainty && body.serviceCertainty !== 'guided_via_quiz') {
+      delete body.serviceCertainty;
     }
 
     // AYS Ola 3 #4 — Turnstile fail-loud. Production MUST set CF_TURNSTILE_SECRET.
@@ -247,7 +261,7 @@ export async function onRequestPost(context) {
     // 3. Build form_data with readable labels
     const KEY_MAP = {
       fn: 'first_name', ln: 'last_name', em: 'email', ph: 'phone',
-      co: 'company', addr: 'address', referral: 'how_heard', notes: 'notes',
+      co: 'company', pos: 'job_title', addr: 'address', referral: 'how_heard', notes: 'notes',
       contactPref: 'contact_preference', formType: 'form_type',
       // Shared
       space: 'space_type', spaceOther: 'space_type_custom', urg: 'urgency',
@@ -260,6 +274,11 @@ export async function onRequestPost(context) {
       porterHours: 'porter_hours',
       porters: 'num_porters', porterCount: 'porter_count_custom',
       dpAreas: 'areas_covered', areaOther: 'area_custom',
+      // V2 2026-04-24 — new keys
+      timeOfDay: 'time_of_day',
+      serviceCertainty: 'service_certainty',
+      needsSiteWalk: 'needs_site_walk',
+      scheduleAtypical: 'schedule_atypical',
     };
     const URGENCY_MAP = {
       asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'

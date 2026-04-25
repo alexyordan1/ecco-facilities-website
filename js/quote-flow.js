@@ -58,15 +58,19 @@
   /* -----------------------------------------------------------------------
      Flow definitions — per-service step sequences
      ----------------------------------------------------------------------- */
+  // V2 2026-04-25 — janitorial flow restructured per mockup G order:
+  // welcome → space → info → size → days → location → contact → success.
+  // 'checkpoint' step removed (absorbed into review). Other flows keep
+  // their pre-V2 shape because this round only redesigns Janitorial.
   var FLOWS = {
-    janitorial: ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'contact', 'success'],
-    dayporter:  ['welcome', 'info', 'space', 'location', 'days', 'porter', 'hours', 'checkpoint', 'contact', 'success'],
+    janitorial: ['welcome', 'space', 'info', 'size', 'days', 'location', 'contact', 'success'],
+    dayporter:  ['welcome', 'info', 'space', 'location', 'days', 'porter', 'hours', 'contact', 'success'],
     // 'both' asks two day questions in sequence so clients with different
     // cleaning vs porter schedules (e.g. restaurant: porter 7 days, cleaning
     // Mon-Fri only) can express it. First visit = cleaning days, second visit
     // = porter days (pre-filled with cleaning days via a "Same days" preset).
-    both:       ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'porter', 'hours', 'checkpoint', 'contact', 'success'],
-    unsure:     ['welcome', 'info', 'space', 'location', 'size', 'days', 'checkpoint', 'contact', 'success']
+    both:       ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'porter', 'hours', 'contact', 'success'],
+    unsure:     ['welcome', 'info', 'space', 'location', 'size', 'days', 'contact', 'success']
   };
 
   /* -----------------------------------------------------------------------
@@ -122,7 +126,8 @@
      ----------------------------------------------------------------------- */
   // AYS Ola 3 #21 — removed legacy 'window' step (no corresponding DOM, all
   // FLOWS path refs dropped in an earlier refactor; still created SCREENS.window = null)
-  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'checkpoint', 'porter', 'hours', 'contact', 'success'];
+  // V2 2026-04-25 — 'checkpoint' removed (absorbed into review screen).
+  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'porter', 'hours', 'contact', 'success'];
   var SCREENS = {};
 
   SCREEN_NAMES.forEach(function (name) {
@@ -232,12 +237,21 @@
   /* -----------------------------------------------------------------------
      STATE
      ----------------------------------------------------------------------- */
+  // V2 2026-04-25 — added userPosition (job role/title), spaceOther (free-text
+  // when "Something else" picked), sizeExact (numeric sq ft), timeOfDay (array
+  // of preferred slots), serviceCertainty ('guided_via_quiz' if welcome quiz
+  // was used), needsSiteWalk (bool, true when size === 'visit_required' or
+  // sizeExact > 15000), scheduleAtypical (bool, computed via the pure helper
+  // computeScheduleAtypical for unusual space+time combos).
   var STATE = {
     service:        null,
     space:          null,
+    spaceOther:     '',
     size:           null,
+    sizeExact:      null,
     days:           [],
     dpDays:         [],
+    timeOfDay:      [],
     porterCount:    null,
     timeStart:      null,
     timeEnd:        null,
@@ -246,11 +260,33 @@
     userName:       '',
     userLastName:   '',
     userEmail:      '',
+    userPosition:   '',
     companyName:    '',
     userAddress:    '',
     userPhone:      '',
-    specialInstructions: ''
+    specialInstructions: '',
+    serviceCertainty: null,
+    needsSiteWalk:  false,
+    scheduleAtypical: false
   };
+
+  /** V2 2026-04-25 — pure heuristic: returns true if the picked space + time
+   * combo is unusual enough to warrant a heads-up on the site visit. Pure
+   * function (no DOM, no STATE references) so any handler can call it.
+   * Office cleans evenings normally, so morning-only is unusual.
+   * Restaurants clean off-hours (eve/night), so morning-only is unusual.
+   * Medical clinics typically clean evenings — but evening-ONLY is too
+   * narrow for a medical schedule, hence the flag. */
+  function computeScheduleAtypical(space, timeOfDay) {
+    var times = Array.isArray(timeOfDay) ? timeOfDay : [];
+    var morningOnly = times.length === 1 && times[0] === 'morning';
+    var eveningOnly = times.length === 1 && times[0] === 'evening';
+    var sp = String(space || '').toLowerCase();
+    if (sp === 'office' && morningOnly) return true;
+    if (sp === 'restaurant' && morningOnly) return true;
+    if (sp === 'medical' && eveningOnly) return true;
+    return false;
+  }
 
   /* -----------------------------------------------------------------------
      Rail progress indicator — "Step X of Y · ~N min left".
@@ -455,7 +491,8 @@
       // Never save submitted / success state
       if (STATE.currentStepName === 'success') return;
       var payload = hasConsent() ? STATE : stripPII(STATE);
-      var snap = { s: payload, t: Date.now(), c: hasConsent() ? 1 : 0 };
+      // V2 2026-04-25 — stamp _v: 2 so loadDraft can migrate v1 drafts safely.
+      var snap = { _v: 2, s: payload, t: Date.now(), c: hasConsent() ? 1 : 0 };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
     } catch (_) { /* localStorage unavailable — quota/private mode */ }
   }
@@ -480,6 +517,16 @@
       var s = parsed.s;
       if (s.days && !Array.isArray(s.days)) s.days = [];
       if (s.dpDays && !Array.isArray(s.dpDays)) s.dpDays = [];
+      // V2 2026-04-25 — type-guard new array fields too.
+      if (s.timeOfDay && !Array.isArray(s.timeOfDay)) s.timeOfDay = [];
+      // V2 2026-04-25 — v1 → v2 migration (per `_v` stamp on snapshot):
+      //   - currentStepName 'role' → 'info' (role is now a field on info)
+      //   - currentStepName 'checkpoint' → 'contact' (checkpoint absorbed into review)
+      // The stamp lives on `parsed._v`. Absent stamp = pre-v2.
+      if (!parsed._v || parsed._v < 2) {
+        if (s.currentStepName === 'role') s.currentStepName = 'info';
+        if (s.currentStepName === 'checkpoint') s.currentStepName = 'contact';
+      }
       return s;
     } catch (_) { return null; }
   }
@@ -2607,6 +2654,8 @@
         ln: STATE.userLastName,
         ph: STATE.userPhone,
         co: STATE.companyName,
+        // V2 2026-04-25 — pos = job role / title captured on the info screen.
+        pos: STATE.userPosition,
         addr: STATE.userAddress,
         space: STATE.space,
         size: STATE.size,
@@ -2628,6 +2677,19 @@
       }
       // Porter count
       if (STATE.porterCount) payload.porters = STATE.porterCount;
+      // V2 2026-04-25 — extra signals captured by the new Janitorial conversational
+      // flow. timeOfDay = preferred slots; serviceCertainty = 'guided_via_quiz'
+      // when user used the welcome mini-quiz; needsSiteWalk = true when size is
+      // 'visit_required' or numeric > 15K; scheduleAtypical = heuristic flag.
+      // exactSize = numeric sq ft when user typed a precise value; spaceOther =
+      // free-text when they picked "Something else". Backend ALLOWED_KEYS already
+      // accepts all of these (see functions/api/submit-quote.js).
+      if (Array.isArray(STATE.timeOfDay) && STATE.timeOfDay.length) payload.timeOfDay = STATE.timeOfDay.slice();
+      if (STATE.serviceCertainty) payload.serviceCertainty = STATE.serviceCertainty;
+      if (STATE.needsSiteWalk) payload.needsSiteWalk = true;
+      if (STATE.scheduleAtypical) payload.scheduleAtypical = true;
+      if (STATE.sizeExact) payload.exactSize = STATE.sizeExact;
+      if (STATE.spaceOther) payload.spaceOther = STATE.spaceOther;
       // Per-porter hours (set in the hours step). Each entry is {start, end}.
       // Legacy startTime/hrs kept for backend consumers that only know shared hours —
       // populated from porter 1 when all porters share a schedule, else empty.
