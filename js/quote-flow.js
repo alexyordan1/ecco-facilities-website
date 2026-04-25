@@ -162,17 +162,10 @@
     try {
       var host = (window.location && window.location.hostname) || '';
       if (host !== 'localhost' && host !== '127.0.0.1' && host !== '0.0.0.0') return;
-      var REQUIRED = [
-        'qfSumName','qfSumEmail','qfSumPhone','qfSumCompany','qfSumAddress',
-        'qfSumSpace','qfSumSize','qfSumSchedule','qfSumTime','qfSumService',
-        'qfRvSvcFreq','qfRvSvcSub','qfRvSchedSub','qfPlanHeroTitle',
-        'qfSumSizeRow','qfSumPortersRow','qfSumTimeRow','qfSumCompanyRow','qfSumPhoneRow',
-        'qfEditFirstName','qfEditLastName','qfEditEmail','qfEditPhone','qfEditCompany',
-        'qfEditAddress','qfEditSpace','qfEditSize','qfEditService','qfEditPorters',
-        'qfEditDays','qfEditPorterHours','qfEditDpDays','qfEditDpPorterHours',
-        'qfSumPorterRow','qfSumPorterSchedule','qfSumPorterTime',
-        'qfContactSubmit','qfSpecialInstructions'
-      ];
+      // Pruned to only IDs the V2 review/contact screen still ships.
+      // V1→V2 redesign retired the qfSum*/qfRv*/qfEdit* IDs; setVal() calls
+      // on those are dead-code no-ops and intentionally not asserted here.
+      var REQUIRED = ['qfContactSubmit', 'qfSpecialInstructions'];
       var missing = REQUIRED.filter(function (id) { return !document.getElementById(id); });
       if (missing.length) {
         console.warn('[qf] Missing review/edit elements:', missing.join(', '),
@@ -3665,7 +3658,15 @@
           return new Promise(function (resolve) {
             if (window.qfTurnstileToken) return resolve(window.qfTurnstileToken);
             if (!window.turnstile) return resolve(null);
-            try { window.turnstile.execute('#qfTurnstile'); } catch (_) {}
+            // Reset before execute so rapid Submit clicks don't trigger
+            // Cloudflare's "Call to execute() on a widget that is already
+            // executing" warning, which can leave a stale challenge in flight.
+            try {
+              if (typeof window.turnstile.reset === 'function') {
+                window.turnstile.reset('#qfTurnstile');
+              }
+              window.turnstile.execute('#qfTurnstile');
+            } catch (_) {}
             var start = Date.now();
             var timerId = null;
             var settled = false;

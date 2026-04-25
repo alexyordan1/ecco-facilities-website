@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=35.2">
+<link rel="stylesheet" href="css/quote-flow.css?v=35.3">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -283,7 +283,7 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title">What brings you to <em>Ecco</em>?</h1>
+          <h2 class="qf2-prompt-title">What brings you to <em>Ecco</em>?</h2>
           <p class="qf2-prompt-sub">Pick what kind of care you&rsquo;re looking for.</p>
         </div>
         <div class="qf2-grid-3" role="group" aria-label="Choose a service">
@@ -390,7 +390,7 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title">Let&rsquo;s get <em>acquainted</em>.</h1>
+          <h2 class="qf2-prompt-title">Let&rsquo;s get <em>acquainted</em>.</h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">I&rsquo;ll save your progress as we go.</span>
             <span class="qf2-prompt-sub-mobile">I&rsquo;ll save as we go.</span>
@@ -425,8 +425,6 @@
         <p class="qf2-field-err" id="qf2InfoErr" role="alert" hidden></p>
         <button type="button" class="qf2-cta" id="qfInfoContinue">Nice to meet you <span aria-hidden="true">&rarr;</span></button>
         <p class="qf2-cta-hint">We&rsquo;re almost there &sim;</p>
-        <!-- Phone is captured later (review screen). Keep hidden so existing JS that may read STATE.userPhone doesn't break. -->
-        <input type="tel" id="qfUserPhone" hidden aria-hidden="true" tabindex="-1">
       </div>
       <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
         <span class="qf2-ask-alina-avatar" aria-hidden="true">
@@ -484,7 +482,7 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title">What kind of <em>space</em>?</h1>
+          <h2 class="qf2-prompt-title">What kind of <em>space</em>?</h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Pick the closest match &mdash; I&rsquo;ll tailor the plan.</span>
             <span class="qf2-prompt-sub-mobile">Pick the closest.</span>
@@ -615,7 +613,7 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title">Tell me about your <em>business</em>.</h1>
+          <h2 class="qf2-prompt-title">Tell me about your <em>business</em>.</h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Company name + the address where we&rsquo;ll clean.</span>
             <span class="qf2-prompt-sub-mobile">Company + where we go.</span>
@@ -706,10 +704,10 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title">
+          <h2 class="qf2-prompt-title">
             <span class="qf2-prompt-sub-desktop">How much space are we <em>cleaning</em>?</span>
             <span class="qf2-prompt-sub-mobile">How much <em>space</em>?</span>
-          </h1>
+          </h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Pick the closest range, or tell me exactly if you know it.</span>
           </p>
@@ -822,7 +820,7 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title" id="qfS4Title">When do you need <em>service</em>?</h1>
+          <h2 class="qf2-prompt-title" id="qfS4Title">When do you need <em>service</em>?</h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Pick the days and times that fit. We can adjust later.</span>
           </p>
@@ -1046,10 +1044,10 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h1 class="qf2-prompt-title">
+          <h2 class="qf2-prompt-title">
             <span class="qf2-prompt-sub-desktop">Here&rsquo;s your <em>snapshot</em>.</span>
             <span class="qf2-prompt-sub-mobile">Your <em>snapshot</em>.</span>
-          </h1>
+          </h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Anything off? Tap a section to tweak it.</span>
           </p>
@@ -1063,7 +1061,7 @@
               <div class="qf2-sum-row-label">The service</div>
               <div class="qf2-sum-row-value" id="qf2SumService">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="service">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="service" aria-label="Edit service">Edit</button>
           </div>
           <div class="qf2-sum-row" data-section="info">
             <div class="qf2-sum-row-ico" aria-hidden="true">
@@ -1073,7 +1071,7 @@
               <div class="qf2-sum-row-label">You</div>
               <div class="qf2-sum-row-value" id="qf2SumYou">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="info">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="info" aria-label="Edit your information">Edit</button>
           </div>
           <div class="qf2-sum-row" data-section="space">
             <div class="qf2-sum-row-ico" aria-hidden="true">
@@ -1083,7 +1081,7 @@
               <div class="qf2-sum-row-label">Your space</div>
               <div class="qf2-sum-row-value" id="qf2SumSpace">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="space">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="space" aria-label="Edit your space">Edit</button>
           </div>
           <div class="qf2-sum-row" data-section="schedule">
             <div class="qf2-sum-row-ico" aria-hidden="true">
@@ -1093,7 +1091,7 @@
               <div class="qf2-sum-row-label">When</div>
               <div class="qf2-sum-row-value" id="qf2SumWhen">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="days">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="days" aria-label="Edit schedule">Edit</button>
           </div>
           <div class="qf2-sum-row" data-section="location">
             <div class="qf2-sum-row-ico" aria-hidden="true">
@@ -1103,7 +1101,7 @@
               <div class="qf2-sum-row-label">Where</div>
               <div class="qf2-sum-row-value" id="qf2SumWhere">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="location">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="location" aria-label="Edit address">Edit</button>
           </div>
         </div>
         <button type="button" class="qf2-phone-optin-link" id="qf2PhoneOptinToggle" aria-expanded="false" aria-controls="qf2PhoneOptinExpanded">+ add your phone number &sim;</button>
@@ -1140,7 +1138,7 @@
           <span aria-hidden="true">&rarr;</span>
         </button>
         <p class="qf2-cta-hint">Talk soon &sim;</p>
-        <div id="qfTurnstile" class="cf-turnstile" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback" style="margin-top:12px"></div>
+        <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
       </div>
       <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
         <span class="qf2-ask-alina-avatar" aria-hidden="true">
@@ -1169,7 +1167,7 @@
         </div>
       </div>
       <div class="qf2-body qf2-success-body">
-        <h1 class="qf2-success-title">Thanks, <em id="qf2SuccessName">there</em>!</h1>
+        <h2 class="qf2-success-title">Thanks, <em id="qf2SuccessName">there</em>!</h2>
         <p class="qf2-success-subtitle">
           <span class="qf2-prompt-sub-desktop">Your request is with me. I&rsquo;ll reach out within 24 hours.</span>
           <span class="qf2-prompt-sub-mobile">I&rsquo;ll reach out within 24 hours.</span>
@@ -1293,7 +1291,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=30.2"></script>
+<script defer src="js/quote-flow.js?v=30.3"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
