@@ -1934,22 +1934,12 @@
           c.setAttribute('aria-pressed', String(c === card));
         });
 
-        if (STATE.space === 'Other') {
-          // V2 — reveal the inline free-text + Continue CTA. Don't advance.
-          if (qf2SpaceOtherWrap) qf2SpaceOtherWrap.hidden = false;
-          if (qf2SpaceContinue) qf2SpaceContinue.hidden = false;
-          if (qf2SpaceOther) {
-            setTimeout(function () { qf2SpaceOther.focus(); }, 50);
-          }
-          return;
-        }
-
-        // Other space picked — clear any prior "Other" details + hide reveal.
+        // D9 — picking any of the 6 cards clears the catch-all input + advances.
         STATE.spaceOther = '';
-        if (qf2SpaceOtherWrap) qf2SpaceOtherWrap.hidden = true;
-        if (qf2SpaceContinue) qf2SpaceContinue.hidden = true;
         if (qf2SpaceOther) qf2SpaceOther.value = '';
+        if (qf2SpaceOtherHelp) qf2SpaceOtherHelp.hidden = true;
         if (qf2SpaceOtherErr) qf2SpaceOtherErr.hidden = true;
+        if (qf2SpaceContinue) qf2SpaceContinue.hidden = true;
 
         qf2AdvanceFromSpace();
       });
@@ -1961,6 +1951,15 @@
         STATE.spaceOther = v.slice(0, 120);
         if (qf2SpaceOtherErr) qf2SpaceOtherErr.hidden = true;
         if (qf2SpaceOtherHelp) qf2SpaceOtherHelp.hidden = !(v.length >= 3);
+        // D9 — show Continue once user has typed enough; clear card selection
+        // since the user is overriding the 6-card grid with a custom space.
+        if (qf2SpaceContinue) qf2SpaceContinue.hidden = !(v.length >= 3);
+        if (v.length >= 3) {
+          qf2SpaceCards.forEach(function (c) {
+            c.classList.remove('is-selected');
+            c.setAttribute('aria-pressed', 'false');
+          });
+        }
       });
       qf2SpaceOther.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && qf2SpaceContinue) {
@@ -1981,6 +1980,9 @@
           if (qf2SpaceOther) qf2SpaceOther.focus();
           return;
         }
+        // D9 — Continue from the catch-all input. No "Other" card exists in the
+        // grid anymore, so set STATE.space here.
+        STATE.space = 'Other';
         STATE.spaceOther = v.slice(0, 120);
         qf2AdvanceFromSpace();
       });

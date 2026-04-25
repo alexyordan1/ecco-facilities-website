@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=35.7">
+<link rel="stylesheet" href="css/quote-flow.css?v=35.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -518,23 +518,26 @@
               <span class="qf2-card-hint">Gyms &amp; studios</span>
             </span>
           </button>
-          <button type="button" class="qf2-card" data-space="Other" aria-label="Something else">
-            <span class="qf2-card-icon qf2-card-icon--gradient" aria-hidden="true">❓</span>
+          <button type="button" class="qf2-card" data-space="School" aria-label="School — K-12, daycare, college">
+            <span class="qf2-card-icon" aria-hidden="true">🏫</span>
             <span class="qf2-card-body">
-              <span class="qf2-card-label">Something else</span>
-              <span class="qf2-card-hint">I&rsquo;ll surprise you</span>
+              <span class="qf2-card-label">School</span>
+              <span class="qf2-card-hint">K-12, daycare, college</span>
             </span>
           </button>
         </div>
-        <!-- V2 inline reveal when "Something else" is selected -->
-        <div class="qf2-space-other-wrap" id="qf2SpaceOtherWrap" hidden>
+        <!-- D9 — always-visible catch-all for spaces not in the 6-card grid above.
+             Typing 3+ chars + Continue submits with data-space="Other" + the typed
+             description. Replaces the prior "Something else" card pattern. -->
+        <div class="qf2-space-other-wrap" id="qf2SpaceOtherWrap">
+          <p class="qf2-space-other-prompt">Doesn&rsquo;t fit? <span>Tell me about your space &darr;</span></p>
           <div class="qf2-field">
             <span class="qf2-field-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4M5 9v10h14V9M9 13h6M9 17h6"/></svg>
             </span>
-            <input type="text" id="qf2SpaceOther" placeholder="Briefly describe your space" maxlength="120" aria-label="Describe your space">
+            <input type="text" id="qf2SpaceOther" placeholder="e.g. warehouse, salon, daycare, church&hellip;" maxlength="120" aria-label="Describe your space">
           </div>
-          <p class="qf2-field-helper" id="qf2SpaceOtherHelper" hidden>Nice &mdash; I&rsquo;ll pass that to our crew &sim;</p>
+          <p class="qf2-field-helper" id="qf2SpaceOtherHelper" hidden>Got it &mdash; I&rsquo;ll pass that to our crew &sim;</p>
           <p class="qf2-field-err" id="qf2SpaceOtherErr" role="alert" hidden></p>
         </div>
         <button type="button" class="qf2-cta" id="qf2SpaceContinue" hidden>Continue <span aria-hidden="true">&rarr;</span></button>
@@ -1262,7 +1265,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=30.7"></script>
+<script defer src="js/quote-flow.js?v=30.8"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
