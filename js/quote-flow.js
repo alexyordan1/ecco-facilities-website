@@ -1823,12 +1823,18 @@
       });
     });
 
-    // Numeric input — toggle walk hint when > 15K
+    // Numeric input — toggle walk hint when > 15K + mute size cards
+    // (numeric exclusivity per mockup G section 09 demo E)
     if (sizeInput) {
       sizeInput.addEventListener('input', function () {
         var n = Number(sizeInput.value.replace(/,/g, '')) || 0;
-        sizeInput.classList.toggle('has-value', n > 0);
-        qf2SizeCards.forEach(function (c) { c.classList.remove('is-selected'); c.setAttribute('aria-pressed', 'false'); });
+        var hasValue = n > 0;
+        sizeInput.classList.toggle('has-value', hasValue);
+        qf2SizeCards.forEach(function (c) {
+          c.classList.toggle('is-deselected', hasValue);
+          c.classList.remove('is-selected');
+          c.setAttribute('aria-pressed', 'false');
+        });
         if (qf2WalkHint) qf2WalkHint.hidden = !(n > 15000);
         STATE.needsSiteWalk = (n > 15000);
       });
@@ -2314,12 +2320,63 @@
         }
       }
 
-      // SPACE: "Office · 6 – 9K sq ft" (or with spaceOther)
+      // SPACE: "Office · 6 – 9K sq ft" (or "Medical · size to be measured" when needsSiteWalk)
       var spaceLabel = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : (STATE.space || '');
-      var sizeLabel = STATE.size === 'visit_required' ? 'visit booked'
-                    : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
+      var sizeLabel = STATE.needsSiteWalk
+        ? 'size to be measured'
+        : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
       var spaceLine = [spaceLabel, sizeLabel].filter(Boolean).join(' · ');
-      setText('qf2SumSpace', spaceLine);
+      var spaceEl = document.getElementById('qf2SumSpace');
+      if (spaceEl) {
+        while (spaceEl.firstChild) spaceEl.removeChild(spaceEl.firstChild);
+        spaceEl.appendChild(document.createTextNode(spaceLine || '—'));
+        if (STATE.spaceOther && STATE.space === 'Other') {
+          spaceEl.appendChild(document.createElement('br'));
+          var sec = document.createElement('span');
+          sec.className = 'qf2-sec';
+          sec.textContent = STATE.spaceOther;
+          spaceEl.appendChild(sec);
+        }
+        // Visit indicator (mockup section 09 demo C)
+        if (STATE.needsSiteWalk) {
+          var visitInd = document.createElement('div');
+          visitInd.className = 'qf2-visit-indicator';
+          visitInd.textContent = "I'll see it in person ~";
+          spaceEl.appendChild(visitInd);
+        }
+      }
+
+      // V2 — Service certainty badge (when guided_via_quiz)
+      var svcEl = document.getElementById('qf2SumService');
+      if (svcEl) {
+        // Remove any existing badge
+        var existingBadge = svcEl.parentElement.querySelector('.qf2-confirm-badge');
+        if (existingBadge) existingBadge.remove();
+        if (STATE.serviceCertainty === 'guided_via_quiz') {
+          var badge = document.createElement('div');
+          badge.className = 'qf2-confirm-badge';
+          badge.textContent = "Alina helps — I'll confirm the details";
+          svcEl.parentElement.appendChild(badge);
+        }
+      }
+
+      // V2 — CTA dynamic copy swap based on needsSiteWalk
+      var ctaBtn = document.getElementById('qfContactSubmit');
+      var ctaLbl = ctaBtn?.querySelector('.qf-rv-send-btn-label');
+      if (ctaLbl) {
+        ctaLbl.textContent = STATE.needsSiteWalk ? 'Send it + book my visit' : 'Send it to Alina';
+      }
+
+      // V2 — CTA subtext (site walk variant)
+      var ctaWrap = ctaBtn?.parentElement;
+      var existingSubtext = ctaWrap?.querySelector('.qf2-cta-subtext');
+      if (existingSubtext) existingSubtext.remove();
+      if (STATE.needsSiteWalk && ctaBtn) {
+        var subtext = document.createElement('p');
+        subtext.className = 'qf2-cta-subtext';
+        subtext.textContent = "I'll email you a calendar link right after ~";
+        ctaBtn.insertAdjacentElement('afterend', subtext);
+      }
 
       // WHEN: "Mon-Fri · Evening" (days summary + time-of-day)
       var DAY_ABBR = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
@@ -3342,6 +3399,26 @@
           var qf2Ref  = document.getElementById('qf2SuccessRef');
           if (qf2Name) qf2Name.textContent = STATE.userName || 'there';
           if (qf2Ref) qf2Ref.textContent = refNumber || '\u2014';
+
+          // V2 \u2014 site walk variant (mockup G section 09 demo C)
+          if (STATE.needsSiteWalk) {
+            var qf2Subtitle = document.querySelector('.qf2-success-subtitle');
+            if (qf2Subtitle && !qf2Subtitle.querySelector('.qf2-success-extra')) {
+              var extra = document.createElement('span');
+              extra.className = 'qf2-success-extra';
+              extra.textContent = 'Plus a link to pick a time for your visit ~';
+              qf2Subtitle.appendChild(extra);
+            }
+            // Highlight the third timeline item as the site visit step
+            var tlItems = document.querySelectorAll('.qf2-timeline-item');
+            if (tlItems.length >= 3) {
+              tlItems[2].classList.add('is-walk');
+              var tlWhen = tlItems[2].querySelector('.qf2-timeline-when');
+              if (tlWhen) tlWhen.textContent = 'Site visit';
+              var tlWhat = tlItems[2].querySelector('.qf2-timeline-what');
+              if (tlWhat) tlWhat.textContent = 'Pick a time from the link.';
+            }
+          }
           // Show reference number hero with count-up reveal (Sprint 5 cinematic).
           var refBox = document.getElementById('qfSuccessRef');
           var refNumEl = document.getElementById('qfSuccessRefNum');
