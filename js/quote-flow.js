@@ -1355,7 +1355,31 @@
     // the V2 cards and any back-compat ones.
     SCREENS.welcome.querySelectorAll('[data-service]').forEach(function (card) {
       card.addEventListener('click', function () {
-        STATE.service = card.getAttribute('data-service');
+        var pickedService = card.getAttribute('data-service');
+        // 2026-04-25 · If the resume banner is up, the user is visually on
+        // welcome but STATE.currentStepName still points at whatever step
+        // their saved draft reached. Calling goNext() from a late step
+        // (e.g. 'contact') silently no-ops because idx >= flow.length-1,
+        // so the click looked dead. Treat any service-card click on
+        // welcome as "start fresh with this service": dismiss the banner,
+        // clear the draft, reset the step pointer, and surface a toast so
+        // the user sees their click took effect.
+        var resumeBanner = document.querySelector('.qf-resume-banner');
+        if (resumeBanner) {
+          try { clearDraft(); } catch(e){}
+          resumeBanner.remove();
+          var label = SERVICE_LABELS[pickedService] || 'your plan';
+          try {
+            qfToast({
+              type: 'success',
+              title: 'Starting fresh',
+              message: 'New quote with ' + label + '. Your previous answers were cleared.',
+              duration: 3500
+            });
+          } catch(e){}
+        }
+        STATE.service = pickedService;
+        STATE.currentStepName = 'welcome';
         buildRail(STATE.service);
         goNext();
       });
