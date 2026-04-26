@@ -4746,55 +4746,6 @@
     }
   });
 
-  // D46 — Standalone "(i)" help button injected into every flowbar at
-  // top-right (just before "Save"). Standardizes the help affordance: same
-  // place on every screen, regardless of pill state. Replaces the per-pill
-  // inline ⓘ glyph that was visually inconsistent (and on mobile got
-  // truncated when the message text wrapped or clipped).
-  (function injectFlowbarHelpButtons() {
-    var flowbars = document.querySelectorAll('.qf2-flowbar, .qf2-flowbar-mobile');
-    flowbars.forEach(function (bar) {
-      // Skip if already injected (defensive — some flowbars are cloned).
-      if (bar.querySelector('.qf2-flowbar-help')) return;
-      // Only attach to flowbars whose screen has an Alina pill — otherwise
-      // there's nothing for the button to expand.
-      var stage = bar.closest('.qf-screen');
-      if (!stage) return;
-      if (!stage.querySelector('.qf2-alina-hero[role="button"]')) return;
-
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'qf2-flowbar-help';
-      btn.setAttribute('aria-label', 'Tap for help from Alina');
-      btn.setAttribute('aria-pressed', 'false');
-      btn.textContent = 'i';
-
-      // Insert just before the Save / Save-for-later button. If absent,
-      // append to the bar.
-      var skip = bar.querySelector('.qf2-flowbar-skip');
-      if (skip) {
-        bar.insertBefore(btn, skip);
-      } else {
-        bar.appendChild(btn);
-      }
-
-      btn.addEventListener('click', function () {
-        var stage = btn.closest('.qf-screen');
-        if (!stage) return;
-        var pill = stage.querySelector('.qf2-alina-hero[role="button"]');
-        if (!pill) return;
-        // Reuse the existing pill click handler — it manages text swap,
-        // aria-expanded, and the body-top adjustment in lockstep.
-        pill.click();
-        // Mirror the pill's expanded state on the help button so a second
-        // tap still clearly looks like "close" rather than "open again".
-        requestAnimationFrame(function () {
-          btn.setAttribute('aria-pressed', pill.getAttribute('aria-expanded') || 'false');
-        });
-      });
-    });
-  })();
-
   // Sprint 4b D17 + Sprint 5 R-D — keyboard shortcuts on the active screen.
   // Esc → back. Digits 1-9 → activate Nth picker card (not while typing).
   // Enter on Info text inputs → click the screen's primary CTA.
