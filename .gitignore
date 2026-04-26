@@ -40,3 +40,5 @@ docs/superpowers/plans/after/
 docs/superpowers/plans/mid-*/
 docs/superpowers/plans/capture-*.mjs
 docs/claude-design-input/
+test-results/
+playwright-report/
