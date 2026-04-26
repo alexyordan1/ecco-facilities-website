@@ -4403,6 +4403,108 @@
       banner.remove();
       goToScreen(STATE.currentStepName);
     });
+
+    // H1 D34 — input sanitization on paste. Browser pastes can carry weird
+    // unicode, control chars, or 5MB blobs from a clipboard manager. Cap
+    // pasted text to each input's maxlength + strip C0 control characters
+    // (except \n, \r, \t which are legitimate in textarea). Keeps payload
+    // safe and predictable for the sales team that reads the lead later.
+    (function inputSanitizer() {
+      function clean(str, allowMultiline) {
+        if (!str) return '';
+        // Strip C0 control chars (except \t, \n, \r when allowed).
+        var pattern = allowMultiline
+          ? /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g
+          : /[\x00-\x1F\x7F]/g;
+        return str.replace(pattern, '').normalize ? str.replace(pattern, '').normalize('NFC') : str.replace(pattern, '');
+      }
+      document.addEventListener('paste', function (e) {
+        var t = e.target;
+        if (!t || (t.tagName !== 'INPUT' && t.tagName !== 'TEXTAREA')) return;
+        var max = parseInt(t.getAttribute('maxlength') || '0', 10);
+        var raw = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+        var allowML = t.tagName === 'TEXTAREA';
+        var cleaned = clean(raw, allowML);
+        if (max > 0 && cleaned.length > max) cleaned = cleaned.slice(0, max);
+        if (cleaned !== raw) {
+          e.preventDefault();
+          // Insert cleaned text at cursor.
+          var start = t.selectionStart || 0;
+          var end = t.selectionEnd || 0;
+          var before = t.value.slice(0, start);
+          var after = t.value.slice(end);
+          t.value = (before + cleaned + after).slice(0, max || Infinity);
+          // Trigger input event so existing handlers (validation, save-draft) run.
+          t.dispatchEvent(new Event('input', { bubbles: true }));
+          t.setSelectionRange(before.length + cleaned.length, before.length + cleaned.length);
+        }
+      });
+    })();
+
+    // H1 D32 — network resilience. Listen for online/offline transitions so
+    // a user who briefly loses WiFi sees a clear banner and the Submit button
+    // is disabled until connection returns. Avoids the silent-fail where a
+    // user clicks Send during a network blip and assumes their lead went
+    // through. Banner is removed once back online.
+    (function netGuard() {
+      var liveBanner = null;
+      function showOfflineBanner() {
+        if (liveBanner) return;
+        liveBanner = document.createElement('div');
+        liveBanner.className = 'qf2-offline-banner';
+        liveBanner.setAttribute('role', 'status');
+        liveBanner.setAttribute('aria-live', 'polite');
+        liveBanner.textContent = 'You’re offline. We’ll wait until you’re back to send anything.';
+        document.body.appendChild(liveBanner);
+        // Disable any visible Submit button.
+        var sub = document.getElementById('qfContactSubmit');
+        if (sub) { sub.disabled = true; sub.setAttribute('data-net-disabled', '1'); }
+      }
+      function hideOfflineBanner() {
+        if (liveBanner) { liveBanner.remove(); liveBanner = null; }
+        var sub = document.getElementById('qfContactSubmit');
+        if (sub && sub.getAttribute('data-net-disabled') === '1') {
+          sub.disabled = false;
+          sub.removeAttribute('data-net-disabled');
+        }
+      }
+      window.addEventListener('offline', showOfflineBanner);
+      window.addEventListener('online', hideOfflineBanner);
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) showOfflineBanner();
+    })();
+
+    // H1 D33 — browser back button integration. Each goToScreen call pushes
+    // a new entry; popstate handler routes back to the previous step instead
+    // of leaving /quote.html entirely (which lost the user's draft state on
+    // some Safari versions). The flag prevents re-pushing during back-nav.
+    (function historyGuard() {
+      var inPopstate = false;
+      var origGoToScreen = window.goToScreen;
+      // goToScreen lives in IIFE scope — patch via a wrapper that pushes
+      // state. We hook into the SCREENS map mutations indirectly via a
+      // MutationObserver on .qf-screen.is-active.
+      var stage = document.getElementById('qfStage');
+      if (!stage) return;
+      var lastActiveId = null;
+      var obs = new MutationObserver(function () {
+        if (inPopstate) { inPopstate = false; return; }
+        var act = stage.querySelector('.qf-screen.is-active');
+        var id = act ? act.id : null;
+        if (id && id !== lastActiveId) {
+          lastActiveId = id;
+          try { history.pushState({ screenId: id }, '', '#' + id.replace('qfScreen_', '')); } catch (_) {}
+        }
+      });
+      obs.observe(stage, { subtree: true, attributes: true, attributeFilter: ['class'] });
+      window.addEventListener('popstate', function (e) {
+        // Browser back: try to traverse our own goBack rather than leaving the page.
+        if (typeof goBack === 'function') {
+          inPopstate = true;
+          try { goBack(); } catch (_) {}
+        }
+      });
+    })();
+
     startBtn.addEventListener('click', function () {
       // Sprint 5 R-C — Undo pattern. Clear immediately (optimistic) but show
       // a 6-second toast with Undo. Restoring re-saves the draft and re-shows
