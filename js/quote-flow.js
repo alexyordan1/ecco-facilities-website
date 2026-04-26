@@ -4301,44 +4301,155 @@
       goToScreen(STATE.currentStepName);
     });
     startBtn.addEventListener('click', function () {
+      // Sprint 5 R-C — Undo pattern. Clear immediately (optimistic) but show
+      // a 6-second toast with Undo. Restoring re-saves the draft and re-shows
+      // the banner. After timeout the clear is permanent.
+      var snapshot = null;
+      try { snapshot = localStorage.getItem('ecco_quote_draft_v1'); } catch (_) {}
       clearDraft();
       banner.remove();
+
+      // Build undo toast
+      var toast = document.createElement('div');
+      toast.className = 'qf2-undo-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      var msg = document.createElement('span');
+      msg.className = 'qf2-undo-toast-msg';
+      msg.textContent = 'Draft cleared.';
+      var undo = document.createElement('button');
+      undo.type = 'button';
+      undo.className = 'qf2-undo-toast-btn';
+      undo.textContent = 'Undo';
+      toast.appendChild(msg);
+      toast.appendChild(undo);
+      document.body.appendChild(toast);
+      // Slide-in
+      requestAnimationFrame(function () { toast.classList.add('is-shown'); });
+
+      var t = setTimeout(function () {
+        toast.classList.remove('is-shown');
+        setTimeout(function () { toast.remove(); }, 250);
+      }, 6000);
+
+      undo.addEventListener('click', function () {
+        clearTimeout(t);
+        if (snapshot) {
+          try { localStorage.setItem('ecco_quote_draft_v1', snapshot); } catch (_) {}
+        }
+        toast.classList.remove('is-shown');
+        setTimeout(function () { toast.remove(); location.reload(); }, 250);
+      });
     });
   })();
 
-  // Sprint 4b D17 — keyboard shortcuts on the active screen.
-  // Esc → back. Digits 1-7 → activate the Nth picker card (when not typing
-  // in an input). Power-user accelerators per /impeccable critique H7.
+  // Sprint 5 R-B — Alina hero pill: tap-to-expand with extended help text.
+  // Each per-step pill carries data-alina-help. Click swaps the visible
+  // message to the help copy; click again or click any other pill restores.
+  // Stores original message in data-alina-original so we can revert.
+  document.addEventListener('click', function (e) {
+    var pill = e.target.closest('.qf2-alina-hero[role="button"]');
+    if (!pill) return;
+    var help = pill.getAttribute('data-alina-help');
+    if (!help) return;
+    var textEl = pill.querySelector('.qf2-alina-hero-text');
+    if (!textEl) return;
+    var expanded = pill.getAttribute('aria-expanded') === 'true';
+    if (expanded) {
+      // Collapse: restore original
+      var orig = pill.getAttribute('data-alina-original');
+      if (orig) textEl.innerHTML = orig;
+      pill.setAttribute('aria-expanded', 'false');
+    } else {
+      // Expand: stash current, show help
+      pill.setAttribute('data-alina-original', textEl.innerHTML);
+      // Keep the "Alina ·" prefix when present, swap the rest.
+      var nameEl = textEl.querySelector('.qf2-alina-name');
+      if (nameEl) {
+        textEl.innerHTML = nameEl.outerHTML + ' &middot; ' + help;
+      } else {
+        textEl.textContent = help;
+      }
+      pill.setAttribute('aria-expanded', 'true');
+    }
+  });
+  // Keyboard activation (Enter/Space) on the pill — already handled by
+  // browser default for elements with role="button" + tabindex=0, but only
+  // when the click handler fires. The line below ensures Space doesn't scroll.
   document.addEventListener('keydown', function (e) {
-    // Skip when typing in form fields, textareas, or contentEditable.
+    var pill = e.target.closest && e.target.closest('.qf2-alina-hero[role="button"]');
+    if (!pill) return;
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      pill.click();
+    }
+  });
+
+  // Sprint 4b D17 + Sprint 5 R-D — keyboard shortcuts on the active screen.
+  // Esc → back. Digits 1-9 → activate Nth picker card (not while typing).
+  // Enter on Info text inputs → click the screen's primary CTA.
+  // Arrow keys on chip groups → focus next/prev chip (roving tabindex).
+  document.addEventListener('keydown', function (e) {
     var t = e.target;
     var isTyping = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
 
     // Esc → goBack (works anywhere except modal/datepicker contexts)
     if (e.key === 'Escape' && typeof goBack === 'function') {
-      // Don't hijack Esc when inside an active datepicker / modal popup.
       if (document.querySelector('.qf2-edit-panel, .qf2-exit-overlay:not([hidden])')) return;
       e.preventDefault();
       goBack();
       return;
     }
 
+    // Sprint 5 R-D — Enter on Info text inputs activates the primary CTA on
+    // that screen. Avoids users having to Tab to the button. Excludes textarea
+    // (newline is intentional there) and email field if format is invalid.
+    if (e.key === 'Enter' && t && t.tagName === 'INPUT' && t.type !== 'submit') {
+      var active = document.querySelector('.qf-screen.is-active');
+      if (active) {
+        var primaryCta = active.querySelector('.qf2-cta:not([hidden]):not([disabled])');
+        if (primaryCta) {
+          e.preventDefault();
+          primaryCta.click();
+          return;
+        }
+      }
+    }
+
+    // Sprint 5 R-D — Arrow keys on chip groups: roving focus to prev/next chip
+    // within the same row. Keeps Tab order at chip-group level (one tab stop)
+    // and lets arrow keys navigate within. Common a11y pattern for radio groups.
+    if (!isTyping && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      if (t && t.classList && t.classList.contains('qf2-chip')) {
+        var row = t.closest('.qf2-chip-row');
+        if (row) {
+          var chips = Array.from(row.querySelectorAll('.qf2-chip'));
+          var idx = chips.indexOf(t);
+          if (idx >= 0) {
+            var nextIdx;
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIdx = (idx - 1 + chips.length) % chips.length;
+            else nextIdx = (idx + 1) % chips.length;
+            e.preventDefault();
+            chips[nextIdx].focus();
+            return;
+          }
+        }
+      }
+    }
+
     // Number keys 1-9 → click the Nth card on the active screen (skip when typing)
     if (!isTyping && /^[1-9]$/.test(e.key)) {
-      var idx = parseInt(e.key, 10) - 1;
-      var active = document.querySelector('.qf-screen.is-active');
-      if (!active) return;
-      // Look for the primary card grid (service / space / size). Skip the
-      // qf2-quiz-chips and other secondary chips so a digit doesn't accidentally
-      // pick a quiz answer.
-      var cards = active.querySelectorAll(
+      var idx2 = parseInt(e.key, 10) - 1;
+      var active2 = document.querySelector('.qf-screen.is-active');
+      if (!active2) return;
+      var cards = active2.querySelectorAll(
         '.qf2-grid-3 .qf2-card[data-service], ' +
         '.qf2-grid-6 .qf2-card[data-space], ' +
         '.qf2-size-grid .qf2-size-card[data-size]'
       );
-      if (cards[idx]) {
+      if (cards[idx2]) {
         e.preventDefault();
-        cards[idx].click();
+        cards[idx2].click();
       }
     }
   });
