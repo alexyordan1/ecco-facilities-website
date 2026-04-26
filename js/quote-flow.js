@@ -311,7 +311,7 @@
 
       var hand = document.createElement('span');
       hand.className = 'qf2-exit-modal-hand';
-      hand.textContent = 'Hey — leaving so soon?';
+      hand.textContent = 'Hey, leaving so soon?';
       modal.appendChild(hand);
 
       var h2 = document.createElement('h2');
@@ -700,7 +700,7 @@
       if (!hasInput) return;
       e.preventDefault();
       // Legacy string (Chrome <51, Edge) — modern browsers show their own copy.
-      e.returnValue = 'Your progress is saved — you can pick up where you left off anytime.';
+      e.returnValue = 'Your progress is saved. You can pick up where you left off anytime.';
       return e.returnValue;
     } catch (_) {}
   });
@@ -1639,7 +1639,7 @@
         // Format → typo suggestion → disposable inbox. All run before Continue
         // click so users get inline feedback as they leave the field.
         if (!EMAIL_RE.test(val)) {
-          qf2ShowInfoErr("Hmm, that email doesn't look right — double-check?", emailField);
+          qf2ShowInfoErr("Hmm, that email doesn't look right. Double-check?", emailField);
           return;
         }
         var typo = (typeof suggestEmailCorrection === 'function') ? suggestEmailCorrection(val) : null;
@@ -1676,9 +1676,9 @@
         var posVal = position  ? position.value.trim()      : '';
 
         if (!fnVal) { qf2ShowInfoErr("I'll need your first name to send your quote.", firstName); return; }
-        if (!lnVal) { qf2ShowInfoErr("And your last name — keeps the records tidy.", lastName); return; }
+        if (!lnVal) { qf2ShowInfoErr("And your last name, keeps the records tidy.", lastName); return; }
         if (!emVal) { qf2ShowInfoErr("Drop me your email so I can send the quote over.", email); return; }
-        if (!EMAIL_RE.test(emVal)) { qf2ShowInfoErr("Hmm, that email doesn't look right — double-check?", email); return; }
+        if (!EMAIL_RE.test(emVal)) { qf2ShowInfoErr("Hmm, that email doesn't look right. Double-check?", email); return; }
         var typoSuggestion = suggestEmailCorrection(emVal);
         if (typoSuggestion) { qf2ShowInfoErr('Did you mean ' + typoSuggestion + '? Tap to fix it.', email); return; }
         if (isDisposableEmail(emVal)) { qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", email); return; }
@@ -1864,7 +1864,7 @@
       ava.appendChild(img);
       var text = document.createElement('div');
       text.className = 'qf2-atypical-heads-up-text';
-      text.textContent = sp + ' + ' + t + " is a bit unusual — most " + sp.toLowerCase() + "s clean evenings or after hours. I'll double-check with you when I prepare the quote, no worries ~";
+      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. I'll double-check with you when I prepare the quote, no worries ~";
       bubble.appendChild(ava);
       bubble.appendChild(text);
       // Insert after the prompt
@@ -2128,7 +2128,7 @@
           // user a next step. Facilities over 1M sq ft are legitimately
           // common for campuses, so we route them to a direct call instead
           // of losing the lead outright.
-          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly — call (646) 303-0816 or email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
+          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Call (646) 303-0816 or email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
           return;
         }
         clearSizeErr();
@@ -2231,7 +2231,7 @@
           return;
         }
         if (n > 1000000) {
-          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let’s chat directly — call (646) 303-0816 or email info@eccofacilities.com.');
+          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let’s chat directly. Call (646) 303-0816 or email info@eccofacilities.com.');
           return;
         }
         STATE.sizeExact = Math.round(n);
@@ -2431,7 +2431,7 @@
           allChips.forEach(c => { c.classList.remove('is-selected'); c.setAttribute('aria-pressed', 'false'); });
           chip.classList.add('is-selected');
           chip.setAttribute('aria-pressed', 'true');
-          if (hadOthers) qf2ShowToast('Cleared others — flexible it is ~');
+          if (hadOthers) qf2ShowToast('Cleared others. Flexible it is ~');
         } else {
           // Toggle this one. If Flexible was selected, deselect it.
           var flex = allChips.find(c => c.getAttribute('data-time') === 'flexible');
@@ -2878,7 +2878,7 @@
         morning:   'Mornings (loosely 6 am–noon)',
         afternoon: 'Afternoons (loosely noon–5 pm)',
         evening:   'Evenings (loosely 5–10 pm)',
-        flexible:  'Anytime — we’ll coordinate'
+        flexible:  'Anytime, we’ll coordinate'
       };
       var timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
       setStackedValue('qf2SumWhen', daysSummary, timeSubs);
@@ -3821,7 +3821,7 @@
       // Ola 3 — re-check disposable + typo at submit. User may have edited
       // the email in the summary panel to a disposable/typo'd address after
       // passing the initial info-step check.
-      else if (suggestEmailCorrection(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks like a typo — did you mean ' + suggestEmailCorrection(STATE.userEmail) + '?' });
+      else if (suggestEmailCorrection(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks like a typo. Did you mean ' + suggestEmailCorrection(STATE.userEmail) + '?' });
       else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a non-disposable email so we can deliver your proposal.' });
       if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'First name is missing.' });
       if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone number is invalid.' });
@@ -4021,7 +4021,7 @@
               msg = 'Please refresh the page and try once more. If it keeps failing, email info@eccofacilities.com.';
             } else if (result.status >= 500) {
               title = 'Our server hiccupped';
-              msg = 'This is on our side, not you. Please try again in a minute — or email info@eccofacilities.com and we\u2019ll follow up personally.';
+              msg = 'This is on our side, not you. Please try again in a minute, or email info@eccofacilities.com and we\u2019ll follow up personally.';
             } else {
               msg = serverMsg || 'Please review your answers and try again, or email info@eccofacilities.com.';
             }
@@ -4138,7 +4138,7 @@
           var shareBtn = document.getElementById('qfShareColleagueBtn');
           if (shareBtn && !shareBtn._qfWired) {
             shareBtn._qfWired = true;
-            var shareTitle = 'Ecco Facilities — commercial cleaning in NYC';
+            var shareTitle = 'Ecco Facilities · commercial cleaning in NYC';
             var shareText = 'I just requested a quote from Ecco Facilities for commercial cleaning. Thought it might be worth a look if you manage a space in NYC.';
             var shareUrl = 'https://eccofacilities.com/';
             shareBtn.addEventListener('click', function () {

@@ -413,7 +413,7 @@
             <span class="qf2-field-ico" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
             </span>
-            <input type="text" id="qfUserPosition" placeholder="Your role (optional &mdash; e.g. Owner, FM, Manager)" autocomplete="organization-title" aria-label="Your role (optional)" maxlength="80">
+            <input type="text" id="qfUserPosition" placeholder="Your role (optional, e.g. Owner, FM, Manager)" autocomplete="organization-title" aria-label="Your role (optional)" maxlength="80">
           </div>
         </div>
         <p class="qf2-field-err" id="qf2InfoErr" role="alert" hidden></p>
@@ -1267,7 +1267,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=34.0"></script>
+<script defer src="js/quote-flow.js?v=34.1"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
