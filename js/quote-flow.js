@@ -783,12 +783,20 @@
   }
 
   var SIZE_LABELS = {
-    'under3k': 'Under 3,000 sq ft',
-    '3k-6k':   '3,000\u20136,000 sq ft',
-    '6k-9k':   '6,000\u20139,000 sq ft',
-    '9k-12k':  '9,000\u201312,000 sq ft',
-    '12k-15k': '12,000\u201315,000 sq ft',
-    'notsure': 'In-person visit'
+    // Sprint 2 D14 \u2014 rebalanced buckets for better small-business precision.
+    // Old "Under 3K" lumped 500 sq ft kiosks with 2,800 sq ft suites.
+    'under1k':  'Under 1,000 sq ft',
+    '1k-3k':    '1,000\u20133,000 sq ft',
+    '3k-6k':    '3,000\u20136,000 sq ft',
+    '6k-12k':   '6,000\u201312,000 sq ft',
+    '12k-plus': '12,000+ sq ft',
+    'visit_required': 'In-person visit',
+    'notsure':  'In-person visit',
+    // Legacy keys preserved so resume-draft from older sessions still maps.
+    'under3k':  'Under 3,000 sq ft',
+    '6k-9k':    '6,000\u20139,000 sq ft',
+    '9k-12k':   '9,000\u201312,000 sq ft',
+    '12k-15k':  '12,000\u201315,000 sq ft'
   };
   // Format a custom sq ft entry (e.g. "5000sqft" or "5000") → "5,000 sq ft"
   function formatSizeLabel(raw) {
@@ -1631,7 +1639,10 @@
         var typoSuggestion = suggestEmailCorrection(emVal);
         if (typoSuggestion) { qf2ShowInfoErr('Did you mean ' + typoSuggestion + '? Tap to fix it.', email); return; }
         if (isDisposableEmail(emVal)) { qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", email); return; }
-        if (!posVal || posVal.length < 2) { qf2ShowInfoErr("I'll need your role — even 'Owner' or 'Manager' works.", position); return; }
+        // Sprint 2 D13 — role is now optional. Owners, restaurateurs, school
+        // administrators, and other non-FM buyers shouldn't be gated on a
+        // free-text role field. STATE.userPosition stays empty when blank;
+        // Review/Snapshot already omits the row gracefully when empty.
         if (posVal.length > 80) posVal = posVal.slice(0, 80);
 
         STATE.userName     = fnVal;
@@ -2096,7 +2107,9 @@
         if (qf2WalkHint) qf2WalkHint.hidden = true;
         STATE.sizeExact = null;
         var s = card.getAttribute('data-size');
-        if (s === 'visit_required') STATE.needsSiteWalk = true;
+        // Sprint 2 D14 — also flag 12K+ enterprise as needing a site walk; that
+        // bucket's pricing is too variable to quote without visiting.
+        if (s === 'visit_required' || s === '12k-plus') STATE.needsSiteWalk = true;
         proceedFromSize(s);
       });
     });
@@ -2776,7 +2789,7 @@
           fieldsWrap.appendChild(fieldRow('qf2EditFn', 'text', STATE.userName, 'First name', 'First name', 60));
           fieldsWrap.appendChild(fieldRow('qf2EditLn', 'text', STATE.userLastName, 'Last name', 'Last name', 60));
           fieldsWrap.appendChild(fieldRow('qf2EditEm', 'email', STATE.userEmail, 'Email', 'Email', 254));
-          fieldsWrap.appendChild(fieldRow('qf2EditPos', 'text', STATE.userPosition, 'Role', 'Role', 80));
+          fieldsWrap.appendChild(fieldRow('qf2EditPos', 'text', STATE.userPosition, 'Role (optional)', 'Role (optional)', 80));
         } else if (section === 'location') {
           fieldsWrap.appendChild(fieldRow('qf2EditCo', 'text', STATE.companyName, 'Company or organization', 'Company', 120));
           fieldsWrap.appendChild(fieldRow('qf2EditAddr', 'text', STATE.userAddress, 'Service address', 'Service address', 200));
