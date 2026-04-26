@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=36.7">
+<link rel="stylesheet" href="css/quote-flow.css?v=36.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -824,29 +824,33 @@
           <button type="button" class="qf2-chip qf2-chip-preset qf-s4-preset" data-preset="every">Every day</button>
           <button type="button" class="qf2-chip qf2-chip-preset qf-s4-preset" data-preset="clear">Clear</button>
         </div>
-        <div class="qf2-section-label">
-          <span class="qf2-prompt-sub-desktop">What time</span>
-          <span class="qf2-prompt-sub-mobile">Time</span>
+        <!-- D18 Sprint 4c — time cluster gated until at least one day picked.
+             Reduces initial cognitive load from 14 selectable items to 10. -->
+        <div class="qf2-time-cluster" id="qf2TimeCluster" data-gated="1">
+          <div class="qf2-section-label">
+            <span class="qf2-prompt-sub-desktop">What time</span>
+            <span class="qf2-prompt-sub-mobile">Time</span>
+          </div>
+          <div class="qf2-chip-row" role="group" aria-label="Time of day">
+            <button type="button" class="qf2-chip qf2-chip-time" data-time="morning" aria-pressed="false">
+              <span class="qf2-chip-time-label">Morning</span>
+              <span class="qf2-chip-time-range">6 am &ndash; 12 pm</span>
+            </button>
+            <button type="button" class="qf2-chip qf2-chip-time" data-time="afternoon" aria-pressed="false">
+              <span class="qf2-chip-time-label">Afternoon</span>
+              <span class="qf2-chip-time-range">12 &ndash; 5 pm</span>
+            </button>
+            <button type="button" class="qf2-chip qf2-chip-time is-selected" data-time="evening" aria-pressed="true">
+              <span class="qf2-chip-time-label">Evening</span>
+              <span class="qf2-chip-time-range">5 &ndash; 10 pm</span>
+            </button>
+            <button type="button" class="qf2-chip qf2-chip-time qf2-chip-time--flexible" data-time="flexible" aria-pressed="false">
+              <span class="qf2-chip-time-label">Flexible</span>
+              <span class="qf2-chip-time-range">we&rsquo;ll coordinate</span>
+            </button>
+          </div>
+          <p class="qf2-time-toast" id="qf2TimeToast" hidden role="status" aria-live="polite"></p>
         </div>
-        <div class="qf2-chip-row" role="group" aria-label="Time of day">
-          <button type="button" class="qf2-chip qf2-chip-time" data-time="morning" aria-pressed="false">
-            <span class="qf2-chip-time-label">Morning</span>
-            <span class="qf2-chip-time-range">6 am &ndash; 12 pm</span>
-          </button>
-          <button type="button" class="qf2-chip qf2-chip-time" data-time="afternoon" aria-pressed="false">
-            <span class="qf2-chip-time-label">Afternoon</span>
-            <span class="qf2-chip-time-range">12 &ndash; 5 pm</span>
-          </button>
-          <button type="button" class="qf2-chip qf2-chip-time is-selected" data-time="evening" aria-pressed="true">
-            <span class="qf2-chip-time-label">Evening</span>
-            <span class="qf2-chip-time-range">5 &ndash; 10 pm</span>
-          </button>
-          <button type="button" class="qf2-chip qf2-chip-time qf2-chip-time--flexible" data-time="flexible" aria-pressed="false">
-            <span class="qf2-chip-time-label">Flexible</span>
-            <span class="qf2-chip-time-range">we&rsquo;ll coordinate</span>
-          </button>
-        </div>
-        <p class="qf2-time-toast" id="qf2TimeToast" hidden role="status" aria-live="polite"></p>
         <span class="qf-s4-count" id="qfDaysCount" aria-live="polite" aria-atomic="true" hidden></span>
         <button type="button" class="qf2-cta" id="qfDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
       </div>
@@ -1258,7 +1262,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=31.1"></script>
+<script defer src="js/quote-flow.js?v=31.2"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

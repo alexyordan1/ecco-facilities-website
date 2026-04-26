@@ -1607,8 +1607,24 @@
     if (emailField) {
       emailField.addEventListener('blur', function () {
         var val = emailField.value.trim();
-        if (val && !EMAIL_RE.test(val)) qf2ShowInfoErr("Hmm, that email doesn't look right — double-check?", emailField);
-        else qf2ClearInfoErr();
+        if (!val) { qf2ClearInfoErr(); return; }
+        // Sprint 4a D16 — full live validation on blur (was format-only).
+        // Format → typo suggestion → disposable inbox. All run before Continue
+        // click so users get inline feedback as they leave the field.
+        if (!EMAIL_RE.test(val)) {
+          qf2ShowInfoErr("Hmm, that email doesn't look right — double-check?", emailField);
+          return;
+        }
+        var typo = (typeof suggestEmailCorrection === 'function') ? suggestEmailCorrection(val) : null;
+        if (typo) {
+          qf2ShowInfoErr('Did you mean ' + typo + '? Tap to fix it.', emailField);
+          return;
+        }
+        if (typeof isDisposableEmail === 'function' && isDisposableEmail(val)) {
+          qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", emailField);
+          return;
+        }
+        qf2ClearInfoErr();
       });
       emailField.addEventListener('input', qf2ClearInfoErr);
     }
@@ -2175,6 +2191,13 @@
     }
 
     if (daysContinueBtn) daysContinueBtn.disabled = STATE.days.length === 0;
+
+    // D18 Sprint 4c — gate the time cluster until at least one day is picked.
+    // Reduces initial visible-decision count on Step 5 from 14 to 10.
+    var timeCluster = document.getElementById('qf2TimeCluster');
+    if (timeCluster) {
+      timeCluster.setAttribute('data-gated', STATE.days.length === 0 ? '1' : '0');
+    }
 
     // Preset highlight
     presetBtns.forEach(function (p) { p.classList.remove('is-active'); });
@@ -4282,5 +4305,42 @@
       banner.remove();
     });
   })();
+
+  // Sprint 4b D17 — keyboard shortcuts on the active screen.
+  // Esc → back. Digits 1-7 → activate the Nth picker card (when not typing
+  // in an input). Power-user accelerators per /impeccable critique H7.
+  document.addEventListener('keydown', function (e) {
+    // Skip when typing in form fields, textareas, or contentEditable.
+    var t = e.target;
+    var isTyping = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+
+    // Esc → goBack (works anywhere except modal/datepicker contexts)
+    if (e.key === 'Escape' && typeof goBack === 'function') {
+      // Don't hijack Esc when inside an active datepicker / modal popup.
+      if (document.querySelector('.qf2-edit-panel, .qf2-exit-overlay:not([hidden])')) return;
+      e.preventDefault();
+      goBack();
+      return;
+    }
+
+    // Number keys 1-9 → click the Nth card on the active screen (skip when typing)
+    if (!isTyping && /^[1-9]$/.test(e.key)) {
+      var idx = parseInt(e.key, 10) - 1;
+      var active = document.querySelector('.qf-screen.is-active');
+      if (!active) return;
+      // Look for the primary card grid (service / space / size). Skip the
+      // qf2-quiz-chips and other secondary chips so a digit doesn't accidentally
+      // pick a quiz answer.
+      var cards = active.querySelectorAll(
+        '.qf2-grid-3 .qf2-card[data-service], ' +
+        '.qf2-grid-6 .qf2-card[data-space], ' +
+        '.qf2-size-grid .qf2-size-card[data-size]'
+      );
+      if (cards[idx]) {
+        e.preventDefault();
+        cards[idx].click();
+      }
+    }
+  });
 
 })();
