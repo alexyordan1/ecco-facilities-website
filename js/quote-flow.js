@@ -2316,8 +2316,12 @@
           : STATE.days.length + ' days';
         setRailValue('days', summary);
 
-        // V2 — capture timeOfDay from selected chips
-        var selectedTimes = Array.from(SCREENS.days.querySelectorAll('.qf2-chip-time.is-selected')).map(c => c.getAttribute('data-time'));
+        // V2 — capture timeOfDay from selected chips.
+        // D41 — Evening is no longer pre-selected. If the user advances
+        // without picking any time slot, auto-default to "flexible" so
+        // the sales team still gets a usable answer instead of empty.
+        var selectedTimes = Array.from(SCREENS.days.querySelectorAll('.qf2-chip-time.is-selected')).map(function (c) { return c.getAttribute('data-time'); });
+        if (selectedTimes.length === 0) selectedTimes = ['flexible'];
         STATE.timeOfDay = selectedTimes;
         STATE.scheduleAtypical = computeScheduleAtypical(STATE.space, STATE.timeOfDay);
 
@@ -2773,11 +2777,14 @@
       else if (_eqSet(STATE.days, WEEKDAYS_ARR)) daysSummary = 'Weekdays';
       else if (_eqSet(STATE.days, WEEKEND_ARR)) daysSummary = 'Weekends';
       else if (STATE.days && STATE.days.length) daysSummary = STATE.days.join(', ');
+      // D41 — softened summaries to match the new "When are we welcome?"
+      // framing on Step 5. Ranges marked "loosely" to underline that the
+      // exact time is coordinated, not committed.
       var TIME_DETAIL = {
-        morning:   'Mornings, 6 am–12 pm',
-        afternoon: 'Afternoons, 12–5 pm',
-        evening:   'Evenings, 5–10 pm',
-        flexible:  'Flexible — we’ll coordinate'
+        morning:   'Mornings (loosely 6 am–noon)',
+        afternoon: 'Afternoons (loosely noon–5 pm)',
+        evening:   'Evenings (loosely 5–10 pm)',
+        flexible:  'Anytime — we’ll coordinate'
       };
       var timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
       setStackedValue('qf2SumWhen', daysSummary, timeSubs);

@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=37.7">
+<link rel="stylesheet" href="css/quote-flow.css?v=37.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -825,27 +825,33 @@
           <button type="button" class="qf2-chip qf2-chip-preset qf-s4-preset" data-preset="clear">Clear</button>
         </div>
         <!-- D18 Sprint 4c — time cluster gated until at least one day picked.
-             Reduces initial cognitive load from 14 selectable items to 10. -->
+             D41 — section reframed as availability windows (when crew is
+             welcome) instead of "Time" (commitment-sounding). Multi-select
+             already supported in JS. Evening no longer pre-selected — user
+             must actively pick at least one slot. Time ranges softened to
+             "loosely" plus pluralized labels (Morning → Mornings) so the
+             chip implies "any morning" not "this specific morning". -->
         <div class="qf2-time-cluster" id="qf2TimeCluster" data-gated="1">
           <div class="qf2-section-label">
-            <span class="qf2-prompt-sub-desktop">What time</span>
-            <span class="qf2-prompt-sub-mobile">Time</span>
+            <span class="qf2-prompt-sub-desktop">When are we welcome?</span>
+            <span class="qf2-prompt-sub-mobile">When are we welcome?</span>
           </div>
-          <div class="qf2-chip-row" role="group" aria-label="Time of day">
+          <p class="qf2-time-helper">Pick the windows when we can come &mdash; we&rsquo;ll coordinate the exact time week by week.</p>
+          <div class="qf2-chip-row" role="group" aria-label="Availability windows">
             <button type="button" class="qf2-chip qf2-chip-time" data-time="morning" aria-pressed="false">
-              <span class="qf2-chip-time-label">Morning</span>
-              <span class="qf2-chip-time-range">6 am &ndash; 12 pm</span>
+              <span class="qf2-chip-time-label">Mornings</span>
+              <span class="qf2-chip-time-range">loosely 6 am&ndash;noon</span>
             </button>
             <button type="button" class="qf2-chip qf2-chip-time" data-time="afternoon" aria-pressed="false">
-              <span class="qf2-chip-time-label">Afternoon</span>
-              <span class="qf2-chip-time-range">12 &ndash; 5 pm</span>
+              <span class="qf2-chip-time-label">Afternoons</span>
+              <span class="qf2-chip-time-range">loosely noon&ndash;5 pm</span>
             </button>
-            <button type="button" class="qf2-chip qf2-chip-time is-selected" data-time="evening" aria-pressed="true">
-              <span class="qf2-chip-time-label">Evening</span>
-              <span class="qf2-chip-time-range">5 &ndash; 10 pm</span>
+            <button type="button" class="qf2-chip qf2-chip-time" data-time="evening" aria-pressed="false">
+              <span class="qf2-chip-time-label">Evenings</span>
+              <span class="qf2-chip-time-range">loosely 5&ndash;10 pm</span>
             </button>
             <button type="button" class="qf2-chip qf2-chip-time qf2-chip-time--flexible" data-time="flexible" aria-pressed="false">
-              <span class="qf2-chip-time-label">Flexible</span>
+              <span class="qf2-chip-time-label">Anytime</span>
               <span class="qf2-chip-time-range">we&rsquo;ll coordinate</span>
             </button>
           </div>
@@ -1260,7 +1266,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=33.3"></script>
+<script defer src="js/quote-flow.js?v=33.4"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
