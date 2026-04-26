@@ -711,7 +711,7 @@
   var ALINA_MESSAGES = {
     janitorial: 'Perfect choice. Now let\u2019s find the right plan for your space.',
     dayporter:  'Great pick. Let\u2019s match you with the right setup.',
-    both:       'Smart move \u2014 full 24/7 coverage. Let\u2019s get to know your space.',
+    both:       'Smart move. Full 24/7 coverage. Let\u2019s get to know your space.',
     unsure:     'No worries, I\u2019ll help you figure it out. Let\u2019s start here.'
   };
 
@@ -723,14 +723,14 @@
     Medical:    'Clinics typically range 1,500\u20135,000 sq ft. Labs and surgical centers can run bigger.',
     Retail:     'Most NYC retail spaces are under 6,000 sq ft. Pick your range.',
     Restaurant: 'Restaurants are usually 2K\u20135K sq ft. Kitchen counts toward the total.',
-    Fitness:    'Gyms range widely \u2014 boutiques under 3K, full facilities 10K+. Pick the closest.',
+    Fitness:    'Gyms range widely: boutiques under 3K, full facilities 10K+. Pick the closest.',
     Other:      'Pick the closest range or enter the exact number below.'
   };
 
   var ALINA_S4_BY_SPACE = {
     Office:     'For offices, Monday\u2013Friday is most common. Weekends only if you need them.',
     Medical:    'Medical spaces usually match patient-facing days. Pick what fits your schedule.',
-    Retail:     'Retail often needs full 7-day coverage \u2014 weekends matter most.',
+    Retail:     'Retail often needs full 7-day coverage. Weekends matter most.',
     Restaurant: 'Restaurants usually need 6\u20137 days. After-hours is the key window.',
     Fitness:    'Gyms and studios often need daily coverage during open hours.',
     Other:      'Pick the days that match your schedule.'
@@ -738,24 +738,24 @@
 
   var ALINA_PORTER_BY_SPACE = {
     Office:     'For an office like yours, 1 porter usually covers it. But you decide!',
-    Medical:    'Medical spaces need tight sanitization \u2014 1 dedicated porter works for clinics, 2+ for larger facilities.',
+    Medical:    'Medical spaces need tight sanitization. 1 dedicated porter works for clinics, 2+ for larger facilities.',
     Retail:     'For retail, 1 porter handles front-of-house freshness. Multi-floor stores usually go with 2.',
-    Restaurant: 'Restaurants often need 1\u20132 porters during service \u2014 one front, one back.',
+    Restaurant: 'Restaurants often need 1\u20132 porters during service: one front, one back.',
     Fitness:    'Gyms benefit from porters on equipment and locker rooms. 1\u20132 usually works.',
-    Other:      'Pick what fits your space \u2014 we\u2019ll fine-tune on the call.'
+    Other:      'Pick what fits your space. We\u2019ll fine-tune on the call.'
   };
 
   var ALINA_HOURS_BY_SPACE = {
     Office:     'Set the hours for each porter. Most offices go 8 AM to 5 PM.',
-    Medical:    'Set the hours to match your patient-facing windows \u2014 usually 8 AM to 6 PM.',
-    Retail:     'Set the hours to match your store hours \u2014 usually 10 AM to 9 PM.',
-    Restaurant: 'Set the hours \u2014 restaurants typically need 11 AM to close.',
-    Fitness:    'Set the hours \u2014 gyms usually open 5 AM to 10 PM.',
+    Medical:    'Set the hours to match your patient-facing windows, usually 8 AM to 6 PM.',
+    Retail:     'Set the hours to match your store hours, usually 10 AM to 9 PM.',
+    Restaurant: 'Set the hours. Restaurants typically need 11 AM to close.',
+    Fitness:    'Set the hours. Gyms usually open 5 AM to 10 PM.',
     Other:      'Set the hours that match your operation.'
   };
 
   var ALINA_WINDOW = {
-    janitorial: 'Last scheduling detail \u2014 when works best for our team?',
+    janitorial: 'Last scheduling detail. When works best for our team?',
     both:       'When should the janitorial team come in?'
   };
 
@@ -1385,6 +1385,11 @@
     // the V2 cards and any back-compat ones.
     SCREENS.welcome.querySelectorAll('[data-service]').forEach(function (card) {
       card.addEventListener('click', function () {
+        // D51 — same double-tap guard as size + space cards.
+        if (card.dataset.qfBusy === '1') return;
+        card.dataset.qfBusy = '1';
+        setTimeout(function () { card.dataset.qfBusy = ''; }, 250);
+
         var pickedService = card.getAttribute('data-service');
         // 2026-04-25 · If the resume banner is up, the user is visually on
         // welcome but STATE.currentStepName still points at whatever step
@@ -1975,6 +1980,13 @@
 
     qf2SpaceCards.forEach(function (card) {
       card.addEventListener('click', function () {
+        // D51 — same double-tap guard as size cards. A fat-finger second click
+        // during the 400ms transition window could otherwise queue a second
+        // advance and skip the next screen.
+        if (card.dataset.qfBusy === '1') return;
+        card.dataset.qfBusy = '1';
+        setTimeout(function () { card.dataset.qfBusy = ''; }, 250);
+
         STATE.space = card.getAttribute('data-space');
 
         // Visual selection: clear all + mark this one
@@ -2110,7 +2122,7 @@
         var val = sizeInput.value.trim();
         var n = Number(val);
         if (!val || isNaN(n)) { showSizeErr('Please enter a number.'); return; }
-        if (n < 100) { showSizeErr('Sizes under 100 sq ft look unusual \u2014 pick a range instead?'); return; }
+        if (n < 100) { showSizeErr('Sizes under 100 sq ft look unusual. Pick a range instead?'); return; }
         if (n > 1000000) {
           // Ola 5 — previously a blocking "try smaller" without giving the
           // user a next step. Facilities over 1M sq ft are legitimately
@@ -2137,6 +2149,15 @@
 
     qf2SizeCards.forEach(function (card) {
       card.addEventListener('click', function () {
+        // D51 — debounce rapid double-taps. Without this guard a fat-finger
+        // double-click could queue a second proceedFromSize while the first
+        // transition was in flight, with the second resolving against a
+        // changed currentStepName and skipping a step. Same pattern day chips
+        // already use (line 2324).
+        if (card.dataset.qfBusy === '1') return;
+        card.dataset.qfBusy = '1';
+        setTimeout(function () { card.dataset.qfBusy = ''; }, 250);
+
         qf2SizeCards.forEach(function (c) {
           c.classList.toggle('is-selected', c === card);
           c.setAttribute('aria-pressed', String(c === card));
@@ -2296,7 +2317,7 @@
     if (alinaEl && STATE.currentStepName === 'days') {
       var n = STATE.days.length;
       if (n === 7) {
-        alinaEl.textContent = 'Every day? That\u2019s serious coverage \u2014 love it.';
+        alinaEl.textContent = 'Every day? That\u2019s serious coverage. Love it.';
       } else if (n > 0 && !arraysEqual(STATE.days, WEEKDAYS)) {
         alinaEl.textContent = n + ' day' + (n > 1 ? 's' : '') + ' selected. Adjust anytime.';
       }
@@ -4037,7 +4058,7 @@
               : 'Your proposal is on its way!';
           }
           if (successSub && STATE.userEmail) {
-            successSub.textContent = 'Check ' + STATE.userEmail + ' \u2014 your custom plan will be there shortly.';
+            successSub.textContent = 'Check ' + STATE.userEmail + '. Your custom plan will be there shortly.';
           }
           // V2 \u2014 populate the qf2 success markup (XSS-safe via textContent)
           var qf2Name = document.getElementById('qf2SuccessName');
@@ -4446,7 +4467,7 @@
     var em = document.createElement('em');
     em.textContent = niceName;
     textWrap.appendChild(em);
-    textWrap.appendChild(document.createTextNode(' \u2014 pick up where you left off?'));
+    textWrap.appendChild(document.createTextNode('. Pick up where you left off?'));
 
     var resumeBtn = document.createElement('button');
     resumeBtn.type = 'button';
