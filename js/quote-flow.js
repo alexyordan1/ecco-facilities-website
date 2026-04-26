@@ -1296,16 +1296,33 @@
   // Ola 3 — re-entry guard. Screen transitions run an 800ms animation; rapid
   // double-clicks on Continue/Back previously queued two transitions whose
   // mid-flight DOM mutations could race. One pending transition at a time.
+  // D26 — Reduced guard from 850ms → 400ms (matches the actual crossfade
+  // duration). 850ms was over-cautious, made back-navigation feel laggy
+  // and required users to double-click to actually advance/retreat.
   var _qfTransitioning = false;
+  var _qfPendingNav = null; // {fn, args} of a nav request that arrived while locked
   function _qfGuardTransition() {
     if (_qfTransitioning) return false;
     _qfTransitioning = true;
-    setTimeout(function () { _qfTransitioning = false; }, 850);
+    setTimeout(function () {
+      _qfTransitioning = false;
+      // D26 — flush any queued navigation. User clicked back/next while
+      // the guard was still locked; honor that intent now instead of dropping.
+      if (_qfPendingNav) {
+        var p = _qfPendingNav;
+        _qfPendingNav = null;
+        try { p.fn(); } catch (_) {}
+      }
+    }, 400);
     return true;
   }
 
   function goNext() {
-    if (!_qfGuardTransition()) return;
+    if (!_qfGuardTransition()) {
+      // D26 — queue. The guard releases in ≤400ms and will replay this call.
+      _qfPendingNav = { fn: goNext };
+      return;
+    }
     var flow = getFlow();
     var idx = getStepIndex(STATE.currentStepName);
     if (idx < 0 || idx >= flow.length - 1) return;
@@ -1314,7 +1331,12 @@
   }
 
   function goBack() {
-    if (!_qfGuardTransition()) return;
+    if (!_qfGuardTransition()) {
+      // D26 — queue. The guard releases in ≤400ms and will replay this call.
+      // Fixes the "have to click back twice" symptom on quick navigation.
+      _qfPendingNav = { fn: goBack };
+      return;
+    }
     var flow = getFlow();
     var idx = getStepIndex(STATE.currentStepName);
     if (idx <= 0) return;
@@ -2847,6 +2869,16 @@
           note.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
           note.textContent = "Hop back to the Space step to switch type.";
           fieldsWrap.appendChild(note);
+        } else if (section === 'space-location') {
+          // D28 — combined "The space" row covers space TYPE (locked, hop back
+          // to change) + the address fields (editable inline).
+          var noteSL = document.createElement('p');
+          noteSL.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          noteSL.textContent = 'Type: ' + (STATE.space || '—') + ' (hop back to Step 2 to change). Address below:';
+          fieldsWrap.appendChild(noteSL);
+          fieldsWrap.appendChild(fieldRow('qf2EditCo', 'text', STATE.companyName, 'Company or organization', 'Company', 120));
+          fieldsWrap.appendChild(fieldRow('qf2EditAddr', 'text', STATE.userAddress, 'Service address', 'Service address', 200));
+          fieldsWrap.appendChild(fieldRow('qf2EditSuite', 'text', STATE.userSuite, 'Suite / Floor (optional)', 'Suite or floor', 60));
         } else if (section === 'service') {
           var n2 = document.createElement('p');
           n2.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
@@ -2902,7 +2934,10 @@
             var em = document.getElementById('qf2EditEm').value.trim();
             var pos = document.getElementById('qf2EditPos').value.trim().slice(0,80);
             STATE.userName = fn; STATE.userLastName = ln; STATE.userEmail = em; STATE.userPosition = pos;
-          } else if (section === 'location') {
+          } else if (section === 'location' || section === 'space-location') {
+            // D28 — space-location merged row uses the same field set as the
+            // legacy location row. Space TYPE is non-editable here (locked
+            // intentionally — change requires the dedicated Space step).
             var co = document.getElementById('qf2EditCo').value.trim().slice(0,120);
             var addr = document.getElementById('qf2EditAddr').value.trim().slice(0,200);
             var suite = document.getElementById('qf2EditSuite').value.trim().slice(0,60);

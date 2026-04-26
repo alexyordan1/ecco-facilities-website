@@ -45,11 +45,10 @@ async function freshOpen(page) {
 
 async function expectActive(page, expectedId) {
   await expect(page.locator(`#${expectedId}`)).toHaveClass(/is-active/, { timeout: 5000 });
-  // The form has an internal _qfTransitioning guard that blocks goNext for
-  // 850ms after a transition fires (anti-double-click). Wait beyond that so
-  // the next test action isn't silently no-op'd. The class flips at the
-  // START of the transition, not the end.
-  await page.waitForTimeout(1100);
+  // D26 — guard reduced 850 → 400ms; tests wait 500ms to clear it. Plus the
+  // queued-nav fallback in the JS means a click during the lock will still
+  // execute when released, so timing is forgiving.
+  await page.waitForTimeout(500);
 }
 
 function expectNoJsErrors(page) {

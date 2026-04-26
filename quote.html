@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=37.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=37.1">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -1055,15 +1055,19 @@
             </div>
             <button type="button" class="qf2-edit-btn" data-edit="info" aria-label="Edit your information">Edit</button>
           </div>
-          <div class="qf2-sum-row" data-section="space">
+          <!-- D28 — merged rows. Was 2 separate rows ("Your space" + "Where")
+               which the user found redundant. Now one row showing space type
+               on line 1 and address on line 2. Edit opens the combined panel. -->
+          <div class="qf2-sum-row" data-section="space-location">
             <div class="qf2-sum-row-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M8 4v16"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 00-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
             </div>
             <div class="qf2-sum-row-main">
-              <div class="qf2-sum-row-label">Your space</div>
+              <div class="qf2-sum-row-label">The space</div>
               <div class="qf2-sum-row-value" id="qf2SumSpace">&mdash;</div>
+              <div class="qf2-sum-row-subvalue" id="qf2SumWhere">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="space" aria-label="Edit your space">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="space-location" aria-label="Edit space and address">Edit</button>
           </div>
           <div class="qf2-sum-row" data-section="schedule">
             <div class="qf2-sum-row-ico" aria-hidden="true">
@@ -1074,16 +1078,6 @@
               <div class="qf2-sum-row-value" id="qf2SumWhen">&mdash;</div>
             </div>
             <button type="button" class="qf2-edit-btn" data-edit="days" aria-label="Edit schedule">Edit</button>
-          </div>
-          <div class="qf2-sum-row" data-section="location">
-            <div class="qf2-sum-row-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 00-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-            </div>
-            <div class="qf2-sum-row-main">
-              <div class="qf2-sum-row-label">Where</div>
-              <div class="qf2-sum-row-value" id="qf2SumWhere">&mdash;</div>
-            </div>
-            <button type="button" class="qf2-edit-btn" data-edit="location" aria-label="Edit address">Edit</button>
           </div>
         </div>
         <button type="button" class="qf2-phone-optin-link" id="qf2PhoneOptinToggle" aria-expanded="false" aria-controls="qf2PhoneOptinExpanded">+ add your phone number &sim;</button>
@@ -1262,7 +1256,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 <!-- Cloudflare Turnstile — invisible, loaded async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=32.1"></script>
+<script defer src="js/quote-flow.js?v=32.2"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

@@ -17,7 +17,10 @@ module.exports = defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // D26 — cap concurrency at 2 workers. The single dev server can flake
+  // under 4-worker pressure (form-state collisions on shared localStorage).
+  // CI uses 1, local dev uses 2 — both stable.
+  workers: process.env.CI ? 1 : 2,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: 'http://localhost:8080',
