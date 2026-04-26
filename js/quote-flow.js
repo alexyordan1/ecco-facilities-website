@@ -2147,10 +2147,35 @@
       });
     }
 
-    // V2 Continue button — delegates to legacy sizeSubmit when numeric typed
-    if (qf2SizeContinue && sizeInput && sizeSubmit) {
+    // Sprint 5 D23 — V2 Continue button validates numeric input directly.
+    // Was delegating to legacy `sizeSubmit` (#qfSizeSubmit), an element that
+    // doesn't exist in the V2 markup, so the chain silently failed and the
+    // Continue button did nothing when the user typed sq ft. Validate inline
+    // and advance via proceedFromSize.
+    if (qf2SizeContinue && sizeInput) {
       qf2SizeContinue.addEventListener('click', function () {
-        if (sizeInput.value.trim()) sizeSubmit.click();
+        var val = sizeInput.value.trim();
+        if (!val) return;
+        var n = Number(val.replace(/,/g, ''));
+        if (isNaN(n) || n < 100) {
+          if (typeof showSizeErr === 'function') showSizeErr('Please enter a number 100 sq ft or larger.');
+          sizeInput.focus();
+          return;
+        }
+        if (n > 1000000) {
+          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let’s chat directly — call (646) 303-0816 or email info@eccofacilities.com.');
+          return;
+        }
+        STATE.sizeExact = Math.round(n);
+        STATE.needsSiteWalk = (n > 15000);
+        proceedFromSize(Math.round(n) + 'sqft');
+      });
+      // Enter on the numeric input → advance via the V2 Continue handler.
+      sizeInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          qf2SizeContinue.click();
+        }
       });
     }
 
