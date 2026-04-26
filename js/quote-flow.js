@@ -4404,6 +4404,66 @@
       goToScreen(STATE.currentStepName);
     });
 
+    // H3 D37 — Save-for-later toast. The flowbar's "Save" button already
+    // calls saveDraft() and flashes the button text. But on the first save
+    // of a session, also show a contextual toast explaining how the user
+    // resumes (returning visit auto-shows the resume banner; if they've
+    // already given email, we can mail a recovery link). This sets clearer
+    // expectations for the "what happens to my answers" question.
+    (function saveForLaterToast() {
+      var FIRST_SAVE_FLAG = 'ecco_quote_save_explained_v1';
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.qf2-flowbar-skip');
+        if (!btn) return;
+        var alreadyExplained;
+        try { alreadyExplained = !!localStorage.getItem(FIRST_SAVE_FLAG); } catch (_) { alreadyExplained = false; }
+        if (alreadyExplained) return;
+        var hasEmail = window.STATE && window.STATE.userEmail;
+        var msg = hasEmail
+          ? "Saved. Come back from this device, or check " + window.STATE.userEmail + " for the resume link."
+          : "Saved on this device. Add your email at the You step so we can mail you the resume link.";
+        try {
+          if (typeof qfToast === 'function') {
+            qfToast({ type: 'success', title: 'Draft saved', message: msg, duration: 5500 });
+          }
+          localStorage.setItem(FIRST_SAVE_FLAG, '1');
+        } catch (_) {}
+      });
+    })();
+
+    // H3 D36 — first-visit hint. Show a one-time micro banner ("Takes ~2
+     // minutes — your draft auto-saves") if the user has no draft AND no
+     // localStorage flag indicating they've seen the form before. Sets the
+     // flag on dismiss or on any meaningful interaction. Avoids spam for
+     // returning visitors.
+    (function firstVisitHint() {
+      var FLAG = 'ecco_quote_seen_v1';
+      try {
+        if (localStorage.getItem(FLAG)) return;
+        if (localStorage.getItem('ecco_quote_draft_v1')) return; // already engaged
+      } catch (_) { return; }
+      var welcome = document.querySelector('.qf-screen.step-1');
+      if (!welcome) return;
+      var hint = document.createElement('div');
+      hint.className = 'qf2-first-visit-hint';
+      hint.setAttribute('role', 'note');
+      hint.innerHTML = '<span class="qf2-first-visit-msg">Takes about 2 minutes &mdash; your answers auto-save as you go.</span>'
+        + '<button type="button" class="qf2-first-visit-dismiss" aria-label="Dismiss">&times;</button>';
+      welcome.appendChild(hint);
+      function dismiss() {
+        hint.classList.add('is-leaving');
+        setTimeout(function () { hint.remove(); }, 250);
+        try { localStorage.setItem(FLAG, '1'); } catch (_) {}
+      }
+      hint.querySelector('.qf2-first-visit-dismiss').addEventListener('click', dismiss);
+      // Auto-mark seen on first card click (the user has clearly engaged).
+      welcome.querySelectorAll('[data-service]').forEach(function (card) {
+        card.addEventListener('click', function () { try { localStorage.setItem(FLAG, '1'); } catch (_) {} }, { once: true });
+      });
+      // Auto-dismiss after 12s if untouched.
+      setTimeout(dismiss, 12000);
+    })();
+
     // H2 D35 — Turnstile lazy-load. Only fetch the Cloudflare challenge
     // script when the user actually reaches the Contact (Review) step.
     // Saves ~50KB + a third-party connection on every form session that
