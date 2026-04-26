@@ -2174,10 +2174,35 @@
     // doesn't exist in the V2 markup, so the chain silently failed and the
     // Continue button did nothing when the user typed sq ft. Validate inline
     // and advance via proceedFromSize.
+    //
+    // D50 — Continue also has to honor a previously-selected SIZE CARD.
+    // Previous behavior: if the user picked a card, advanced, then came
+    // back to Size and clicked Continue (with no number typed), the
+    // handler returned early at `if (!val) return;` and the form looked
+    // stuck. Now: if a card is selected and the input is empty, advance
+    // with that card's data-size value.
     if (qf2SizeContinue && sizeInput) {
       qf2SizeContinue.addEventListener('click', function () {
         var val = sizeInput.value.trim();
-        if (!val) return;
+
+        // D50 — empty input → fall back to the selected card. If neither
+        // is set, prompt the user to pick something rather than silently
+        // returning.
+        if (!val) {
+          var selectedCard = SCREENS.size.querySelector('.qf2-size-card.is-selected[data-size]');
+          if (selectedCard) {
+            var s = selectedCard.getAttribute('data-size');
+            if (s === 'visit_required' || s === '12k-plus') STATE.needsSiteWalk = true;
+            STATE.sizeExact = null;
+            proceedFromSize(s);
+            return;
+          }
+          // Neither: show inline guidance + focus input.
+          if (typeof showSizeErr === 'function') showSizeErr('Pick a size range or enter your sq ft to continue.');
+          sizeInput.focus();
+          return;
+        }
+
         var n = Number(val.replace(/,/g, ''));
         if (isNaN(n) || n < 100) {
           if (typeof showSizeErr === 'function') showSizeErr('Please enter a number 100 sq ft or larger.');

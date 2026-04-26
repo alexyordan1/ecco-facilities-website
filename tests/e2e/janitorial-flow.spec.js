@@ -104,6 +104,30 @@ test.describe('Janitorial — full flow', () => {
     h.expectNoJsErrors(page);
   });
 
+  test('Step 4 — Continue advances when card was previously picked + back-navigated (D50)', async ({ page }) => {
+    // Repro: user picks a size CARD → advances → goes back → clicks Continue.
+    // Before D50 the Continue handler returned early because the numeric
+    // input was empty, so the form looked frozen.
+    await page.click('.qf2-card[data-service="janitorial"]');
+    await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
+    await h.expectActive(page, 'qfScreen_size');
+    await page.click('.qf2-size-card[data-size="3k-6k"]');
+    await h.expectActive(page, 'qfScreen_days');
+    // Back to Size — pick the visible back arrow (desktop or mobile flowbar)
+    const backBtn = page.locator('#qfScreen_days [data-qf2-back]:visible').first();
+    await backBtn.click();
+    await h.expectActive(page, 'qfScreen_size');
+    // The card should still show as selected
+    await expect(page.locator('.qf2-size-card[data-size="3k-6k"]')).toHaveClass(/is-selected/);
+    // Click Continue — should advance back to Days
+    await page.click('#qf2SizeContinue');
+    await h.expectActive(page, 'qfScreen_days');
+    h.expectNoJsErrors(page);
+  });
+
   test('Step 5 — Continue blocked without time-window selection (D49)', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
