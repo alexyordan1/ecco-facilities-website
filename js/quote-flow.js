@@ -2691,19 +2691,31 @@
       if (STATE.userPosition) youSubs.push(STATE.userPosition);
       setStackedValue('qf2SumYou', fullName.trim(), youSubs);
 
-      // SPACE row: primary = "Office, 4,500 sq ft" — comma not `·` since type
-      // and size are properties OF the space, not separate items.
+      // SPACE row: primary = company NAME (the user's identity for this
+      // space). Sub-line 1 = "Office, 4,500 sq ft" (type + size). Sub-line 2
+      // would normally be the address but D28 splits address into the
+      // sibling .qf2-sum-row-subvalue (#qf2SumWhere) so it stays separate
+      // from this primary value.
+      // Fallback when no company is given: use space type + size as primary.
       var spaceLabel = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : (STATE.space || '');
       var sizeLabel = STATE.needsSiteWalk
         ? 'size to be measured'
         : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
-      var spaceLine = [spaceLabel, sizeLabel].filter(Boolean).join(', ');
+      var typeAndSize = [spaceLabel, sizeLabel].filter(Boolean).join(', ');
+      var spacePrimary = STATE.companyName ? STATE.companyName : typeAndSize;
+      var spaceSubs = STATE.companyName && typeAndSize ? [typeAndSize] : [];
       var spaceEl = document.getElementById('qf2SumSpace');
       if (spaceEl) {
         while (spaceEl.firstChild) spaceEl.removeChild(spaceEl.firstChild);
-        spaceEl.appendChild(document.createTextNode(spaceLine || '—'));
-        // Visit indicator (mockup section 09 demo C) — kept here for the
-        // moment when sales needs to confirm via in-person measurement.
+        spaceEl.appendChild(document.createTextNode(spacePrimary || '—'));
+        spaceSubs.forEach(function (s) {
+          spaceEl.appendChild(document.createElement('br'));
+          var span = document.createElement('span');
+          span.className = 'qf2-sec';
+          span.textContent = s;
+          spaceEl.appendChild(span);
+        });
+        // Visit indicator (mockup section 09 demo C).
         if (STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
@@ -2745,15 +2757,22 @@
       }
 
       // WHEN row: primary = days, sub = time window with hour range.
-      // Was "Mon, Wed, Fri · Evening" (mixes `,` between days and `·` between
-      // days+time — visual noise). Now days alone on the primary line, and
-      // the time + range is on its own muted sub-line.
-      var DAY_ABBR = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
+      // D31 — days now show full names (Monday, Wednesday, Friday) instead
+      // of abbreviated (Mon, Wed, Fri). The Snapshot has plenty of width
+      // and abbreviations were saving characters that didn't need saving.
+      // Special idioms: 7 days → "Every day", Mon–Fri → "Weekdays",
+      // Sat+Sun → "Weekends" (semantic phrasing, not abbreviation).
       var WEEKDAYS_ARR = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      var WEEKEND_ARR  = ['Saturday','Sunday'];
+      function _eqSet(a, b) {
+        if (!a || a.length !== b.length) return false;
+        return b.every(function (d) { return a.indexOf(d) > -1; });
+      }
       var daysSummary = '';
       if (STATE.days && STATE.days.length === 7) daysSummary = 'Every day';
-      else if (STATE.days && STATE.days.length === 5 && WEEKDAYS_ARR.every(function(d){ return STATE.days.indexOf(d) > -1; })) daysSummary = 'Mon–Fri';
-      else if (STATE.days && STATE.days.length) daysSummary = STATE.days.map(function(d){ return DAY_ABBR[d] || d; }).join(', ');
+      else if (_eqSet(STATE.days, WEEKDAYS_ARR)) daysSummary = 'Weekdays';
+      else if (_eqSet(STATE.days, WEEKEND_ARR)) daysSummary = 'Weekends';
+      else if (STATE.days && STATE.days.length) daysSummary = STATE.days.join(', ');
       var TIME_DETAIL = {
         morning:   'Mornings, 6 am–12 pm',
         afternoon: 'Afternoons, 12–5 pm',
@@ -2763,25 +2782,16 @@
       var timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
       setStackedValue('qf2SumWhen', daysSummary, timeSubs);
 
-      // WHERE / SPACE-LOCATION sub-line: primary holds the natural-reading
-      // form "Acme Corp at 123 Madison Ave…". Suite (if present) appears on
-      // its own muted sub-line for parseability.
+      // WHERE sub-line below The space row: address + optional suite.
+      // D31 — company name moved to the row's primary, so the address
+      // sub-line is purely location info (no "at" prefix needed now).
       var whereEl = document.getElementById('qf2SumWhere');
       if (whereEl) {
         while (whereEl.firstChild) whereEl.removeChild(whereEl.firstChild);
-        var headParts = [];
-        if (STATE.companyName) headParts.push(STATE.companyName);
-        if (STATE.userAddress) {
-          headParts.push(headParts.length ? 'at ' + STATE.userAddress : STATE.userAddress);
-        }
-        whereEl.appendChild(document.createTextNode(headParts.join(' ') || '—'));
-        if (STATE.userSuite) {
-          whereEl.appendChild(document.createElement('br'));
-          var suiteSpan = document.createElement('span');
-          suiteSpan.className = 'qf2-sec';
-          suiteSpan.textContent = 'Suite ' + STATE.userSuite;
-          whereEl.appendChild(suiteSpan);
-        }
+        var addrParts = [];
+        if (STATE.userAddress) addrParts.push(STATE.userAddress);
+        if (STATE.userSuite) addrParts.push('Suite ' + STATE.userSuite);
+        whereEl.textContent = addrParts.join(' · ') || '—';
       }
     }
 
