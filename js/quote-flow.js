@@ -4637,6 +4637,40 @@
   // Each per-step pill carries data-alina-help. Click swaps the visible
   // message to the help copy; click again or click any other pill restores.
   // Stores original message in data-alina-original so we can revert.
+  //
+  // D40 — push the body's top: down by the expanded pill's overflow so it
+  // doesn't overlap the H2 below. Required because .qf2-hero-wrap and
+  // .qf2-body are independently absolute-positioned; without this hook the
+  // pill grew vertically into the H2 region (most visible on mobile where
+  // the help text wraps to 3-4 lines).
+  function updateBodyTopForPill(pill) {
+    var stage = pill.closest('.qf-screen');
+    if (!stage) return;
+    var body = stage.querySelector('.qf2-body');
+    var heroWrap = stage.querySelector('.qf2-hero-wrap');
+    if (!body || !heroWrap) return;
+    // Cache the default top from CSS the first time we see this body.
+    if (!body.hasAttribute('data-qf-default-top')) {
+      body.setAttribute('data-qf-default-top', String(parseInt(window.getComputedStyle(body).top, 10) || 0));
+    }
+    var defaultTop = parseInt(body.getAttribute('data-qf-default-top'), 10) || 0;
+    var expanded = pill.getAttribute('aria-expanded') === 'true';
+    if (!expanded) {
+      body.style.top = '';
+      body.style.transition = '';
+      return;
+    }
+    var heroTop = heroWrap.getBoundingClientRect().top - (stage.getBoundingClientRect().top || 0);
+    var pillBottom = heroTop + pill.getBoundingClientRect().height;
+    var minTop = Math.ceil(pillBottom + 14); // 14px breathing buffer
+    if (minTop > defaultTop) {
+      body.style.transition = 'top .25s cubic-bezier(0.16, 1, 0.3, 1)';
+      body.style.top = minTop + 'px';
+    } else {
+      body.style.top = '';
+    }
+  }
+
   document.addEventListener('click', function (e) {
     var pill = e.target.closest('.qf2-alina-hero[role="button"]');
     if (!pill) return;
@@ -4662,6 +4696,13 @@
       }
       pill.setAttribute('aria-expanded', 'true');
     }
+    // D40 — re-measure on next frame so layout has settled.
+    requestAnimationFrame(function () { updateBodyTopForPill(pill); });
+  });
+  // D40 — also re-measure when viewport resizes (text wraps differently).
+  window.addEventListener('resize', function () {
+    var pill = document.querySelector('.qf-screen.is-active .qf2-alina-hero[aria-expanded="true"]');
+    if (pill) updateBodyTopForPill(pill);
   });
   // Keyboard activation (Enter/Space) on the pill — already handled by
   // browser default for elements with role="button" + tabindex=0, but only
