@@ -103,4 +103,24 @@ test.describe('Janitorial — full flow', () => {
     await h.expectActive(page, 'qfScreen_info');
     h.expectNoJsErrors(page);
   });
+
+  test('Step 5 — Continue blocked without time-window selection (D49)', async ({ page }) => {
+    await page.click('.qf2-card[data-service="janitorial"]');
+    await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
+    await h.expectActive(page, 'qfScreen_size');
+    await page.click('.qf2-size-card[data-size="3k-6k"]');
+    await h.expectActive(page, 'qfScreen_days');
+    // Pick a day but NO time window
+    await page.click('#qfScreen_days .qf-day-card[data-day="Monday"]');
+    // Continue should be disabled
+    await expect(page.locator('#qfDaysContinue')).toBeDisabled();
+    // Pick a time window — Continue enables
+    await page.click('#qfScreen_days .qf2-chip-time[data-time="morning"]');
+    await expect(page.locator('#qfDaysContinue')).toBeEnabled();
+    await page.click('#qfDaysContinue');
+    await h.expectActive(page, 'qfScreen_location');
+  });
 });

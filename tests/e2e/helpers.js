@@ -119,12 +119,13 @@ async function pickSizeExact(page, sqft) {
 }
 
 /**
- * Step 5 (SCHEDULE) — pick a single day chip then Continue. Evening default
- * already pre-selected.
+ * Step 5 (SCHEDULE) — pick a single day chip then Continue. Per D49,
+ * a time window is now REQUIRED, so we always click one (defaults to
+ * 'morning' if the caller doesn't specify).
  */
-async function pickSchedule(page, day = 'Monday', time = null) {
-  await page.click(`.qf-day-card[data-day="${day}"]`);
-  if (time) await page.click(`.qf2-chip-time[data-time="${time}"]`);
+async function pickSchedule(page, day = 'Monday', time = 'morning') {
+  await page.click(`#qfScreen_days .qf-day-card[data-day="${day}"]`);
+  await page.click(`#qfScreen_days .qf2-chip-time[data-time="${time}"]`);
   await page.click('#qfDaysContinue');
 }
 

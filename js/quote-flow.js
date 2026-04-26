@@ -2237,7 +2237,16 @@
         : '';
     }
 
-    if (daysContinueBtn) daysContinueBtn.disabled = STATE.days.length === 0;
+    // D49 — Continue requires BOTH ≥1 day AND ≥1 time window selected.
+    // Previously the form auto-defaulted to ['flexible'] when no time chip
+    // was picked; user feedback: "deja avanzar sin necesidad de seleccionar
+    // un gap para la limpieza". Now the time cluster is a real gate.
+    var anyTimeSelected = SCREENS.days
+      ? SCREENS.days.querySelectorAll('.qf2-chip-time.is-selected').length > 0
+      : false;
+    if (daysContinueBtn) {
+      daysContinueBtn.disabled = STATE.days.length === 0 || !anyTimeSelected;
+    }
 
     // D18 Sprint 4c — gate the time cluster until at least one day is picked.
     // Reduces initial visible-decision count on Step 5 from 14 to 10.
@@ -2321,7 +2330,21 @@
         // without picking any time slot, auto-default to "flexible" so
         // the sales team still gets a usable answer instead of empty.
         var selectedTimes = Array.from(SCREENS.days.querySelectorAll('.qf2-chip-time.is-selected')).map(function (c) { return c.getAttribute('data-time'); });
-        if (selectedTimes.length === 0) selectedTimes = ['flexible'];
+        // D49 — block Continue when no time window is selected. Replaces
+        // the prior auto-default to ['flexible'] which let users advance
+        // without confirming when the cleaning crew was welcome.
+        if (selectedTimes.length === 0) {
+          var cluster = document.getElementById('qf2TimeCluster');
+          if (cluster) {
+            try { cluster.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+            cluster.classList.add('qf2-time-cluster-shake');
+            setTimeout(function () { cluster.classList.remove('qf2-time-cluster-shake'); }, 600);
+          }
+          if (typeof qfToast === 'function') {
+            qfToast({ type: 'warn', title: 'One more thing', message: 'Pick a time window so I know when we can come.', duration: 3500 });
+          }
+          return;
+        }
         STATE.timeOfDay = selectedTimes;
         STATE.scheduleAtypical = computeScheduleAtypical(STATE.space, STATE.timeOfDay);
 
@@ -2372,13 +2395,15 @@
           }
           var currentlyOn = chip.classList.toggle('is-selected');
           chip.setAttribute('aria-pressed', String(currentlyOn));
-          // Don't allow zero selections — re-add Evening as fallback.
-          var anyOn = allChips.some(c => c.classList.contains('is-selected'));
-          if (!anyOn) {
-            var ev = allChips.find(c => c.getAttribute('data-time') === 'evening');
-            if (ev) { ev.classList.add('is-selected'); ev.setAttribute('aria-pressed', 'true'); }
-          }
+          // D49 — removed Evening auto-fallback. If the user toggles all
+          // chips off, the time cluster stays empty and Continue stays
+          // disabled until they pick something. Forcing Evening back on
+          // contradicts D41's "no preselection" intent and let users
+          // advance without actually confirming when the crew is welcome.
         }
+        // After every chip toggle, refresh the disabled state of Continue
+        // (which gates on time-cluster having ≥1 selection).
+        if (typeof syncDaysUI === 'function') syncDaysUI();
       });
     });
 
