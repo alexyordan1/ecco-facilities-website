@@ -266,6 +266,48 @@
     scheduleAtypical: false
   };
 
+  /* =======================================================================
+     D53 — Lead funnel analytics. Pushes step-level events into the global
+     dataLayer so GTM can forward them to GA4 (and Clarity sees them as
+     custom events). Invisible to the user; visible to ops in the funnel
+     report. Schema:
+
+       quote_step_view      { step_name, step_index, service, space,
+                              has_resume_draft }
+       quote_step_complete  { from_step, to_step, duration_ms, service,
+                              space }
+       quote_abandon        { current_step, step_index, total_duration_ms,
+                              has_email }
+       quote_field_error    { field, error_type, step }
+       quote_submit_attempt { service, space, days_count, has_phone }
+       quote_submit_success { service, space, ref, time_to_submit_ms }
+       quote_submit_failure { service, status, reason }
+
+     dataLayer is created by the GTM bootstrap in quote.html before this
+     IIFE runs. We push directly; if dataLayer is missing (e.g. ad-blocker),
+     the array is created on first push so events still queue and forward
+     once GTM eventually loads.
+     ======================================================================= */
+  var FLOW_START_TS = Date.now();
+  var STEP_ENTER_TS = Date.now();
+  function qfTrack(event, props) {
+    try {
+      window.dataLayer = window.dataLayer || [];
+      var payload = Object.assign({ event: event }, props || {});
+      window.dataLayer.push(payload);
+      // Mirror to Clarity as a custom set so session replays can be filtered
+      // by funnel position. Clarity's API is `clarity('set', key, value)`.
+      if (typeof window.clarity === 'function' && props && props.step_name) {
+        try { window.clarity('set', 'quote_step', String(props.step_name)); } catch (_) {}
+      }
+    } catch (_) { /* never let telemetry crash the form */ }
+  }
+  function qfStepIndex(name) {
+    var flow = (typeof getFlow === 'function') ? getFlow() : [];
+    var idx = flow.indexOf(name);
+    return idx >= 0 ? idx : -1;
+  }
+
   /** V2 2026-04-25 — exit-intent modal (mockup G demo B). Desktop only.
    * Fires when the cursor exits via the top edge of the viewport before the
    * user has supplied an email. One-shot per session. Renders a centered
@@ -698,6 +740,19 @@
                      STATE.userEmail || STATE.userName || STATE.space ||
                      (Array.isArray(STATE.days) && STATE.days.length);
       if (!hasInput) return;
+      // D53 — telemetry: log the abandon event so we know which step lost
+      // the user. This fires synchronously before the prompt; dataLayer is
+      // queued for GTM to flush on the next page (Cloudflare Pages serves
+      // the same origin, so the queue persists across nav).
+      qfTrack('quote_abandon', {
+        current_step: step,
+        step_index: qfStepIndex(step),
+        total_duration_ms: Date.now() - FLOW_START_TS,
+        has_email: !!STATE.userEmail,
+        has_company: !!STATE.companyName,
+        service: STATE.service || null,
+        space: STATE.space || null
+      });
       e.preventDefault();
       // Legacy string (Chrome <51, Edge) — modern browsers show their own copy.
       e.returnValue = 'Your progress is saved. You can pick up where you left off anytime.';
@@ -1114,6 +1169,19 @@
   function goToScreen(name, direction) {
     var to = SCREENS[name];
     if (!to) return;
+    // D53 — telemetry: step_complete fires before view of next step, so the
+    // duration is measured against the previous step's enter timestamp.
+    var prevStep = STATE.currentStepName;
+    if (prevStep && prevStep !== name && direction !== 'back') {
+      qfTrack('quote_step_complete', {
+        from_step: prevStep,
+        to_step: name,
+        duration_ms: Date.now() - STEP_ENTER_TS,
+        service: STATE.service || null,
+        space:   STATE.space || null
+      });
+    }
+    STEP_ENTER_TS = Date.now();
     // AYS Ola 4 Commit L HI-1/HI-2 — release all Mutation/Intersection observers
     // when we reach the success screen. The form is effectively done; no need
     // to keep watching invalid states, floater button props, or section activation.
@@ -1153,6 +1221,16 @@
     to.removeAttribute('inert');
     to.removeAttribute('aria-hidden');
     STATE.currentStepName = name;
+
+    // D53 — telemetry: fire step_view for every screen activation.
+    qfTrack('quote_step_view', {
+      step_name: name,
+      step_index: qfStepIndex(name),
+      service: STATE.service || null,
+      space:   STATE.space || null,
+      has_resume_draft: !!document.querySelector('.qf-resume-banner'),
+      direction: direction === 'back' ? 'back' : 'fwd'
+    });
 
     // Sprint 2 — celebratory haptic pulse on success.
     if (name === 'success') qfHaptic(QF_HAPTIC.success);
@@ -3933,6 +4011,15 @@
           }
         } catch (_) { /* localStorage may be disabled — ignore */ }
 
+        // D53 — telemetry: submit attempt
+        qfTrack('quote_submit_attempt', {
+          service: STATE.service || null,
+          space: STATE.space || null,
+          days_count: (STATE.days || []).length,
+          has_phone: !!STATE.userPhone,
+          has_special_instructions: !!STATE.specialInstructions
+        });
+
         // Loading state — Fix #47 aria-busy for screen readers
         var originalHTML = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -4026,6 +4113,12 @@
               msg = serverMsg || 'Please review your answers and try again, or email info@eccofacilities.com.';
             }
             qfToast({ type:'error', title: title, message: msg, duration: 7000 });
+            // D53 — telemetry: backend rejected submission with a status.
+            qfTrack('quote_submit_failure', {
+              service: STATE.service || null,
+              status: result.status || 0,
+              reason: serverMsg || ('http_' + (result.status || 0))
+            });
             submitBtn.disabled = false;
             submitBtn.removeAttribute('aria-busy');
             submitBtn.classList.remove('is-loading');
@@ -4128,6 +4221,15 @@
             tl[2].textContent = 'Week of ' + fmt(7);
           }
           setRailValue('contact', '\u2713');
+          // D53 — telemetry: a successful submit fires here, with the ref so
+          // the funnel report can join to the CRM lead.
+          qfTrack('quote_submit_success', {
+            service: STATE.service || null,
+            space: STATE.space || null,
+            ref: refNumber || null,
+            time_to_submit_ms: Date.now() - FLOW_START_TS,
+            needs_site_walk: !!STATE.needsSiteWalk
+          });
           submitBtn.disabled = false;
           submitBtn.removeAttribute('aria-busy');
           submitBtn.classList.remove('is-loading');
@@ -4161,6 +4263,12 @@
             ? 'Captcha didn\u2019t load. Please refresh and try again.'
             : 'Check your connection and try again, or email info@eccofacilities.com.';
           qfToast({ type:'error', title:'Submission failed', message: msg, duration: 7000 });
+          // D53 — telemetry: network/captcha errors before the server saw us.
+          qfTrack('quote_submit_failure', {
+            service: STATE.service || null,
+            status: 0,
+            reason: (err && /captcha|turnstile/i.test(err.message || '')) ? 'captcha' : 'network'
+          });
           submitBtn.disabled = false;
           submitBtn.removeAttribute('aria-busy');
           submitBtn.classList.remove('is-loading');

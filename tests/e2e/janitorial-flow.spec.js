@@ -128,6 +128,22 @@ test.describe('Janitorial — full flow', () => {
     h.expectNoJsErrors(page);
   });
 
+  test('D53 — funnel telemetry pushes step events to dataLayer', async ({ page }) => {
+    await page.click('.qf2-card[data-service="janitorial"]');
+    await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_info');
+    // Inspect dataLayer for the events we expect.
+    const events = await page.evaluate(() => (window.dataLayer || []).map(e => e.event));
+    expect(events).toContain('quote_step_view');
+    expect(events).toContain('quote_step_complete');
+    // Verify a step_view payload has the expected shape
+    const stepView = await page.evaluate(() => (window.dataLayer || []).find(e => e.event === 'quote_step_view' && e.step_name === 'space'));
+    expect(stepView).toBeTruthy();
+    expect(stepView.step_index).toBeGreaterThanOrEqual(0);
+    h.expectNoJsErrors(page);
+  });
+
   test('Step 5 — Continue blocked without time-window selection (D49)', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
