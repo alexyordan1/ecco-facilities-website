@@ -2642,6 +2642,29 @@
     var contactObserver = registerObserver(new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
         if (m.target === SCREENS.contact && SCREENS.contact.classList.contains('is-active')) {
+          // D43 — if STATE is empty when reaching Review (e.g. via stale
+          // localStorage draft pointing to 'contact' with cleared fields,
+          // or via direct URL navigation), redirect to Welcome rather than
+          // showing a snapshot full of em-dash placeholders. Triggers when
+          // the two most fundamental fields are both empty: service +
+          // userName. Either alone could be a partial restore; both
+          // missing means there's no quote to review.
+          if (!STATE.service && !STATE.userName) {
+            try {
+              if (typeof qfToast === 'function') {
+                qfToast({
+                  type: 'warn',
+                  title: 'No quote to review yet',
+                  message: 'Looks like your draft cleared. Let’s start fresh.',
+                  duration: 3500
+                });
+              }
+            } catch (_) {}
+            if (typeof goToScreen === 'function') {
+              try { goToScreen('welcome', 'back'); } catch (_) {}
+            }
+            return;
+          }
           populateSummary();
           if (typeof qf2PopulateSummary === 'function') qf2PopulateSummary();
         }
