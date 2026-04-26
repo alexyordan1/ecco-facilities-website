@@ -4404,6 +4404,31 @@
       goToScreen(STATE.currentStepName);
     });
 
+    // H2 D35 — Turnstile lazy-load. Only fetch the Cloudflare challenge
+    // script when the user actually reaches the Contact (Review) step.
+    // Saves ~50KB + a third-party connection on every form session that
+    // bounces earlier. Idempotent: subsequent activations don't re-inject.
+    (function turnstileLazy() {
+      var injected = false;
+      function inject() {
+        if (injected) return;
+        injected = true;
+        var s = document.createElement('script');
+        s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        s.async = true;
+        s.defer = true;
+        document.head.appendChild(s);
+      }
+      var stage = document.getElementById('qfStage');
+      if (!stage) return;
+      // If contact is already active (e.g. on resume) inject right away.
+      if (document.querySelector('#qfScreen_contact.is-active')) inject();
+      var obs = new MutationObserver(function () {
+        if (document.querySelector('#qfScreen_contact.is-active')) inject();
+      });
+      obs.observe(stage, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    })();
+
     // H1 D34 — input sanitization on paste. Browser pastes can carry weird
     // unicode, control chars, or 5MB blobs from a clipboard manager. Cap
     // pasted text to each input's maxlength + strip C0 control characters

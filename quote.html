@@ -1253,10 +1253,14 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 <script src="js/main.js?v=4.6"></script>
-<!-- Cloudflare Turnstile — invisible, loaded async -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- H2 D35 — Turnstile lazy-load. Was eagerly loaded at every visit which
+     meant users who bounced before Step 7 still paid ~50KB + connections to
+     challenges.cloudflare.com. Now we inject the script only when the
+     contact screen becomes active (via MutationObserver in quote-flow.js).
+     Token state lives at the window level so the callback signature
+     (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=33.0"></script>
+<script defer src="js/quote-flow.js?v=33.1"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
