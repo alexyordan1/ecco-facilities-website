@@ -1948,20 +1948,12 @@
     if (qf2SpaceOther) {
       qf2SpaceOther.addEventListener('input', function () {
         var v = qf2SpaceOther.value.trim();
-        var prevHidden = qf2SpaceContinue ? qf2SpaceContinue.hidden : true;
         STATE.spaceOther = v.slice(0, 120);
         if (qf2SpaceOtherErr) qf2SpaceOtherErr.hidden = true;
         if (qf2SpaceOtherHelp) qf2SpaceOtherHelp.hidden = !(v.length >= 3);
         // D9 — show Continue once user has typed enough; clear card selection
         // since the user is overriding the 6-card grid with a custom space.
         if (qf2SpaceContinue) qf2SpaceContinue.hidden = !(v.length >= 3);
-        // D11 — scroll Continue into view on the hidden→visible transition
-        // (mobile keyboard pushes layout, button can land below fold).
-        if (qf2SpaceContinue && prevHidden && !qf2SpaceContinue.hidden) {
-          setTimeout(function () {
-            qf2SpaceContinue.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 60);
-        }
         if (v.length >= 3) {
           qf2SpaceCards.forEach(function (c) {
             c.classList.remove('is-selected');
