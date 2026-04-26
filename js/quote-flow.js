@@ -2649,56 +2649,61 @@
     // / Where) using current STATE. XSS-safe via textContent. Called whenever
     // the contact screen activates (above) and after edit-panel saves.
     function qf2PopulateSummary() {
-      function setText(id, text) {
+      // D30 — refined hierarchy: every row has ONE primary fact (medium ink)
+      // and 0+ sub-facts (muted). No more `·` mixing identity with metadata
+      // or days with time. Helper builds: [primary, sub1, sub2, …] into a
+      // value element with a primary line + .qf2-sec spans on br'd lines.
+      function setStackedValue(id, primary, subs) {
         var el = document.getElementById(id);
-        if (el) { el.textContent = text || '—'; }
+        if (!el) return;
+        while (el.firstChild) el.removeChild(el.firstChild);
+        el.appendChild(document.createTextNode(primary || '—'));
+        (subs || []).filter(Boolean).forEach(function (s) {
+          el.appendChild(document.createElement('br'));
+          var span = document.createElement('span');
+          span.className = 'qf2-sec';
+          span.textContent = s;
+          el.appendChild(span);
+        });
       }
-      // SERVICE: "Janitorial · recurring" (or similar)
+
+      // SERVICE row: primary = service name, sub = descriptive caption.
+      // Was "Janitorial · recurring" (redundant for Janitorial, mixes label
+      // and qualifier with `·`). Now: "Janitorial" / "Recurring after-hours…"
       var SERVICE_NAMES = { janitorial: 'Janitorial', dayporter: 'Day Porter', both: 'Combined', unsure: 'Help me decide' };
-      var svcName = SERVICE_NAMES[STATE.service] || (STATE.service || '');
-      var svcTail = STATE.service === 'janitorial' ? ' · recurring'
-                  : STATE.service === 'dayporter'  ? ' · on-site'
-                  : STATE.service === 'both'       ? ' · day porter + janitorial'
-                  : '';
-      setText('qf2SumService', svcName + svcTail);
+      var SERVICE_CAPTIONS = {
+        janitorial: 'Recurring after-hours cleaning',
+        dayporter:  'On-site during business hours',
+        both:       'Day porter plus janitorial',
+        unsure:     "We'll help you choose"
+      };
+      setStackedValue('qf2SumService',
+        SERVICE_NAMES[STATE.service] || (STATE.service || ''),
+        [SERVICE_CAPTIONS[STATE.service]]);
 
-      // YOU: "First Last · Role / email"
+      // YOU row: primary = full name; subs = email, then role (if filled).
+      // Was "Marina García · Facilities Manager" with email on a separate
+      // line. The `·` mixed identity (name) with metadata (role). Now each
+      // fact lives on its own line and the role is optional, not a peer.
       var fullName = (STATE.userName || '') + (STATE.userLastName ? ' ' + STATE.userLastName : '');
-      var youParts = [];
-      if (fullName.trim()) youParts.push(fullName.trim());
-      if (STATE.userPosition) youParts.push(STATE.userPosition);
-      var youLine = youParts.join(' · ');
-      var youEl = document.getElementById('qf2SumYou');
-      if (youEl) {
-        while (youEl.firstChild) youEl.removeChild(youEl.firstChild);
-        youEl.appendChild(document.createTextNode(youLine || '—'));
-        if (STATE.userEmail) {
-          youEl.appendChild(document.createElement('br'));
-          var em = document.createElement('span');
-          em.className = 'qf2-sec';
-          em.textContent = STATE.userEmail;
-          youEl.appendChild(em);
-        }
-      }
+      var youSubs = [];
+      if (STATE.userEmail) youSubs.push(STATE.userEmail);
+      if (STATE.userPosition) youSubs.push(STATE.userPosition);
+      setStackedValue('qf2SumYou', fullName.trim(), youSubs);
 
-      // SPACE: "Office · 6 – 9K sq ft" (or "Medical · size to be measured" when needsSiteWalk)
+      // SPACE row: primary = "Office, 4,500 sq ft" — comma not `·` since type
+      // and size are properties OF the space, not separate items.
       var spaceLabel = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : (STATE.space || '');
       var sizeLabel = STATE.needsSiteWalk
         ? 'size to be measured'
         : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
-      var spaceLine = [spaceLabel, sizeLabel].filter(Boolean).join(' · ');
+      var spaceLine = [spaceLabel, sizeLabel].filter(Boolean).join(', ');
       var spaceEl = document.getElementById('qf2SumSpace');
       if (spaceEl) {
         while (spaceEl.firstChild) spaceEl.removeChild(spaceEl.firstChild);
         spaceEl.appendChild(document.createTextNode(spaceLine || '—'));
-        if (STATE.spaceOther && STATE.space === 'Other') {
-          spaceEl.appendChild(document.createElement('br'));
-          var sec = document.createElement('span');
-          sec.className = 'qf2-sec';
-          sec.textContent = STATE.spaceOther;
-          spaceEl.appendChild(sec);
-        }
-        // Visit indicator (mockup section 09 demo C)
+        // Visit indicator (mockup section 09 demo C) — kept here for the
+        // moment when sales needs to confirm via in-person measurement.
         if (STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
@@ -2739,33 +2744,44 @@
         ctaBtn.insertAdjacentElement('afterend', subtext);
       }
 
-      // WHEN: "Mon-Fri · Evening" (days summary + time-of-day)
+      // WHEN row: primary = days, sub = time window with hour range.
+      // Was "Mon, Wed, Fri · Evening" (mixes `,` between days and `·` between
+      // days+time — visual noise). Now days alone on the primary line, and
+      // the time + range is on its own muted sub-line.
       var DAY_ABBR = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
       var WEEKDAYS_ARR = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
       var daysSummary = '';
       if (STATE.days && STATE.days.length === 7) daysSummary = 'Every day';
       else if (STATE.days && STATE.days.length === 5 && WEEKDAYS_ARR.every(function(d){ return STATE.days.indexOf(d) > -1; })) daysSummary = 'Mon–Fri';
       else if (STATE.days && STATE.days.length) daysSummary = STATE.days.map(function(d){ return DAY_ABBR[d] || d; }).join(', ');
-      var TIME_LABEL = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', flexible: 'Flexible' };
-      var timeSummary = (STATE.timeOfDay || []).map(function(t){ return TIME_LABEL[t] || t; }).join(', ');
-      var whenLine = [daysSummary, timeSummary].filter(Boolean).join(' · ');
-      setText('qf2SumWhen', whenLine);
+      var TIME_DETAIL = {
+        morning:   'Mornings, 6 am–12 pm',
+        afternoon: 'Afternoons, 12–5 pm',
+        evening:   'Evenings, 5–10 pm',
+        flexible:  'Flexible — we’ll coordinate'
+      };
+      var timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
+      setStackedValue('qf2SumWhen', daysSummary, timeSubs);
 
-      // WHERE: "Westway Holdings\n150 Broadway, NY · Suite 4"
+      // WHERE / SPACE-LOCATION sub-line: primary holds the natural-reading
+      // form "Acme Corp at 123 Madison Ave…". Suite (if present) appears on
+      // its own muted sub-line for parseability.
       var whereEl = document.getElementById('qf2SumWhere');
       if (whereEl) {
         while (whereEl.firstChild) whereEl.removeChild(whereEl.firstChild);
-        if (STATE.companyName) {
-          whereEl.appendChild(document.createTextNode(STATE.companyName));
-          whereEl.appendChild(document.createElement('br'));
+        var headParts = [];
+        if (STATE.companyName) headParts.push(STATE.companyName);
+        if (STATE.userAddress) {
+          headParts.push(headParts.length ? 'at ' + STATE.userAddress : STATE.userAddress);
         }
-        var addrParts = [];
-        if (STATE.userAddress) addrParts.push(STATE.userAddress);
-        if (STATE.userSuite) addrParts.push('Suite ' + STATE.userSuite);
-        var sec = document.createElement('span');
-        sec.className = 'qf2-sec';
-        sec.textContent = addrParts.join(' · ') || '—';
-        whereEl.appendChild(sec);
+        whereEl.appendChild(document.createTextNode(headParts.join(' ') || '—'));
+        if (STATE.userSuite) {
+          whereEl.appendChild(document.createElement('br'));
+          var suiteSpan = document.createElement('span');
+          suiteSpan.className = 'qf2-sec';
+          suiteSpan.textContent = 'Suite ' + STATE.userSuite;
+          whereEl.appendChild(suiteSpan);
+        }
       }
     }
 
