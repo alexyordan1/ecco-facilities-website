@@ -2799,6 +2799,23 @@
     // V2 — Edit inline panel (mockup G demo D). Click Edit → expand a panel
     // below the row with fields scoped to that section. Cancel closes.
     // Save updates STATE + re-populates the summary in place.
+    //
+    // D29 — make the WHOLE row tappable, not just the small Edit pill. The
+    // pill remains as a visual cue + a11y tab stop, but a click anywhere on
+    // the row body delegates to its Edit button. We attach the listener to
+    // the row itself and gate by checking the click target isn't already an
+    // input/button/etc inside an open edit panel.
+    SCREENS.contact.querySelectorAll('.qf2-sum-row[data-section]').forEach(function (row) {
+      row.addEventListener('click', function (e) {
+        // Skip if the click landed on the Edit button itself, an input, or
+        // any element inside an already-open edit panel. We only want clicks
+        // on the row's "passive" area (label, value, icon, empty space).
+        if (e.target.closest('.qf2-edit-btn, .qf2-sum-edit-panel, input, textarea, select, button, a')) return;
+        var btn = row.querySelector('.qf2-edit-btn[data-edit]');
+        if (btn) btn.click();
+      });
+    });
+
     SCREENS.contact.querySelectorAll('.qf2-edit-btn[data-edit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var section = btn.getAttribute('data-edit');
