@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=41.1">
+<link rel="stylesheet" href="css/quote-flow.css?v=41.2">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -604,13 +604,12 @@
             <span class="qf2-prompt-sub-mobile">Company + where we go.</span>
           </p>
         </div>
-        <div class="qf2-location-hint">
-          <span class="qf2-hand-label">
-            <span class="qf2-prompt-sub-desktop">For property managers &sim;</span>
-            <span class="qf2-prompt-sub-mobile">Property managers &sim;</span>
-          </span>
-          <span class="qf2-prompt-sub-desktop">Use the service location, not your own office.</span>
-          <span class="qf2-prompt-sub-mobile">Use the service location.</span>
+        <div class="qf2-location-hint" role="note" aria-label="Hint for property managers">
+          <span class="qf2-location-hint-label">For property managers</span>
+          <p class="qf2-location-hint-body">
+            <span class="qf2-prompt-sub-desktop">Use the service location, not your own office.</span>
+            <span class="qf2-prompt-sub-mobile">Use the service location.</span>
+          </p>
         </div>
         <div class="qf2-fields" role="group" aria-label="Company and address">
           <div class="qf2-field">
@@ -921,7 +920,7 @@
         <div class="qf2-prompt">
           <h2 class="qf2-prompt-title">Let&rsquo;s plan your <em>coverage</em>.</h2>
         </div>
-        <p class="qf-dp-prompt-promise">~ Add the porters you need and configure their hours</p>
+        <p class="qf-dp-prompt-promise">Add the porters you need and configure their hours.</p>
 
         <div class="qf-dp-porters" id="qfDpPorters">
           <!-- Per-porter accordion cards rendered by quote-flow.js -->
