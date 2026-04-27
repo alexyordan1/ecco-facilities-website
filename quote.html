@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=39.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=39.1">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -921,15 +921,7 @@
         <div class="qf2-prompt">
           <h2 class="qf2-prompt-title">Let&rsquo;s plan your <em>coverage</em>.</h2>
         </div>
-        <p class="qf-dp-prompt-promise">~ Tell me your staffing, then their schedule</p>
-
-        <div class="qf2-section-label qf-dp-count-label">
-          <span class="qf2-prompt-sub-desktop">How many porters?</span>
-          <span class="qf2-prompt-sub-mobile">How many porters?</span>
-        </div>
-        <div class="qf2-chip-row qf-dp-count-row" role="radiogroup" aria-label="Number of porters" id="qfDpCountRow">
-          <!-- Count chips (1 / 2 / 3+) rendered by quote-flow.js -->
-        </div>
+        <p class="qf-dp-prompt-promise">~ Add the porters you need and configure their hours</p>
 
         <div class="qf-dp-porters" id="qfDpPorters">
           <!-- Per-porter accordion cards rendered by quote-flow.js -->
@@ -1247,7 +1239,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=35.0"></script>
+<script defer src="js/quote-flow.js?v=35.1"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

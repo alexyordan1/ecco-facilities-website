@@ -145,7 +145,7 @@ test.describe('Day Porter — full flow', () => {
     h.expectNoJsErrors(page);
   });
 
-  test('6 — Telemetry: dataLayer contains quote_porter_count_picked when chip clicked', async ({ page }) => {
+  test('6 — Telemetry: dataLayer contains quote_porter_added on + button click', async ({ page }) => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
@@ -153,18 +153,17 @@ test.describe('Day Porter — full flow', () => {
     await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
-    // Click the "2" count chip.
-    await page.click('.qf-dp-count-chip[data-count="2"]');
+    // Click the "+ Add another porter" button.
+    await page.click('#qfDpAddPorter');
     await page.waitForTimeout(200);
 
     const events = await page.evaluate(() =>
       (window.dataLayer || [])
-        .filter((e) => e && e.event === 'quote_porter_count_picked')
-        .map((e) => ({ count: e.count, source: e.source }))
+        .filter((e) => e && e.event === 'quote_porter_added')
+        .map((e) => ({ count: e.count }))
     );
     expect(events.length).toBeGreaterThan(0);
     expect(events[0].count).toBe(2);
-    expect(events[0].source).toBe('chip');
 
     h.expectNoJsErrors(page);
   });

@@ -2566,9 +2566,10 @@
          { id, days[], hoursMode 'same'|'custom', sameStart, sameEnd,
            customHours: { Monday: {start,end}, ... } }
 
-     Defaults seeded from DP_DEFAULTS_BY_SPACE on first entry to the screen
-     (so an Office defaults to Mon-Fri 9-5, a Restaurant to every day
-     11-23, etc). After that the state persists across draft saves.
+     Defaults seeded from DP_DEFAULT (uniform Mon-Fri 8 AM - 4 PM, 8h/day,
+     40h/week) on first entry to the screen. The 'both' flow seeds porter[0]
+     from the cleaning days the user just picked. After that the state
+     persists across draft saves.
      ======================================================================= */
   if (SCREENS.schedule) {
     var DP_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -2576,25 +2577,22 @@
     var DP_WEEKDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
     var DP_MAX_PORTERS = 6;
 
-    // Smart per-space defaults. Mirrors ALINA_HOURS_BY_SPACE.
-    var DP_DEFAULTS_BY_SPACE = {
-      Office:     { days: DP_WEEKDAYS.slice(),       start: '09:00', end: '17:00' },
-      Medical:    { days: DP_WEEKDAYS.slice(),       start: '08:00', end: '18:00' },
-      Retail:     { days: DP_DAYS.slice(),           start: '10:00', end: '21:00' },
-      Restaurant: { days: DP_DAYS.slice(),           start: '11:00', end: '23:00' },
-      Fitness:    { days: DP_DAYS.slice(),           start: '05:00', end: '22:00' },
-      School:     { days: DP_WEEKDAYS.slice(),       start: '07:00', end: '16:00' },
-      Other:      { days: DP_WEEKDAYS.slice(),       start: '09:00', end: '17:00' }
-    };
+    // 2026-04-26 — single uniform default after the count-chip removal: every
+    // porter starts with Mon–Fri 8 AM – 4 PM (8 hours/day, 40 hours/week).
+    // Communicated via the collapsed-card summary on the screen, not via
+    // copy in the prompt — the user sees the actual defaults right away
+    // and tweaks per porter from there.
+    var DP_DEFAULT = { days: DP_WEEKDAYS.slice(), start: '08:00', end: '16:00' };
 
-    var qfDpCountRow         = document.getElementById('qfDpCountRow');
     var qfDpPortersHost      = document.getElementById('qfDpPorters');
     var qfDpAddPorterBtn     = document.getElementById('qfDpAddPorter');
     var qfDpScheduleContinue = document.getElementById('qfDpScheduleContinue');
     var qfDpStatus           = document.getElementById('qfDpStatus');
 
     // Local UI state — which porter card is open in the accordion.
-    var dpUI = { openIdx: 0 };
+    // Default -1 means all collapsed: the user sees the seeded porter as a
+    // summary line and the "+ Add another porter" button right below it.
+    var dpUI = { openIdx: -1 };
 
     function dpFmtTime(hhmm) {
       if (!hhmm) return '—';
@@ -2647,14 +2645,12 @@
       return total;
     }
     function dpMakePorter(id) {
-      var sp = (STATE.space && DP_DEFAULTS_BY_SPACE[STATE.space]) ? STATE.space : 'Other';
-      var d = DP_DEFAULTS_BY_SPACE[sp];
       return {
         id: id,
-        days: d.days.slice(),
+        days: DP_DEFAULT.days.slice(),
         hoursMode: 'same',
-        sameStart: d.start,
-        sameEnd: d.end,
+        sameStart: DP_DEFAULT.start,
+        sameEnd: DP_DEFAULT.end,
         customHours: {}
       };
     }
@@ -2677,33 +2673,9 @@
     }
 
     // ─── Renderers ───
-    function dpRenderCountChips() {
-      qfDpCountRow.innerHTML = '';
-      var actual = (STATE.dpPorters || []).length;
-      [
-        { n: 1, sub: 'porter',  hint: 'most common' },
-        { n: 2, sub: 'porters', hint: 'multi-floor' },
-        { n: 3, sub: 'porters', hint: 'larger spaces — use + to add more' }
-      ].forEach(function (cfg) {
-        var n = cfg.n;
-        var isSel = (n < 3 && STATE.dpPorterCount === n) || (n === 3 && actual >= 3);
-        var displayN = (n === 3 && actual > 3) ? String(actual) : (n === 3 ? '3+' : String(n));
-        var displaySub = (n === 3 && actual > 3) ? 'porters' : cfg.sub;
-        var chip = dpEl('button', {
-          type: 'button',
-          class: 'qf2-chip qf-dp-count-chip' + (isSel ? ' is-selected' : ''),
-          'aria-pressed': isSel ? 'true' : 'false',
-          'data-count': n,
-          title: cfg.hint,
-          onclick: function () { dpSetCount(n); }
-        }, [
-          dpEl('span', { class: 'qf-dp-count-num' }, displayN),
-          dpEl('span', { class: 'qf-dp-count-sub' }, displaySub)
-        ]);
-        qfDpCountRow.appendChild(chip);
-      });
-    }
-
+    // 2026-04-26 — count-chip row removed in favor of a "+ Add another porter"
+    // affordance only. Less decision fatigue at first paint; the user just
+    // confirms or expands the seeded porter and adds more if needed.
     function dpRenderDayChips(porterIdx) {
       var p = STATE.dpPorters[porterIdx];
       return dpEl('div', { class: 'qf-dp-day-row', role: 'group', 'aria-label': 'Porter ' + p.id + ' days' },
@@ -2930,7 +2902,6 @@
     }
 
     function dpRender() {
-      dpRenderCountChips();
       dpRenderPorters();
       dpRenderAddBtn();
       dpRenderCTA();
@@ -2938,20 +2909,6 @@
     }
 
     // ─── Actions ───
-    function dpSetCount(n) {
-      if (n === STATE.dpPorterCount && STATE.dpPorters.length === n) return;
-      var prev = STATE.dpPorterCount;
-      STATE.dpPorterCount = n;
-      while (STATE.dpPorters.length < n) STATE.dpPorters.push(dpMakePorter(STATE.dpPorters.length + 1));
-      while (STATE.dpPorters.length > n) STATE.dpPorters.pop();
-      // Don't auto-open the newly added porter — keep user's editing focus
-      // on whichever porter they were on. Just clamp to valid range.
-      if (dpUI.openIdx >= STATE.dpPorters.length) dpUI.openIdx = STATE.dpPorters.length - 1;
-      if (dpUI.openIdx < 0) dpUI.openIdx = 0;
-      dpRender();
-      qfTrack('quote_porter_count_picked', { count: n, previous: prev || 0, source: 'chip', service: STATE.service, space: STATE.space });
-    }
-
     function dpAddPorter() {
       if (STATE.dpPorters.length >= DP_MAX_PORTERS) return;
       STATE.dpPorters.push(dpMakePorter(STATE.dpPorters.length + 1));
@@ -3036,14 +2993,16 @@
           if (!STATE.dpPorters || !STATE.dpPorters.length) {
             var seed = dpMakePorter(1);
             // For 'both' flow, prefer the cleaning days the user just picked
-            // over space defaults — the user's intent to "do both on the same
-            // schedule" is the likeliest interpretation.
+            // over the uniform default — the user's intent to "do both on the
+            // same schedule" is the likeliest interpretation.
             if (STATE.service === 'both' && Array.isArray(STATE.days) && STATE.days.length) {
               seed.days = STATE.days.slice();
             }
             STATE.dpPorters = [seed];
             STATE.dpPorterCount = 1;
-            dpUI.openIdx = 0;
+            // Collapsed by default — the summary line itself communicates the
+            // 8 AM – 4 PM Mon–Fri suggestion. User taps to edit, or "+" to add.
+            dpUI.openIdx = -1;
           }
           dpRender();
         }
