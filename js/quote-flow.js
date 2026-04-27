@@ -60,16 +60,17 @@
      ----------------------------------------------------------------------- */
   // V2 2026-04-25 — janitorial flow restructured per mockup G order:
   // welcome → space → info → size → days → location → contact → success.
-  // 'checkpoint' step removed (absorbed into review). Other flows keep
-  // their pre-V2 shape because this round only redesigns Janitorial.
+  // 'checkpoint' step removed (absorbed into review).
+  //
+  // D55 — dayporter rebuilt to match the Janitorial 7-screen rhythm. Drops
+  // size, condenses dpDays + porter + hours into a single rich `schedule`
+  // screen that owns count + days + hours per porter.
+  // 'both' (janitorial + dayporter combined) reuses Janitorial's days
+  // for cleaning + the new schedule for porter staffing.
   var FLOWS = {
     janitorial: ['welcome', 'space', 'info', 'size', 'days', 'location', 'contact', 'success'],
-    dayporter:  ['welcome', 'info', 'space', 'location', 'days', 'porter', 'hours', 'contact', 'success'],
-    // 'both' asks two day questions in sequence so clients with different
-    // cleaning vs porter schedules (e.g. restaurant: porter 7 days, cleaning
-    // Mon-Fri only) can express it. First visit = cleaning days, second visit
-    // = porter days (pre-filled with cleaning days via a "Same days" preset).
-    both:       ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'porter', 'hours', 'contact', 'success'],
+    dayporter:  ['welcome', 'space', 'info', 'schedule', 'location', 'contact', 'success'],
+    both:       ['welcome', 'space', 'info', 'size', 'days', 'schedule', 'location', 'contact', 'success'],
     unsure:     ['welcome', 'info', 'space', 'location', 'size', 'days', 'contact', 'success']
   };
 
@@ -88,26 +89,24 @@
       { key: 'days',     label: 'Schedule' },
       { key: 'contact',  label: 'Review' }
     ],
+    // D55 — dayporter mirrors the Janitorial 7-station rail; the new
+    // `schedule` station owns staffing + days + hours.
     dayporter: [
       { key: 'welcome',  label: 'Service' },
-      { key: 'info',     label: 'You' },
       { key: 'space',    label: 'Space' },
+      { key: 'info',     label: 'You' },
+      { key: 'schedule', label: 'Schedule' },
       { key: 'location', label: 'Location' },
-      { key: 'days',     label: 'Schedule' },
-      { key: 'porter',   label: 'Porter' },
-      { key: 'hours',    label: 'Hours' },
       { key: 'contact',  label: 'Review' }
     ],
     both: [
       { key: 'welcome',  label: 'Service' },
-      { key: 'info',     label: 'You' },
       { key: 'space',    label: 'Space' },
-      { key: 'location', label: 'Location' },
+      { key: 'info',     label: 'You' },
       { key: 'size',     label: 'Size' },
       { key: 'days',     label: 'Cleaning' },
-      { key: 'dpDays',   label: 'Porter days' },
-      { key: 'porter',   label: 'Porters' },
-      { key: 'hours',    label: 'Hours' },
+      { key: 'schedule', label: 'Porter' },
+      { key: 'location', label: 'Location' },
       { key: 'contact',  label: 'Review' }
     ],
     unsure: [
@@ -127,7 +126,12 @@
   // AYS Ola 3 #21 — removed legacy 'window' step (no corresponding DOM, all
   // FLOWS path refs dropped in an earlier refactor; still created SCREENS.window = null)
   // V2 2026-04-25 — 'checkpoint' removed (absorbed into review screen).
-  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'dpDays', 'porter', 'hours', 'contact', 'success'];
+  // D55 — `schedule` added; legacy `dpDays`/`porter`/`hours` kept until
+  // Phase 3 strips their handlers. The DOM screens for dpDays/porter/hours
+  // get deleted in Phase 2 (HTML), at which point document.getElementById
+  // returns null and the legacy IIFE blocks become harmless no-ops via
+  // their `if (SCREENS.dpDays) { ... }` guards.
+  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'schedule', 'dpDays', 'porter', 'hours', 'contact', 'success'];
   var SCREENS = {};
 
   SCREEN_NAMES.forEach(function (name) {
@@ -245,8 +249,17 @@
     size:           null,
     sizeExact:      null,
     days:           [],
-    dpDays:         [],
     timeOfDay:      [],
+    // D55 — new Day Porter schedule model. Each porter has its own days +
+    // hours, with a "same hours every day" or "per day" mode. dpPorterCount
+    // tracks the chip-selected count (1, 2, 3); dpPorters can grow up to
+    // MAX_PORTERS via the "+ Add another porter" button.
+    dpPorterCount:  0,
+    dpPorters:      [],
+    // Legacy compat (drained on Phase 3 when V1 handlers are deleted): these
+    // still get written by the legacy dpDays / porter / hours handlers and
+    // read by buildSubmitPayload(). Once Phase 3 lands they can be removed.
+    dpDays:         [],
     porterCount:    null,
     timeStart:      null,
     timeEnd:        null,
