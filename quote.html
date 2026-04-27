@@ -42,7 +42,7 @@
      widened slightly to include the full opsz range used by hero titles. -->
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=38.6">
+<link rel="stylesheet" href="css/quote-flow.css?v=39.0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -872,109 +872,89 @@
       </button>
     </section>
 
-    <!-- STEP 4b · PORTER DAYS (only in the 'both' flow) -->
-    <section class="qf-screen step-4b" hidden id="qfScreen_dpDays" aria-label="Which days do you need a porter on-site?">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" id="qfAlinaSaysS4b" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysTextS4b">A porter is on-site during business hours. Pick the days you need one, then tap &ldquo;Same as cleaning&rdquo; if the schedule matches.</p>
-          </div>
+    <!-- D55 — Day Porter SCHEDULE screen. Replaces the legacy V1 trio
+         (qfScreen_dpDays + qfScreen_porter + qfScreen_hours) with a
+         single rich screen that owns count + days + hours per porter.
+         Owns flow: dayporter (after Info) and both (after Days). -->
+    <section class="qf-screen step-schedule qf2-stage" hidden id="qfScreen_schedule" aria-label="Porter schedule">
+      <header class="qf2-flowbar" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <ol class="qf2-flowbar-rail">
+          <li class="qf2-flowbar-station is-done" data-station="welcome"><span class="qf2-flowbar-dot"></span>Service</li>
+          <li class="qf2-flowbar-station is-done" data-station="space"><span class="qf2-flowbar-dot"></span>Space</li>
+          <li class="qf2-flowbar-station is-done" data-station="info"><span class="qf2-flowbar-dot"></span>You</li>
+          <li class="qf2-flowbar-station is-active" data-station="schedule"><span class="qf2-flowbar-dot"></span>Schedule</li>
+          <li class="qf2-flowbar-station" data-station="location"><span class="qf2-flowbar-dot"></span>Location</li>
+          <li class="qf2-flowbar-station" data-station="contact"><span class="qf2-flowbar-dot"></span>Review</li>
+        </ol>
+        <span class="qf2-flowbar-step-count">Step 4 of 6</span>
+        <button type="button" class="qf2-flowbar-skip">Save for later</button>
+      </header>
+      <header class="qf2-flowbar-mobile" role="navigation" aria-label="Quote progress">
+        <button type="button" class="qf2-flowbar-back" aria-label="Back" data-qf2-back>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg>
+        </button>
+        <div class="qf2-flowbar-mobile-progress">
+          <div class="qf2-flowbar-mobile-track"><div class="qf2-flowbar-mobile-fill" style="width:67%"></div></div>
+          <div class="qf2-flowbar-mobile-label">Step 4 of 6</div>
         </div>
-        <h2 class="qf-s4-title">Which <em>days</em> do you need a porter on-site?</h2>
-
-        <div class="qf-s4-presets" role="group" aria-label="Quick day presets">
-          <button type="button" class="qf-s4-preset" data-preset-dp="same">Same as cleaning</button>
-          <button type="button" class="qf-s4-preset" data-preset-dp="weekdays">Mon&ndash;Fri</button>
-          <button type="button" class="qf-s4-preset" data-preset-dp="every">Every day</button>
-          <button type="button" class="qf-s4-preset" data-preset-dp="clear">Clear</button>
-        </div>
-
-        <div class="qf-s4-days" role="group" aria-label="Select days of the week">
-          <div class="qf-s4-day-group qf-s4-weekdays">
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Monday" aria-pressed="false"><span class="qf-service-card-label">Monday</span></button>
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Tuesday" aria-pressed="false"><span class="qf-service-card-label">Tuesday</span></button>
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Wednesday" aria-pressed="false"><span class="qf-service-card-label">Wednesday</span></button>
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Thursday" aria-pressed="false"><span class="qf-service-card-label">Thursday</span></button>
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card" data-day="Friday" aria-pressed="false"><span class="qf-service-card-label">Friday</span></button>
+        <button type="button" class="qf2-flowbar-skip">Save</button>
+      </header>
+      <div class="qf2-hero-wrap">
+        <div class="qf2-alina-hero" role="button" tabindex="0" aria-expanded="false"
+             data-alina-help="Each porter can have their own days and hours. Add up to 6 with the + button below."
+             aria-label="Tap for more help">
+          <div class="qf2-alina-hero-avatar">
+            <picture>
+              <source type="image/webp" srcset="images/alina-avatar-96.webp">
+              <img src="images/alina-avatar-96.jpg" alt="Alina" width="36" height="36" loading="lazy" decoding="async">
+            </picture>
           </div>
-          <div class="qf-s4-day-group qf-s4-weekend-group">
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card qf-day-weekend" data-day="Saturday" aria-pressed="false"><span class="qf-service-card-label">Saturday</span></button>
-            <button type="button" class="qf-service-card qf-day-card qf-dp-day-card qf-day-weekend" data-day="Sunday" aria-pressed="false"><span class="qf-service-card-label">Sunday</span></button>
+          <div class="qf2-alina-hero-text">
+            <span class="qf2-alina-name">Alina</span> &middot; Pick the staffing first, then days and hours
           </div>
-        </div>
-        <div class="qf-s4-bottom">
-          <span class="qf-s4-count" id="qfDpDaysCount" aria-live="polite" aria-atomic="true"></span>
-          <button type="button" class="qf-s4-continue" id="qfDpDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
         </div>
       </div>
-    </section>
+      <div class="qf2-body">
+        <div class="qf2-prompt">
+          <h2 class="qf2-prompt-title">Let&rsquo;s plan your <em>coverage</em>.</h2>
+        </div>
+        <p class="qf-dp-prompt-promise">~ Tell me your staffing, then their schedule</p>
 
-    <!-- STEP 5b · PORTER COUNT (auto-advance) -->
-    <section class="qf-screen step-porter" hidden id="qfScreen_porter" aria-label="How many porters?">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysPorter">How many porters does your space need? Pick what fits.</p>
-          </div>
+        <div class="qf2-section-label qf-dp-count-label">
+          <span class="qf2-prompt-sub-desktop">How many porters?</span>
+          <span class="qf2-prompt-sub-mobile">How many porters?</span>
         </div>
-        <h2 class="qf-s5-title">Let&rsquo;s staff your <em>space</em></h2>
-        <div class="qf-s5-porter-cards" role="group" aria-label="Porter count">
-          <button type="button" class="qf-service-card" data-porters="1">
-            <span class="qf-popular-badge" aria-label="Recommended"><span class="qf-popular-badge-star" aria-hidden="true">&#x2605;</span> Recommended</span>
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F464;</span>
-            <span class="qf-service-card-label">1 Porter</span>
-            <span class="qf-service-card-hint">Most common setup</span>
-          </button>
-          <button type="button" class="qf-service-card" data-porters="2">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F465;</span>
-            <span class="qf-service-card-label">2 Porters</span>
-            <span class="qf-service-card-hint">Large or multi-floor spaces</span>
-          </button>
-          <button type="button" class="qf-service-card qf-s3-notsure" data-porters="notsure">
-            <span class="qf-service-card-ico" aria-hidden="true">&#x1F914;</span>
-            <span class="qf-service-card-label">Not sure?</span>
-            <span class="qf-service-card-hint">Alina will suggest one</span>
-          </button>
+        <div class="qf2-chip-row qf-dp-count-row" role="radiogroup" aria-label="Number of porters" id="qfDpCountRow">
+          <!-- Count chips (1 / 2 / 3+) rendered by quote-flow.js -->
         </div>
-        <div class="qf-s3-or">
-          <span class="qf-s3-or-line"></span>
-          <span class="qf-s3-or-text">or enter exact number</span>
-          <span class="qf-s3-or-line"></span>
+
+        <div class="qf-dp-porters" id="qfDpPorters">
+          <!-- Per-porter accordion cards rendered by quote-flow.js -->
         </div>
-        <div class="qf-s3-input-wrap">
-          <input type="number" class="qf-s3-input" id="qfPorterCustomCount" placeholder="Number of porters (3+)" min="3" max="50" inputmode="numeric" aria-label="Enter number of porters">
-          <button type="button" class="qf-s3-input-btn" id="qfPorterCustomSubmit">Continue <span aria-hidden="true">&rarr;</span></button>
+
+        <button type="button" class="qf-dp-add-porter" id="qfDpAddPorter">
+          <span class="qf-dp-add-porter-plus" aria-hidden="true">+</span>
+          <span class="qf-dp-add-porter-label">Add another porter</span>
+        </button>
+
+        <div class="qf-dp-cta-wrap">
+          <button type="button" class="qf2-cta" id="qfDpScheduleContinue">Continue <span aria-hidden="true">&rarr;</span></button>
+          <span class="qf-dp-cta-status" id="qfDpStatus" aria-live="polite"></span>
         </div>
       </div>
+      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
+        <span class="qf2-ask-alina-avatar" aria-hidden="true">
+          <picture>
+            <source type="image/webp" srcset="images/alina-avatar-96.webp">
+            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
+          </picture>
+        </span>
+        <span class="qf2-ask-alina-label">Ask Alina anything</span>
+      </button>
     </section>
-
-    <!-- STEP 5b2 · PORTER HOURS (separate screen) -->
-    <section class="qf-screen step-hours" hidden id="qfScreen_hours" aria-label="Porter hours">
-      <div class="qf-screen-inner">
-        <div class="qf-alina-says" role="status" aria-live="polite">
-          <span class="qf-alina-says-avatar" aria-hidden="true">
-            <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-            <span class="qf-alina-says-dot"></span>
-          </span>
-          <div class="qf-alina-says-bubble">
-            <p class="qf-alina-says-text" id="qfAlinaSaysHours">Set the hours for each porter. You can adjust later.</p>
-          </div>
-        </div>
-        <h2 class="qf-s5-title">Set porter <em>hours</em></h2>
-        <div class="qf-porter-rows" id="qfPorterRows"></div>
-        <button type="button" class="qf-s5-continue" id="qfPorterContinue">Continue <span aria-hidden="true">&rarr;</span></button>
-      </div>
-    </section>
-
-    <!-- (STEP 5c "Both Details" screen removed — never referenced by any FLOWS array.) -->
 
     <!-- CHECKPOINT · "Let me make sure I got this right..." (placed right before contact
          so any service flow scrolls monotonically downward — no back-and-forth jump) -->
