@@ -63,13 +63,13 @@ All values defined as CSS custom properties on `.qf2-stage`:
 
 **Italic-serif rule:** the Fraunces italic accent is reserved for ONE meaningful word per H2 (`how big is the *space*?`, `What kind of *space*?`, `Here's your *snapshot*.`). Never two, never zero on prompt screens.
 
-**Typography tier system (D58, 2026-04-27):** Three tiers. Caveat reserved for *persona only* — never for content the user has to read clearly.
+**Typography tier system (D59, 2026-04-27 — final):** Two tiers + one persona stamp. Caveat reduced to a **single use** after legibility feedback.
 
-- **Tier 1 — Persona (Caveat).** Decorative voice moments. Examples: Alina name in hero pill, "Heads up~" callout, "I'll send the team:" tag (Alina speaking out loud), signature closers ("Quote in your inbox~", "We're almost there~", "Talk soon~"), quiz result hand-write, multi-location / location / out-of-area / visit / timeline hints, exit modal hand text, success extra, CTA subtext. Selectors: `.qf2-alina-hero-text .qf2-alina-name`, `.qf2-quiz-result-hand`, `.qf-dp-team-preview-tag`, `.qf2-multi-loc-hint`, `.qf2-location-hint .qf2-hand-label`, `.qf2-visit-indicator`, `.qf2-cta-subtext`, `.qf2-success-extra`, `.qf2-out-of-area-text .qf2-hand`, `.qf2-exit-modal-hand`, `.qf2-timeline-when`, `.qf2-numeric-label`.
-- **Tier 2 — Editorial (Fraunces italic).** Section labels phrased as questions, sub-promises, Alina-flavored framing that is still content. Examples: "Which days do they work?", "What hours each day?", "When are we welcome?", "~ Add the porters you need…", "Let's tweak this~" (edit panel header). Selectors: `.qf2-section-label`, `.qf-dp-prompt-promise`, `.qf2-sum-edit-header`. Also: H2 accent words, porter title numerals, time-summary numerals (8, 40).
-- **Tier 3 — UI (DM Sans, weights vary).** Anything clickable, scannable, or instructional. Examples: "Not sure? I can help you pick" quiz toggle, field helpers, CTA hint, snapshot row labels (uppercase eyebrow), phone opt-in link, day/jan/DP presets, DP CTA status, DP time-summary wrapper. Selectors: `.qf2-not-sure-link`, `.qf2-field-helper`, `.qf2-cta-hint`, `.qf2-sum-row-label`, `.qf2-phone-optin-link`, `.qf2-chip-preset`, `.qf-dp-preset`, `.qf-dp-cta-status`, `.qf-dp-time-summary` (wrapper).
+- **Persona stamp (Caveat — the ONLY usage).** `.qf2-alina-hero-text .qf2-alina-name` only. The italic script reads as Alina's signature on her message pill; everywhere else the cursive form was found to slow comprehension. Hard-locked to this single selector.
+- **Tier 1 — Editorial (Fraunces italic).** Section labels phrased as questions, sub-promises, H2 accent words, porter title numerals, time-summary numerals. Selectors: `.qf2-section-label`, `.qf-dp-prompt-promise`, `.qf2-sum-edit-header`, `h2 em`.
+- **Tier 2 — UI (DM Sans, weights and italic vary).** Everything else. Body, controls, helpers, status, eyebrows, links, presets. Italic + sage for "voice" moments (e.g. "Heads up~", "I'll send the team:", closers). Plain weight for content. Eyebrow uppercase 700 0.14em tracking for section markers in the snapshot.
 
-**Hard rule:** Never use Caveat for primary actions, errors, validation status, instructions, or content the user must process to make a decision. The Facility Manager target scans under time pressure; cursive script slows comprehension.
+**Hard rule:** Never reintroduce Caveat outside the Alina-name selector. The Facility Manager target scans under time pressure; cursive script slows comprehension. "Voice moments" use **DM Sans italic sage** instead — warm and readable.
 
 ## Layout
 
