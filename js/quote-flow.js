@@ -2709,6 +2709,9 @@
 
     function dpRenderHoursMode(porterIdx) {
       var p = STATE.dpPorters[porterIdx];
+      // 2026-04-27 — "Per day" → "Custom". Same hours stays. Custom is more
+      // honest: when you switch off the "same" pattern you're customizing
+      // per day. "Per day" was technical, "Custom" is the user's mental model.
       return dpEl('div', { class: 'qf-dp-hours-mode', role: 'tablist' }, [
         dpEl('label', {
           class: 'qf-dp-hours-mode-opt' + (p.hoursMode === 'same' ? ' is-active' : ''),
@@ -2726,7 +2729,7 @@
           onclick: function () { dpSetMode(porterIdx, 'custom'); }
         }, [
           dpEl('input', { type: 'radio', name: 'qf-dp-mode-' + p.id, checked: p.hoursMode === 'custom' || null }),
-          document.createTextNode('Per day')
+          document.createTextNode('Custom')
         ])
       ]);
     }
@@ -2800,18 +2803,15 @@
       var p = STATE.dpPorters[porterIdx];
       return dpEl('div', { class: 'qf-dp-porter-body' }, [
         dpEl('div', { class: 'qf-dp-section' }, [
-          dpEl('div', { class: 'qf2-section-label' }, [
-            dpEl('span', { class: 'qf2-prompt-sub-desktop' }, 'Days'),
-            dpEl('span', { class: 'qf2-prompt-sub-mobile' }, 'Days')
-          ]),
+          // 2026-04-27 — labels phrased as questions to feel like a small
+          // dialogue beat from Alina, not noun headers. Mobile keeps the
+          // same copy (no abbreviation needed for short questions).
+          dpEl('div', { class: 'qf2-section-label' }, 'Which days do they work?'),
           dpRenderDayChips(porterIdx),
           dpRenderPresets(porterIdx)
         ]),
         dpEl('div', { class: 'qf-dp-section' }, [
-          dpEl('div', { class: 'qf2-section-label' }, [
-            dpEl('span', { class: 'qf2-prompt-sub-desktop' }, 'Hours'),
-            dpEl('span', { class: 'qf2-prompt-sub-mobile' }, 'Hours')
-          ]),
+          dpEl('div', { class: 'qf2-section-label' }, 'What hours each day?'),
           dpRenderHoursMode(porterIdx),
           p.hoursMode === 'same' ? dpRenderSameRow(porterIdx) : dpRenderCustomRows(porterIdx)
         ])
