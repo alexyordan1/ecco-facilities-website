@@ -144,6 +144,73 @@ async function fillLocation(page, opts = {}) {
   await page.click('#qfLocationContinue');
 }
 
+/**
+ * D55 — Day Porter SCHEDULE screen helper. Configures one or more porters
+ * with their days + hours, then clicks Continue.
+ *
+ * opts.porters: array of porter configs (1..6). Each entry:
+ *   { days: ['Monday', ...],          // required
+ *     hours: '09:00-17:00',           // shorthand for same-hours
+ *     custom: { Monday: '08:00-12:00', ... }  // per-day hours
+ *   }
+ * If `porters` is omitted, picks 1 porter with default Mon–Fri 9–5.
+ *
+ * Example:
+ *   await pickPorterSchedule(page, {
+ *     porters: [
+ *       { days: ['Monday','Wednesday','Friday'], hours: '09:00-17:00' },
+ *       { days: ['Tuesday','Thursday'], hours: '13:00-19:00' }
+ *     ]
+ *   });
+ */
+async function pickPorterSchedule(page, opts = {}) {
+  const porters = (opts && opts.porters && opts.porters.length)
+    ? opts.porters
+    : [{ days: ['Monday','Tuesday','Wednesday','Thursday','Friday'], hours: '09:00-17:00' }];
+
+  // Add porters via the "+ Add" button if more than the seeded one.
+  for (let i = 1; i < porters.length; i++) {
+    await page.click('#qfDpAddPorter');
+    await page.waitForTimeout(150);
+  }
+
+  for (let idx = 0; idx < porters.length; idx++) {
+    const p = porters[idx];
+    // Open the porter card if not already open. Click its header.
+    const card = page.locator(`#qfDpPorters .qf-dp-porter[data-porter-idx="${idx}"]`).first();
+    if (!(await card.evaluate((el) => el.classList.contains('is-open')))) {
+      await card.locator('.qf-dp-porter-header').click();
+      await page.waitForTimeout(120);
+    }
+    // Clear default day selection by clicking the Clear preset.
+    const clearBtn = card.locator('.qf-dp-preset', { hasText: 'Clear' }).first();
+    if (await clearBtn.count()) await clearBtn.click();
+    await page.waitForTimeout(80);
+    // Pick each day.
+    for (const day of p.days) {
+      await card.locator(`.qf-day-card[data-day="${day}"]`).click();
+      await page.waitForTimeout(40);
+    }
+    if (p.custom) {
+      // Switch to "Per day" mode.
+      await card.locator('.qf-dp-hours-mode-opt').nth(1).click();
+      await page.waitForTimeout(80);
+      for (const [day, range] of Object.entries(p.custom)) {
+        const [start, end] = range.split('-');
+        const row = card.locator('.qf-dp-custom-row').filter({ hasText: day }).first();
+        await row.locator('input[type="time"]').nth(0).fill(start);
+        await row.locator('input[type="time"]').nth(1).fill(end);
+      }
+    } else if (p.hours) {
+      const [start, end] = p.hours.split('-');
+      await card.locator(`#qf-dp-start-${idx + 1}`).fill(start);
+      await card.locator(`#qf-dp-end-${idx + 1}`).fill(end);
+    }
+  }
+
+  await page.click('#qfDpScheduleContinue');
+}
+
 module.exports = {
   freshOpen,
   dismissCookieBanner,
@@ -154,5 +221,6 @@ module.exports = {
   pickSize,
   pickSizeExact,
   pickSchedule,
+  pickPorterSchedule,
   fillLocation,
 };

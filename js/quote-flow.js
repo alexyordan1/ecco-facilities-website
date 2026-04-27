@@ -126,12 +126,9 @@
   // AYS Ola 3 #21 — removed legacy 'window' step (no corresponding DOM, all
   // FLOWS path refs dropped in an earlier refactor; still created SCREENS.window = null)
   // V2 2026-04-25 — 'checkpoint' removed (absorbed into review screen).
-  // D55 — `schedule` added; legacy `dpDays`/`porter`/`hours` kept until
-  // Phase 3 strips their handlers. The DOM screens for dpDays/porter/hours
-  // get deleted in Phase 2 (HTML), at which point document.getElementById
-  // returns null and the legacy IIFE blocks become harmless no-ops via
-  // their `if (SCREENS.dpDays) { ... }` guards.
-  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'schedule', 'dpDays', 'porter', 'hours', 'contact', 'success'];
+  // D55 Phase 3 — legacy `dpDays`/`porter`/`hours` screens removed; the new
+  // `schedule` screen handles porter count + days + hours in one accordion.
+  var SCREEN_NAMES = ['welcome', 'info', 'space', 'location', 'size', 'days', 'schedule', 'contact', 'success'];
   var SCREENS = {};
 
   SCREEN_NAMES.forEach(function (name) {
@@ -2557,240 +2554,544 @@
   }
 
   /* =======================================================================
-     DP-DAYS step — Second day picker, only in the 'both' flow. Lets the user
-     pick different days for the porter vs the janitorial cleaning captured
-     on the prior screen. Mirrors the days-screen UI and logic with its own
-     state slice (STATE.dpDays) and a "Same as cleaning" preset.
-     ======================================================================= */
-  if (SCREENS.dpDays) {
-    var dpDayBtns     = SCREENS.dpDays.querySelectorAll('.qf-dp-day-card');
-    var dpPresetBtns  = SCREENS.dpDays.querySelectorAll('.qf-s4-preset');
-    var dpCountEl     = document.getElementById('qfDpDaysCount');
-    var dpContinueBtn = document.getElementById('qfDpDaysContinue');
+     D55 — SCHEDULE step (Day Porter + Both flows). Single rich screen
+     that owns count, days, and hours per porter. Replaces the legacy V1
+     dpDays + porter + hours screens (deleted in Phase 2 markup change).
 
-    function syncDpDaysUI() {
-      dpDayBtns.forEach(function (btn) {
-        var selected = (STATE.dpDays || []).indexOf(btn.getAttribute('data-day')) !== -1;
-        btn.classList.toggle('is-selected', selected);
-        btn.setAttribute('aria-pressed', String(selected));
-      });
-      if (dpCountEl) {
-        var n = (STATE.dpDays || []).length;
-        dpCountEl.textContent = n > 0 ? (n + ' day' + (n > 1 ? 's' : '') + ' selected') : '';
+     State model:
+       STATE.dpPorterCount  : 1, 2, or 3 (chip selection — actual count
+                              can grow beyond 3 via the "+" button up to
+                              MAX_PORTERS).
+       STATE.dpPorters[]    : per-porter object array; each:
+         { id, days[], hoursMode 'same'|'custom', sameStart, sameEnd,
+           customHours: { Monday: {start,end}, ... } }
+
+     Defaults seeded from DP_DEFAULTS_BY_SPACE on first entry to the screen
+     (so an Office defaults to Mon-Fri 9-5, a Restaurant to every day
+     11-23, etc). After that the state persists across draft saves.
+     ======================================================================= */
+  if (SCREENS.schedule) {
+    var DP_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    var DP_DAY_SHORT = { Monday:'Mon', Tuesday:'Tue', Wednesday:'Wed', Thursday:'Thu', Friday:'Fri', Saturday:'Sat', Sunday:'Sun' };
+    var DP_WEEKDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+    var DP_MAX_PORTERS = 6;
+
+    // Smart per-space defaults. Mirrors ALINA_HOURS_BY_SPACE.
+    var DP_DEFAULTS_BY_SPACE = {
+      Office:     { days: DP_WEEKDAYS.slice(),       start: '09:00', end: '17:00' },
+      Medical:    { days: DP_WEEKDAYS.slice(),       start: '08:00', end: '18:00' },
+      Retail:     { days: DP_DAYS.slice(),           start: '10:00', end: '21:00' },
+      Restaurant: { days: DP_DAYS.slice(),           start: '11:00', end: '23:00' },
+      Fitness:    { days: DP_DAYS.slice(),           start: '05:00', end: '22:00' },
+      School:     { days: DP_WEEKDAYS.slice(),       start: '07:00', end: '16:00' },
+      Other:      { days: DP_WEEKDAYS.slice(),       start: '09:00', end: '17:00' }
+    };
+
+    var qfDpCountRow         = document.getElementById('qfDpCountRow');
+    var qfDpPortersHost      = document.getElementById('qfDpPorters');
+    var qfDpAddPorterBtn     = document.getElementById('qfDpAddPorter');
+    var qfDpScheduleContinue = document.getElementById('qfDpScheduleContinue');
+    var qfDpStatus           = document.getElementById('qfDpStatus');
+
+    // Local UI state — which porter card is open in the accordion.
+    var dpUI = { openIdx: 0 };
+
+    function dpFmtTime(hhmm) {
+      if (!hhmm) return '—';
+      var parts = hhmm.split(':').map(Number);
+      var h = parts[0], m = parts[1];
+      var period = h >= 12 ? 'PM' : 'AM';
+      var h12 = h % 12 || 12;
+      return m === 0 ? (h12 + ' ' + period) : (h12 + ':' + String(m).padStart(2,'0') + ' ' + period);
+    }
+    function dpFmtDays(days) {
+      if (!days || !days.length) return 'No days picked';
+      if (days.length === 7) return 'Every day';
+      var sorted = days.slice().sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
+      if (sorted.length === 5 && DP_WEEKDAYS.every(function (d) { return sorted.indexOf(d) >= 0; })) return 'Mon–Fri';
+      if (sorted.length === 2 && sorted.indexOf('Saturday') >= 0 && sorted.indexOf('Sunday') >= 0) return 'Weekends';
+      return sorted.map(function (d) { return DP_DAY_SHORT[d]; }).join(', ');
+    }
+    function dpDuration(start, end) {
+      if (!start || !end) return 0;
+      var s = start.split(':').map(Number), e = end.split(':').map(Number);
+      return Math.max(0, (e[0] + e[1]/60) - (s[0] + s[1]/60));
+    }
+    function dpPorterIssues(p) {
+      var out = [];
+      if (!p.days.length) out.push('Pick at least one day for porter ' + p.id);
+      if (p.hoursMode === 'same') {
+        if (dpDuration(p.sameStart, p.sameEnd) <= 0) out.push('Porter ' + p.id + ': end must be after start');
+      } else {
+        p.days.forEach(function (day) {
+          var ch = p.customHours[day];
+          if (!ch) out.push('Porter ' + p.id + ': set hours for ' + day);
+          else if (dpDuration(ch.start, ch.end) <= 0) out.push('Porter ' + p.id + ' ' + day + ': end must be after start');
+        });
       }
-      if (dpContinueBtn) dpContinueBtn.disabled = !((STATE.dpDays || []).length);
-      dpPresetBtns.forEach(function (p) { p.classList.remove('is-active'); });
-      var dp = STATE.dpDays || [];
-      // Priority: when dp matches STATE.days, prefer the "Same as cleaning"
-      // chip — it communicates the semantic relation more clearly than a
-      // generic "Mon-Fri". Only fall through to Every/Weekdays if STATE.days
-      // doesn't match.
-      if (dp.length > 0 && arraysEqual(dp, STATE.days || [])) {
-        dpPresetBtns.forEach(function (p) { if (p.dataset.presetDp === 'same') p.classList.add('is-active'); });
-      } else if (dp.length === 7) {
-        dpPresetBtns.forEach(function (p) { if (p.dataset.presetDp === 'every') p.classList.add('is-active'); });
-      } else if (arraysEqual(dp, WEEKDAYS)) {
-        dpPresetBtns.forEach(function (p) { if (p.dataset.presetDp === 'weekdays') p.classList.add('is-active'); });
+      return out;
+    }
+    function dpPorterSummary(p) {
+      return dpFmtDays(p.days) + ' · ' + dpFmtTime(p.sameStart) + '–' + dpFmtTime(p.sameEnd) +
+        (p.hoursMode === 'custom' ? ' (custom)' : '');
+    }
+    function dpTotalWeeklyHours() {
+      var total = 0;
+      (STATE.dpPorters || []).forEach(function (p) {
+        if (p.hoursMode === 'same') total += dpDuration(p.sameStart, p.sameEnd) * p.days.length;
+        else p.days.forEach(function (d) {
+          var ch = p.customHours[d];
+          if (ch) total += dpDuration(ch.start, ch.end);
+        });
+      });
+      return total;
+    }
+    function dpMakePorter(id) {
+      var sp = (STATE.space && DP_DEFAULTS_BY_SPACE[STATE.space]) ? STATE.space : 'Other';
+      var d = DP_DEFAULTS_BY_SPACE[sp];
+      return {
+        id: id,
+        days: d.days.slice(),
+        hoursMode: 'same',
+        sameStart: d.start,
+        sameEnd: d.end,
+        customHours: {}
+      };
+    }
+
+    // Tiny createElement helper — same pattern as the refined mockup.
+    function dpEl(tag, attrs, kids) {
+      var e = document.createElement(tag);
+      if (attrs) Object.keys(attrs).forEach(function (k) {
+        if (k === 'class') e.className = attrs[k];
+        else if (k === 'html') e.innerHTML = attrs[k];
+        else if (k.indexOf('on') === 0) e.addEventListener(k.slice(2), attrs[k]);
+        else if (attrs[k] === true) e.setAttribute(k, '');
+        else if (attrs[k] != null && attrs[k] !== false) e.setAttribute(k, attrs[k]);
+      });
+      if (kids) (Array.isArray(kids) ? kids : [kids]).forEach(function (c) {
+        if (c == null || c === false) return;
+        e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+      });
+      return e;
+    }
+
+    // ─── Renderers ───
+    function dpRenderCountChips() {
+      qfDpCountRow.innerHTML = '';
+      var actual = (STATE.dpPorters || []).length;
+      [
+        { n: 1, sub: 'porter',  hint: 'most common' },
+        { n: 2, sub: 'porters', hint: 'multi-floor' },
+        { n: 3, sub: 'porters', hint: 'larger spaces — use + to add more' }
+      ].forEach(function (cfg) {
+        var n = cfg.n;
+        var isSel = (n < 3 && STATE.dpPorterCount === n) || (n === 3 && actual >= 3);
+        var displayN = (n === 3 && actual > 3) ? String(actual) : (n === 3 ? '3+' : String(n));
+        var displaySub = (n === 3 && actual > 3) ? 'porters' : cfg.sub;
+        var chip = dpEl('button', {
+          type: 'button',
+          class: 'qf2-chip qf-dp-count-chip' + (isSel ? ' is-selected' : ''),
+          'aria-pressed': isSel ? 'true' : 'false',
+          'data-count': n,
+          title: cfg.hint,
+          onclick: function () { dpSetCount(n); }
+        }, [
+          dpEl('span', { class: 'qf-dp-count-num' }, displayN),
+          dpEl('span', { class: 'qf-dp-count-sub' }, displaySub)
+        ]);
+        qfDpCountRow.appendChild(chip);
+      });
+    }
+
+    function dpRenderDayChips(porterIdx) {
+      var p = STATE.dpPorters[porterIdx];
+      return dpEl('div', { class: 'qf-dp-day-row', role: 'group', 'aria-label': 'Porter ' + p.id + ' days' },
+        DP_DAYS.map(function (day) {
+          var isSel = p.days.indexOf(day) >= 0;
+          return dpEl('button', {
+            type: 'button',
+            class: 'qf2-chip qf-day-card' + (isSel ? ' is-selected' : ''),
+            'aria-pressed': isSel ? 'true' : 'false',
+            'data-day': day,
+            'aria-label': day,
+            title: day,
+            onclick: function () { dpToggleDay(porterIdx, day); }
+          }, [
+            dpEl('span', { class: 'qf2-prompt-sub-desktop' }, day),
+            dpEl('span', { class: 'qf2-prompt-sub-mobile' }, DP_DAY_SHORT[day])
+          ]);
+        })
+      );
+    }
+
+    function dpRenderPresets(porterIdx) {
+      return dpEl('div', { class: 'qf-dp-presets' }, [
+        dpEl('button', { type: 'button', class: 'qf-dp-preset', onclick: function () { dpApplyPreset(porterIdx, 'weekdays'); } }, 'Mon–Fri'),
+        dpEl('span', { class: 'qf-dp-preset-sep' }, '·'),
+        dpEl('button', { type: 'button', class: 'qf-dp-preset', onclick: function () { dpApplyPreset(porterIdx, 'every'); } }, 'Every day'),
+        dpEl('span', { class: 'qf-dp-preset-sep' }, '·'),
+        dpEl('button', { type: 'button', class: 'qf-dp-preset', onclick: function () { dpApplyPreset(porterIdx, 'clear'); } }, 'Clear')
+      ]);
+    }
+
+    function dpRenderHoursMode(porterIdx) {
+      var p = STATE.dpPorters[porterIdx];
+      return dpEl('div', { class: 'qf-dp-hours-mode', role: 'tablist' }, [
+        dpEl('label', {
+          class: 'qf-dp-hours-mode-opt' + (p.hoursMode === 'same' ? ' is-active' : ''),
+          role: 'tab',
+          'aria-selected': p.hoursMode === 'same' ? 'true' : 'false',
+          onclick: function () { dpSetMode(porterIdx, 'same'); }
+        }, [
+          dpEl('input', { type: 'radio', name: 'qf-dp-mode-' + p.id, checked: p.hoursMode === 'same' || null }),
+          document.createTextNode('Same hours')
+        ]),
+        dpEl('label', {
+          class: 'qf-dp-hours-mode-opt' + (p.hoursMode === 'custom' ? ' is-active' : ''),
+          role: 'tab',
+          'aria-selected': p.hoursMode === 'custom' ? 'true' : 'false',
+          onclick: function () { dpSetMode(porterIdx, 'custom'); }
+        }, [
+          dpEl('input', { type: 'radio', name: 'qf-dp-mode-' + p.id, checked: p.hoursMode === 'custom' || null }),
+          document.createTextNode('Per day')
+        ])
+      ]);
+    }
+
+    function dpRenderSameRow(porterIdx) {
+      var p = STATE.dpPorters[porterIdx];
+      var dur = dpDuration(p.sameStart, p.sameEnd);
+      var totalForPorter = dur * p.days.length;
+      var errCls = dur <= 0 ? ' is-error' : '';
+      return dpEl('div', null, [
+        dpEl('div', { class: 'qf-dp-time-row' }, [
+          dpEl('div', { class: 'qf-dp-time-field' }, [
+            dpEl('label', { for: 'qf-dp-start-' + p.id }, 'Start'),
+            dpEl('input', {
+              type: 'time',
+              class: 'qf-dp-time-input' + errCls,
+              id: 'qf-dp-start-' + p.id,
+              value: p.sameStart,
+              onchange: function (e) { dpSetTime(porterIdx, null, 'start', e.target.value); }
+            })
+          ]),
+          dpEl('div', { class: 'qf-dp-time-field' }, [
+            dpEl('label', { for: 'qf-dp-end-' + p.id }, 'End'),
+            dpEl('input', {
+              type: 'time',
+              class: 'qf-dp-time-input' + errCls,
+              id: 'qf-dp-end-' + p.id,
+              value: p.sameEnd,
+              onchange: function (e) { dpSetTime(porterIdx, null, 'end', e.target.value); }
+            })
+          ])
+        ]),
+        dur > 0 && dpEl('div', { class: 'qf-dp-time-summary', html:
+          '~ <em>' + dur.toFixed(0) + '</em> hours per day · <em>' +
+          totalForPorter.toFixed(0) + '</em> hours per week' }),
+        dur > 0 && p.days.length > 0 && dpEl('div', { class: 'qf-dp-team-preview', html:
+          '<span class="qf-dp-team-preview-tag">~ I’ll send the team:</span> Porter ' + p.id +
+          ' works <strong>' + dpFmtDays(p.days) + '</strong>, <strong>' +
+          dpFmtTime(p.sameStart) + ' to ' + dpFmtTime(p.sameEnd) + '</strong>.' })
+      ]);
+    }
+
+    function dpRenderCustomRows(porterIdx) {
+      var p = STATE.dpPorters[porterIdx];
+      if (!p.days.length) return dpEl('div', { class: 'qf-dp-custom-empty' }, '~ Pick days first to set hours');
+      return dpEl('div', { class: 'qf-dp-custom-rows' }, p.days.map(function (day) {
+        var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
+        var err = dpDuration(ch.start, ch.end) <= 0 ? ' is-error' : '';
+        return dpEl('div', { class: 'qf-dp-custom-row' }, [
+          dpEl('span', { class: 'qf-dp-custom-day' }, day),
+          dpEl('input', {
+            type: 'time',
+            class: 'qf-dp-time-input' + err,
+            value: ch.start,
+            'aria-label': day + ' start',
+            onchange: function (e) { dpSetTime(porterIdx, day, 'start', e.target.value); }
+          }),
+          dpEl('span', { class: 'qf-dp-arrow' }, '→'),
+          dpEl('input', {
+            type: 'time',
+            class: 'qf-dp-time-input' + err,
+            value: ch.end,
+            'aria-label': day + ' end',
+            onchange: function (e) { dpSetTime(porterIdx, day, 'end', e.target.value); }
+          })
+        ]);
+      }));
+    }
+
+    function dpRenderPorterBody(porterIdx) {
+      var p = STATE.dpPorters[porterIdx];
+      return dpEl('div', { class: 'qf-dp-porter-body' }, [
+        dpEl('div', { class: 'qf-dp-section' }, [
+          dpEl('div', { class: 'qf2-section-label' }, [
+            dpEl('span', { class: 'qf2-prompt-sub-desktop' }, 'Days'),
+            dpEl('span', { class: 'qf2-prompt-sub-mobile' }, 'Days')
+          ]),
+          dpRenderDayChips(porterIdx),
+          dpRenderPresets(porterIdx)
+        ]),
+        dpEl('div', { class: 'qf-dp-section' }, [
+          dpEl('div', { class: 'qf2-section-label' }, [
+            dpEl('span', { class: 'qf2-prompt-sub-desktop' }, 'Hours'),
+            dpEl('span', { class: 'qf2-prompt-sub-mobile' }, 'Hours')
+          ]),
+          dpRenderHoursMode(porterIdx),
+          p.hoursMode === 'same' ? dpRenderSameRow(porterIdx) : dpRenderCustomRows(porterIdx)
+        ])
+      ]);
+    }
+
+    function dpRenderPorterCard(porterIdx) {
+      var p = STATE.dpPorters[porterIdx];
+      var isOpen = dpUI.openIdx === porterIdx;
+      var issues = dpPorterIssues(p);
+      var cls = ['qf-dp-porter'];
+      cls.push(isOpen ? 'is-open' : 'is-collapsed');
+      if (issues.length) cls.push('is-error');
+
+      var headerKids = [
+        dpEl('div', { class: 'qf-dp-porter-info' }, [
+          dpEl('div', { class: 'qf-dp-porter-title', html: 'Porter <em>' + p.id + '</em>' }),
+          !isOpen && dpEl('div', { class: 'qf-dp-porter-summary' }, dpPorterSummary(p))
+        ]),
+        dpEl('div', { class: 'qf-dp-porter-actions' }, [
+          !isOpen && dpEl('button', {
+            type: 'button',
+            class: 'qf-dp-porter-edit',
+            onclick: function (e) { e.stopPropagation(); dpOpenPorter(porterIdx); }
+          }, 'Edit'),
+          porterIdx > 0 && dpEl('button', {
+            type: 'button',
+            class: 'qf-dp-porter-remove',
+            'aria-label': 'Remove porter ' + p.id,
+            onclick: function (e) { e.stopPropagation(); dpRemovePorter(porterIdx); }
+          }, '×'),
+          dpEl('span', {
+            class: 'qf-dp-porter-chevron',
+            'aria-hidden': 'true',
+            html: '<svg viewBox="0 0 14 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6 6-6"/></svg>'
+          })
+        ])
+      ];
+
+      var header = dpEl('header', {
+        class: 'qf-dp-porter-header',
+        onclick: function () { dpOpenPorter(porterIdx); },
+        role: 'button',
+        tabindex: '0',
+        'aria-expanded': isOpen ? 'true' : 'false',
+        onkeydown: function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dpOpenPorter(porterIdx); }
+        }
+      }, headerKids);
+
+      var card = dpEl('article', { class: cls.join(' '), 'data-porter-idx': porterIdx }, [header]);
+      if (isOpen) card.appendChild(dpRenderPorterBody(porterIdx));
+      return card;
+    }
+
+    function dpRenderPorters() {
+      qfDpPortersHost.innerHTML = '';
+      (STATE.dpPorters || []).forEach(function (_, idx) {
+        qfDpPortersHost.appendChild(dpRenderPorterCard(idx));
+      });
+    }
+
+    function dpRenderAddBtn() {
+      var n = (STATE.dpPorters || []).length;
+      qfDpAddPorterBtn.disabled = n >= DP_MAX_PORTERS;
+      qfDpAddPorterBtn.style.display = n >= DP_MAX_PORTERS ? 'none' : '';
+      var label = qfDpAddPorterBtn.querySelector('.qf-dp-add-porter-label');
+      if (label) {
+        var ord = ['', '', 'a 2nd', 'a 3rd', 'a 4th', 'a 5th', 'a 6th'][n + 1] || 'another';
+        label.textContent = n === 1 ? 'Add another porter' : ('Add ' + ord + ' porter');
       }
     }
 
-    dpDayBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (!Array.isArray(STATE.dpDays)) STATE.dpDays = [];
-        var day = btn.getAttribute('data-day');
-        var idx = STATE.dpDays.indexOf(day);
-        if (idx === -1) STATE.dpDays.push(day); else STATE.dpDays.splice(idx, 1);
-        syncDpDaysUI();
-      });
-    });
+    function dpRenderCTA() {
+      var allIssues = (STATE.dpPorters || []).map(dpPorterIssues).reduce(function (a,b) { return a.concat(b); }, []);
+      var valid = allIssues.length === 0 && (STATE.dpPorters || []).length > 0;
+      qfDpScheduleContinue.disabled = !valid;
+      if (valid) {
+        var n = STATE.dpPorters.length;
+        var hours = dpTotalWeeklyHours();
+        qfDpStatus.textContent = '~ Looks good · ' + n + ' porter' + (n > 1 ? 's' : '') +
+          ', ' + hours.toFixed(0) + ' hours per week';
+        qfDpStatus.classList.add('is-ok');
+      } else {
+        qfDpStatus.textContent = allIssues[0] || '';
+        qfDpStatus.classList.remove('is-ok');
+      }
+    }
 
-    dpPresetBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var p = btn.dataset.presetDp;
-        if (p === 'same') STATE.dpDays = (STATE.days || []).slice();
-        else if (p === 'weekdays') STATE.dpDays = WEEKDAYS.slice();
-        else if (p === 'every') STATE.dpDays = ALL_DAYS.slice();
-        else if (p === 'clear') STATE.dpDays = [];
-        syncDpDaysUI();
-      });
-    });
+    function dpRender() {
+      dpRenderCountChips();
+      dpRenderPorters();
+      dpRenderAddBtn();
+      dpRenderCTA();
+      try { saveDraft(); } catch (_) {}
+    }
 
-    // When the dpDays screen becomes active, pre-select whatever we already
-    // know — either a prior edit to STATE.dpDays or the cleaning days we
-    // copied on exit from the days screen.
-    var dpEnterObs = registerObserver(new MutationObserver(function (mutations) {
+    // ─── Actions ───
+    function dpSetCount(n) {
+      if (n === STATE.dpPorterCount && STATE.dpPorters.length === n) return;
+      var prev = STATE.dpPorterCount;
+      STATE.dpPorterCount = n;
+      while (STATE.dpPorters.length < n) STATE.dpPorters.push(dpMakePorter(STATE.dpPorters.length + 1));
+      while (STATE.dpPorters.length > n) STATE.dpPorters.pop();
+      // Don't auto-open the newly added porter — keep user's editing focus
+      // on whichever porter they were on. Just clamp to valid range.
+      if (dpUI.openIdx >= STATE.dpPorters.length) dpUI.openIdx = STATE.dpPorters.length - 1;
+      if (dpUI.openIdx < 0) dpUI.openIdx = 0;
+      dpRender();
+      qfTrack('quote_porter_count_picked', { count: n, previous: prev || 0, source: 'chip', service: STATE.service, space: STATE.space });
+    }
+
+    function dpAddPorter() {
+      if (STATE.dpPorters.length >= DP_MAX_PORTERS) return;
+      STATE.dpPorters.push(dpMakePorter(STATE.dpPorters.length + 1));
+      STATE.dpPorterCount = STATE.dpPorters.length;
+      // Auto-open here — user's intent is to configure the freshly added one.
+      dpUI.openIdx = STATE.dpPorters.length - 1;
+      dpRender();
+      qfTrack('quote_porter_added', { count: STATE.dpPorters.length, service: STATE.service, space: STATE.space });
+    }
+
+    function dpRemovePorter(idx) {
+      if (idx === 0) return;
+      STATE.dpPorters.splice(idx, 1);
+      STATE.dpPorters.forEach(function (p, i) { p.id = i + 1; });
+      STATE.dpPorterCount = STATE.dpPorters.length;
+      if (dpUI.openIdx >= STATE.dpPorters.length) dpUI.openIdx = STATE.dpPorters.length - 1;
+      if (dpUI.openIdx < 0) dpUI.openIdx = 0;
+      dpRender();
+      qfTrack('quote_porter_removed', { count: STATE.dpPorters.length, removed_index: idx, service: STATE.service, space: STATE.space });
+    }
+
+    function dpOpenPorter(idx) {
+      dpUI.openIdx = (dpUI.openIdx === idx) ? -1 : idx;
+      dpRender();
+    }
+
+    function dpToggleDay(porterIdx, day) {
+      var p = STATE.dpPorters[porterIdx];
+      var i = p.days.indexOf(day);
+      if (i >= 0) {
+        p.days.splice(i, 1);
+        delete p.customHours[day];
+      } else {
+        p.days.push(day);
+        p.days.sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
+      }
+      dpRender();
+    }
+
+    function dpApplyPreset(porterIdx, preset) {
+      var p = STATE.dpPorters[porterIdx];
+      if (preset === 'weekdays') p.days = DP_WEEKDAYS.slice();
+      else if (preset === 'every') p.days = DP_DAYS.slice();
+      else { p.days = []; p.customHours = {}; }
+      dpRender();
+    }
+
+    function dpSetMode(porterIdx, mode) {
+      var p = STATE.dpPorters[porterIdx];
+      var prev = p.hoursMode;
+      p.hoursMode = mode;
+      if (mode === 'custom') {
+        p.days.forEach(function (day) {
+          if (!p.customHours[day]) p.customHours[day] = { start: p.sameStart, end: p.sameEnd };
+        });
+      }
+      dpRender();
+      // Telemetry: a switch to "Per day" is a high-signal event because it
+      // means the user actually wants per-day hours — useful for ops to
+      // know how often clients have non-uniform schedules.
+      if (prev !== mode && mode === 'custom') {
+        qfTrack('quote_schedule_customized', { porter_id: p.id, total_porters: STATE.dpPorters.length, service: STATE.service, space: STATE.space });
+      }
+    }
+
+    function dpSetTime(porterIdx, day, kind, value) {
+      var p = STATE.dpPorters[porterIdx];
+      if (day === null) {
+        if (kind === 'start') p.sameStart = value;
+        else p.sameEnd = value;
+      } else {
+        if (!p.customHours[day]) p.customHours[day] = { start: '09:00', end: '17:00' };
+        p.customHours[day][kind] = value;
+      }
+      dpRender();
+    }
+
+    // ─── Activation: seed defaults + render on screen become active ───
+    var dpScheduleObserver = registerObserver(new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
-        if (m.target === SCREENS.dpDays && SCREENS.dpDays.classList.contains('is-active')) {
-          if (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length) {
-            STATE.dpDays = (STATE.days || []).slice();
+        if (m.target === SCREENS.schedule && SCREENS.schedule.classList.contains('is-active')) {
+          if (!STATE.dpPorters || !STATE.dpPorters.length) {
+            STATE.dpPorters = [dpMakePorter(1)];
+            STATE.dpPorterCount = 1;
+            dpUI.openIdx = 0;
           }
-          syncDpDaysUI();
+          dpRender();
         }
       });
     }));
-    dpEnterObs.observe(SCREENS.dpDays, { attributes: true, attributeFilter: ['class'] });
+    dpScheduleObserver.observe(SCREENS.schedule, { attributes: true, attributeFilter: ['class'] });
 
-    if (dpContinueBtn) {
-      dpContinueBtn.addEventListener('click', function () {
-        if (!(STATE.dpDays || []).length) return;
-        var summary = STATE.dpDays.length === 7 ? 'Every day'
-          : arraysEqual(STATE.dpDays, WEEKDAYS) ? 'Mon\u2013Fri'
-          : STATE.dpDays.length + ' days';
-        setRailValue('dpDays', summary);
-        goNext();
-      });
-    }
-  }
-
-  /* =======================================================================
-     PORTER step — Progressive reveal + smart scheduling
-     ======================================================================= */
-  if (SCREENS.porter) {
-    function timeOptions(defaultVal) {
-      var opts = '';
-      for (var h = 6; h <= 23; h++) {
-        var ampm = h < 12 ? 'AM' : 'PM';
-        var hr = h <= 12 ? h : h - 12;
-        if (hr === 0) hr = 12;
-        opts += '<option value="' + h + '"' + (h === defaultVal ? ' selected' : '') + '>' + hr + ':00 ' + ampm + '</option>';
+    // ─── Wire static buttons ───
+    qfDpAddPorterBtn.addEventListener('click', dpAddPorter);
+    qfDpScheduleContinue.addEventListener('click', function () {
+      var allIssues = (STATE.dpPorters || []).map(dpPorterIssues).reduce(function (a,b) { return a.concat(b); }, []);
+      if (allIssues.length || !STATE.dpPorters.length) {
+        if (typeof qfToast === 'function') {
+          qfToast({ type: 'warn', title: 'Almost there', message: allIssues[0] || 'Pick at least one porter', duration: 3500 });
+        }
+        return;
       }
-      return opts;
-    }
+      // Mirror to legacy STATE fields so buildSubmitPayload backward compat
+      // (Phase 3 of the cleanup) still has the data it expects.
+      STATE.porterCount = String(STATE.dpPorters.length);
+      STATE.dpDays = (function () {
+        var union = {};
+        STATE.dpPorters.forEach(function (p) { p.days.forEach(function (d) { union[d] = 1; }); });
+        return Object.keys(union).sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
+      })();
+      STATE.porterHours = STATE.dpPorters.map(function (p) { return { start: p.sameStart, end: p.sameEnd }; });
+      STATE.timeStart = STATE.dpPorters[0].sameStart;
+      STATE.timeEnd   = STATE.dpPorters[0].sameEnd;
 
-    function buildPorterRows(count) {
-      var rowsEl = document.getElementById('qfPorterRows');
-      if (!rowsEl) return;
-      // Ensure porterHours array matches count. Preserve existing entries so a
-      // rebuild (e.g. user goes back and re-selects the same count) keeps their
-      // prior schedules. New slots default to 08:00–17:00.
-      if (!Array.isArray(STATE.porterHours)) STATE.porterHours = [];
-      while (STATE.porterHours.length < count) STATE.porterHours.push({ start: '08:00', end: '17:00' });
-      if (STATE.porterHours.length > count) STATE.porterHours.length = count;
-
-      // Helper: pick a select's initial option to match STATE so a user who
-      // returns to this screen sees their stored times, not the 8/17 defaults.
-      function selectedAttr(optVal, current) {
-        var hhmm = String(optVal).length === 1 ? ('0' + optVal + ':00') : (optVal + ':00');
-        return hhmm === current ? ' selected' : '';
-      }
-
-      var html = '';
-      for (var i = 1; i <= count; i++) {
-        var ph = STATE.porterHours[i - 1];
-        var startHour = parseInt((ph.start || '08:00').split(':')[0], 10);
-        var endHour = parseInt((ph.end || '17:00').split(':')[0], 10);
-        html += '<div class="qf-porter-row" data-porter-row="' + i + '">' +
-                '<span class="qf-porter-row-label">Porter ' + i + '</span>' +
-                '<div class="qf-porter-row-times">' +
-                '<div class="qf-porter-row-field">' +
-                '<span class="qf-porter-row-sub">Start time</span>' +
-                '<select class="qf-s5-time-select" data-porter="' + i + '" data-time="start" aria-label="Porter ' + i + ' start time">' + timeOptions(startHour) + '</select>' +
-                '</div>' +
-                '<span class="qf-porter-row-sep">to</span>' +
-                '<div class="qf-porter-row-field">' +
-                '<span class="qf-porter-row-sub">End time</span>' +
-                '<select class="qf-s5-time-select" data-porter="' + i + '" data-time="end" aria-label="Porter ' + i + ' end time">' + timeOptions(endHour) + '</select>' +
-                '</div>' +
-                '</div></div>';
-      }
-      rowsEl.innerHTML = html;
-
-      // Keep legacy single timeStart/timeEnd mirrors synced to porter 1 so
-      // downstream display helpers and payload compatibility code keep working.
-      STATE.timeStart = STATE.porterHours[0].start;
-      STATE.timeEnd = STATE.porterHours[0].end;
-    }
-
-    function advanceFromPorter(porterVal) {
-      STATE.porterCount = porterVal;
-      var count = STATE.porterCount === 'notsure' ? 1 : parseInt(STATE.porterCount) || 1;
-      buildPorterRows(count);
-
-      // Combine space-tailored context with porter-count specifics.
-      var hoursAlina = document.getElementById('qfAlinaSaysHours');
-      if (hoursAlina) {
-        var spaceHint = ALINA_HOURS_BY_SPACE[STATE.space] || ALINA_HOURS_BY_SPACE.Other;
-        hoursAlina.textContent = count === 1
-          ? spaceHint
-          : 'Set the hours for each of your ' + count + ' porters. ' + spaceHint;
-      }
-
-      var label = STATE.porterCount === 'notsure' ? 'TBD' : STATE.porterCount + ' porter' + (STATE.porterCount !== '1' ? 's' : '');
-      setRailValue('porter', label);
+      var n = STATE.dpPorters.length;
+      var hrs = dpTotalWeeklyHours();
+      setRailValue('schedule', n + ' porter' + (n > 1 ? 's' : '') + ' · ' + hrs.toFixed(0) + ' hrs/wk');
       goNext();
-    }
-
-    // When the porter screen becomes active, personalize Alina's line by space type
-    var porterEnterObs = registerObserver(new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
-        if (m.target === SCREENS.porter && SCREENS.porter.classList.contains('is-active')) {
-          var alina = document.getElementById('qfAlinaSaysPorter');
-          if (!alina) return;
-          alina.textContent = ALINA_PORTER_BY_SPACE[STATE.space] || ALINA_PORTER_BY_SPACE.Other;
-        }
-      });
-    }));
-    porterEnterObs.observe(SCREENS.porter, { attributes: true, attributeFilter: ['class'] });
-
-    // Quick-pick cards — auto-advance
-    SCREENS.porter.querySelectorAll('.qf-service-card[data-porters]').forEach(function (card) {
-      card.addEventListener('click', function () {
-        advanceFromPorter(card.getAttribute('data-porters'));
-      });
     });
 
-    // Custom count submit
-    var porterCustomSubmit = document.getElementById('qfPorterCustomSubmit');
-    var porterCustomInput = document.getElementById('qfPorterCustomCount');
-    if (porterCustomSubmit && porterCustomInput) {
-      porterCustomSubmit.addEventListener('click', function () {
-        var val = porterCustomInput.value.trim();
-        if (!val || isNaN(val) || Number(val) < 3) {
-          porterCustomInput.style.borderColor = '#C84444';
-          porterCustomInput.focus();
-          return;
-        }
-        porterCustomInput.style.borderColor = '';
-        advanceFromPorter(val);
+    // V2 — Back arrow + Save for later in the V2 flowbar
+    SCREENS.schedule.querySelectorAll('[data-qf2-back]').forEach(function (btn) {
+      btn.addEventListener('click', function () { goBack(); });
+    });
+    SCREENS.schedule.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saveDraft();
+        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
-      porterCustomInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); porterCustomSubmit.click(); }
-      });
-      porterCustomInput.addEventListener('input', function () { porterCustomInput.style.borderColor = ''; });
-    }
+    });
   }
 
-  // Hours screen — Continue button
-  if (SCREENS.hours) {
-    // Delegated change handler — time selects are built dynamically by buildPorterRows().
-    // Converts the integer option values (6..23) emitted by timeOptions() into "HH:00"
-    // strings on STATE so the summary card matches the details-screen format.
-    SCREENS.hours.addEventListener('change', function (e) {
-      var sel = e.target.closest && e.target.closest('.qf-s5-time-select');
-      if (!sel) return;
-      var hhmm = sel.value.indexOf(':') >= 0 ? sel.value : (sel.value.length === 1 ? '0' + sel.value : sel.value) + ':00';
-      var porterIdx = parseInt(sel.getAttribute('data-porter'), 10) - 1;
-      var which = sel.getAttribute('data-time');
-      if (isNaN(porterIdx) || porterIdx < 0) return;
-      if (!Array.isArray(STATE.porterHours)) STATE.porterHours = [];
-      while (STATE.porterHours.length <= porterIdx) STATE.porterHours.push({ start: '08:00', end: '17:00' });
-      if (which === 'start') STATE.porterHours[porterIdx].start = hhmm;
-      else if (which === 'end') STATE.porterHours[porterIdx].end = hhmm;
-      // Mirror porter 1 into legacy fields
-      if (porterIdx === 0) {
-        if (which === 'start') STATE.timeStart = hhmm;
-        else if (which === 'end') STATE.timeEnd = hhmm;
-      }
-      saveDraft();
-    });
-    var porterContinueBtn = document.getElementById('qfPorterContinue');
-    if (porterContinueBtn) {
-      porterContinueBtn.addEventListener('click', function () {
-        setRailValue('hours', 'Set');
-        goNext();
-      });
-    }
-  }
+  /* DP-DAYS / PORTER / HOURS legacy V1 handlers REMOVED in D55 Phase 3.
+     The single qfScreen_schedule above replaces all three. legacy STATE
+     fields (dpDays, porterCount, porterHours, timeStart, timeEnd) are
+     still populated by the schedule continue handler so buildSubmitPayload
+     stays backward compatible with the CRM ingest.
+
+     Searching for "if (SCREENS.dpDays)" or "buildPorterRows"? They lived
+     here pre-D55. See git log for the removal commit. */
 
   /* DETAILS step removed — the "Both services combined" screen was never
      referenced by any FLOWS array. All four service flows use the standard
@@ -2957,21 +3258,57 @@
         if (!a || a.length !== b.length) return false;
         return b.every(function (d) { return a.indexOf(d) > -1; });
       }
+      function _fmtDayList(arr) {
+        if (!arr || !arr.length) return '';
+        if (arr.length === 7) return 'Every day';
+        if (_eqSet(arr, WEEKDAYS_ARR)) return 'Weekdays';
+        if (_eqSet(arr, WEEKEND_ARR)) return 'Weekends';
+        return arr.join(', ');
+      }
+      function _fmt12(hhmm) {
+        if (!hhmm) return '—';
+        var parts = String(hhmm).split(':').map(Number);
+        var h = parts[0], m = parts[1] || 0;
+        var period = h >= 12 ? 'PM' : 'AM';
+        var h12 = h % 12 || 12;
+        return m === 0 ? (h12 + ' ' + period) : (h12 + ':' + String(m).padStart(2,'0') + ' ' + period);
+      }
+      // D55 — dayporter & both flows show one summary line per porter
+      // ("Porter 1 · Mon-Fri · 9 AM - 5 PM"). Janitorial keeps the existing
+      // days + time-window format. For 'both' we stack: cleaning days on top,
+      // each porter line below.
       var daysSummary = '';
-      if (STATE.days && STATE.days.length === 7) daysSummary = 'Every day';
-      else if (_eqSet(STATE.days, WEEKDAYS_ARR)) daysSummary = 'Weekdays';
-      else if (_eqSet(STATE.days, WEEKEND_ARR)) daysSummary = 'Weekends';
-      else if (STATE.days && STATE.days.length) daysSummary = STATE.days.join(', ');
-      // D41 — softened summaries to match the new "When are we welcome?"
-      // framing on Step 5. Ranges marked "loosely" to underline that the
-      // exact time is coordinated, not committed.
-      var TIME_DETAIL = {
-        morning:   'Mornings (loosely 6 am–noon)',
-        afternoon: 'Afternoons (loosely noon–5 pm)',
-        evening:   'Evenings (loosely 5–10 pm)',
-        flexible:  'Anytime, we’ll coordinate'
-      };
-      var timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
+      var timeSubs = [];
+      if (STATE.service === 'dayporter' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
+        var firstPorter = STATE.dpPorters[0];
+        daysSummary = 'Porter 1 · ' + _fmtDayList(firstPorter.days) +
+          ' · ' + _fmt12(firstPorter.sameStart) + ' - ' + _fmt12(firstPorter.sameEnd) +
+          (firstPorter.hoursMode === 'custom' ? ' (custom)' : '');
+        for (var i = 1; i < STATE.dpPorters.length; i++) {
+          var pp = STATE.dpPorters[i];
+          timeSubs.push('Porter ' + pp.id + ' · ' + _fmtDayList(pp.days) +
+            ' · ' + _fmt12(pp.sameStart) + ' - ' + _fmt12(pp.sameEnd) +
+            (pp.hoursMode === 'custom' ? ' (custom)' : ''));
+        }
+      } else if (STATE.service === 'both' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
+        daysSummary = 'Cleaning · ' + (_fmtDayList(STATE.days) || '—');
+        STATE.dpPorters.forEach(function (pp) {
+          timeSubs.push('Porter ' + pp.id + ' · ' + _fmtDayList(pp.days) +
+            ' · ' + _fmt12(pp.sameStart) + ' - ' + _fmt12(pp.sameEnd) +
+            (pp.hoursMode === 'custom' ? ' (custom)' : ''));
+        });
+      } else {
+        // Janitorial / unsure — preserve the legacy days + time-window format.
+        daysSummary = _fmtDayList(STATE.days);
+        // D41 — softened summaries to match the "When are we welcome?" framing.
+        var TIME_DETAIL = {
+          morning:   'Mornings (loosely 6 am–noon)',
+          afternoon: 'Afternoons (loosely noon–5 pm)',
+          evening:   'Evenings (loosely 5–10 pm)',
+          flexible:  'Anytime, we’ll coordinate'
+        };
+        timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
+      }
       setStackedValue('qf2SumWhen', daysSummary, timeSubs);
 
       // WHERE sub-line below The space row: address + optional suite.
@@ -3153,7 +3490,13 @@
         });
         saveBtn.addEventListener('click', function () {
           if (routeBack) {
-            var TARGET = { service: 'welcome', space: 'space', days: 'days', size: 'size' };
+            // D55 — for dayporter, the 'days' edit goes to the new Schedule
+            // screen (porters + days + hours); for janitorial it stays on
+            // the cleaning-days screen. 'both' opens Schedule because that's
+            // where porter config lives; cleaning days have their own edit
+            // path implicitly via the same Schedule landing then back-arrow.
+            var daysTarget = (STATE.service === 'dayporter' || STATE.service === 'both') ? 'schedule' : 'days';
+            var TARGET = { service: 'welcome', space: 'space', days: daysTarget, size: 'size' };
             var step = TARGET[section];
             panel.remove();
             row.classList.remove('is-editing');
@@ -3895,6 +4238,34 @@
           }
         }
       }
+      // D55 — rich per-porter schedule. Backend ALLOWED_KEYS accepts dpPorters
+      // alongside the legacy porterHours/dpDays flat fields. Each porter:
+      //   { id, days:[…], hoursMode:'same'|'custom', sameStart:'HH:MM',
+      //     sameEnd:'HH:MM', customHours:{ Mon:{start,end}, … } }
+      // We strip transient UI fields (none currently) and ship the persistable
+      // shape only. CRM ingest reads dpPorters first, falls back to flat fields.
+      if ((formType === 'dayporter' || formType === 'both') &&
+          Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
+        payload.dpPorters = STATE.dpPorters.map(function (p) {
+          var out = {
+            id: p.id,
+            days: Array.isArray(p.days) ? p.days.slice() : [],
+            hoursMode: p.hoursMode === 'custom' ? 'custom' : 'same',
+            sameStart: p.sameStart || '',
+            sameEnd: p.sameEnd || ''
+          };
+          if (p.hoursMode === 'custom' && p.customHours && typeof p.customHours === 'object') {
+            out.customHours = {};
+            Object.keys(p.customHours).forEach(function (day) {
+              var ch = p.customHours[day];
+              if (ch && ch.start && ch.end) {
+                out.customHours[day] = { start: ch.start, end: ch.end };
+              }
+            });
+          }
+          return out;
+        });
+      }
       // Drop empty/null fields so form_data stays clean
       Object.keys(payload).forEach(function (k) {
         var v = payload[k];
@@ -4025,12 +4396,37 @@
         } catch (_) { /* localStorage may be disabled — ignore */ }
 
         // D53 — telemetry: submit attempt
+        // D55 — added porter_count + total_weekly_hours for the new dayporter funnel.
+        var _dpPorters = Array.isArray(STATE.dpPorters) ? STATE.dpPorters : [];
+        var _porterCount = _dpPorters.length;
+        var _totalWeeklyHours = _dpPorters.reduce(function (sum, p) {
+          if (!p || !Array.isArray(p.days)) return sum;
+          if (p.hoursMode === 'same') {
+            var s = (p.sameStart || '').split(':').map(Number);
+            var e = (p.sameEnd || '').split(':').map(Number);
+            var dur = Math.max(0, (e[0] + (e[1]||0)/60) - (s[0] + (s[1]||0)/60));
+            return sum + dur * p.days.length;
+          } else if (p.customHours) {
+            return sum + p.days.reduce(function (acc, d) {
+              var ch = p.customHours[d];
+              if (!ch) return acc;
+              var s = (ch.start || '').split(':').map(Number);
+              var e = (ch.end || '').split(':').map(Number);
+              return acc + Math.max(0, (e[0] + (e[1]||0)/60) - (s[0] + (s[1]||0)/60));
+            }, 0);
+          }
+          return sum;
+        }, 0);
+        var _hasCustomHours = _dpPorters.some(function (p) { return p && p.hoursMode === 'custom'; });
         qfTrack('quote_submit_attempt', {
           service: STATE.service || null,
           space: STATE.space || null,
           days_count: (STATE.days || []).length,
           has_phone: !!STATE.userPhone,
-          has_special_instructions: !!STATE.specialInstructions
+          has_special_instructions: !!STATE.specialInstructions,
+          porter_count: _porterCount,
+          total_weekly_hours: Math.round(_totalWeeklyHours),
+          has_custom_hours: _hasCustomHours
         });
 
         // Loading state — Fix #47 aria-busy for screen readers

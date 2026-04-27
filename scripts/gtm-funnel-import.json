@@ -138,7 +138,10 @@
               { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "space" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - space}}" } ] },
               { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "days_count" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - days_count}}" } ] },
               { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "has_phone" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - has_phone}}" } ] },
-              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "has_special_instructions" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - has_special_instructions}}" } ] }
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "has_special_instructions" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - has_special_instructions}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "porter_count" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - porter_count}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "total_weekly_hours" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - total_weekly_hours}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "has_custom_hours" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - has_custom_hours}}" } ] }
             ]
           },
           { "type": "TAG_REFERENCE", "key": "measurementId", "value": "GA4 - All Pages" }
@@ -202,6 +205,114 @@
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": { "type": "MAP" },
         "consentSettings": { "consentStatus": "NOT_SET" }
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "tagId": "1007",
+        "name": "GA4 Event - quote_porter_count_picked",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "quote_porter_count_picked" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "count" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - count}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "previous" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - previous}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "source" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - source}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "service" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - service}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "space" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - space}}" } ] }
+            ]
+          },
+          { "type": "TAG_REFERENCE", "key": "measurementId", "value": "GA4 - All Pages" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["10007"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "tagId": "1008",
+        "name": "GA4 Event - quote_porter_added",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "quote_porter_added" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "count" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - count}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "service" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - service}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "space" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - space}}" } ] }
+            ]
+          },
+          { "type": "TAG_REFERENCE", "key": "measurementId", "value": "GA4 - All Pages" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["10008"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "tagId": "1009",
+        "name": "GA4 Event - quote_porter_removed",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "quote_porter_removed" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "count" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - count}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "removed_index" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - removed_index}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "service" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - service}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "space" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - space}}" } ] }
+            ]
+          },
+          { "type": "TAG_REFERENCE", "key": "measurementId", "value": "GA4 - All Pages" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["10009"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "tagId": "1010",
+        "name": "GA4 Event - quote_schedule_customized",
+        "type": "gaawe",
+        "parameter": [
+          { "type": "BOOLEAN", "key": "sendEcommerceData", "value": "false" },
+          { "type": "TEMPLATE", "key": "eventName", "value": "quote_schedule_customized" },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "porter_id" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - porter_id}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "total_porters" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - total_porters}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "service" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - service}}" } ] },
+              { "type": "MAP", "map": [ { "type": "TEMPLATE", "key": "name", "value": "space" }, { "type": "TEMPLATE", "key": "value", "value": "{{DLV - space}}" } ] }
+            ]
+          },
+          { "type": "TAG_REFERENCE", "key": "measurementId", "value": "GA4 - All Pages" }
+        ],
+        "fingerprint": "0",
+        "firingTriggerId": ["10010"],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": { "type": "MAP" },
+        "consentSettings": { "consentStatus": "NOT_SET" }
       }
     ],
     "trigger": [
@@ -258,6 +369,42 @@
         "type": "CUSTOM_EVENT",
         "customEventFilter": [ { "type": "EQUALS", "parameter": [ { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" }, { "type": "TEMPLATE", "key": "arg1", "value": "quote_submit_failure" } ] } ],
         "fingerprint": "0"
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "triggerId": "10007",
+        "name": "Quote · Porter Count Picked",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [ { "type": "EQUALS", "parameter": [ { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" }, { "type": "TEMPLATE", "key": "arg1", "value": "quote_porter_count_picked" } ] } ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "triggerId": "10008",
+        "name": "Quote · Porter Added",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [ { "type": "EQUALS", "parameter": [ { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" }, { "type": "TEMPLATE", "key": "arg1", "value": "quote_porter_added" } ] } ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "triggerId": "10009",
+        "name": "Quote · Porter Removed",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [ { "type": "EQUALS", "parameter": [ { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" }, { "type": "TEMPLATE", "key": "arg1", "value": "quote_porter_removed" } ] } ],
+        "fingerprint": "0"
+      },
+      {
+        "accountId": "6347545674",
+        "containerId": "248138470",
+        "triggerId": "10010",
+        "name": "Quote · Schedule Customized",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [ { "type": "EQUALS", "parameter": [ { "type": "TEMPLATE", "key": "arg0", "value": "{{_event}}" }, { "type": "TEMPLATE", "key": "arg1", "value": "quote_schedule_customized" } ] } ],
+        "fingerprint": "0"
       }
     ],
     "variable": [
@@ -281,7 +428,16 @@
       { "accountId": "6347545674", "containerId": "248138470", "variableId": "20018", "name": "DLV - time_to_submit_ms", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "time_to_submit_ms" } ], "fingerprint": "0" },
       { "accountId": "6347545674", "containerId": "248138470", "variableId": "20019", "name": "DLV - needs_site_walk", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "needs_site_walk" } ], "fingerprint": "0" },
       { "accountId": "6347545674", "containerId": "248138470", "variableId": "20020", "name": "DLV - status", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "status" } ], "fingerprint": "0" },
-      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20021", "name": "DLV - reason", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "reason" } ], "fingerprint": "0" }
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20021", "name": "DLV - reason", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "reason" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20022", "name": "DLV - count", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "count" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20023", "name": "DLV - previous", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "previous" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20024", "name": "DLV - source", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "source" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20025", "name": "DLV - removed_index", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "removed_index" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20026", "name": "DLV - porter_id", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "porter_id" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20027", "name": "DLV - total_porters", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "total_porters" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20028", "name": "DLV - porter_count", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "porter_count" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20029", "name": "DLV - total_weekly_hours", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "total_weekly_hours" } ], "fingerprint": "0" },
+      { "accountId": "6347545674", "containerId": "248138470", "variableId": "20030", "name": "DLV - has_custom_hours", "type": "v", "parameter": [ { "type": "INTEGER", "key": "dataLayerVersion", "value": "2" }, { "type": "BOOLEAN", "key": "setDefaultValue", "value": "false" }, { "type": "TEMPLATE", "key": "name", "value": "has_custom_hours" } ], "fingerprint": "0" }
     ],
     "fingerprint": "0",
     "tagManagerUrl": "https://tagmanager.google.com/#/versions/accounts/6347545674/containers/248138470/versions/0?apiLink=version"

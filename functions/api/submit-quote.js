@@ -169,10 +169,11 @@ export async function onRequestPost(context) {
     }
     // Whitelist + coerce: drop any key not in KEY_MAP, cap each string to MAX_STR.
     // V2 2026-04-24 — added timeOfDay, serviceCertainty, needsSiteWalk, scheduleAtypical.
+    // D55 2026-04-26 — added dpPorters (rich per-porter schedule array, max 6 entries).
     const ALLOWED_KEYS = new Set([
       'em','fn','ln','ph','co','pos','addr','suite','referral','notes','contactPref','formType',
       'space','spaceOther','urg','size','exactSize','janDays',
-      'hrs','customHrs','startTime','porterHours','dpDays','porters','porterCount','dpAreas','areaOther',
+      'hrs','customHrs','startTime','porterHours','dpDays','dpPorters','porters','porterCount','dpAreas','areaOther',
       'timeOfDay','serviceCertainty','needsSiteWalk','scheduleAtypical',
       'turnstileToken'
     ]);
@@ -181,6 +182,34 @@ export async function onRequestPost(context) {
       const v = body[k];
       if (typeof v === 'string' && v.length > MAX_STR) body[k] = v.slice(0, MAX_STR);
       if (Array.isArray(v)) body[k] = v.slice(0, 20).map((s) => typeof s === 'string' ? s.slice(0, MAX_STR) : s);
+    }
+    // D55 2026-04-26 — dpPorters: array of porter-objects. Cap to 6 (matches
+    // frontend MAX_PORTERS) and shape-validate each entry. Anything malformed
+    // is dropped silently — frontend enforces the schema; this is defense-in-depth.
+    if (Array.isArray(body.dpPorters)) {
+      const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+      const VALID_DAYS = new Set(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']);
+      body.dpPorters = body.dpPorters.slice(0, 6).map((p, i) => {
+        if (!p || typeof p !== 'object') return null;
+        const days = Array.isArray(p.days) ? p.days.filter((d) => VALID_DAYS.has(d)).slice(0, 7) : [];
+        const hoursMode = p.hoursMode === 'custom' ? 'custom' : 'same';
+        const sameStart = (typeof p.sameStart === 'string' && TIME_RE.test(p.sameStart)) ? p.sameStart : '';
+        const sameEnd = (typeof p.sameEnd === 'string' && TIME_RE.test(p.sameEnd)) ? p.sameEnd : '';
+        const out = { id: Number(p.id) || (i + 1), days, hoursMode, sameStart, sameEnd };
+        if (hoursMode === 'custom' && p.customHours && typeof p.customHours === 'object') {
+          out.customHours = {};
+          for (const day of Object.keys(p.customHours)) {
+            if (!VALID_DAYS.has(day)) continue;
+            const ch = p.customHours[day];
+            if (ch && typeof ch === 'object' &&
+                typeof ch.start === 'string' && TIME_RE.test(ch.start) &&
+                typeof ch.end === 'string' && TIME_RE.test(ch.end)) {
+              out.customHours[day] = { start: ch.start, end: ch.end };
+            }
+          }
+        }
+        return out;
+      }).filter(Boolean);
     }
     // V2 2026-04-24 — pos validation: trim + max 80 chars (free-text role field).
     if (typeof body.pos === 'string') {
@@ -272,6 +301,8 @@ export async function onRequestPost(context) {
       hrs: 'hours_per_day', customHrs: 'custom_hours',
       startTime: 'start_time', dpDays: 'coverage_days',
       porterHours: 'porter_hours',
+      // D55 2026-04-26 — dpPorters serialized as JSON for human-readable email/CRM display
+      dpPorters: 'porter_schedule',
       porters: 'num_porters', porterCount: 'porter_count_custom',
       dpAreas: 'areas_covered', areaOther: 'area_custom',
       // V2 2026-04-24 — new keys
