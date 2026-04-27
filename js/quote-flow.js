@@ -2843,22 +2843,32 @@
             'aria-label': 'Remove porter ' + p.id,
             onclick: function (e) { e.stopPropagation(); dpRemovePorter(porterIdx); }
           }, '×'),
-          dpEl('span', {
+          // D62 — chevron is the AT-accessible accordion toggle. <button>
+          // with aria-expanded so screen readers announce open/closed state.
+          dpEl('button', {
+            type: 'button',
             class: 'qf-dp-porter-chevron',
-            'aria-hidden': 'true',
-            html: '<svg viewBox="0 0 14 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6 6-6"/></svg>'
+            'aria-expanded': isOpen ? 'true' : 'false',
+            'aria-label': (isOpen ? 'Collapse' : 'Expand') + ' porter ' + p.id,
+            onclick: function (e) { e.stopPropagation(); dpOpenPorter(porterIdx); },
+            html: '<svg viewBox="0 0 14 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 1l6 6 6-6"/></svg>'
           })
         ])
       ];
 
+      // D62 — header is a non-interactive container. Click anywhere on it
+      // still toggles the accordion (sighted UX shortcut), but it does NOT
+      // claim the role of a button — that lives on the chevron <button>
+      // inside headerKids. This eliminates the WCAG nested-interactive
+      // violation (a button hosting other buttons), while keeping the row
+      // tappable for sighted users via plain onclick + cursor:pointer.
       var header = dpEl('header', {
         class: 'qf-dp-porter-header',
-        onclick: function () { dpOpenPorter(porterIdx); },
-        role: 'button',
-        tabindex: '0',
-        'aria-expanded': isOpen ? 'true' : 'false',
-        onkeydown: function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dpOpenPorter(porterIdx); }
+        onclick: function (e) {
+          // Skip toggle when click landed on a real interactive child
+          // (Edit / × / chevron) so their handlers run cleanly.
+          if (e.target.closest('button, a, input, [role="button"]')) return;
+          dpOpenPorter(porterIdx);
         }
       }, headerKids);
 
