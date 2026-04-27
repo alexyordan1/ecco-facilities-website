@@ -1655,6 +1655,34 @@
     var digits = normalizePhone(v);
     return digits.length >= 10 && digits.length <= 15;
   }
+  // D63 — progressive US phone formatter "(XXX) XXX-XXXX". Reduces typo
+  // rate at the contact step + reads more professional in the snapshot.
+  // Non-US digits or pasted formats: leaves the user's input alone (the
+  // validator above accepts any 10–15 digit string).
+  function formatUSPhone(input) {
+    var digits = normalizePhone(input);
+    if (!digits) return '';
+    // Strip leading 1 country code so the format reads as local.
+    if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
+    if (digits.length > 10) return input; // probably not a US number — leave alone
+    if (digits.length < 4)  return digits;
+    if (digits.length < 7)  return '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+    return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6, 10);
+  }
+  function attachPhoneAutoFormat(el) {
+    if (!el || el._qfPhoneFormatWired) return;
+    el._qfPhoneFormatWired = true;
+    el.addEventListener('input', function () {
+      var caretAtEnd = el.selectionStart === el.value.length;
+      var formatted = formatUSPhone(el.value);
+      if (formatted !== el.value) {
+        el.value = formatted;
+        if (caretAtEnd) {
+          try { el.setSelectionRange(formatted.length, formatted.length); } catch (_) {}
+        }
+      }
+    });
+  }
   // Name normalizer — collapses internal runs of whitespace (tabs, newlines,
   // multiple spaces) to a single space and trims. Applied to first/last name
   // wherever the user can type into the form (info step + review edit panel).
@@ -3316,6 +3344,8 @@
         }
       });
     }
+    // D63 — wire US-style auto-format on the phone input as the user types.
+    attachPhoneAutoFormat(document.getElementById('qfUserPhone'));
 
     var qf2NotesArea = document.getElementById('qfSpecialInstructions');
     var qf2NotesCounter = document.getElementById('qf2NotesCounter');
