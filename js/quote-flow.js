@@ -4260,12 +4260,25 @@
       if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'A valid address or ZIP is missing.' });
       if (!STATE.space) errs.push({ field: 'space', msg: 'Space type is missing.' });
       if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Space size is missing.' });
-      if (!STATE.days || !STATE.days.length) errs.push({ field: 'days', msg: 'Please pick at least one service day.' });
-      // For 'both' we also require porter days. They may legitimately match
-      // cleaning days (the "Same as cleaning" preset copies them over), but
-      // the STATE slot must be populated so payload carries the right list.
-      if (STATE.service === 'both' && (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length)) {
-        errs.push({ field: 'dpDays', msg: 'Please pick the days you need your porter on-site.' });
+      // D61 — fix critical bug: pure Day Porter flow doesn't visit the
+      // janitorial days screen, so STATE.days is empty. The old check
+      // rejected every Day Porter submission. Now: jan/unsure require
+      // STATE.days (cleaning); dayporter requires STATE.dpDays (porter
+      // days, populated by the schedule continue handler from the union
+      // of dpPorters[].days); both require both.
+      if (STATE.service === 'dayporter') {
+        if (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length) {
+          errs.push({ field: 'dpDays', msg: 'Please pick at least one day for your porter.' });
+        }
+      } else {
+        if (!STATE.days || !STATE.days.length) {
+          errs.push({ field: 'days', msg: 'Please pick at least one service day.' });
+        }
+        // 'both' also requires porter days. May legitimately match cleaning
+        // days, but the STATE slot must carry the right list for the payload.
+        if (STATE.service === 'both' && (!Array.isArray(STATE.dpDays) || !STATE.dpDays.length)) {
+          errs.push({ field: 'dpDays', msg: 'Please pick the days you need your porter on-site.' });
+        }
       }
       if ((STATE.service === 'dayporter' || STATE.service === 'both') && !STATE.porterCount) {
         errs.push({ field: 'porters', msg: 'Porter count is missing.' });

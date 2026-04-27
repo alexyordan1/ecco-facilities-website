@@ -167,4 +167,48 @@ test.describe('Day Porter — full flow', () => {
 
     h.expectNoJsErrors(page);
   });
+
+  test('7 — D61 regression: Day Porter submit does NOT fail validation on STATE.days', async ({ page }) => {
+    // Pre-D61, validateForSubmit() required STATE.days for every flow,
+    // but pure Day Porter never visits qfScreen_days, so submit always
+    // showed "Please pick at least one service day." This test guards
+    // the fix: stub the submit network call, click submit, assert that
+    // (a) the form posts to /api/submit-quote (validation passed) and
+    // (b) no validation toast for missing days appears.
+    await page.click('.qf2-card[data-service="dayporter"]');
+    await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
+    await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue');
+    await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_contact');
+
+    // Stub the submit endpoint so we don't actually submit a real lead.
+    let postedPayload = null;
+    await page.route('**/api/submit-quote', async (route) => {
+      postedPayload = JSON.parse(route.request().postData() || '{}');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, ref: 'EDP-TEST123' }),
+      });
+    });
+
+    await page.locator('#qfContactSubmit').scrollIntoViewIfNeeded();
+    await page.click('#qfContactSubmit');
+    await page.waitForTimeout(2500);
+
+    // Validation passed → request was POSTed.
+    expect(postedPayload).not.toBeNull();
+    expect(postedPayload.formType).toBe('dayporter');
+    expect(postedPayload.dpPorters).toBeTruthy();
+    expect(postedPayload.dpPorters.length).toBeGreaterThan(0);
+    // No "service day" validation toast leaked through.
+    const toasts = await page.locator('.qf-toast-body').allTextContents();
+    const dayValidationToast = toasts.find((t) => /service day/i.test(t));
+    expect(dayValidationToast).toBeUndefined();
+  });
 });
