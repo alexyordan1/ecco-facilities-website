@@ -3034,7 +3034,14 @@
       mutations.forEach(function (m) {
         if (m.target === SCREENS.schedule && SCREENS.schedule.classList.contains('is-active')) {
           if (!STATE.dpPorters || !STATE.dpPorters.length) {
-            STATE.dpPorters = [dpMakePorter(1)];
+            var seed = dpMakePorter(1);
+            // For 'both' flow, prefer the cleaning days the user just picked
+            // over space defaults — the user's intent to "do both on the same
+            // schedule" is the likeliest interpretation.
+            if (STATE.service === 'both' && Array.isArray(STATE.days) && STATE.days.length) {
+              seed.days = STATE.days.slice();
+            }
+            STATE.dpPorters = [seed];
             STATE.dpPorterCount = 1;
             dpUI.openIdx = 0;
           }
