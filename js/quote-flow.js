@@ -149,8 +149,12 @@
   var typingDots   = document.getElementById('qfTypingDots');
   var liveNumEl    = document.getElementById('qfLiveNum');
   var askAlinaBtn  = document.getElementById('qfAskAlinaBtn');
-  // V1 exit overlay retired — V2 wireExitIntent() builds the modal at runtime.
-  // Variables kept null so the legacy handlers below short-circuit harmlessly.
+  // Exit-intent overlay fully retired in D76. The pattern (cursor-leave
+  // captures email) read as a TaskRabbit-style urgency grab, conflicting
+  // with the "Adult, no urgency" voice rule in PRODUCT.md. The form
+  // already auto-saves a draft on consent (see saveDraft + resume banner),
+  // which gives returning users their progress without ambushing them on
+  // the way out. Legacy V1 handler vars below short-circuit harmlessly.
   var exitOverlay  = null;
   var exitClose    = null;
   var exitForm     = null;
@@ -317,139 +321,6 @@
     var idx = flow.indexOf(name);
     return idx >= 0 ? idx : -1;
   }
-
-  /** V2 2026-04-25 — exit-intent modal (mockup G demo B). Desktop only.
-   * Fires when the cursor exits via the top edge of the viewport before the
-   * user has supplied an email. One-shot per session. Renders a centered
-   * modal with email input + "No thanks" / "Send it" actions. On submit
-   * we capture STATE.userEmail, save the draft, and close the modal so the
-   * user can pick up later via the resume banner.
-   */
-  (function wireExitIntent() {
-    if (typeof window === 'undefined') return;
-    if (!matchMedia || !matchMedia('(min-width: 768px)').matches) return; // desktop only
-    var fired = false;
-    var SHOWN_KEY = 'ecco_quote_exit_shown_v1';
-    try { if (sessionStorage.getItem(SHOWN_KEY)) fired = true; } catch (_) {}
-
-    function shouldFire() {
-      if (fired) return false;
-      // Don't fire if already on review/success or after we have email
-      var active = document.querySelector('.qf-screen.is-active');
-      if (active && (active.id === 'qfScreen_contact' || active.id === 'qfScreen_success')) return false;
-      // Don't fire if user already typed an email
-      var emailEl = document.getElementById('qfUserEmail');
-      if (emailEl && emailEl.value && emailEl.value.indexOf('@') > -1) return false;
-      return true;
-    }
-
-    function showModal() {
-      if (!shouldFire()) return;
-      fired = true;
-      try { sessionStorage.setItem(SHOWN_KEY, '1'); } catch (_) {}
-
-      var overlay = document.createElement('div');
-      overlay.className = 'qf2-exit-overlay';
-      var modal = document.createElement('div');
-      modal.className = 'qf2-exit-modal';
-      var ava = document.createElement('div');
-      ava.className = 'qf2-exit-modal-avatar';
-      var img = document.createElement('img');
-      img.src = 'images/alina-avatar-96.jpg';
-      img.alt = '';
-      img.width = 56; img.height = 56;
-      ava.appendChild(img);
-      modal.appendChild(ava);
-
-      var hand = document.createElement('span');
-      hand.className = 'qf2-exit-modal-hand';
-      hand.textContent = 'Hey, leaving so soon?';
-      modal.appendChild(hand);
-
-      var h2 = document.createElement('h2');
-      h2.appendChild(document.createTextNode('Drop your '));
-      var em = document.createElement('em');
-      em.textContent = 'email';
-      h2.appendChild(em);
-      modal.appendChild(h2);
-
-      var p = document.createElement('p');
-      p.textContent = "I'll send you the form to finish later, no pressure.";
-      modal.appendChild(p);
-
-      var fieldWrap = document.createElement('div');
-      fieldWrap.className = 'qf2-field';
-      var input = document.createElement('input');
-      input.type = 'email';
-      input.placeholder = 'you@company.com';
-      input.id = 'qf2ExitEmail';
-      input.setAttribute('aria-label', 'Email address');
-      var prevEmail = document.getElementById('qfUserEmail');
-      if (prevEmail && prevEmail.value) input.value = prevEmail.value;
-      fieldWrap.appendChild(input);
-      modal.appendChild(fieldWrap);
-
-      var actions = document.createElement('div');
-      actions.className = 'qf2-exit-modal-actions';
-      var noBtn = document.createElement('button');
-      noBtn.type = 'button';
-      noBtn.className = 'qf2-exit-modal-no';
-      noBtn.textContent = 'No thanks';
-      var yesBtn = document.createElement('button');
-      yesBtn.type = 'button';
-      yesBtn.className = 'qf2-exit-modal-yes';
-      yesBtn.textContent = 'Send it →';
-
-      function close() { try { overlay.remove(); } catch(e){} }
-
-      noBtn.addEventListener('click', close);
-      yesBtn.addEventListener('click', function () {
-        var v = input.value.trim();
-        if (!v || !EMAIL_RE.test(v)) {
-          input.focus();
-          input.classList.add('qf-input-invalid');
-          qfToast({ type:'warn', title:'Valid email needed', message:'We need a real email to send your resume link.', duration: 4500 });
-          return;
-        }
-        STATE.userEmail = v;
-        if (prevEmail) prevEmail.value = v;
-        try { saveDraft(); } catch(e){}
-        // Persist the partial lead so we can follow up (mirrors legacy V1 behaviour).
-        var originalText = yesBtn.textContent;
-        yesBtn.disabled = true;
-        yesBtn.textContent = 'Sending…';
-        fetch('/api/capture-partial', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: v, firstName: STATE.userName || '', phone: STATE.userPhone || '' })
-        }).catch(function(){ /* silent — backend may be offline */ })
-          .finally(function () {
-            yesBtn.disabled = false;
-            yesBtn.textContent = originalText;
-            qfToast({ type:'success', title:'We’ve got your spot', message:'We’ll follow up with ' + v + ' so you can pick this up later.' });
-            close();
-          });
-      });
-      overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
-      document.addEventListener('keydown', function escClose(e) {
-        if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escClose); }
-      });
-
-      actions.appendChild(noBtn);
-      actions.appendChild(yesBtn);
-      modal.appendChild(actions);
-      overlay.appendChild(modal);
-      document.body.appendChild(overlay);
-      setTimeout(function(){ input.focus(); }, 80);
-    }
-
-    document.addEventListener('mouseleave', function (e) {
-      // Only fire when cursor exits via the top of the viewport
-      if (e.clientY > 0) return;
-      // Add a tiny delay so accidental scroll-to-tab-bar doesn't fire it
-      showModal();
-    });
-  })();
 
   /** V2 2026-04-25 — pure heuristic: returns true if the picked space + time
    * combo is unusual enough to warrant a heads-up on the site visit. Pure
