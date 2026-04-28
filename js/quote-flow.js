@@ -1980,7 +1980,7 @@
       ava.appendChild(img);
       var text = document.createElement('div');
       text.className = 'qf2-atypical-heads-up-text';
-      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. I'll double-check with you when I prepare the quote, no worries ~";
+      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. I'll double-check with you when I prepare the quote, no worries.";
       bubble.appendChild(ava);
       bubble.appendChild(text);
       // Insert after the prompt
@@ -2547,7 +2547,7 @@
           allChips.forEach(c => { c.classList.remove('is-selected'); c.setAttribute('aria-pressed', 'false'); });
           chip.classList.add('is-selected');
           chip.setAttribute('aria-pressed', 'true');
-          if (hadOthers) qf2ShowToast('Cleared others. Flexible it is ~');
+          if (hadOthers) qf2ShowToast('Cleared others. Flexible it is.');
         } else {
           // Toggle this one. If Flexible was selected, deselect it.
           var flex = allChips.find(c => c.getAttribute('data-time') === 'flexible');
@@ -2791,10 +2791,10 @@
           ])
         ]),
         dur > 0 && dpEl('div', { class: 'qf-dp-time-summary', html:
-          '~ <em>' + dur.toFixed(0) + '</em> hours per day · <em>' +
+          '<em>' + dur.toFixed(0) + '</em> hours per day · <em>' +
           totalForPorter.toFixed(0) + '</em> hours per week' }),
         dur > 0 && p.days.length > 0 && dpEl('div', { class: 'qf-dp-team-preview', html:
-          '<span class="qf-dp-team-preview-tag">~ I’ll send the team:</span> Porter ' + p.id +
+          '<span class="qf-dp-team-preview-tag">I’ll send the team:</span> Porter ' + p.id +
           ' works <strong>' + dpFmtDays(p.days) + '</strong>, <strong>' +
           dpFmtTime(p.sameStart) + ' to ' + dpFmtTime(p.sameEnd) + '</strong>.' })
       ]);
@@ -2802,7 +2802,7 @@
 
     function dpRenderCustomRows(porterIdx) {
       var p = STATE.dpPorters[porterIdx];
-      if (!p.days.length) return dpEl('div', { class: 'qf-dp-custom-empty' }, '~ Pick days first to set hours');
+      if (!p.days.length) return dpEl('div', { class: 'qf-dp-custom-empty' }, 'Pick days first to set hours');
       return dpEl('div', { class: 'qf-dp-custom-rows' }, p.days.map(function (day) {
         var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
         var err = dpDuration(ch.start, ch.end) <= 0 ? ' is-error' : '';
@@ -2930,7 +2930,7 @@
       if (valid) {
         var n = STATE.dpPorters.length;
         var hours = dpTotalWeeklyHours();
-        qfDpStatus.textContent = '~ Looks good · ' + n + ' porter' + (n > 1 ? 's' : '') +
+        qfDpStatus.textContent = 'Looks good · ' + n + ' porter' + (n > 1 ? 's' : '') +
           ', ' + hours.toFixed(0) + ' hours per week';
         qfDpStatus.classList.add('is-ok');
       } else {
@@ -3213,7 +3213,7 @@
         if (STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
-          visitInd.textContent = "I'll see it in person ~";
+          visitInd.textContent = "I'll see it in person.";
           spaceEl.appendChild(visitInd);
         }
       }
@@ -3246,7 +3246,7 @@
       if (STATE.needsSiteWalk && ctaBtn) {
         var subtext = document.createElement('p');
         subtext.className = 'qf2-cta-subtext';
-        subtext.textContent = "I'll email you a calendar link right after ~";
+        subtext.textContent = "I'll email you a calendar link right after.";
         ctaBtn.insertAdjacentElement('afterend', subtext);
       }
 
@@ -3409,7 +3409,7 @@
 
         var header = document.createElement('p');
         header.className = 'qf2-sum-edit-header';
-        header.textContent = "Let's tweak this ~";
+        header.textContent = "Let's tweak this.";
         panel.appendChild(header);
 
         var fieldsWrap = document.createElement('div');
@@ -4593,7 +4593,7 @@
             if (qf2Subtitle && !qf2Subtitle.querySelector('.qf2-success-extra')) {
               var extra = document.createElement('span');
               extra.className = 'qf2-success-extra';
-              extra.textContent = 'Plus a link to pick a time for your visit ~';
+              extra.textContent = 'Plus a link to pick a time for your visit.';
               qf2Subtitle.appendChild(extra);
             }
             // Highlight the third timeline item as the site visit step
