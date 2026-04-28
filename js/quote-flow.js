@@ -470,7 +470,7 @@
   }
 
   /* -----------------------------------------------------------------------
-     Rail progress indicator — "Step X of Y · ~N min left".
+     Rail progress indicator — "Step X of Y · About N min left".
      Replaces the pricing estimate per user preference (no dollar amounts shown).
      ----------------------------------------------------------------------- */
   function qfRenderRailProgress() {
@@ -500,7 +500,7 @@
       if (remaining <= 0) {
         timeEl.textContent = 'Almost done';
       } else {
-        timeEl.textContent = '~' + mins + ' min left';
+        timeEl.textContent = 'About ' + mins + ' min left';
       }
     }
     wrap.setAttribute('data-state', currentIdx >= flow.length - 2 ? 'final' : 'active');
@@ -1901,7 +1901,7 @@
         var addr = addressInput ? addressInput.value.trim() : '';
 
         if (!companyVal) {
-          showLocErr("Whose space are we cleaning? (Even your own name works ~)", companyInput);
+          showLocErr("Whose space are we cleaning? (Even your own name works.)", companyInput);
           return;
         }
         if (companyVal.length > 120) companyVal = companyVal.slice(0, 120);
