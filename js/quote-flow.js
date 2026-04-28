@@ -523,6 +523,21 @@
     if (pillLabel) pillLabel.textContent = isFinalInteractive
       ? 'Last step'
       : 'Step ' + displayStep + ' of ' + totalSteps;
+
+    // D70 — also sync the per-screen flowbar step-count labels so they
+    // match the active service flow. Markup hardcodes things like
+    // "Step 2 of 7" assuming janitorial; pure Day Porter flow is shorter
+    // and Combined is longer. Replace label text on the currently active
+    // screen only (other screens are inert via [hidden]).
+    var activeScreen = document.querySelector('.qf-screen.qf2-stage.is-active');
+    if (activeScreen) {
+      var labelText = isFinalInteractive
+        ? 'Last step'
+        : 'Step ' + displayStep + ' of ' + totalSteps;
+      activeScreen.querySelectorAll('.qf2-flowbar-step-count, .qf2-flowbar-mobile-label').forEach(function (el) {
+        el.textContent = labelText;
+      });
+    }
   }
 
   /* -----------------------------------------------------------------------
@@ -2029,7 +2044,7 @@
       text.className = 'qf2-out-of-area-text';
       var hand = document.createElement('span');
       hand.className = 'qf2-hand';
-      hand.textContent = 'Hmm —';
+      hand.textContent = 'Hmm,';
       text.appendChild(hand);
       text.appendChild(document.createTextNode(" that's outside NYC. Want me to add you to the waitlist?"));
       var actions = document.createElement('div');
@@ -3227,7 +3242,7 @@
         if (STATE.serviceCertainty === 'guided_via_quiz') {
           var badge = document.createElement('div');
           badge.className = 'qf2-confirm-badge';
-          badge.textContent = "Alina helps — I'll confirm the details";
+          badge.textContent = "Alina helps. I'll confirm the details.";
           svcEl.parentElement.appendChild(badge);
         }
       }
