@@ -1609,13 +1609,22 @@
     });
   }
   if (SCREENS.info) {
-    // V2 — error display. Falls back to legacy showInfoError if the V2 element
-    // doesn't exist (e.g. on dayporter/both/unsure flows that still use v1 HTML).
-    var qf2InfoErr = document.getElementById('qf2InfoErr');
+    // D77 — per-field errors on Info screen. Each validatable field has its
+    // own error slot below it; the message lives next to the field that
+    // failed instead of as a single bottom-aggregate. Falls back to legacy
+    // showInfoError if no slot is mapped (e.g. v1 HTML or unknown focusEl).
+    var INFO_ERR_MAP = {
+      qfUserFirstName: 'qf2InfoErr_firstName',
+      qfUserLastName:  'qf2InfoErr_lastName',
+      qfUserEmail:     'qf2InfoErr_email'
+    };
     function qf2ShowInfoErr(msg, focusEl) {
-      if (qf2InfoErr) {
-        qf2InfoErr.textContent = msg;
-        qf2InfoErr.hidden = false;
+      qf2ClearInfoErr();
+      var errId = focusEl && INFO_ERR_MAP[focusEl.id];
+      var errEl = errId ? document.getElementById(errId) : null;
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.hidden = false;
       } else {
         showInfoError(msg, focusEl);
       }
@@ -1624,8 +1633,10 @@
       }
     }
     function qf2ClearInfoErr() {
-      if (qf2InfoErr) qf2InfoErr.hidden = true;
-      else clearInfoError();
+      Object.keys(INFO_ERR_MAP).forEach(function (inputId) {
+        var el = document.getElementById(INFO_ERR_MAP[inputId]);
+        if (el) el.hidden = true;
+      });
       ['qfUserFirstName','qfUserLastName','qfUserEmail','qfUserPosition'].forEach(function(id){
         var el = document.getElementById(id);
         if (el) el.classList.remove('qf-input-invalid');
@@ -5247,9 +5258,9 @@
     var t = e.target;
     var isTyping = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
 
-    // Esc → goBack (works anywhere except modal/datepicker contexts)
+    // Esc → goBack (works anywhere except an open edit panel)
     if (e.key === 'Escape' && typeof goBack === 'function') {
-      if (document.querySelector('.qf2-edit-panel, .qf2-exit-overlay:not([hidden])')) return;
+      if (document.querySelector('.qf2-edit-panel')) return;
       e.preventDefault();
       goBack();
       return;

@@ -68,15 +68,16 @@ test.describe('Email validation', () => {
     await page.fill('#qfUserLastName', 'User');
     await page.fill('#qfUserEmail', 'not-an-email');
     await page.locator('#qfUserEmail').blur();
-    await expect(page.locator('#qf2InfoErr')).toBeVisible();
+    // D77 — error now lives in a per-field slot adjacent to the email input.
+    await expect(page.locator('#qf2InfoErr_email')).toBeVisible();
   });
 
   test('Good email after bad clears error', async ({ page }) => {
     await page.fill('#qfUserEmail', 'bad');
     await page.locator('#qfUserEmail').blur();
-    await expect(page.locator('#qf2InfoErr')).toBeVisible();
+    await expect(page.locator('#qf2InfoErr_email')).toBeVisible();
     await page.fill('#qfUserEmail', 'good@example.com');
     await page.locator('#qfUserEmail').blur();
-    await expect(page.locator('#qf2InfoErr')).toBeHidden();
+    await expect(page.locator('#qf2InfoErr_email')).toBeHidden();
   });
 });
