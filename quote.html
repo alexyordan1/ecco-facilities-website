@@ -53,7 +53,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=14.7">
-<link rel="stylesheet" href="css/quote-flow.css?v=45.5">
+<link rel="stylesheet" href="css/quote-flow.css?v=45.6">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -270,6 +270,25 @@
         <span class="qf-rail-pill-label" id="qfRailPillLabel">Step 1 of 7</span>
       </div>
     </header>
+
+    <!-- D91 — keyboard-shortcut affordance (desktop only). Pure CSS:
+         hover reveals the popover for mouse users; Enter/Space on the
+         <summary> toggles the pinned/open state for keyboard users.
+         Lives outside the (display:none on V2) qf-flow-bar header so
+         it actually renders. Hidden on mobile via @media rule —
+         touch users don't reach for a keyboard. -->
+    <details class="qf-kbd-help" id="qfKbdHelp">
+      <summary class="qf-kbd-help-trigger" aria-label="Show keyboard shortcuts" title="Keyboard shortcuts"><span aria-hidden="true">?</span></summary>
+      <div class="qf-kbd-help-panel" role="dialog" aria-label="Keyboard shortcuts">
+        <p class="qf-kbd-help-title">Keyboard shortcuts</p>
+        <dl class="qf-kbd-help-list">
+          <dt><kbd>Esc</kbd></dt><dd>back one step</dd>
+          <dt><kbd>Enter</kbd></dt><dd>continue / submit</dd>
+          <dt><kbd>1</kbd><span aria-hidden="true">–</span><kbd>9</kbd></dt><dd>pick by position</dd>
+          <dt><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>navigate day chips</dd>
+        </dl>
+      </div>
+    </details>
 
     <!-- STEP 1 · WELCOME -->
     <!-- V2 2026-04-25 — rebuilt from mockup G. Uses qf2- design system
