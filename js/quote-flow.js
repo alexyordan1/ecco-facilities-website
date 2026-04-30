@@ -4988,7 +4988,10 @@
       var hint = document.createElement('div');
       hint.className = 'qf2-first-visit-hint';
       hint.setAttribute('role', 'note');
-      hint.innerHTML = '<span class="qf2-first-visit-msg">Takes about 2 minutes &mdash; your answers auto-save as you go.</span>'
+      // D89 — em-dash → period for brand-voice rule (Adult, no urgency).
+      // First-visit hint was the last em-dash leak in user-visible copy
+      // after D71/D74/D83 scrubbed the others.
+      hint.innerHTML = '<span class="qf2-first-visit-msg">Takes about 2 minutes. Your answers auto-save as you go.</span>'
         + '<button type="button" class="qf2-first-visit-dismiss" aria-label="Dismiss">&times;</button>';
       welcome.appendChild(hint);
       function dismiss() {
