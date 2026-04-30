@@ -400,6 +400,10 @@
     // "Step 2 of 7" assuming janitorial; pure Day Porter flow is shorter
     // and Combined is longer. Replace label text on the currently active
     // screen only (other screens are inert via [hidden]).
+    // D83 — extended: also drives the per-screen mobile fill bar width.
+    // The HTML used to ship 7 inline `style="width:N%"` defaults assuming
+    // the janitorial flow; we now compute pct from the active flow and
+    // write width on the active screen only.
     var activeScreen = document.querySelector('.qf-screen.qf2-stage.is-active');
     if (activeScreen) {
       var labelText = isFinalInteractive
@@ -407,6 +411,9 @@
         : 'Step ' + displayStep + ' of ' + totalSteps;
       activeScreen.querySelectorAll('.qf2-flowbar-step-count, .qf2-flowbar-mobile-label').forEach(function (el) {
         el.textContent = labelText;
+      });
+      activeScreen.querySelectorAll('.qf2-flowbar-mobile-fill').forEach(function (el) {
+        el.style.width = pct + '%';
       });
     }
   }
