@@ -53,7 +53,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.0">
-<link rel="stylesheet" href="css/quote-flow.css?v=46.5">
+<link rel="stylesheet" href="css/quote-flow.css?v=46.6">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -416,8 +416,8 @@
         <div class="qf2-prompt">
           <h2 class="qf2-prompt-title">Let&rsquo;s get <em>acquainted</em>.</h2>
           <p class="qf2-prompt-sub">
-            <span class="qf2-prompt-sub-desktop">I&rsquo;ll save your progress as we go.</span>
-            <span class="qf2-prompt-sub-mobile">I&rsquo;ll save as we go.</span>
+            <span class="qf2-prompt-sub-desktop">Just the basics. We&rsquo;ll keep it brief.</span>
+            <span class="qf2-prompt-sub-mobile">Just the basics.</span>
           </p>
         </div>
         <div class="qf2-fields" role="group" aria-label="Your contact details">
@@ -733,6 +733,7 @@
           </h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Pick the closest range, or type the exact number.</span>
+            <span class="qf2-prompt-sub-mobile">Pick a range, or type the number.</span>
           </p>
         </div>
         <div class="qf2-size-grid" role="group" aria-label="Pick your size range">
@@ -840,9 +841,10 @@
       </div>
       <div class="qf2-body">
         <div class="qf2-prompt">
-          <h2 class="qf2-prompt-title" id="qfS4Title">When do you need <em>service</em>?</h2>
+          <h2 class="qf2-prompt-title" id="qfS4Title">Which <em>days</em> should we clean?</h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Pick the days and times that fit. We can adjust later.</span>
+            <span class="qf2-prompt-sub-mobile">Days + windows. We can adjust later.</span>
           </p>
         </div>
         <!-- D45 — removed redundant "Which days" / "Days" section label.
@@ -872,10 +874,10 @@
              "loosely" plus pluralized labels (Morning → Mornings) so the
              chip implies "any morning" not "this specific morning". -->
         <div class="qf2-time-cluster" id="qf2TimeCluster" data-gated="1">
-          <div class="qf2-section-label">
+          <h3 class="qf2-section-label">
             <span class="qf2-prompt-sub-desktop">When are we welcome?</span>
             <span class="qf2-prompt-sub-mobile">When are we welcome?</span>
-          </div>
+          </h3>
           <p class="qf2-time-helper">Pick a window. We&rsquo;ll coordinate the exact time later.</p>
           <div class="qf2-chip-row" role="group" aria-label="Availability windows">
             <button type="button" class="qf2-chip qf2-chip-time" data-time="morning" aria-pressed="false">
@@ -1050,6 +1052,7 @@
           <h2 class="qf2-prompt-title">Here&rsquo;s your <em>snapshot</em>.</h2>
           <p class="qf2-prompt-sub">
             <span class="qf2-prompt-sub-desktop">Anything off? Tap a section to tweak it.</span>
+            <span class="qf2-prompt-sub-mobile">Tap a section to tweak it.</span>
           </p>
         </div>
         <div class="qf2-summary" role="region" aria-label="Quote summary">
@@ -1109,7 +1112,7 @@
           <p class="qf2-field-helper" id="qf2PhoneHelper">We&rsquo;ll only call if email bounces.</p>
         </div>
         <div class="qf2-textarea-wrap">
-          <textarea id="qfSpecialInstructions" placeholder="Anything else I should know? Elevator access, security quirks..." maxlength="500"></textarea>
+          <textarea id="qfSpecialInstructions" placeholder="Anything else I should know? Elevator access, security quirks..." maxlength="500" aria-label="Special instructions (optional)" aria-describedby="qf2NotesCounter"></textarea>
           <div class="qf2-textarea-counter" id="qf2NotesCounter">0 / 500</div>
         </div>
         <div class="qf2-trust" aria-label="Trust signals">
@@ -1119,7 +1122,11 @@
             <span class="qf2-prompt-sub-mobile">Licensed</span>
           </span>
           <span class="qf2-trust-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>
+            <!-- D117 (2026-05-01) — was an empty circle (visual disparity vs.
+                 the bordered/stroked check + shield neighbors). Swapped for a
+                 proper clock SVG. The "24h response" pairing is obvious now:
+                 clock face + 12 o'clock hand. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             24h response
           </span>
           <span class="qf2-trust-item">
@@ -1279,7 +1286,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=36.9"></script>
+<script defer src="js/quote-flow.js?v=37.0"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
