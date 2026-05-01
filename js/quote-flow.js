@@ -2583,9 +2583,29 @@
       }
       return out;
     }
+    // D108 (2026-05-01) — collapsed porter card header summary now reflects
+    // actual custom hours instead of showing "(custom)" placeholder.
+    //   • Uniform (same mode, or custom but all days equal) → "Mon–Fri · 8 AM – 4 PM"
+    //   • Differing per-day hours → "Mon 8 AM–4 PM, Tue 8 AM–4 PM, Wed 8 AM–12 PM"
+    //     (no day-list prefix because every day already names itself).
     function dpPorterSummary(p) {
-      return dpFmtDays(p.days) + ' · ' + dpFmtTime(p.sameStart) + '–' + dpFmtTime(p.sameEnd) +
-        (p.hoursMode === 'custom' ? ' (custom)' : '');
+      // Uniform path covers same mode AND custom-but-all-equal.
+      if (p.hoursMode !== 'custom' || !p.customHours || !p.days || !p.days.length) {
+        return dpFmtDays(p.days) + ' · ' + dpFmtTime(p.sameStart) + '–' + dpFmtTime(p.sameEnd);
+      }
+      var first = p.customHours[p.days[0]] || { start: p.sameStart, end: p.sameEnd };
+      var uniform = p.days.every(function (day) {
+        var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
+        return ch.start === first.start && ch.end === first.end;
+      });
+      if (uniform) {
+        return dpFmtDays(p.days) + ' · ' + dpFmtTime(first.start) + '–' + dpFmtTime(first.end);
+      }
+      // Per-day. Use short day names (Mon, Tue, …) to fit the card header.
+      return p.days.map(function (day) {
+        var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
+        return DP_DAY_SHORT[day] + ' ' + dpFmtTime(ch.start) + '–' + dpFmtTime(ch.end);
+      }).join(', ');
     }
     function dpTotalWeeklyHours() {
       var total = 0;
@@ -3212,52 +3232,85 @@
       // each porter line below.
       //
       // D105 (2026-05-01) — when hoursMode === 'custom', show the actual
-      // per-day hours by grouping days that share the same start/end. So if
-      // Mon-Thu = 9-5 and Fri = 10-4, summary shows "Mon-Thu 9 AM - 5 PM,
-      // Fri 10 AM - 4 PM" instead of just "9 AM - 5 PM (custom)" which hid
-      // the user's actual schedule.
+      // per-day hours instead of the literal "(custom)" placeholder which
+      // hid the user's real schedule.
+      //
+      // D107 (2026-05-01) — adjusted formatting per user feedback:
+      //   • If every day shares the same start/end → single line ("8 AM - 4 PM").
+      //   • If ANY day differs → list EVERY day individually, no grouping.
+      //     User wanted to scan day-by-day when schedules differ. Grouping
+      //     ("Mon, Tue 8 AM - 4 PM, Wed 8 AM - 2 PM") read confusingly because
+      //     the same comma was doing two jobs (separating days within a group
+      //     and separating different groups). Per-day listing avoids that
+      //     ambiguity even though it's slightly longer.
       function _porterHoursStr(p) {
         if (p.hoursMode !== 'custom' || !p.customHours || !p.days || !p.days.length) {
           return _fmt12(p.sameStart) + ' - ' + _fmt12(p.sameEnd);
         }
-        // Group days by identical start/end.
-        var groups = [];
-        p.days.forEach(function (day) {
+        // Resolve each day to its effective start/end (falling back to the
+        // porter's `same` when a day has no override).
+        var perDay = p.days.map(function (day) {
           var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
-          var match = null;
-          for (var gi = 0; gi < groups.length; gi++) {
-            if (groups[gi].start === ch.start && groups[gi].end === ch.end) { match = groups[gi]; break; }
-          }
-          if (match) match.days.push(day);
-          else groups.push({ days: [day], start: ch.start, end: ch.end });
+          return { day: day, start: ch.start, end: ch.end };
         });
-        // If everyone shares the same hours after grouping, show single line
-        // (custom mode but uniform — same as `same` visually).
-        if (groups.length === 1) {
-          return _fmt12(groups[0].start) + ' - ' + _fmt12(groups[0].end);
+        // Are all entries uniform?
+        var first = perDay[0];
+        var uniform = perDay.every(function (d) {
+          return d.start === first.start && d.end === first.end;
+        });
+        if (uniform) {
+          return _fmt12(first.start) + ' - ' + _fmt12(first.end);
         }
-        // Multiple groups — list each.
-        return groups.map(function (g) {
-          return _fmtDayList(g.days) + ' ' + _fmt12(g.start) + ' - ' + _fmt12(g.end);
+        // Differ at least once — list every day on its own.
+        return perDay.map(function (d) {
+          return d.day + ' ' + _fmt12(d.start) + ' - ' + _fmt12(d.end);
         }).join(', ');
+      }
+
+      // D108 (2026-05-01) — `_porterIsUniform` lets the caller decide whether
+      // to add a day-list prefix ("Weekdays · 8 AM - 4 PM") or skip it because
+      // the per-day breakdown already names each day. Two redundant ways of
+      // reading the same days felt incoherent — "Weekdays · Monday 8-4,
+      // Tuesday 8-4, Wednesday 8-12…" both names the group AND the days.
+      function _porterIsUniform(p) {
+        if (p.hoursMode !== 'custom' || !p.customHours || !p.days || !p.days.length) {
+          return true; // `same` mode: by definition uniform.
+        }
+        var first = p.customHours[p.days[0]] || { start: p.sameStart, end: p.sameEnd };
+        return p.days.every(function (day) {
+          var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
+          return ch.start === first.start && ch.end === first.end;
+        });
+      }
+
+      // Build "Porter N · <schedule>" where the day-list prefix is omitted
+      // when the porter has per-day differing hours (the per-day list already
+      // names every day, so adding "Weekdays · …" or "Mon, Wed, Fri · …" on
+      // top would say the days twice).
+      function _porterLine(porter) {
+        var label = 'Porter ' + porter.id + ' · ';
+        if (_porterIsUniform(porter)) {
+          return label + _fmtDayList(porter.days) + ' · ' + _porterHoursStr(porter);
+        }
+        return label + _porterHoursStr(porter);
       }
 
       var daysSummary = '';
       var timeSubs = [];
       if (STATE.service === 'dayporter' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
-        var firstPorter = STATE.dpPorters[0];
-        daysSummary = 'Porter 1 · ' + _fmtDayList(firstPorter.days) +
-          ' · ' + _porterHoursStr(firstPorter);
+        // D108 — the first porter already starts with "Porter 1 · " from
+        // _porterLine, so we strip the leading "Porter 1 · " and re-add as
+        // the primary line vs sub-line distinction. Actually keep the prefix
+        // — the snapshot's `qf2SumWhen` shows it as the first line, then any
+        // additional porters cascade as sub-lines below.
+        daysSummary = _porterLine(STATE.dpPorters[0]);
         for (var i = 1; i < STATE.dpPorters.length; i++) {
-          var pp = STATE.dpPorters[i];
-          timeSubs.push('Porter ' + pp.id + ' · ' + _fmtDayList(pp.days) +
-            ' · ' + _porterHoursStr(pp));
+          timeSubs.push(_porterLine(STATE.dpPorters[i]));
         }
       } else if (STATE.service === 'both' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
         daysSummary = 'Cleaning · ' + (_fmtDayList(STATE.days) || '—');
         STATE.dpPorters.forEach(function (pp) {
-          timeSubs.push('Porter ' + pp.id + ' · ' + _fmtDayList(pp.days) +
-            ' · ' + _porterHoursStr(pp));
+          timeSubs.push(_porterLine(pp));
         });
       } else {
         // Janitorial / unsure — preserve the legacy days + time-window format.
