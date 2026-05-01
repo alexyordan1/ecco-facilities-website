@@ -454,6 +454,28 @@
     }
     card.classList.add('is-chosen');
   }, { capture: true });
+
+  // D106 (2026-05-01) — `<input type="time">` natively shows the picker only
+  // when you click the small clock icon; clicking the time text gives keyboard
+  // editing. UX feedback: users expect tapping anywhere on the input to open
+  // the picker. `HTMLInputElement.showPicker()` does that — it requires user
+  // activation, and a click event qualifies. Supported: Chrome 99+, Edge 99+,
+  // Firefox 101+, Safari 16+. Wrapped in try/catch because some
+  // browser/state combos still throw NotAllowedError. iOS Safari already
+  // shows the wheel picker on tap natively, so this is desktop-effective.
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || t.tagName !== 'INPUT' || t.type !== 'time') return;
+    if (typeof t.showPicker !== 'function') return;
+    // Skip if the user clicked the actual native picker icon — the browser
+    // already handles that. Detect via offset (the icon sits in the right
+    // ~24px of the input).
+    var rect = t.getBoundingClientRect();
+    var fromRight = rect.right - e.clientX;
+    if (fromRight >= 0 && fromRight <= 28) return;
+    try { t.showPicker(); } catch (_) { /* user-activation guards; ignore */ }
+  }, { capture: false });
+
   // Sprint 4 — magnetic hover on service cards (desktop only).
   (function setupMagnetic() {
     if (qfReducedMotion) return;
@@ -3188,25 +3210,54 @@
       // ("Porter 1 · Mon-Fri · 9 AM - 5 PM"). Janitorial keeps the existing
       // days + time-window format. For 'both' we stack: cleaning days on top,
       // each porter line below.
+      //
+      // D105 (2026-05-01) — when hoursMode === 'custom', show the actual
+      // per-day hours by grouping days that share the same start/end. So if
+      // Mon-Thu = 9-5 and Fri = 10-4, summary shows "Mon-Thu 9 AM - 5 PM,
+      // Fri 10 AM - 4 PM" instead of just "9 AM - 5 PM (custom)" which hid
+      // the user's actual schedule.
+      function _porterHoursStr(p) {
+        if (p.hoursMode !== 'custom' || !p.customHours || !p.days || !p.days.length) {
+          return _fmt12(p.sameStart) + ' - ' + _fmt12(p.sameEnd);
+        }
+        // Group days by identical start/end.
+        var groups = [];
+        p.days.forEach(function (day) {
+          var ch = p.customHours[day] || { start: p.sameStart, end: p.sameEnd };
+          var match = null;
+          for (var gi = 0; gi < groups.length; gi++) {
+            if (groups[gi].start === ch.start && groups[gi].end === ch.end) { match = groups[gi]; break; }
+          }
+          if (match) match.days.push(day);
+          else groups.push({ days: [day], start: ch.start, end: ch.end });
+        });
+        // If everyone shares the same hours after grouping, show single line
+        // (custom mode but uniform — same as `same` visually).
+        if (groups.length === 1) {
+          return _fmt12(groups[0].start) + ' - ' + _fmt12(groups[0].end);
+        }
+        // Multiple groups — list each.
+        return groups.map(function (g) {
+          return _fmtDayList(g.days) + ' ' + _fmt12(g.start) + ' - ' + _fmt12(g.end);
+        }).join(', ');
+      }
+
       var daysSummary = '';
       var timeSubs = [];
       if (STATE.service === 'dayporter' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
         var firstPorter = STATE.dpPorters[0];
         daysSummary = 'Porter 1 · ' + _fmtDayList(firstPorter.days) +
-          ' · ' + _fmt12(firstPorter.sameStart) + ' - ' + _fmt12(firstPorter.sameEnd) +
-          (firstPorter.hoursMode === 'custom' ? ' (custom)' : '');
+          ' · ' + _porterHoursStr(firstPorter);
         for (var i = 1; i < STATE.dpPorters.length; i++) {
           var pp = STATE.dpPorters[i];
           timeSubs.push('Porter ' + pp.id + ' · ' + _fmtDayList(pp.days) +
-            ' · ' + _fmt12(pp.sameStart) + ' - ' + _fmt12(pp.sameEnd) +
-            (pp.hoursMode === 'custom' ? ' (custom)' : ''));
+            ' · ' + _porterHoursStr(pp));
         }
       } else if (STATE.service === 'both' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
         daysSummary = 'Cleaning · ' + (_fmtDayList(STATE.days) || '—');
         STATE.dpPorters.forEach(function (pp) {
           timeSubs.push('Porter ' + pp.id + ' · ' + _fmtDayList(pp.days) +
-            ' · ' + _fmt12(pp.sameStart) + ' - ' + _fmt12(pp.sameEnd) +
-            (pp.hoursMode === 'custom' ? ' (custom)' : ''));
+            ' · ' + _porterHoursStr(pp));
         });
       } else {
         // Janitorial / unsure — preserve the legacy days + time-window format.

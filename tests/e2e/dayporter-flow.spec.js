@@ -93,8 +93,14 @@ test.describe('Day Porter — full flow', () => {
     await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_contact');
 
+    // D105 (2026-05-01) — summary now shows the ACTUAL custom per-day hours
+    // instead of the literal "(custom)" placeholder. Each unique start/end
+    // pair gets its own day list. With 3 different schedules across 3 days,
+    // we expect 3 separate entries.
     const whenRow = page.locator('#qf2SumWhen');
-    await expect(whenRow).toContainText(/\(custom\)/);
+    await expect(whenRow).toContainText('Monday 8 AM - 12 PM');
+    await expect(whenRow).toContainText('Wednesday 1 PM - 5 PM');
+    await expect(whenRow).toContainText('Friday 9 AM - 1 PM');
 
     h.expectNoJsErrors(page);
   });
