@@ -3140,7 +3140,10 @@
       var ctaBtn = document.getElementById('qfContactSubmit');
       var ctaLbl = ctaBtn?.querySelector('.qf-rv-send-btn-label');
       if (ctaLbl) {
-        ctaLbl.textContent = STATE.needsSiteWalk ? 'Send it + book my visit' : 'Send it to Alina';
+        // D100 (2026-05-01) — copy aligned with Ola 5 spec ("Request my quote").
+        // Previous "Send it to Alina" anthropomorphized the form too much; the
+        // user's mental model is "I'm requesting a quote" not "I'm DM'ing Alina".
+        ctaLbl.textContent = STATE.needsSiteWalk ? 'Request my quote + book visit' : 'Request my quote';
       }
 
       // V2 — CTA subtext (site walk variant)
