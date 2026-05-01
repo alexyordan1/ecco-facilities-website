@@ -1658,7 +1658,27 @@
         showInfoError(msg, focusEl);
       }
       if (focusEl) {
-        try { focusEl.focus(); focusEl.classList.add('qf-input-invalid'); } catch(e){}
+        try {
+          focusEl.focus();
+          focusEl.classList.add('qf-input-invalid');
+          // D112 (2026-05-01) — link the error region to the input via
+          // aria-describedby + aria-invalid so screen readers announce
+          // the error in context (WCAG 3.3.1, 1.3.1, 4.1.2). Without this,
+          // the role="alert" on the err element fired when shown but the
+          // input itself didn't reference it.
+          //
+          // aria-describedby is a SPACE-SEPARATED list. qfUserEmail already
+          // has `aria-describedby="qf2EmailHelper"` from HTML; we APPEND
+          // the error id rather than overwrite, so both helper + error get
+          // announced. On cleanup we strip only the qf2InfoErr_* tokens.
+          if (errId) {
+            var existing = focusEl.getAttribute('aria-describedby') || '';
+            var tokens = existing.split(/\s+/).filter(Boolean);
+            if (tokens.indexOf(errId) === -1) tokens.push(errId);
+            focusEl.setAttribute('aria-describedby', tokens.join(' '));
+          }
+          focusEl.setAttribute('aria-invalid', 'true');
+        } catch(e){}
       }
     }
     function qf2ClearInfoErr() {
@@ -1668,7 +1688,21 @@
       });
       ['qfUserFirstName','qfUserLastName','qfUserEmail','qfUserPosition'].forEach(function(id){
         var el = document.getElementById(id);
-        if (el) el.classList.remove('qf-input-invalid');
+        if (el) {
+          el.classList.remove('qf-input-invalid');
+          // D112 — strip aria-invalid + only the qf2InfoErr_* tokens from
+          // aria-describedby, preserving any legitimate helper tokens
+          // (e.g. qf2EmailHelper, qf2PhoneHelper).
+          el.removeAttribute('aria-invalid');
+          var prev = el.getAttribute('aria-describedby');
+          if (prev) {
+            var cleaned = prev.split(/\s+/).filter(function (t) {
+              return t && !/^qf2InfoErr_/.test(t);
+            }).join(' ');
+            if (cleaned) el.setAttribute('aria-describedby', cleaned);
+            else el.removeAttribute('aria-describedby');
+          }
+        }
       });
     }
 
@@ -3455,14 +3489,14 @@
           fieldsWrap.appendChild(fieldRow('qf2EditSuite', 'text', STATE.userSuite, 'Suite / Floor (optional)', 'Suite or floor', 60));
         } else if (section === 'space') {
           var note = document.createElement('p');
-          note.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          note.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
           note.textContent = "Hop back to the Space step to switch type.";
           fieldsWrap.appendChild(note);
         } else if (section === 'space-location') {
           // D28 — combined "The space" row covers space TYPE (locked, hop back
           // to change) + the address fields (editable inline).
           var noteSL = document.createElement('p');
-          noteSL.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          noteSL.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
           noteSL.textContent = 'Type: ' + (STATE.space || '—') + ' (hop back to Step 2 to change). Address below:';
           fieldsWrap.appendChild(noteSL);
           fieldsWrap.appendChild(fieldRow('qf2EditCo', 'text', STATE.companyName, 'Company or organization', 'Company', 120));
@@ -3470,17 +3504,17 @@
           fieldsWrap.appendChild(fieldRow('qf2EditSuite', 'text', STATE.userSuite, 'Suite / Floor (optional)', 'Suite or floor', 60));
         } else if (section === 'service') {
           var n2 = document.createElement('p');
-          n2.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          n2.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
           n2.textContent = "Hop back to the start to switch service.";
           fieldsWrap.appendChild(n2);
         } else if (section === 'days') {
           var n3 = document.createElement('p');
-          n3.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          n3.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
           n3.textContent = "Hop back to the Schedule step to adjust days/times.";
           fieldsWrap.appendChild(n3);
         } else if (section === 'size') {
           var n4 = document.createElement('p');
-          n4.style.cssText = 'font-size:13px;color:var(--qf2-muted);margin:0 0 10px';
+          n4.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
           n4.textContent = "Hop back to the Size step to adjust.";
           fieldsWrap.appendChild(n4);
         }
