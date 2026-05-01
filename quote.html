@@ -53,7 +53,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.0">
-<link rel="stylesheet" href="css/quote-flow.css?v=46.6">
+<link rel="stylesheet" href="css/quote-flow.css?v=46.7">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -1058,7 +1058,14 @@
         <div class="qf2-summary" role="region" aria-label="Quote summary">
           <div class="qf2-sum-row" data-section="service">
             <div class="qf2-sum-row-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+              <!-- D123 (2026-05-01) — was a checkmark SVG, but checkmarks
+                   read as "confirmed/done" status, not as a category icon.
+                   The trust strip below already uses a checkmark for
+                   "Licensed & insured" — three different meanings for one
+                   glyph (status / category / confirmation) felt sloppy.
+                   Swapped to a sparkle/clean icon that semantically maps
+                   to "the service" without overloading the check glyph. -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.5L18 9l-4.2 1.5L12 15l-1.8-4.5L6 9l4.2-1.5z"/><path d="M19 14l.7 1.8L21.5 16.5l-1.8.7L19 19l-.7-1.8L16.5 16.5l1.8-.7z"/></svg>
             </div>
             <div class="qf2-sum-row-main">
               <div class="qf2-sum-row-label">The service</div>
@@ -1122,12 +1129,16 @@
             <span class="qf2-prompt-sub-mobile">Licensed</span>
           </span>
           <span class="qf2-trust-item">
-            <!-- D117 (2026-05-01) — was an empty circle (visual disparity vs.
-                 the bordered/stroked check + shield neighbors). Swapped for a
-                 proper clock SVG. The "24h response" pairing is obvious now:
-                 clock face + 12 o'clock hand. -->
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            24h response
+            <!-- D120 (2026-05-01) — was "24h response", but the CTA hint
+                 below ("Quote in your inbox within 24h") and the success
+                 page ("I'll reach out within 24 hours") already promise
+                 the same. Three "24h" claims in 30 seconds reads as
+                 over-promising (PRODUCT.md Adult voice rule). Swapped to
+                 a location/scope claim that complements the trust strip
+                 instead of duplicating the time promise. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s-7-7-7-12a7 7 0 0114 0c0 5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <span class="qf2-prompt-sub-desktop">NYC + 5 boroughs</span>
+            <span class="qf2-prompt-sub-mobile">NYC area</span>
           </span>
           <span class="qf2-trust-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/></svg>
@@ -1286,7 +1297,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=37.0"></script>
+<script defer src="js/quote-flow.js?v=37.1"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

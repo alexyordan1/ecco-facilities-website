@@ -1604,39 +1604,18 @@
   // Company names keep internal spacing intact since "A.T. & T." style names
   // can legitimately have double spaces/periods.
   function cleanName(v) { return ((v == null) ? '' : String(v)).replace(/\s+/g, ' ').trim(); }
-  function showInfoError(msg, offendingEl) {
-    var errEl = document.getElementById('qfInfoErr');
-    if (errEl) {
-      errEl.textContent = msg;
-      errEl.hidden = false;
-    }
-    if (offendingEl) {
-      offendingEl.classList.add('qf-input-invalid');
-      // Ola 8 — wire aria-describedby so screen readers announce the error
-      // message in context with the input, not as an orphaned live-region
-      // update 50ms later. We also set aria-invalid for AT that relies on
-      // that semantic instead of the visual class.
-      offendingEl.setAttribute('aria-describedby', 'qfInfoErr');
-      offendingEl.setAttribute('aria-invalid', 'true');
-      offendingEl.focus();
-    }
-  }
-  function clearInfoError() {
-    var errEl = document.getElementById('qfInfoErr');
-    if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
-    // Ola 8 — clear across ALL info-step inputs (was 3, missed last name
-    // and company). Also strip the aria-describedby + aria-invalid that
-    // showInfoError attached so the SR doesn't keep announcing a stale
-    // error after the user corrected the field.
-    ['qfUserFirstName','qfUserLastName','qfUserEmail','qfUserPhone','qfUserCompany'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) {
-        el.classList.remove('qf-input-invalid');
-        el.removeAttribute('aria-describedby');
-        el.removeAttribute('aria-invalid');
-      }
-    });
-  }
+  // D121 (2026-05-01) — DELETED `showInfoError` + `clearInfoError`. They
+  // referenced `document.getElementById('qfInfoErr')`, an ID that does
+  // NOT exist in quote.html. The HTML uses per-field slots
+  // (`qf2InfoErr_firstName` / `_lastName` / `_email`) instead, wired via
+  // `qf2ShowInfoErr` + `qf2ClearInfoErr` (the V2 functions). The legacy
+  // pair was reachable only as a fallback when `INFO_ERR_MAP[focusEl.id]`
+  // returned falsy — which only happens for `qfUserPosition` (Role,
+  // unvalidated). On that path the fallback wrote into a non-existent
+  // node, set aria-describedby="qfInfoErr" pointing at nothing, and the
+  // user got a stale broken aria reference. Dead and incorrect.
+  // The fallback `else { showInfoError(...) }` in qf2ShowInfoErr below
+  // was also removed.
   if (SCREENS.info) {
     // D77 — per-field errors on Info screen. Each validatable field has its
     // own error slot below it; the message lives next to the field that
@@ -1654,9 +1633,13 @@
       if (errEl) {
         errEl.textContent = msg;
         errEl.hidden = false;
-      } else {
-        showInfoError(msg, focusEl);
       }
+      // D121 — removed `else { showInfoError(...) }` fallback. The legacy
+      // path referenced a non-existent ID (qfInfoErr) and only ran when
+      // a future field validated outside INFO_ERR_MAP. If that ever
+      // happens, the focus + aria-invalid below still fire (so AT users
+      // know something's wrong); we just don't have a visible error
+      // message until that field gets its own error slot.
       if (focusEl) {
         try {
           focusEl.focus();
