@@ -53,7 +53,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.0">
-<link rel="stylesheet" href="css/quote-flow.css?v=46.7">
+<link rel="stylesheet" href="css/quote-flow.css?v=46.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -209,15 +209,6 @@
 <main class="q-flow" id="main">
   <h1 class="sr-only">Request a Free Quote · Ecco Facilities</h1>
 
-  <!-- Ask Alina · floating pill (hidden until step 2) -->
-  <button type="button" class="qf-ask-alina" id="qfAskAlinaBtn" aria-label="Ask Alina a question">
-    <span class="qf-ask-alina-avatar" aria-hidden="true">
-      <picture><source type="image/avif" srcset="images/alina-avatar-96.avif 1x, images/alina-avatar-192.avif 2x"><source type="image/webp" srcset="images/alina-avatar-96.webp 1x, images/alina-avatar-192.webp 2x"><img src="images/alina-avatar-96.jpg" srcset="images/alina-avatar-96.jpg 1x, images/alina-avatar-192.jpg 2x" alt="" width="38" height="38" loading="lazy" decoding="async"></picture>
-    </span>
-    <span class="qf-ask-alina-label">Ask Alina</span>
-    <span class="qf-ask-alina-pulse" aria-hidden="true"></span>
-  </button>
-
   <!-- Stage -->
   <section class="qf-stage" id="qfStage">
 
@@ -359,17 +350,7 @@
         </div>
       </div>
       <!-- V2 — "Ask Alina" floating pill (bottom-left). Present on every
-           screen per mockup G. Opens the chat widget on click. -->
-      <button type="button" class="qf2-ask-alina-float" id="qf2AskAlinaFloat" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+           screen per mockup G. Opens the chat widget on click. -->    </section>
 
     <!-- STEP 3 · INFO / YOU — V2 mockup G rebuild -->
     <section class="qf-screen step-info qf2-stage" hidden id="qfScreen_info" aria-label="Let's get acquainted">
@@ -458,17 +439,7 @@
         </div>
         <button type="button" class="qf2-cta" id="qfInfoContinue">Nice to meet you <span aria-hidden="true">&rarr;</span></button>
         <p class="qf2-cta-hint">We&rsquo;re almost there.</p>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
 
     <!-- STEP 3 · SPACE TYPE — V2 mockup G rebuild -->
     <section class="qf-screen step-2 qf2-stage" hidden id="qfScreen_space" aria-label="What kind of space are we caring for?">
@@ -580,17 +551,7 @@
           <p class="qf2-field-err" id="qf2SpaceOtherErr" role="alert" hidden></p>
         </div>
         <button type="button" class="qf2-cta" id="qf2SpaceContinue" hidden>Continue <span aria-hidden="true">&rarr;</span></button>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
 
     <!-- STEP 3 · SPACE SIZE -->
     <!-- STEP · LOCATION (company name + address) -->
@@ -672,17 +633,7 @@
         </div>
         <p class="qf2-field-err" id="qf2LocErr" role="alert" hidden></p>
         <button type="button" class="qf2-cta" id="qfLocationContinue">Review my answers <span aria-hidden="true">&rarr;</span></button>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
 
     <!-- STEP 4 · SIZE — V2 mockup G rebuild -->
     <section class="qf-screen step-3 qf2-stage" hidden id="qfScreen_size" aria-label="How much space?">
@@ -785,17 +736,7 @@
           <span class="qf2-prompt-sub-mobile">Multiple locations? Size the largest.</span>
         </p>
         <button type="button" class="qf2-cta" id="qf2SizeContinue">Continue <span aria-hidden="true">&rarr;</span></button>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
 
     <!-- STEP 4 · SCHEDULE (Days) -->
     <!-- STEP 5 · SCHEDULE (days + time) — V2 mockup G rebuild -->
@@ -901,17 +842,7 @@
         </div>
         <span class="qf-s4-count" id="qfDaysCount" aria-live="polite" aria-atomic="true" hidden></span>
         <button type="button" class="qf2-cta" id="qfDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
 
     <!-- D55 — Day Porter SCHEDULE screen. Replaces the legacy V1 trio
          (qfScreen_dpDays + qfScreen_porter + qfScreen_hours) with a
@@ -977,17 +908,7 @@
           <button type="button" class="qf2-cta" id="qfDpScheduleContinue">Continue <span aria-hidden="true">&rarr;</span></button>
           <span class="qf-dp-cta-status" id="qfDpStatus" aria-live="polite"></span>
         </div>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
 
     <!-- CHECKPOINT · "Let me make sure I got this right..." (placed right before contact
          so any service flow scrolls monotonically downward — no back-and-forth jump) -->
@@ -1152,17 +1073,7 @@
         </button>
         <p class="qf2-cta-hint">Quote in your inbox within 24h. No spam, no commitment.</p>
         <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
-      </div>
-      <button type="button" class="qf2-ask-alina-float" aria-label="Ask Alina anything">
-        <span class="qf2-ask-alina-avatar" aria-hidden="true">
-          <picture>
-            <source type="image/webp" srcset="images/alina-avatar-96.webp">
-            <img src="images/alina-avatar-96.jpg" alt="" width="32" height="32" loading="lazy" decoding="async">
-          </picture>
-        </span>
-        <span class="qf2-ask-alina-label">Ask Alina anything</span>
-      </button>
-    </section>
+      </div>    </section>
     <!-- SUCCESS SCREEN -->
     <!-- STEP 8 · SUCCESS — V2 mockup G rebuild -->
     <section class="qf-screen step-success qf2-stage is-success" hidden id="qfScreen_success" aria-label="Success">
@@ -1297,7 +1208,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=37.1"></script>
+<script defer src="js/quote-flow.js?v=37.2"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

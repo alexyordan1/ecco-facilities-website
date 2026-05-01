@@ -148,7 +148,11 @@
   var greetingEl   = document.getElementById('qfGreeting');
   var typingDots   = document.getElementById('qfTypingDots');
   var liveNumEl    = document.getElementById('qfLiveNum');
-  var askAlinaBtn  = document.getElementById('qfAskAlinaBtn');
+  // D125 (2026-05-01) — askAlinaBtn / Ask-Alina floating pills retired.
+  // The chat was a stub (toast "Chat will open here in production");
+  // never wired to a backend on /quote. User: "no hace sentido". The
+  // static `.qf2-alina-hero` per-screen pills (persona stamp + helper
+  // copy) stay; only the interactive ask-feature is gone.
   // Exit-intent overlay fully retired in D76. The pattern (cursor-leave
   // captures email) read as a TaskRabbit-style urgency grab, conflicting
   // with the "Adult, no urgency" voice rule in PRODUCT.md. The form
@@ -4786,13 +4790,10 @@
     });
   }
 
-  if (askAlinaBtn) {
-    askAlinaBtn.addEventListener('click', function () {
-      var pill = document.getElementById('qAskToggle');
-      if (pill) pill.click();
-      else qfToast({ type:'warn', title:'Alina chat', message:'Chat will open here in production.' });
-    });
-  }
+  // D125 — Ask Alina chat handler removed (the pill stub was never wired
+  // to a backend on /quote; opening showed a placeholder toast). The
+  // per-screen static `.qf2-alina-hero` headers stay — those are persona
+  // copy, not interactive chat.
 
   /* =======================================================================
      Feature #13: Exit intent recovery
