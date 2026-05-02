@@ -56,7 +56,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=50.0">
+<link rel="stylesheet" href="css/quote-flow.css?v=49.9">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -1055,16 +1055,6 @@
           <span aria-hidden="true">&rarr;</span>
         </button>
         <p class="qf2-cta-hint">Quote in your inbox within 24h.</p>
-        <!-- D150 — Floating submit CTA. Mirrors #qfContactSubmit.
-             JS at wireFloatingCta() toggles .is-visible based on scroll
-             position relative to the inline submit button. Visible only
-             on the contact screen via .q-flow.is-step-final. -->
-        <div class="qf-plan-floating-cta" id="qfPlanFloatingCta" aria-hidden="true" role="region" aria-label="Submit quote (floating)">
-          <button type="button" class="qf2-cta" id="qfFloatingSubmitBtn">
-            <span>Request my quote</span>
-            <span aria-hidden="true">&rarr;</span>
-          </button>
-        </div>
         <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
       </div>    </section>
     <!-- SUCCESS SCREEN -->
@@ -1201,7 +1191,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=38.0"></script>
+<script defer src="js/quote-flow.js?v=37.9"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
