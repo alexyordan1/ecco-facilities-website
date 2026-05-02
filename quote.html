@@ -166,19 +166,20 @@
     <h1 class="qf-noscript-title">Request your free quote</h1>
     <p>We'll reply within 24 hours with a custom cleaning proposal. No JavaScript required.</p>
     <form class="qf-noscript-form" action="/api/submit-quote" method="POST">
-      <label>First name <input class="qf-noscript-input" name="fn" type="text" required></label>
-      <label>Last name <input class="qf-noscript-input" name="ln" type="text"></label>
-      <label>Email <input class="qf-noscript-input" name="em" type="email" required></label>
-      <label>Phone (optional) <input class="qf-noscript-input" name="ph" type="tel"></label>
-      <label>Company <input class="qf-noscript-input" name="co" type="text"></label>
-      <label>Address or ZIP <input class="qf-noscript-input" name="addr" type="text" required></label>
+      <label>First name <input class="qf-noscript-input" name="fn" type="text" autocomplete="given-name" maxlength="60" required></label>
+      <label>Last name <input class="qf-noscript-input" name="ln" type="text" autocomplete="family-name" maxlength="60"></label>
+      <label>Email <input class="qf-noscript-input" name="em" type="email" autocomplete="email" maxlength="254" required></label>
+      <label>Phone (optional) <input class="qf-noscript-input" name="ph" type="tel" autocomplete="tel" maxlength="25"></label>
+      <label>Company <input class="qf-noscript-input" name="co" type="text" autocomplete="organization" maxlength="120"></label>
+      <label>Address or ZIP <input class="qf-noscript-input" name="addr" type="text" autocomplete="street-address" maxlength="200" required></label>
       <label>Service
         <select class="qf-noscript-input" name="formType" required>
-          <option value="janitorial">Janitorial (recurring cleaning)</option>
+          <option value="janitorial">Night cleaning (recurring after-hours)</option>
           <option value="dayporter">Day Porter (on-site during business hours)</option>
+          <option value="both">Combined (porter + night cleaning)</option>
         </select>
       </label>
-      <label>Notes <textarea class="qf-noscript-input" name="notes" rows="3"></textarea></label>
+      <label>Notes <textarea class="qf-noscript-input" name="notes" rows="3" maxlength="500"></textarea></label>
       <button class="qf-noscript-btn" type="submit">Send request</button>
     </form>
     <p class="qf-noscript-contact">Prefer to reach out directly?
