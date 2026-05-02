@@ -4319,21 +4319,21 @@
     // Check that all required fields for the current service are captured
     function validateForSubmit() {
       var errs = [];
-      if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email is missing or invalid.' });
+      if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks off. Needs an @ symbol and a domain so we can send your quote.' });
       // Ola 3 — re-check disposable + typo at submit. User may have edited
       // the email in the summary panel to a disposable/typo'd address after
       // passing the initial info-step check.
       else if (suggestEmailCorrection(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks like a typo. Did you mean ' + suggestEmailCorrection(STATE.userEmail) + '?' });
-      else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a non-disposable email so we can deliver your proposal.' });
-      if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'First name is missing.' });
-      if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone number is invalid.' });
+      else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a real work email so we can deliver your proposal.' });
+      if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'We need your first name to send the quote.' });
+      if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone looks off. Try the 10-digit format (area code first).' });
       // AYS Ola 4 Commit L HI-4 — mirror the stricter check from the location step.
       var _a = STATE.userAddress || '';
       var _isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(_a);
       var _hasStreet = _a.length >= 6 && /\d/.test(_a) && /[A-Za-z]{2,}/.test(_a);
-      if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'A valid address or ZIP is missing.' });
-      if (!STATE.space) errs.push({ field: 'space', msg: 'Space type is missing.' });
-      if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Space size is missing.' });
+      if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'We need a ZIP or street address to match you with the local team.' });
+      if (!STATE.space) errs.push({ field: 'space', msg: 'Pick a space type so we can quote it right.' });
+      if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Pick a size range so we can quote it right.' });
       // D61 — fix critical bug: pure Day Porter flow doesn't visit the
       // janitorial days screen, so STATE.days is empty. The old check
       // rejected every Day Porter submission. Now: jan/unsure require
@@ -4355,7 +4355,7 @@
         }
       }
       if ((STATE.service === 'dayporter' || STATE.service === 'both') && !STATE.porterCount) {
-        errs.push({ field: 'porters', msg: 'Porter count is missing.' });
+        errs.push({ field: 'porters', msg: 'Pick how many porters you need on-site.' });
       }
       return errs;
     }
