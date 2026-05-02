@@ -954,6 +954,10 @@
    *  (e.g. checkpoint, success) are treated as being "after" the previous
    *  station — so past stations stay done and no station becomes `current`. */
   function updateRail() {
+    // D154 — V2 progress update is independent of V1 .qf-rail-stations
+    // (which D147 removed). Always run it; V1 rail station updates below
+    // skip when the V1 element is missing.
+    qfRenderRailProgress();
     if (!railStations) return;
     var flow = getFlow();
     var config = RAIL_CONFIGS[STATE.service] || RAIL_CONFIGS.unsure;
@@ -1006,8 +1010,6 @@
       railFill.style.width = Math.min(100, Math.max(0, pct)) + '%';
     }
 
-    // Refresh the rail progress indicator alongside station updates.
-    qfRenderRailProgress();
   }
 
   /** Set the value text on a rail station by key */
