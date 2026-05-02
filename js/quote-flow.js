@@ -4795,6 +4795,28 @@
   // per-screen static `.qf2-alina-hero` headers stay — those are persona
   // copy, not interactive chat.
 
+  // D126 (2026-05-01) — Theme toggle. The bootstrap script in quote.html
+  // <head> already applies the saved theme on load (synchronous, no FOUC).
+  // This handler just toggles + persists when the user clicks. The
+  // aria-pressed state is synced so AT users hear the current state.
+  var themeToggle = document.getElementById('qf2ThemeToggle');
+  if (themeToggle) {
+    function syncThemePressed() {
+      var current = document.documentElement.getAttribute('data-theme') || 'light';
+      themeToggle.setAttribute('aria-pressed', current === 'dark' ? 'true' : 'false');
+      themeToggle.setAttribute('aria-label',
+        current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    syncThemePressed();
+    themeToggle.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme') || 'light';
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('ecco_theme', next); } catch (_) {}
+      syncThemePressed();
+    });
+  }
+
   /* =======================================================================
      Feature #13: Exit intent recovery
      ======================================================================= */

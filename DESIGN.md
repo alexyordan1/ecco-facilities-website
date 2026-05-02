@@ -6,7 +6,14 @@
 
 **Color strategy:** Restrained-to-Committed. Sage carries about 15-25% of any given screen's surface (CTAs + active states + script accents + flow-bar progress). Cream is the dominant surface; white is the card. Peach is for icon backgrounds and dashed dividers.
 
-**Theme:** Light. Physical scene: *"Office facilities manager at her desk under fluorescent ceiling light, mid-morning, comparing three vendor quotes between meetings."* Dark mode would feel wrong for the editorial register and the "earn-trust-with-warmth" goal.
+**Theme:** Light by default + opt-in dark variant ("Editorial midnight").
+Physical scenes that defined each:
+- Light: *"Office facilities manager at her desk under fluorescent ceiling light, mid-morning, comparing three vendor quotes between meetings."*
+- Dark: *"Property manager reviewing three quotes from her living-room couch at 8pm with a single warm lamp on, evening winding down before bed."*
+
+The dark variant is **not auto-applied via `prefers-color-scheme`** — the user toggles it explicitly via `.qf2-theme-toggle` (sun/moon button bottom-right). Choice persists in `localStorage` as `ecco_theme`. This honors the Adult brand voice (no surprise theme swaps); it also avoids the cascade trap from D95 where 40 V1 `@media(prefers-color-scheme:dark)` blocks were leaking. The new dark token set is fresh, V2-aligned, and lives under `[data-theme="dark"]` selector.
+
+The previous note said "Dark mode would feel wrong" — and a generic SaaS dark would have. The Editorial Midnight variant keeps the editorial register: surface is `#1B2733` (warm teal-navy, NOT clinical blue), ink is `#EFE8D7` (marfil tostado, NOT pure white), peach disc becomes `#3A322A` (dorado tostado), sage lifts to `#6FB376` for 6.8:1 contrast on the dark surface. The form reads as "magazine printed on dark stock with marker-green annotations" rather than "tool that switches to dark by default to look modern".
 
 **Anti-pattern check:** Resists category-reflex (cleaning industry → spray-bottle green or steel blue). Sage is closer to a magazine masthead than to a "fresh clean" gradient. No glassmorphism, no gradient text, no hero metrics, no identical card grids in production.
 
@@ -37,6 +44,29 @@ All values defined as CSS custom properties on `.qf2-stage`:
 - Ink on cream: 14.6:1 (AAA)
 - Muted on cream: 4.6:1 (AA)
 - White on sage (active state): 6.4:1 (AAA)
+
+### Dark variant — "Editorial Midnight"
+
+Activated via `[data-theme="dark"]` on `<html>`. Same token names, dark values:
+
+```css
+--qf2-cream:        #1B2733;  /* primary surface — warm teal-navy */
+--qf2-cream-2:      #243441;  /* card surface, slightly lighter */
+--qf2-peach:        #3A322A;  /* icon-disc — dorado tostado, keeps warm */
+--qf2-peach-deep:   #4A4036;
+--qf2-edge-warm:    rgba(111,179,118,.22);  /* sage 22% — borders pop on dark */
+--qf2-ink:          #EFE8D7;  /* marfil tostado — NOT pure white */
+--qf2-muted:        #8A9AAB;
+--qf2-sage:         #6FB376;  /* lifted lightness for 6.8:1 contrast on dark */
+--qf2-sage-bright:  #82C589;
+--qf2-sage-soft:    rgba(111,179,118,.14);
+```
+
+Contrast (verified for dark):
+- Sage on midnight: 6.5:1 (AAA)
+- Ink (marfil) on midnight: 13.8:1 (AAA)
+- Muted on midnight: 5.2:1 (AA)
+- Marfil on sage (active state): 4.1:1 (AA)
 
 ## Typography
 
