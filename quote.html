@@ -58,7 +58,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.0">
-<link rel="stylesheet" href="css/quote-flow.css?v=47.1">
+<link rel="stylesheet" href="css/quote-flow.css?v=47.3">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -306,7 +306,7 @@
          the flow-bar (no bar on step 1, per user-preference rule). -->
     <section class="qf-screen step-1 is-active qf2-stage is-welcome" id="qfScreen_welcome" aria-label="Welcome">
       <div class="qf2-hero-wrap">
-        <div class="qf2-alina-hero" role="button" tabindex="0" aria-expanded="false" data-alina-help="Janitorial cleans deep after hours. Day Porter stays on-site during the day for spills and restocks. Combined covers both." aria-label="Tap for more help">
+        <div class="qf2-alina-hero" role="button" tabindex="0" aria-expanded="false" data-alina-help="Night cleaning is janitorial after-hours, deep cleaning while you're closed. Day Porter stays on-site during your business hours for spills and restocks. Combined covers both." aria-label="Tap for more help">
           <div class="qf2-alina-hero-avatar">
             <picture>
               <source type="image/avif" srcset="images/alina-avatar-96.avif">
@@ -324,32 +324,59 @@
           <h2 class="qf2-prompt-title">What brings you to <em>Ecco</em>?</h2>
           <p class="qf2-prompt-sub">Pick what kind of care you&rsquo;re looking for.</p>
         </div>
-        <div class="qf2-grid-3" role="group" aria-label="Choose a service">
-          <button type="button" class="qf2-card" data-service="janitorial" data-service-label="Janitorial" aria-label="Recurring clean: janitorial, evenings and weekends">
+        <div class="qf2-grid-3 qf2-grid-3--rich" role="group" aria-label="Choose a service">
+          <button type="button" class="qf2-card qf2-card--rich" data-service="janitorial" data-service-label="Night cleaning" aria-label="Night cleaning: janitorial after-hours, evenings and weekends">
             <span class="qf2-card-icon" aria-hidden="true">🧹</span>
             <span class="qf2-card-body">
-              <span class="qf2-card-label">Recurring clean</span>
+              <span class="qf2-card-label">Night cleaning</span>
               <span class="qf2-card-hint">Janitorial · evenings + weekends</span>
+              <span class="qf2-card-includes">A dedicated janitorial crew that comes in after you close. They handle the deep work: floors, bathrooms, surfaces, trash, full disinfection. Fresh by the next morning.</span>
             </span>
           </button>
-          <button type="button" class="qf2-card" data-service="dayporter" data-service-label="Day Porter" aria-label="Day Porter: on-site during business hours">
+          <button type="button" class="qf2-card qf2-card--rich" data-service="dayporter" data-service-label="Day Porter" aria-label="Day Porter: on-site during your business hours">
             <span class="qf2-card-icon" aria-hidden="true">☀️</span>
             <span class="qf2-card-body">
               <span class="qf2-card-label">Day Porter</span>
-              <span class="qf2-card-hint">On-site during business hours</span>
+              <span class="qf2-card-hint">On-site during your business hours</span>
+              <span class="qf2-card-includes">A dedicated porter on-site through your business hours. They keep things visibly tidy: lobby touch-ups, spills, bathroom restocking, trash. They spot issues before they become problems.</span>
             </span>
           </button>
-          <button type="button" class="qf2-card" data-service="both" data-service-label="Combined" aria-label="Combined: day porter plus janitorial">
+          <button type="button" class="qf2-card qf2-card--rich" data-service="both" data-service-label="Combined" aria-label="Combined: janitorial plus day porter from one team">
             <span class="qf2-card-icon" aria-hidden="true">🔄</span>
             <span class="qf2-card-body">
               <span class="qf2-card-label">Combined</span>
-              <span class="qf2-card-hint">Day porter + nightly cleaning</span>
+              <span class="qf2-card-hint">Janitorial + porter, one team</span>
+              <span class="qf2-card-includes">Both services from one coordinated team. A porter keeps things tidy through the day; a crew deep-cleans after you close. Best for high-traffic offices, clinics, and retail.</span>
             </span>
           </button>
         </div>
         <button type="button" class="qf2-not-sure-link" id="qf2QuizToggle" aria-expanded="false" aria-controls="qf2QuizPanel">
           Not sure? I can help you pick
         </button>
+        <!-- D127 — Welcome trust strip. Mirrors the snapshot trust pattern
+             in a slimmer single-line variant. Adds the reassurance moment
+             that earlier was missing on the entry screen. -->
+        <div class="qf2-welcome-trust" aria-label="Trust signals">
+          <span class="qf2-welcome-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>
+            Licensed &amp; insured
+          </span>
+          <span class="qf2-welcome-trust-sep" aria-hidden="true">·</span>
+          <span class="qf2-welcome-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s-7-7-7-12a7 7 0 0114 0c0 5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            NYC + 5 boroughs
+          </span>
+          <span class="qf2-welcome-trust-sep" aria-hidden="true">·</span>
+          <span class="qf2-welcome-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/></svg>
+            200+ businesses
+          </span>
+          <span class="qf2-welcome-trust-sep" aria-hidden="true">·</span>
+          <span class="qf2-welcome-trust-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            Quote in 24h
+          </span>
+        </div>
         <div class="qf2-quiz-panel" id="qf2QuizPanel" hidden role="region" aria-label="Service recommender">
           <p class="qf2-quiz-q">
             <span class="qf2-quiz-q-desktop">What&rsquo;s the bigger problem in your space?</span>
@@ -1225,7 +1252,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=37.3"></script>
+<script defer src="js/quote-flow.js?v=37.4"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

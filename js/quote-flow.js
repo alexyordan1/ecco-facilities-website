@@ -1450,10 +1450,12 @@
     }
 
     if (qf2QuizChips.length) {
+      // D127 — labels match the welcome card copy. "Janitorial" → "Night cleaning"
+      // surfaces user-facing; "Janitorial" stays in the blurb as SEO keyword.
       var QF2_QUIZ_LABELS = {
-        janitorial: { name: 'Janitorial', blurb: '· recurring cleaning after hours.' },
-        dayporter:  { name: 'Day Porter', blurb: '· on-site during business hours.' },
-        both:       { name: 'Combined',   blurb: '· day porter + janitorial.' }
+        janitorial: { name: 'Night cleaning', blurb: '· janitorial after-hours, evenings + weekends.' },
+        dayporter:  { name: 'Day Porter',     blurb: '· on-site during your business hours.' },
+        both:       { name: 'Combined',       blurb: '· janitorial + porter, one team.' }
       };
       qf2QuizChips.forEach(function (chip) {
         chip.addEventListener('click', function () {

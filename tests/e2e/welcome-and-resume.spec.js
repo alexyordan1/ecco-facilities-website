@@ -26,7 +26,11 @@ test.describe('Welcome screen', () => {
     await expect(pill).toHaveAttribute('aria-expanded', 'true');
     const after = (await pill.locator('.qf2-alina-hero-text').textContent()) || '';
     expect(after).not.toBe(before);
-    expect(after).toContain('Janitorial');
+    // D127 — service rename: "Janitorial" → "Night cleaning" as the user-
+    // facing card label, with "janitorial" kept lowercase in the help text
+    // as an SEO keyword (also surfaces in the quiz blurbs). Test now asserts
+    // case-insensitive presence so future copy tweaks don't churn it.
+    expect(after.toLowerCase()).toContain('janitorial');
   });
 
   test('Not sure quiz reveals chips and recommends', async ({ page }) => {
