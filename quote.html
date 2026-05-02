@@ -56,7 +56,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=48.2">
+<link rel="stylesheet" href="css/quote-flow.css?v=49.9">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -166,19 +166,20 @@
     <h1 class="qf-noscript-title">Request your free quote</h1>
     <p>We'll reply within 24 hours with a custom cleaning proposal. No JavaScript required.</p>
     <form class="qf-noscript-form" action="/api/submit-quote" method="POST">
-      <label>First name <input class="qf-noscript-input" name="fn" type="text" required></label>
-      <label>Last name <input class="qf-noscript-input" name="ln" type="text"></label>
-      <label>Email <input class="qf-noscript-input" name="em" type="email" required></label>
-      <label>Phone (optional) <input class="qf-noscript-input" name="ph" type="tel"></label>
-      <label>Company <input class="qf-noscript-input" name="co" type="text"></label>
-      <label>Address or ZIP <input class="qf-noscript-input" name="addr" type="text" required></label>
+      <label>First name <input class="qf-noscript-input" name="fn" type="text" autocomplete="given-name" maxlength="60" required></label>
+      <label>Last name <input class="qf-noscript-input" name="ln" type="text" autocomplete="family-name" maxlength="60"></label>
+      <label>Email <input class="qf-noscript-input" name="em" type="email" autocomplete="email" maxlength="254" required></label>
+      <label>Phone (optional) <input class="qf-noscript-input" name="ph" type="tel" autocomplete="tel" maxlength="25"></label>
+      <label>Company <input class="qf-noscript-input" name="co" type="text" autocomplete="organization" maxlength="120"></label>
+      <label>Address or ZIP <input class="qf-noscript-input" name="addr" type="text" autocomplete="street-address" maxlength="200" required></label>
       <label>Service
         <select class="qf-noscript-input" name="formType" required>
-          <option value="janitorial">Janitorial (recurring cleaning)</option>
+          <option value="janitorial">Night cleaning (recurring after-hours)</option>
           <option value="dayporter">Day Porter (on-site during business hours)</option>
+          <option value="both">Combined (porter + night cleaning)</option>
         </select>
       </label>
-      <label>Notes <textarea class="qf-noscript-input" name="notes" rows="3"></textarea></label>
+      <label>Notes <textarea class="qf-noscript-input" name="notes" rows="3" maxlength="500"></textarea></label>
       <button class="qf-noscript-btn" type="submit">Send request</button>
     </form>
     <p class="qf-noscript-contact">Prefer to reach out directly?
@@ -218,55 +219,11 @@
   <!-- Stage -->
   <section class="qf-stage" id="qfStage">
 
-    <!-- Persistent narrative rail (hidden on Step 1) -->
-    <header class="qf-flow-bar" id="qfFlowBar">
-      <!-- D1 · Linear fill bar (desktop) -->
-      <span class="qf-rail-fill-bar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="qfRailFillBar"></span>
-      <button type="button" class="qf-flow-back" id="qfFlowBackBtn" aria-label="Back to previous step">
-        <span class="qf-flow-back-arrow" aria-hidden="true">&larr;</span>
-      </button>
-      <nav class="qf-flow-rail" aria-label="Your plan progress">
-        <div class="qf-rail-track" aria-hidden="true">
-          <div class="qf-rail-fill" id="qfRailFill"></div>
-        </div>
-        <ol class="qf-rail-stations">
-          <li class="qf-rail-station is-done" data-key="service">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Service</span>
-            <span class="qf-rail-value" id="qfRailService">Day Porter</span>
-          </li>
-          <li class="qf-rail-station is-current" data-key="space">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Space type</span>
-            <span class="qf-rail-value qf-rail-value-pending">Choose now</span>
-          </li>
-          <li class="qf-rail-station" data-key="size">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Size</span>
-            <span class="qf-rail-value qf-rail-value-pending">&mdash;</span>
-          </li>
-          <li class="qf-rail-station" data-key="schedule">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Schedule</span>
-            <span class="qf-rail-value qf-rail-value-pending">&mdash;</span>
-          </li>
-          <li class="qf-rail-station" data-key="contact">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Contact</span>
-            <span class="qf-rail-value qf-rail-value-pending">&mdash;</span>
-          </li>
-        </ol>
-      </nav>
-      <aside class="qf-flow-progress" id="qfRailProgressWrap" aria-label="Progress">
-        <span class="qf-progress-step" id="qfRailProgressStep" aria-live="polite">&mdash;</span>
-        <span class="qf-progress-time" id="qfRailProgressTime" aria-hidden="true"></span>
-      </aside>
-      <!-- D1 · Compact pill (mobile) -->
-      <div class="qf-rail-pill">
-        <span class="qf-rail-pill-bar" id="qfRailPillBar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>
-        <span class="qf-rail-pill-label" id="qfRailPillLabel">Step 1 of 7</span>
-      </div>
-    </header>
+    <!-- D147 — V1 .qf-flow-bar removed. Was the original "narrative rail"
+         from the pre-mockup-G design, kept as `display:none` global since the
+         V2 per-screen .qf2-flowbar replaced it. JS getElementById calls for
+         qfFlowBar / qfRailFillBar / qfRailFill / qfRailPillBar etc. all
+         null-check and short-circuit, so removal is safe. -->
 
     <!-- D91 — keyboard-shortcut affordance (desktop only). Pure CSS:
          hover reveals the popover for mouse users; Enter/Space on the
@@ -311,14 +268,13 @@
       <div class="qf2-body">
         <div class="qf2-prompt">
           <h2 class="qf2-prompt-title">What brings you to <em>Ecco</em>?</h2>
-          <p class="qf2-prompt-sub">Pick what kind of care you&rsquo;re looking for.</p>
+          <p class="qf2-prompt-sub">Pick what kind of care you&rsquo;re looking for. <span class="qf2-prompt-sub-time">About 2 minutes.</span></p>
         </div>
         <div class="qf2-grid-3 qf2-grid-3--rich" role="group" aria-label="Choose a service">
           <button type="button" class="qf2-card qf2-card--rich" data-service="janitorial" data-service-label="Night cleaning" aria-label="Night cleaning: janitorial after-hours, evenings and weekends">
             <span class="qf2-card-icon" aria-hidden="true">🧹</span>
             <span class="qf2-card-body">
               <span class="qf2-card-label">Night cleaning</span>
-              <span class="qf2-card-hint">Janitorial · evenings + weekends</span>
               <span class="qf2-card-includes">A dedicated janitorial crew that comes in after you close. They handle the deep work: floors, bathrooms, surfaces, trash, full disinfection. Fresh by the next morning.</span>
             </span>
           </button>
@@ -326,7 +282,6 @@
             <span class="qf2-card-icon" aria-hidden="true">☀️</span>
             <span class="qf2-card-body">
               <span class="qf2-card-label">Day Porter</span>
-              <span class="qf2-card-hint">On-site during your business hours</span>
               <span class="qf2-card-includes">A dedicated porter on-site through your business hours. They keep things visibly tidy: lobby touch-ups, spills, bathroom restocking, trash. They spot issues before they become problems.</span>
             </span>
           </button>
@@ -334,7 +289,6 @@
             <span class="qf2-card-icon" aria-hidden="true">🔄</span>
             <span class="qf2-card-body">
               <span class="qf2-card-label">Combined</span>
-              <span class="qf2-card-hint">Janitorial + porter, one team</span>
               <span class="qf2-card-includes">Both services from one coordinated team. A porter keeps things tidy through the day; a crew deep-cleans after you close. Best for high-traffic offices, clinics, and retail.</span>
             </span>
           </button>
@@ -578,7 +532,7 @@
             <span class="qf2-field-ico" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4M5 9v10h14V9M9 13h6M9 17h6"/></svg>
             </span>
-            <input type="text" id="qf2SpaceOther" placeholder="e.g. warehouse, salon, daycare, church&hellip;" maxlength="120" aria-label="Describe your space">
+            <input type="text" id="qf2SpaceOther" placeholder="e.g. warehouse, daycare, church&hellip;" maxlength="120" aria-label="Describe your space">
           </div>
           <p class="qf2-field-helper" id="qf2SpaceOtherHelper" hidden>Got it. I&rsquo;ll pass that to our crew.</p>
           <p class="qf2-field-err" id="qf2SpaceOtherErr" role="alert" hidden></p>
@@ -764,10 +718,6 @@
           </span>
           <span>Big space. Let&rsquo;s book a visit so I can size it accurately.</span>
         </div>
-        <p class="qf2-multi-loc-hint">
-          <span class="qf2-prompt-sub-desktop">Multiple locations? Size the largest. We&rsquo;ll cover the rest on the call.</span>
-          <span class="qf2-prompt-sub-mobile">Multiple locations? Size the largest.</span>
-        </p>
         <button type="button" class="qf2-cta" id="qf2SizeContinue">Continue <span aria-hidden="true">&rarr;</span></button>
       </div>    </section>
 
@@ -1104,7 +1054,7 @@
           <span class="qf-rv-send-btn-label">Request my quote</span>
           <span aria-hidden="true">&rarr;</span>
         </button>
-        <p class="qf2-cta-hint">Quote in your inbox within 24h. No spam, no commitment.</p>
+        <p class="qf2-cta-hint">Quote in your inbox within 24h.</p>
         <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
       </div>    </section>
     <!-- SUCCESS SCREEN -->
@@ -1241,7 +1191,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
 <script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=37.5"></script>
+<script defer src="js/quote-flow.js?v=37.9"></script>
 <script src="js/cookie-consent.js?v=1.1"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

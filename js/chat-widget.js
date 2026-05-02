@@ -75,7 +75,7 @@ const CONFIG = {
   apiUrl: 'https://ecco-chat-backend.vercel.app/api/chat',
   botName: 'Alina',
   botTitle: pageContent.title,
-  avatar: 'images/alina-avatar.jpg',
+  avatar: 'images/alina-avatar-192.jpg',
   greeting: pageContent.greeting,
   placeholder: 'Ask Alina anything...',
   poweredBy: '🤖 AI-powered assistant · Not a real person'

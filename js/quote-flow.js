@@ -349,10 +349,10 @@
      Replaces the pricing estimate per user preference (no dollar amounts shown).
      ----------------------------------------------------------------------- */
   function qfRenderRailProgress() {
-    var wrap  = document.getElementById('qfRailProgressWrap');
-    var stepEl = document.getElementById('qfRailProgressStep');
-    var timeEl = document.getElementById('qfRailProgressTime');
-    if (!wrap || !stepEl) return;
+    // D149 — V1 .qf-flow-bar was retired in D147. The V1 progress wrap +
+    // step + time + fillBar + pillBar / pillLabel elements no longer exist
+    // in the DOM. Function refactored to drive only the V2 per-screen
+    // .qf2-flowbar-{step-count,mobile-label,mobile-fill} updates.
     var flow = getFlow();
     var currentIdx = flow.indexOf(STATE.currentStepName);
     if (currentIdx < 0) return;
@@ -365,54 +365,18 @@
     // like one more question is coming. Swap in "Last step" so users
     // mentally commit to the final CTA instead of bracing for another page.
     var isFinalInteractive = STATE.currentStepName === 'contact';
-    stepEl.textContent = isFinalInteractive
-      ? 'Last step'
-      : 'Step ' + displayStep + ' of ' + totalSteps;
-    if (timeEl) {
-      var remaining = Math.max(0, totalSteps - doneSteps);
-      // ~18s/step is our empirical median; round up to the next minute, clamp to [1, 3].
-      var mins = Math.max(1, Math.min(3, Math.ceil((remaining * 18) / 60)));
-      if (remaining <= 0) {
-        timeEl.textContent = 'Almost done';
-      } else {
-        timeEl.textContent = 'About ' + mins + ' min left';
-      }
-    }
-    wrap.setAttribute('data-state', currentIdx >= flow.length - 2 ? 'final' : 'active');
-
-    // D1 · sync linear fill bar (desktop) + compact pill (mobile)
     var pct = totalSteps > 1 ? Math.round(((displayStep - 1) / (totalSteps - 1)) * 100) : 0;
-    var fillBar = document.getElementById('qfRailFillBar');
-    if (fillBar) {
-      fillBar.style.setProperty('--qf-progress', pct + '%');
-      fillBar.setAttribute('aria-valuenow', String(pct));
-    }
-    var pillBar = document.getElementById('qfRailPillBar');
-    var pillLabel = document.getElementById('qfRailPillLabel');
-    if (pillBar) {
-      pillBar.style.setProperty('--qf-progress', pct + '%');
-      // Scale (0..1) for the transform:scaleX fill animation on mobile.
-      pillBar.style.setProperty('--qf-progress-scale', (pct / 100).toFixed(3));
-      pillBar.setAttribute('aria-valuenow', String(pct));
-    }
-    if (pillLabel) pillLabel.textContent = isFinalInteractive
+    var labelText = isFinalInteractive
       ? 'Last step'
       : 'Step ' + displayStep + ' of ' + totalSteps;
 
-    // D70 — also sync the per-screen flowbar step-count labels so they
-    // match the active service flow. Markup hardcodes things like
-    // "Step 2 of 7" assuming janitorial; pure Day Porter flow is shorter
-    // and Combined is longer. Replace label text on the currently active
-    // screen only (other screens are inert via [hidden]).
-    // D83 — extended: also drives the per-screen mobile fill bar width.
-    // The HTML used to ship 7 inline `style="width:N%"` defaults assuming
-    // the janitorial flow; we now compute pct from the active flow and
-    // write width on the active screen only.
+    // D70 — sync the per-screen flowbar step-count labels so they match
+    // the active service flow. Markup hardcodes things like "Step 2 of 7"
+    // assuming janitorial; pure Day Porter flow is shorter and Combined
+    // is longer.
+    // D83 — also drive the per-screen mobile fill bar width.
     var activeScreen = document.querySelector('.qf-screen.qf2-stage.is-active');
     if (activeScreen) {
-      var labelText = isFinalInteractive
-        ? 'Last step'
-        : 'Step ' + displayStep + ' of ' + totalSteps;
       activeScreen.querySelectorAll('.qf2-flowbar-step-count, .qf2-flowbar-mobile-label').forEach(function (el) {
         el.textContent = labelText;
       });
@@ -4319,21 +4283,21 @@
     // Check that all required fields for the current service are captured
     function validateForSubmit() {
       var errs = [];
-      if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email is missing or invalid.' });
+      if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks off. Needs an @ symbol and a domain so we can send your quote.' });
       // Ola 3 — re-check disposable + typo at submit. User may have edited
       // the email in the summary panel to a disposable/typo'd address after
       // passing the initial info-step check.
       else if (suggestEmailCorrection(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks like a typo. Did you mean ' + suggestEmailCorrection(STATE.userEmail) + '?' });
-      else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a non-disposable email so we can deliver your proposal.' });
-      if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'First name is missing.' });
-      if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone number is invalid.' });
+      else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a real work email so we can deliver your proposal.' });
+      if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'We need your first name to send the quote.' });
+      if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone looks off. Try the 10-digit format (area code first).' });
       // AYS Ola 4 Commit L HI-4 — mirror the stricter check from the location step.
       var _a = STATE.userAddress || '';
       var _isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(_a);
       var _hasStreet = _a.length >= 6 && /\d/.test(_a) && /[A-Za-z]{2,}/.test(_a);
-      if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'A valid address or ZIP is missing.' });
-      if (!STATE.space) errs.push({ field: 'space', msg: 'Space type is missing.' });
-      if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Space size is missing.' });
+      if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'We need a ZIP or street address to match you with the local team.' });
+      if (!STATE.space) errs.push({ field: 'space', msg: 'Pick a space type so we can quote it right.' });
+      if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Pick a size range so we can quote it right.' });
       // D61 — fix critical bug: pure Day Porter flow doesn't visit the
       // janitorial days screen, so STATE.days is empty. The old check
       // rejected every Day Porter submission. Now: jan/unsure require
@@ -4355,7 +4319,7 @@
         }
       }
       if ((STATE.service === 'dayporter' || STATE.service === 'both') && !STATE.porterCount) {
-        errs.push({ field: 'porters', msg: 'Porter count is missing.' });
+        errs.push({ field: 'porters', msg: 'Pick how many porters you need on-site.' });
       }
       return errs;
     }
