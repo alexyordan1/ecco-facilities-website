@@ -56,7 +56,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500;1,9..40,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Caveat:wght@500&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="css/styles.css?v=15.1">
-<link rel="stylesheet" href="css/quote-flow.css?v=49.7">
+<link rel="stylesheet" href="css/quote-flow.css?v=49.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","address":{"@type":"PostalAddress","addressLocality":"New York","addressRegion":"NY","addressCountry":"US"},"areaServed":[{"@type":"City","name":"New York"},{"@type":"City","name":"Brooklyn"},{"@type":"City","name":"Queens"},{"@type":"City","name":"Bronx"},{"@type":"City","name":"Staten Island"}],"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -219,55 +219,11 @@
   <!-- Stage -->
   <section class="qf-stage" id="qfStage">
 
-    <!-- Persistent narrative rail (hidden on Step 1) -->
-    <header class="qf-flow-bar" id="qfFlowBar">
-      <!-- D1 · Linear fill bar (desktop) -->
-      <span class="qf-rail-fill-bar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="qfRailFillBar"></span>
-      <button type="button" class="qf-flow-back" id="qfFlowBackBtn" aria-label="Back to previous step">
-        <span class="qf-flow-back-arrow" aria-hidden="true">&larr;</span>
-      </button>
-      <nav class="qf-flow-rail" aria-label="Your plan progress">
-        <div class="qf-rail-track" aria-hidden="true">
-          <div class="qf-rail-fill" id="qfRailFill"></div>
-        </div>
-        <ol class="qf-rail-stations">
-          <li class="qf-rail-station is-done" data-key="service">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Service</span>
-            <span class="qf-rail-value" id="qfRailService">Day Porter</span>
-          </li>
-          <li class="qf-rail-station is-current" data-key="space">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Space type</span>
-            <span class="qf-rail-value qf-rail-value-pending">Choose now</span>
-          </li>
-          <li class="qf-rail-station" data-key="size">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Size</span>
-            <span class="qf-rail-value qf-rail-value-pending">&mdash;</span>
-          </li>
-          <li class="qf-rail-station" data-key="schedule">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Schedule</span>
-            <span class="qf-rail-value qf-rail-value-pending">&mdash;</span>
-          </li>
-          <li class="qf-rail-station" data-key="contact">
-            <span class="qf-rail-dot" aria-hidden="true"></span>
-            <span class="qf-rail-label">Contact</span>
-            <span class="qf-rail-value qf-rail-value-pending">&mdash;</span>
-          </li>
-        </ol>
-      </nav>
-      <aside class="qf-flow-progress" id="qfRailProgressWrap" aria-label="Progress">
-        <span class="qf-progress-step" id="qfRailProgressStep" aria-live="polite">&mdash;</span>
-        <span class="qf-progress-time" id="qfRailProgressTime" aria-hidden="true"></span>
-      </aside>
-      <!-- D1 · Compact pill (mobile) -->
-      <div class="qf-rail-pill">
-        <span class="qf-rail-pill-bar" id="qfRailPillBar" role="progressbar" aria-label="Quote progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>
-        <span class="qf-rail-pill-label" id="qfRailPillLabel">Step 1 of 7</span>
-      </div>
-    </header>
+    <!-- D147 — V1 .qf-flow-bar removed. Was the original "narrative rail"
+         from the pre-mockup-G design, kept as `display:none` global since the
+         V2 per-screen .qf2-flowbar replaced it. JS getElementById calls for
+         qfFlowBar / qfRailFillBar / qfRailFill / qfRailPillBar etc. all
+         null-check and short-circuit, so removal is safe. -->
 
     <!-- D91 — keyboard-shortcut affordance (desktop only). Pure CSS:
          hover reveals the popover for mouse users; Enter/Space on the
@@ -576,7 +532,7 @@
             <span class="qf2-field-ico" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4M5 9v10h14V9M9 13h6M9 17h6"/></svg>
             </span>
-            <input type="text" id="qf2SpaceOther" placeholder="e.g. warehouse, salon, daycare, church&hellip;" maxlength="120" aria-label="Describe your space">
+            <input type="text" id="qf2SpaceOther" placeholder="e.g. warehouse, daycare, church&hellip;" maxlength="120" aria-label="Describe your space">
           </div>
           <p class="qf2-field-helper" id="qf2SpaceOtherHelper" hidden>Got it. I&rsquo;ll pass that to our crew.</p>
           <p class="qf2-field-err" id="qf2SpaceOtherErr" role="alert" hidden></p>
