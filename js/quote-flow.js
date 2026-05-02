@@ -419,9 +419,6 @@
       activeScreen.querySelectorAll('.qf2-flowbar-mobile-fill').forEach(function (el) {
         el.style.width = pct + '%';
       });
-      activeScreen.querySelectorAll('.qf2-flowbar-rail').forEach(function (el) {
-        el.style.setProperty('--qf2-flowbar-progress', (pct / 100).toFixed(3));
-      });
     }
   }
 
