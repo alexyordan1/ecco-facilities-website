@@ -4328,9 +4328,11 @@
     (function wireFloatingCta() {
       var floater = document.getElementById('qfPlanFloatingCta');
       var floaterBtn = document.getElementById('qfFloatingSubmitBtn');
-      var inlineFoot = SCREENS.contact ? SCREENS.contact.querySelector('.qf-rev-foot') : null;
       var mainBtn = document.getElementById('qfContactSubmit');
-      if (!floater || !floaterBtn || !inlineFoot || !mainBtn) return;
+      // D150 — V2 has no .qf-rev-foot wrapper; use the submit button itself as
+      // the "inline" reference for scroll-out-of-view detection.
+      var inlineFoot = mainBtn;
+      if (!floater || !floaterBtn || !mainBtn) return;
 
       // Forward click + mirror disabled / aria-busy state
       floaterBtn.addEventListener('click', function () {
