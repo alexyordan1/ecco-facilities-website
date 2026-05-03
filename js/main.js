@@ -129,59 +129,6 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
 })();
 
 /* ============================================================
-   HERO STATS — COUNTER ANIMATION
-   ============================================================ */
-(function initCounters() {
-  var counters = document.querySelectorAll('.hero-stat-num');
-  if (!counters.length) return;
-  var animated = false;
-
-  function animateCounters() {
-    if (animated) return;
-    animated = true;
-    counters.forEach(function(el) {
-      var target = parseInt(el.getAttribute('data-target'), 10);
-      var suffix = el.getAttribute('data-suffix') || '';
-      var duration = 2000;
-      var startTime = null;
-
-      function step(ts) {
-        if (!startTime) startTime = ts;
-        var progress = Math.min((ts - startTime) / duration, 1);
-        var eased = 1 - Math.pow(1 - progress, 3);
-        el.textContent = Math.floor(eased * target) + suffix;
-        if (progress < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-  }
-
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          animateCounters();
-          observer.disconnect();
-        }
-      });
-    }, { threshold: 0.3 });
-    observer.observe(counters[0].closest('.hero-stats'));
-  }
-
-  /* Mandatory fallback — project rule */
-  setTimeout(function() {
-    if (!animated) {
-      counters.forEach(function(el) {
-        var target = el.getAttribute('data-target');
-        var suffix = el.getAttribute('data-suffix') || '';
-        el.textContent = target + suffix;
-      });
-      animated = true;
-    }
-  }, 3000);
-})();
-
-/* ============================================================
    INDUSTRIES ACCORDION
    ============================================================ */
 (function initIndustryAccordion() {
@@ -435,4 +382,34 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   } else {
     init();
   }
+})();
+
+/* ============================================================
+   FOOTER NEWSLETTER — accessible status announcement (harden)
+   ============================================================ */
+(function initFooterNl() {
+  var form = document.getElementById('footerNlForm');
+  if (!form) return;
+  var email = document.getElementById('footerNlEmail');
+  var status = document.getElementById('footerNlStatus');
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function setStatus(msg, kind) {
+    if (!status) return;
+    status.textContent = msg;
+    status.classList.toggle('is-err', kind === 'err');
+    status.classList.toggle('is-ok', kind === 'ok');
+  }
+  form.addEventListener('submit', function(e) {
+    var v = (email.value || '').trim();
+    if (!v || !emailRe.test(v)) {
+      e.preventDefault();
+      setStatus('Please enter a valid email address.', 'err');
+      email.focus();
+      return;
+    }
+    setStatus('Opening sign-up in a new tab…', 'ok');
+  });
+  email.addEventListener('input', function() {
+    if (status.textContent) setStatus('', '');
+  });
 })();
