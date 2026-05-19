@@ -17,9 +17,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=18.8">
+<link rel="stylesheet" href="css/styles.css?v=18.13">
+<link rel="stylesheet" href="css/components.css?v=1.4">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
-<style>:root{--r:10px;--rl:16px}body{padding-top:72px}</style>
+<style>:root{--radius:10px;--radius-lg:16px}body{padding-top:72px}</style>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -293,7 +294,7 @@ location:()=>`<h2 class="step-q">Almost there, ${D.fn}! Where is your facility?<
   <div class="fg"><label for="fCo">Company Name *</label><input placeholder="Company name" id="fCo" required aria-required="true" value="${D.co||''}" oninput="D.co=this.value;this.classList.remove('v-err')"></div>
   <div class="fg"><label for="fAddr">Full Address *</label><input type="text" placeholder="Street address, suite/floor, city, state, ZIP" id="fAddr" required aria-required="true" value="${D.addr||''}" oninput="D.addr=this.value;this.classList.remove('v-err')"></div>
   <div class="fg"><label for="fRef">How did you hear about us? <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-  <select id="fRef" class="fg" style="width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--rl);font-family:var(--fb);font-size:.92rem;color:#FFF;outline:none;background:rgba(255,255,255,.06);cursor:pointer;appearance:none" onchange="D.referral=this.value">
+  <select id="fRef" class="fg" style="width:100%;padding:.85rem 1.1rem;border:2px solid rgba(255,255,255,.12);border-radius:var(--radius-lg);font-family:var(--font-body);font-size:.92rem;color:#FFF;outline:none;background:rgba(255,255,255,.06);cursor:pointer;appearance:none" onchange="D.referral=this.value">
   <option value="">Select one (optional)</option>
   <option value="Google Search">Google Search</option>
   <option value="Referral">Referral from someone</option>
@@ -372,7 +373,7 @@ init(){
       const s=JSON.parse(saved);
       if(s.ts&&Date.now()-s.ts<7*24*60*60*1000){
         const sBox=document.getElementById('sBox');
-        sBox.innerHTML='<div style="text-align:center;padding:2rem"><h2 class="step-q">Welcome back!</h2><p class="step-sub">You have a saved quote in progress. Would you like to continue?</p><div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem"><button onclick="W.restoreSaved()" style="padding:.8rem 2rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer">Continue Quote</button><button onclick="W.startFresh()" style="padding:.8rem 2rem;background:transparent;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.2);border-radius:8px;font-family:var(--fb);font-size:.9rem;cursor:pointer">Start Over</button></div></div>';
+        sBox.innerHTML='<div style="text-align:center;padding:2rem"><h2 class="step-q">Welcome back!</h2><p class="step-sub">You have a saved quote in progress. Would you like to continue?</p><div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem"><button onclick="W.restoreSaved()" style="padding:.8rem 2rem;background:var(--color-green);color:#fff;border:none;border-radius:8px;font-family:var(--font-body);font-size:.9rem;font-weight:600;cursor:pointer">Continue Quote</button><button onclick="W.startFresh()" style="padding:.8rem 2rem;background:transparent;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.2);border-radius:8px;font-family:var(--font-body);font-size:.9rem;cursor:pointer">Start Over</button></div></div>';
         document.querySelector('.wiz-nav').style.display='none';
         return;
       }else{localStorage.removeItem('ecco_quote_dp')}
@@ -714,7 +715,7 @@ async submit(){
     showConfetti();
   }catch(err){
     D._submitted=false;
-    document.getElementById('sBox').innerHTML='<div style="text-align:center;padding:3rem 1rem"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><h2 class="step-q">Something went wrong</h2><p class="step-sub">We couldn\'t send your request. Please try again or email us directly.</p><a href="mailto:info@eccofacilities.com" style="display:inline-block;margin-top:1rem;padding:.8rem 2rem;background:var(--green);color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Email Us Instead</a><button onclick="D._submitted=false;W.cur=W.steps.length-1;W.render();document.querySelector(\'.wiz-nav\').style.display=\'flex\'" style="display:block;margin:1rem auto 0;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:.85rem;text-decoration:underline">← Go back and try again</button></div>';
+    document.getElementById('sBox').innerHTML='<div style="text-align:center;padding:3rem 1rem"><div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div><h2 class="step-q">Something went wrong</h2><p class="step-sub">We couldn\'t send your request. Please try again or email us directly.</p><a href="mailto:info@eccofacilities.com" style="display:inline-block;margin-top:1rem;padding:.8rem 2rem;background:var(--color-green);color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Email Us Instead</a><button onclick="D._submitted=false;W.cur=W.steps.length-1;W.render();document.querySelector(\'.wiz-nav\').style.display=\'flex\'" style="display:block;margin:1rem auto 0;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:.85rem;text-decoration:underline">← Go back and try again</button></div>';
     document.querySelector('.wiz-nav').style.display='';
   }
 }

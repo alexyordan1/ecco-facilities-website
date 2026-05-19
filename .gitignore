@@ -42,3 +42,4 @@ docs/superpowers/plans/capture-*.mjs
 docs/claude-design-input/
 test-results/
 playwright-report/
+bun.lock

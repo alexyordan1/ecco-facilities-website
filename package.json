@@ -12,6 +12,7 @@
     "@axe-core/playwright": "^4.11.2",
     "@playwright/test": "^1.59.1",
     "axe-core": "^4.11.3",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "css-tree": "^3.2.1"
   }
 }

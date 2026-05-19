@@ -27,19 +27,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" href="images/stock/23-coworking-space.webp" as="image">
-<link rel="stylesheet" href="css/styles.css?v=18.8">
+<link rel="stylesheet" href="css/styles.css?v=18.13">
+<link rel="stylesheet" href="css/components.css?v=1.4">
 <style>
 .filter-bar{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:3rem;padding:0 3.5rem}
-.filter-btn{padding:.65rem 1.5rem;background:var(--wh);border:1.5px solid var(--bl);border-radius:50px;font-size:.82rem;font-weight:600;color:var(--navy);cursor:pointer;transition:all .3s var(--ease);white-space:nowrap}
-.filter-btn:hover{border-color:var(--navy);background:var(--navy);color:var(--wh)}
-.filter-btn.active{background:var(--navy);color:var(--wh);border-color:var(--navy)}
-.testimonials-grid-sec .test-card{display:none;background:var(--cream);border-color:var(--bl);flex-direction:column}
+.filter-btn{padding:.65rem 1.5rem;background:var(--color-white);border:1.5px solid var(--color-border);border-radius:50px;font-size:.82rem;font-weight:600;color:var(--color-navy);cursor:pointer;transition:all .3s var(--ease);white-space:nowrap}
+.filter-btn:hover{border-color:var(--color-navy);background:var(--color-navy);color:var(--color-white)}
+.filter-btn.active{background:var(--color-navy);color:var(--color-white);border-color:var(--color-navy)}
+.testimonials-grid-sec .test-card{display:none;background:var(--color-cream);border-color:var(--color-border);flex-direction:column}
 .testimonials-grid-sec .test-card.visible{display:flex;opacity:1;transform:none}
-.testimonials-grid-sec .test-quote{color:var(--tb)}
-.testimonials-grid-sec .test-name{color:var(--navy)}
-.testimonials-grid-sec .test-role{color:var(--tm)}
+.testimonials-grid-sec .test-quote{color:var(--color-text-body)}
+.testimonials-grid-sec .test-name{color:var(--color-navy)}
+.testimonials-grid-sec .test-role{color:var(--color-text-muted)}
 .testimonials-grid-sec .test-stars{color:#F59E0B}
-.testimonials-grid-sec .test-av{background:linear-gradient(135deg,var(--navy),var(--blue));color:var(--wh)}
+.testimonials-grid-sec .test-av{background:linear-gradient(135deg,var(--color-navy),var(--color-blue));color:var(--color-white)}
 @media(max-width:900px){.filter-bar{padding:0 1.5rem}}
 @media(max-width:480px){.filter-bar{padding:0 1rem;gap:.6rem}.filter-btn{padding:.5rem 1rem;font-size:.75rem}}
 </style>
