@@ -486,4 +486,173 @@
     }
 }
 
+/* ========================================================================
+   9. PHOTO CARD — .card-image (image-led card with overlay)
+   ------------------------------------------------------------------------
+   Specialized card variant for image-backed content (service cards, hero
+   tiles, gallery cards). Distinct from .card (content-led, white bg) —
+   .card-image is image-led with no padding, gradient overlay for text legibility.
+     .card-image          — Image card wrapper (was .photo-card)
+     .card-image-bg       — Background image layer (positioned absolute)
+     .card-image-overlay  — Gradient overlay for text contrast
+     .card-image-content  — Foreground content (bottom-aligned by default)
+   Legacy aliases: .photo-card, .photo-card-bg, .photo-card-overlay, .photo-card-content
+   ======================================================================== */
+
+.card-image,
+.photo-card {
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    min-height: 320px;
+    cursor: default;
+    transition:
+        transform .35s cubic-bezier(.22, 1, .36, 1),
+        box-shadow .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.card-image:hover,
+.photo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px -8px rgba(11, 29, 56, .18);
+}
+
+.card-image-bg,
+.photo-card-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform .6s ease;
+}
+
+.card-image:hover .card-image-bg,
+.photo-card:hover .photo-card-bg {
+    transform: scale(1.05);
+}
+
+.card-image-overlay,
+.photo-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 29, 56, .15) 0, rgba(11, 29, 56, .85) 65%);
+    transition: background .3s;
+}
+
+.card-image-content,
+.photo-card-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+/* ========================================================================
+   10. PILLAR — .pillar (segmented tab / category selector)
+   ------------------------------------------------------------------------
+   Specialized component for the "Five Pillars" / industry-selector pattern.
+   Acts as a button-like tab with active state, icon, and uppercase label.
+     .pillar         — Base tab (cursor pointer, no border by default)
+     .pillar:hover   — Subtle green tint
+     .pillar.active  — Selected state (white bg, green bottom border, shadow)
+     .pillar-icon    — Circular icon container (52px, green tint)
+     .pillar-label   — Uppercase small text below icon
+   ======================================================================== */
+
+.pillar {
+    text-align: center;
+    padding: 1.8rem 1rem;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    transition: all .4s cubic-bezier(.16, 1, .3, 1);
+    border-bottom: 3px solid transparent;
+}
+
+.pillar:hover {
+    background: rgba(45, 122, 50, .03);
+}
+
+.pillar.active {
+    background: var(--color-white);
+    border-bottom-color: var(--color-green);
+    box-shadow: 0 4px 20px rgba(11, 29, 56, .08);
+    border-radius: 16px 16px 0 0;
+}
+
+.pillar-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin: 0 auto .8rem;
+    background: rgba(45, 122, 50, .06);
+    color: var(--color-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s;
+}
+
+.pillar.active .pillar-icon {
+    background: linear-gradient(135deg, rgba(45, 122, 50, .15), rgba(48, 104, 173, .1));
+    transform: scale(1.1);
+}
+
+.pillar-label {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--color-navy);
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+.pillar.active .pillar-label {
+    color: var(--color-green);
+}
+
+/* ========================================================================
+   11. LIST-ITEM — .list-item (list row with icon prefix)
+   ------------------------------------------------------------------------
+   Vertical list of items with a circular icon and text body. Used for
+   feature lists, before/after comparisons, problem lists.
+     .list-item        — Row wrapper (flex, gap, border-bottom separator)
+     .list-item-icon   — Circular icon container (28px, colorable)
+   Legacy aliases: .ba-item, .ba-ico
+   ======================================================================== */
+
+.list-item,
+.ba-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding-bottom: .8rem;
+    margin-bottom: .8rem;
+    border-bottom: 1px solid rgba(223, 228, 236, .5);
+    font-size: .9rem;
+    line-height: 1.6;
+    color: var(--color-text-body);
+}
+
+.list-item:last-child,
+.ba-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.list-item-icon,
+.ba-ico {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 } /* end @layer components */
