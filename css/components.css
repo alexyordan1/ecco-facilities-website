@@ -1,0 +1,269 @@
+/* ========================================================================
+   Ecco Facilities — Canonical Component Library
+   ------------------------------------------------------------------------
+   Source-of-truth for reusable UI components. Added during Phase 2.B of
+   the design-system reset (D158).
+
+   Architecture:
+   - Layered under @layer components for cascade safety
+   - Uses canonical tokens from styles.css :root (--color-*, --font-*, --shadow-*, etc.)
+   - All values match existing styles.css rules — loading this file alongside
+     styles.css produces NO visual change. As Phase 2.D migrates pages,
+     duplicate rules will be removed from styles.css.
+
+   Components (5 base):
+     1. .btn          — Buttons (6 variants)
+     2. .card         — Cards (3 variants)
+     3. .sec          — Sections (with head/title/label/sub)
+     4. .container    — Max-width layout wrappers
+     5. .badge        — Pills, eyebrows, status indicators
+
+   Naming: Same class names as live system to avoid breaking refs.
+   Future additions use BEM-style modifiers (.component--variant).
+   ======================================================================== */
+
+@layer components {
+
+/* ========================================================================
+   1. BUTTON — .btn (base) + variants
+   ------------------------------------------------------------------------
+   Base: inline-flex, 44px min touch target (WCAG), spring transitions.
+   Variants:
+     .btn-primary   — Navy gradient, primary CTA
+     .btn-white     — White bg / navy text, used on dark sections
+     .btn-outline   — Transparent bg / white border (was .btn-ol — kept)
+     .btn-sage      — Green pill button (large CTA)
+     .btn-ghost     — Text-only link-style button
+   ======================================================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .9rem 2.4rem;
+    font-family: var(--font-body);
+    font-size: .88rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    min-height: 44px;
+    text-decoration: none;
+    transition:
+        transform .25s cubic-bezier(.34, 1.56, .64, 1),
+        box-shadow .25s cubic-bezier(.16, 1, .3, 1),
+        background .2s var(--ease);
+}
+
+.btn:hover { transform: translateY(-2px) scale(1.02); }
+.btn:active { transform: translateY(0) scale(.98); transition-duration: .1s; }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-navy) 0, var(--color-navy-x-light) 100%);
+    color: var(--color-white);
+    box-shadow: 0 4px 20px rgba(11, 29, 56, .15);
+}
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(11, 29, 56, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.btn-white {
+    background: var(--color-white);
+    color: var(--color-navy);
+}
+.btn-white:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(11, 29, 56, .18), 0 4px 12px rgba(11, 29, 56, .08);
+}
+.btn-white:active { transform: scale(.96); }
+
+/* .btn-ol is legacy name; kept until Phase 2.D rename. Same as .btn-outline. */
+.btn-outline,
+.btn-ol {
+    background: transparent;
+    color: var(--color-white);
+    border: 1.5px solid rgba(255, 255, 255, .25);
+}
+
+.btn-sage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    background: var(--color-green);
+    color: #fff;
+    font: 600 16px/1 var(--font-body);
+    padding: 18px 36px;
+    border-radius: 999px;
+    border: none;
+    text-decoration: none;
+    letter-spacing: .01em;
+    min-height: 52px;
+    box-shadow: 0 8px 24px -6px rgba(45, 122, 50, .35);
+    transition: transform .25s var(--ease-spring), box-shadow .25s var(--ease);
+}
+.btn-sage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -6px rgba(45, 122, 50, .45);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--color-blue);
+    padding: .5rem 0;
+    border: none;
+}
+
+/* ========================================================================
+   2. CARD — .card (base) + variants
+   ------------------------------------------------------------------------
+   Canonical card pattern. Consolidates .val-card, .ind-card, etc.
+   Variants:
+     .card           — Generic bordered card
+     .card-elevated  — With shadow lift on hover
+     .card-flat      — No border, subtle bg only
+   ======================================================================== */
+
+.card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2.2rem;
+    position: relative;
+    overflow: hidden;
+    transition:
+        transform .15s var(--ease-spring),
+        box-shadow .15s var(--ease),
+        border-color .15s var(--ease);
+}
+
+.card-elevated {
+    box-shadow: var(--shadow-sm);
+}
+.card-elevated:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-subtle);
+}
+
+.card-flat {
+    border: none;
+    background: var(--color-cream);
+}
+
+/* ========================================================================
+   3. SECTION — .sec + head/title/label/sub
+   ------------------------------------------------------------------------
+   Page section primitive. Use with .container for max-width.
+     .sec       — Padded section wrapper (6rem top/bottom)
+     .sec-head  — Centered header area
+     .sec-ttl   — Display title (Cormorant Garamond)
+     .sec-lbl   — Eyebrow label (uppercase, green, pill bg)
+     .sec-sub   — Subtitle below title
+   ======================================================================== */
+
+.sec {
+    padding: 6rem 3.5rem;
+}
+
+.sec-head {
+    text-align: center;
+    max-width: 1000px;
+    margin: 0 auto 3.5rem;
+}
+
+.sec-ttl {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    line-height: 1.2;
+    color: var(--color-navy);
+    letter-spacing: -.02em;
+}
+
+.sec-lbl {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--color-green);
+    margin-bottom: 1.2rem;
+    background: var(--color-green-bg);
+    padding: .35rem .9rem .35rem .5rem;
+    border-radius: 999px;
+}
+
+.sec-sub {
+    font-size: 1.1rem;
+    color: var(--color-text-body);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 1.2rem auto 0;
+}
+
+/* ========================================================================
+   4. CONTAINER — .container
+   ------------------------------------------------------------------------
+   Max-width wrapper. Use inside .sec for content alignment.
+     .container       — Default max-width (1200px from --max-width)
+     .container-narrow — Narrower variant for long-form text (~720px)
+     .container-wide  — Wider variant for full-bleed grids (~1400px)
+   ======================================================================== */
+
+.container {
+    width: 100%;
+    max-width: var(--max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.container-narrow {
+    max-width: 720px;
+}
+
+.container-wide {
+    max-width: 1400px;
+}
+
+/* ========================================================================
+   5. BADGE — .badge + variants
+   ------------------------------------------------------------------------
+   Small inline pill for status, certifications, eyebrow tags.
+     .badge       — Default (light bg, small text)
+     .badge-green — Green tint (uses --color-green-bg)
+     .badge-dark  — Dark bg for hero/navy sections
+   ======================================================================== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .9rem;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    border-radius: 999px;
+    background: var(--color-border-subtle);
+    color: var(--color-text-body);
+}
+
+.badge-green {
+    background: var(--color-green-bg);
+    color: var(--color-green);
+    border: 1px solid var(--color-green-border);
+}
+
+.badge-dark {
+    background: rgba(255, 255, 255, .08);
+    color: var(--color-text-white-muted);
+    border: 1px solid rgba(255, 255, 255, .12);
+}
+
+} /* end @layer components */
