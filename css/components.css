@@ -266,4 +266,224 @@
     border: 1px solid rgba(255, 255, 255, .12);
 }
 
+/* ========================================================================
+   6. NAV — .nav + dropdown system
+   ------------------------------------------------------------------------
+   Fixed top nav bar with frosted-glass background. Hides on scroll-down
+   on mobile (via .nav-hidden class added by JS).
+     .nav          — Fixed header bar (72px height, blur backdrop)
+     .nav.scrolled — Adds shadow when scrolled past 20px
+     .nav-logo     — Logo container (42px image height)
+     .nl           — Nav link (legacy short name; alias .nav-link)
+     .nl-icon      — Icon prefix on nav link (mobile dropdown)
+     .nm           — Nav menu container
+     .nm-sep       — Visual separator in dropdown menus
+     .ddi          — Dropdown item (legacy short name)
+     .ddsc         — Dropdown item subcaption
+   ======================================================================== */
+
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 0 3.5rem;
+    height: 72px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(250, 251, 252, .92);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    backdrop-filter: blur(20px) saturate(1.2);
+    transition: background .3s var(--ease), box-shadow .3s var(--ease), transform .35s var(--ease);
+}
+
+.nav.scrolled {
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-logo img {
+    height: 42px;
+    transition: opacity .3s;
+}
+
+.nl,
+.nav-link {
+    position: relative;
+    padding: .5rem 1.1rem;
+    font-size: .82rem;
+    font-weight: 500;
+    color: var(--color-text-body);
+    transition: color .3s;
+}
+
+.nl-icon {
+    display: none; /* shown on mobile only via media query in styles.css */
+}
+
+.nm {
+    display: flex;
+    align-items: center;
+}
+
+.nm-sep {
+    height: 1px;
+    margin: .3rem 1.5rem;
+    background: rgba(11, 29, 56, .06);
+    flex-shrink: 0;
+}
+
+.ddi {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .65rem .9rem;
+    border-radius: 8px;
+    font-size: .84rem;
+    color: var(--color-text-body);
+    transition: all .2s;
+}
+
+.ddsc {
+    font-size: .72rem;
+    color: var(--color-text-muted);
+    margin-top: .1rem;
+}
+
+/* ========================================================================
+   7. FOOTER — .footer + grid system
+   ------------------------------------------------------------------------
+   Navy footer with 4-column grid (1.5fr + 3×1fr).
+     .footer            — Navy background container
+     .footer-grid       — 4-column grid (collapses on mobile)
+     .footer-col        — Column wrapper (with links/spans inside)
+     .footer-heading    — Column heading (uppercase eyebrow)
+     .footer-brand      — Brand column with logo
+     .footer-newsletter — Newsletter row (border-top separator)
+     .footer-bottom     — Bottom legal row (copyright, fine print)
+   ======================================================================== */
+
+.footer {
+    background: var(--color-navy);
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-grid {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 2.5rem;
+    padding: 3rem 3.5rem 2.5rem;
+}
+
+.footer-col a,
+.footer-col span {
+    display: block;
+    font-size: .84rem;
+    color: var(--color-text-white-muted);
+    padding: .3rem 0;
+    transition: color .3s;
+}
+
+.footer-col a:hover {
+    color: var(--color-white);
+}
+
+.footer-heading {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--color-text-white-muted);
+    margin-bottom: 1.2rem;
+    opacity: .6;
+}
+
+.footer-brand img {
+    height: 42px;
+    margin-bottom: 1rem;
+}
+
+.footer-newsletter {
+    padding: 2rem 3.5rem;
+    border-top: 1px solid var(--color-border-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--color-border-dark);
+    padding: 1.5rem 3.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .5rem;
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+/* ========================================================================
+   8. FORM-FIELD — .form-group + label/input/row
+   ------------------------------------------------------------------------
+   Building blocks for forms outside the quote-flow (which uses its own
+   .qf-* system in quote-flow.css).
+     .form-group  — Wrapper (label + input stacked)
+     .form-label  — Field label (navy, slight spacing)
+     .form-input  — Standard input/textarea field
+     .form-row    — 2-column grid for side-by-side fields
+   ======================================================================== */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--color-navy);
+    margin-bottom: .5rem;
+    letter-spacing: .02em;
+}
+
+.form-input {
+    padding: .8rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1rem; /* iOS Safari zoom prevention */
+    color: var(--color-text-dark);
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+    width: 100%;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-green);
+    box-shadow: 0 0 0 3px var(--color-green-bg);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 700px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 } /* end @layer components */
