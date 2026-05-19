@@ -655,4 +655,104 @@
     justify-content: center;
 }
 
+/* ========================================================================
+   12. CERT BADGE — .cert-badge (icon + label rounded badge)
+   ------------------------------------------------------------------------
+   Larger badge variant with icon + label. Used for certifications row
+   (Green Seal, EPA, Insured, NYC licensed, etc.). Distinct from .badge
+   (small pill) — cert-badge is larger, has icon + bordered.
+     .cert-badge        — Rounded white badge (border-radius 40px)
+     .cert-badge:hover  — Lift + green border accent
+     .cert-badge-ico    — Icon container (28px, green color)
+     .cert-badge-label  — Text label (small, semibold, navy)
+   ======================================================================== */
+
+.cert-badge {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    flex-shrink: 0;
+    padding: .8rem 1.5rem;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 40px;
+    transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.cert-badge:hover {
+    border-color: var(--color-navy);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 20px rgba(11, 29, 56, .08);
+}
+
+.cert-badge-ico {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-green);
+    flex-shrink: 0;
+}
+
+.cert-badge-label {
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--color-navy);
+    white-space: nowrap;
+}
+
+/* ========================================================================
+   13. TESTIMONIAL — .testimonial (.trust-quote canonical)
+   ------------------------------------------------------------------------
+   Card displaying a customer quote with stars rating + author meta.
+     .testimonial         — Card wrapper (white bg, border, radius)
+     .testimonial-stars   — Star rating row (flex gap)
+     .testimonial-text    — Quote body (italic display font)
+     .testimonial-author  — Author name (bold navy)
+     .testimonial-meta    — Author title/role (muted small)
+   Legacy aliases: .trust-quote, .trust-quote-stars, .trust-quote-text,
+                   .trust-quote-author, .trust-quote-meta
+   ======================================================================== */
+
+.testimonial,
+.trust-quote {
+    padding: 2rem 1.8rem;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+    transition:
+        transform .4s cubic-bezier(.34, 1.56, .64, 1),
+        box-shadow .4s cubic-bezier(.16, 1, .3, 1),
+        border-color .3s ease;
+}
+
+.testimonial-stars,
+.trust-quote-stars {
+    display: flex;
+    gap: .15rem;
+    margin-bottom: .8rem;
+}
+
+.testimonial-text,
+.trust-quote-text {
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--color-text-body);
+    line-height: 1.75;
+    margin-bottom: 1.2rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+
+.testimonial-author,
+.trust-quote-author {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--color-navy);
+}
+
 } /* end @layer components */
