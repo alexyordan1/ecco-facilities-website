@@ -1,5 +1,26 @@
+# Ecco Facilities — robots.txt
+# Updated: 2026-05-19
+
 User-agent: *
 Allow: /
-Disallow: /admin/
 
+# Internal areas — not for indexing
+Disallow: /admin/
+Disallow: /crm/
+Disallow: /functions/
+Disallow: /chat-backend/
+Disallow: /.git/
+Disallow: /.css-tools/
+Disallow: /node_modules/
+Disallow: /docs/
+
+# Test/utility pages
+Disallow: /mobile-test.html
+Disallow: /emailjs-template.html
+Disallow: /index-reference.html
+
+# Crawl-delay (gentle on the host)
+Crawl-delay: 1
+
+# Sitemaps
 Sitemap: https://eccofacilities.com/sitemap.xml
