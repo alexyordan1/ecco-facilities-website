@@ -81,6 +81,7 @@ if (document.querySelectorAll('.svc-panel').length) {
 document.querySelectorAll('.svc-tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
     var target = tab.dataset.panel;
+    if (!target) return; /* index.html tabs use data-svc; handled by initSvcTabs */
     document.querySelectorAll('.svc-tab').forEach(function(t) {
       t.classList.toggle('active', t === tab);
       t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
@@ -156,6 +157,7 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   tabs.forEach(function(tab) {
     tab.addEventListener('click', function() {
       var target = tab.getAttribute('data-svc');
+      if (!target) return; /* services.html tabs use data-panel; handled above */
       tabs.forEach(function(t) { t.classList.remove('active'); });
       tab.classList.add('active');
       panels.forEach(function(p) {
