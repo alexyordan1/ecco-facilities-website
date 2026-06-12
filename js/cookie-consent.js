@@ -3,7 +3,9 @@
   var gpcEnabled = navigator.globalPrivacyControl === true;
   if(gpcEnabled){
     localStorage.setItem('ecco_cookies','declined');
+    localStorage.setItem('ecco_consent','declined');
     if(window._hsq)window._hsq.push(['doNotTrack']);
+    window.dispatchEvent(new CustomEvent('ecco:consent-declined'));
     return; // No banner needed — GPC auto-declines
   }
   if(localStorage.getItem('ecco_cookies'))return;
