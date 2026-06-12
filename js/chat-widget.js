@@ -75,7 +75,7 @@ const CONFIG = {
   apiUrl: 'https://ecco-chat-backend.vercel.app/api/chat',
   botName: 'Alina',
   botTitle: pageContent.title,
-  avatar: 'images/alina-avatar-192.jpg',
+  avatar: '/images/alina-avatar-192.jpg',
   greeting: pageContent.greeting,
   placeholder: 'Ask Alina anything...',
   poweredBy: '🤖 AI-powered assistant · Not a real person'
@@ -213,7 +213,7 @@ document.head.appendChild(styles);
 
 var widget = document.createElement('div');
 widget.id = 'ecco-chat-widget';
-widget.innerHTML = '<button class="ecco-chat-toggle" id="eccoChatToggle" aria-label="Ask Alina" title="Ask Alina"><span class="ecco-chat-toggle-pulse" aria-hidden="true"></span><span class="ecco-chat-toggle-avatar"><img src="' + CONFIG.avatar + '" alt="" width="38" height="38"></span><span class="ecco-chat-toggle-label">Ask Alina</span><span class="ecco-chat-toggle-badge" id="eccoChatBadge" aria-hidden="true">1</span></button><div class="ecco-chat-tooltip" id="eccoChatTooltip"><button class="tip-close" id="eccoTipClose" aria-label="Dismiss">\u2715</button><span class="tip-name">Hi, I\u2019m Alina \uD83D\uDC4B</span> Looking for the right cleaning fit for your space?</div><div class="ecco-chat-panel" id="eccoChatPanel" role="dialog" aria-modal="true" aria-label="Chat with Alina"><div class="ecco-chat-header"><div class="ecco-chat-avatar"><img src="' + CONFIG.avatar + '" alt="Alina" width="40" height="40"></div><div class="ecco-chat-header-info"><h4>' + CONFIG.botName + '</h4><div class="ecco-chat-header-title">' + CONFIG.botTitle + ' \u00B7 AI</div><div class="ecco-chat-header-status">Online \u00B7 Replies in ~2 min</div></div><div class="ecco-chat-actions"><button class="ecco-chat-reset" id="eccoChatReset" aria-label="New chat" title="New conversation">\u21BA</button><button class="ecco-chat-close" id="eccoChatClose" aria-label="Close chat">\u2715</button></div></div><a class="ecco-chat-cta-bar" id="eccoChatCta" href="quote.html"><span class="ecco-chat-cta-icon" aria-hidden="true"></span><span class="ecco-chat-cta-label">Start your free quote \u00B7 24-hour turnaround</span><span class="ecco-chat-cta-arrow" aria-hidden="true">\u2192</span></a><div class="ecco-chat-messages" id="eccoChatMessages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Chat messages"></div><div class="ecco-chat-input-area"><textarea class="ecco-chat-input" id="eccoChatInput" placeholder="' + CONFIG.placeholder + '" rows="1"></textarea><button class="ecco-chat-send" id="eccoChatSend" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div><div class="ecco-chat-footer">' + CONFIG.poweredBy + '</div></div>';
+widget.innerHTML = '<button class="ecco-chat-toggle" id="eccoChatToggle" aria-label="Ask Alina" title="Ask Alina"><span class="ecco-chat-toggle-pulse" aria-hidden="true"></span><span class="ecco-chat-toggle-avatar"><img src="' + CONFIG.avatar + '" alt="" width="38" height="38"></span><span class="ecco-chat-toggle-label">Ask Alina</span><span class="ecco-chat-toggle-badge" id="eccoChatBadge" aria-hidden="true">1</span></button><div class="ecco-chat-tooltip" id="eccoChatTooltip"><button class="tip-close" id="eccoTipClose" aria-label="Dismiss">\u2715</button><span class="tip-name">Hi, I\u2019m Alina \uD83D\uDC4B</span> Looking for the right cleaning fit for your space?</div><div class="ecco-chat-panel" id="eccoChatPanel" role="dialog" aria-modal="true" aria-label="Chat with Alina"><div class="ecco-chat-header"><div class="ecco-chat-avatar"><img src="' + CONFIG.avatar + '" alt="Alina" width="40" height="40"></div><div class="ecco-chat-header-info"><h4>' + CONFIG.botName + '</h4><div class="ecco-chat-header-title">' + CONFIG.botTitle + ' \u00B7 AI</div><div class="ecco-chat-header-status">Online \u00B7 Replies in ~2 min</div></div><div class="ecco-chat-actions"><button class="ecco-chat-reset" id="eccoChatReset" aria-label="New chat" title="New conversation">\u21BA</button><button class="ecco-chat-close" id="eccoChatClose" aria-label="Close chat">\u2715</button></div></div><a class="ecco-chat-cta-bar" id="eccoChatCta" href="/quote.html"><span class="ecco-chat-cta-icon" aria-hidden="true"></span><span class="ecco-chat-cta-label">Start your free quote \u00B7 24-hour turnaround</span><span class="ecco-chat-cta-arrow" aria-hidden="true">\u2192</span></a><div class="ecco-chat-messages" id="eccoChatMessages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Chat messages"></div><div class="ecco-chat-input-area"><textarea class="ecco-chat-input" id="eccoChatInput" placeholder="' + CONFIG.placeholder + '" rows="1"></textarea><button class="ecco-chat-send" id="eccoChatSend" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div><div class="ecco-chat-footer">' + CONFIG.poweredBy + '</div></div>';
 document.body.appendChild(widget);
 
 var toggle = document.getElementById('eccoChatToggle');
@@ -400,19 +400,19 @@ async function sendToAPI(userMessage) {
 
 function getFallbackResponse(msg) {
   var l = msg.toLowerCase();
-  if (l.match(/service|offer|do you do/)) return "We offer two core services:\n\n**Janitorial** \u2014 Recurring cleaning on your schedule.\n\n**Day Porter** \u2014 Dedicated on-site pro during business hours.\n\nWant details? [Get a free quote](quote.html)!";
-  if (l.match(/area|borough|where|nyc/)) return "We serve **all 5 boroughs of NYC**!\n\n[Request a free quote](quote.html)";
-  if (l.match(/eco|green|safe|chemical/)) return "Every product is **100% eco-certified** \u2014 Green Seal + EPA Safer Choice.\n\nSafe for kids, pets, and allergies. [Learn more](sustainability.html)";
-  if (l.match(/quote|price|cost|how much/)) return "Every proposal is custom for your space.\n\nTransparent pricing within **24 hours**.\n\n[Get a Free Quote \u2192](quote.html)";
-  if (l.match(/porter|daytime/)) return "Our **Day Porter** keeps your space fresh during business hours \u2014 lobbies, restrooms, spills.\n\n[Learn more](day-porter.html)";
-  if (l.match(/janitor|clean|recurring/)) return "**Janitorial** \u2014 recurring cleaning tailored to your space.\n\nYou choose the frequency.\n\n[Learn more](janitorial.html)";
-  if (l.match(/career|job|hiring/)) return "We're hiring! Cleaning Techs, Day Porters, Team Leads.\n\n[Apply now](careers.html)!";
-  if (l.match(/talk|human|team|contact/)) return "Of course!\n\n\uD83D\uDCE7 **info@eccofacilities.com** \u2014 same-day response\n\n[Request a Quote](quote.html)";
-  if (l.match(/which|fit|recommend/)) return "It depends on your space:\n\n\u2022 **Office/Medical** \u2192 Janitorial\n\u2022 **Lobby/High-traffic** \u2192 Day Porter\n\u2022 **Both?** \u2192 24/7 coverage!\n\n[Get a quote](quote.html)";
-  if (l.match(/fast|quick|start|urgent/)) return "Most clients start within **5-7 days**.\n\nUrgent? We can begin in **48 hours**.\n\n[Request a quote](quote.html)";
+  if (l.match(/service|offer|do you do/)) return "We offer two core services:\n\n**Janitorial** \u2014 Recurring cleaning on your schedule.\n\n**Day Porter** \u2014 Dedicated on-site pro during business hours.\n\nWant details? [Get a free quote](/quote.html)!";
+  if (l.match(/area|borough|where|nyc/)) return "We serve **all 5 boroughs of NYC**!\n\n[Request a free quote](/quote.html)";
+  if (l.match(/eco|green|safe|chemical/)) return "Every product is **100% eco-certified** \u2014 Green Seal + EPA Safer Choice.\n\nSafe for kids, pets, and allergies. [Learn more](/sustainability.html)";
+  if (l.match(/quote|price|cost|how much/)) return "Every proposal is custom for your space.\n\nTransparent pricing within **24 hours**.\n\n[Get a Free Quote \u2192](/quote.html)";
+  if (l.match(/porter|daytime/)) return "Our **Day Porter** keeps your space fresh during business hours \u2014 lobbies, restrooms, spills.\n\n[Learn more](/day-porter.html)";
+  if (l.match(/janitor|clean|recurring/)) return "**Janitorial** \u2014 recurring cleaning tailored to your space.\n\nYou choose the frequency.\n\n[Learn more](/janitorial.html)";
+  if (l.match(/career|job|hiring/)) return "We're hiring! Cleaning Techs, Day Porters, Team Leads.\n\n[Apply now](/careers.html)!";
+  if (l.match(/talk|human|team|contact/)) return "Of course!\n\n\uD83D\uDCE7 **info@eccofacilities.com** \u2014 same-day response\n\n[Request a Quote](/quote.html)";
+  if (l.match(/which|fit|recommend/)) return "It depends on your space:\n\n\u2022 **Office/Medical** \u2192 Janitorial\n\u2022 **Lobby/High-traffic** \u2192 Day Porter\n\u2022 **Both?** \u2192 24/7 coverage!\n\n[Get a quote](/quote.html)";
+  if (l.match(/fast|quick|start|urgent/)) return "Most clients start within **5-7 days**.\n\nUrgent? We can begin in **48 hours**.\n\n[Request a quote](/quote.html)";
   if (l.match(/hi|hello|hey|hola/)) return "Hi there! \uD83D\uDC4B I'm Alina.\n\nHow can I help you today?";
   if (l.match(/thank|gracias/)) return "You're welcome! \uD83C\uDF3F\n\nAnything else I can help with?";
-  return "Great question!\n\n[Request a Free Quote](quote.html) \u2014 24hr response\n\n\uD83D\uDCE7 **info@eccofacilities.com**";
+  return "Great question!\n\n[Request a Free Quote](/quote.html) \u2014 24hr response\n\n\uD83D\uDCE7 **info@eccofacilities.com**";
 }
 
 /* ============ SERVICE CARDS + COPY BUTTONS ============ */
@@ -421,8 +421,8 @@ function buildServiceCard(kind) {
   var card = document.createElement('div');
   card.className = 'ecco-service-card';
   var config = kind === 'jan'
-    ? { icon: '\uD83E\uDDF9', title: 'Janitorial', sub: 'Recurring cleaning, on your schedule', href: 'janitorial.html', bullets: ['You pick the frequency & times', 'Dedicated, trained janitorial team', '100% eco-certified products', 'Works nights, weekends, after-hours'] }
-    : { icon: '\uD83D\uDC64', title: 'Day Porter', sub: 'On-site during business hours', href: 'day-porter.html', bullets: ['Keeps lobby & restrooms guest-ready', 'Handles spills, restocks, touch-ups', 'Dedicated, uniformed porter', 'Flexible shifts (4h, 6h, 8h)'] };
+    ? { icon: '\uD83E\uDDF9', title: 'Janitorial', sub: 'Recurring cleaning, on your schedule', href: '/janitorial.html', bullets: ['You pick the frequency & times', 'Dedicated, trained janitorial team', '100% eco-certified products', 'Works nights, weekends, after-hours'] }
+    : { icon: '\uD83D\uDC64', title: 'Day Porter', sub: 'On-site during business hours', href: '/day-porter.html', bullets: ['Keeps lobby & restrooms guest-ready', 'Handles spills, restocks, touch-ups', 'Dedicated, uniformed porter', 'Flexible shifts (4h, 6h, 8h)'] };
   var bulletsHtml = config.bullets.map(function(b) { return '<li>' + b + '</li>'; }).join('');
   card.innerHTML =
     '<div class="ecco-service-card-head">' +
@@ -719,7 +719,7 @@ function buildQuoteUrl(d) {
   if (d.sqft) params.set('size', d.sqft);
   if (d.frequency) params.set('freq', d.frequency);
   if (d.urgency) params.set('urgency', d.urgency);
-  return 'quote.html?' + params.toString();
+  return '/quote.html?' + params.toString();
 }
 
 function showRetryBanner(userMessage) {
@@ -747,7 +747,7 @@ async function handleSend(text, isRetry) {
   var msg = text || input.value.trim();
   if (!msg || isLoading) return;
   if (quoteFlow.active) { input.value = ''; autoResize(); handleQuoteAnswer(msg); return; }
-  if (msgCount >= MAX_MESSAGES) { addMessage("Great chat! For more help: **info@eccofacilities.com** or [get a quote](quote.html).", 'bot'); return; }
+  if (msgCount >= MAX_MESSAGES) { addMessage("Great chat! For more help: **info@eccofacilities.com** or [get a quote](/quote.html).", 'bot'); return; }
   var stale = messages.querySelector('.ecco-quick-replies');
   if (stale) stale.remove();
   var oldBanner = messages.querySelector('.ecco-retry-banner');
