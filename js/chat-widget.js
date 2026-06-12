@@ -208,6 +208,33 @@ styles.textContent = `
   .ecco-chat-toggle-pulse { width: 32px; height: 32px; }
   .ecco-chat-tooltip { left: 16px; bottom: 4.5rem; max-width: 200px; }
 }
+@media (prefers-color-scheme: dark) {
+  .ecco-chat-toggle { background: #243441; color: #EFE8D7; border-color: rgba(111,179,118,.22); }
+  .ecco-chat-tooltip { background: #243441; color: #EFE8D7; }
+  .ecco-chat-tooltip .tip-name { color: #EFE8D7; }
+  .ecco-chat-panel { background: #243441; }
+  .ecco-chat-header { background: #1B2733; border-bottom-color: rgba(255,255,255,.08); }
+  .ecco-chat-header h4 { color: #EFE8D7; }
+  .ecco-chat-header .ecco-chat-sub { color: rgba(239,232,215,.6); }
+  .ecco-chat-close:hover, .ecco-chat-reset:hover { background: rgba(255,255,255,.06); color: #EFE8D7; }
+  .ecco-retry-banner, .ecco-offline-banner { background: #3A322A; border-color: rgba(111,179,118,.22); color: #C9C0AE; }
+  .ecco-svc-card { background: #243441; border-color: rgba(111,179,118,.22); }
+  .ecco-svc-card h5 { color: #EFE8D7; }
+  .ecco-svc-card li { color: #EFE8D7; }
+  .ecco-nudge { background: #243441; color: #EFE8D7; border-color: rgba(111,179,118,.22); }
+  .ecco-quote-summary { background: linear-gradient(180deg, #243441, #1B2733); }
+  .ecco-quote-summary li { color: #EFE8D7; }
+  .ecco-quote-summary .q-val { color: #EFE8D7; }
+  .ecco-chat-messages { background: #1B2733; }
+  .ecco-chat-messages::-webkit-scrollbar-thumb { background: rgba(111,179,118,.3); }
+  .ecco-msg-bot { background: #243441; color: #EFE8D7; border-color: rgba(111,179,118,.22); }
+  .ecco-typing { background: #243441; border-color: rgba(111,179,118,.22); }
+  .ecco-chat-input-area { background: #1B2733; border-top-color: rgba(255,255,255,.08); }
+  .ecco-chat-input { background: #243441; border-color: rgba(111,179,118,.22); color: #EFE8D7; }
+  .ecco-chat-input:focus { background: #243441; }
+  .ecco-chat-footer { background: #1B2733; }
+  .ecco-quick-btn { background: #243441; border-color: rgba(111,179,118,.22); color: #EFE8D7; }
+}
 `;
 document.head.appendChild(styles);
 
