@@ -2159,7 +2159,7 @@
           // user a next step. Facilities over 1M sq ft are legitimately
           // common for campuses, so we route them to a direct call instead
           // of losing the lead outright.
-          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Call (646) 303-0816 or email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
+          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
           return;
         }
         clearSizeErr();
@@ -2262,7 +2262,7 @@
           return;
         }
         if (n > 1000000) {
-          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let’s chat directly. Call (646) 303-0816 or email info@eccofacilities.com.');
+          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
           return;
         }
         STATE.sizeExact = Math.round(n);
