@@ -326,7 +326,15 @@ document.querySelectorAll('.rv-light').forEach(function(el) { obs.observe(el); }
   for (var k2 = 0; k2 < wraps.length; k2++) buildWordDom(wraps[k2], WORDS[0]);
   if (reduced) return;
   var idx = 0;
+  var heroVisible = true;
+  var heroEl2 = document.querySelector('.hero');
+  if (heroEl2 && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function(entries) {
+      heroVisible = entries[0].isIntersecting;
+    }, { threshold: 0 }).observe(heroEl2);
+  }
   setInterval(function() {
+    if (document.hidden || !heroVisible) return;
     idx = (idx + 1) % WORDS.length;
     showWord(idx);
   }, CYCLE_MS);
