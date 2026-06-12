@@ -14,16 +14,16 @@
 <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Request a Free Quote · Ecco Facilities LLC</title>
-<meta name="description" content="Get a free custom cleaning quote in 2 minutes. Janitorial &amp; day porter services across NYC. Alina, our AI advisor, tailors a proposal delivered within 24 hours. No commitment.">
+<meta name="description" content="Get a free custom cleaning quote in 2 minutes. Janitorial and day porter services across NYC. Answer a few quick questions and receive a tailored proposal within 24 hours. No commitment.">
 <meta property="og:title" content="Request a Free Quote · Ecco Facilities LLC">
-<meta property="og:description" content="Chat with Alina, our AI cleaning advisor. Get a free, customized proposal for janitorial or day porter services, delivered within 24 hours.">
+<meta property="og:description" content="A quick 2-minute form. Get a free, customized proposal for janitorial or day porter services, delivered within 24 hours.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://eccofacilities.com/quote.html">
 <meta property="og:image" content="https://eccofacilities.com/images/logo-horizontal.png">
 <link rel="canonical" href="https://eccofacilities.com/quote.html">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Request a Free Quote · Ecco Facilities LLC">
-<meta name="twitter:description" content="Chat with Alina, our AI cleaning advisor. Customized proposals within 24 hours.">
+<meta name="twitter:description" content="A quick 2-minute form. Customized cleaning proposals within 24 hours.">
 <meta name="twitter:image" content="https://eccofacilities.com/images/logo-horizontal.png">
 <!-- Ola 9 — consolidated 3 redundant favicon <link> tags into the canonical
      pair. Browsers pick the best match from sizes, and the deprecated
@@ -161,32 +161,13 @@
 <body>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe class="qf-gtm-ns" src="https://www.googletagmanager.com/ns.html?id=GTM-W2ZWXZ3T" height="0" width="0"></iframe></noscript>
-<!-- Fallback for users with JS disabled — plain HTML form that POSTs to same endpoint -->
+<!-- Fallback for users with JS disabled: the quote flow requires JS (JSON + Turnstile), so we show an honest contact block instead of a form that cannot submit. -->
 <noscript>
   <div class="qf-noscript">
     <h1 class="qf-noscript-title">Request your free quote</h1>
-    <p>We'll reply within 24 hours with a custom cleaning proposal. No JavaScript required.</p>
-    <form class="qf-noscript-form" action="/api/submit-quote" method="POST">
-      <label>First name <input class="qf-noscript-input" name="fn" type="text" autocomplete="given-name" maxlength="60" required></label>
-      <label>Last name <input class="qf-noscript-input" name="ln" type="text" autocomplete="family-name" maxlength="60"></label>
-      <label>Email <input class="qf-noscript-input" name="em" type="email" autocomplete="email" maxlength="254" required></label>
-      <label>Phone (optional) <input class="qf-noscript-input" name="ph" type="tel" autocomplete="tel" maxlength="25"></label>
-      <label>Company <input class="qf-noscript-input" name="co" type="text" autocomplete="organization" maxlength="120"></label>
-      <label>Address or ZIP <input class="qf-noscript-input" name="addr" type="text" autocomplete="street-address" maxlength="200" required></label>
-      <label>Service
-        <select class="qf-noscript-input" name="formType" required>
-          <option value="janitorial">Night cleaning (recurring after-hours)</option>
-          <option value="dayporter">Day Porter (on-site during business hours)</option>
-          <option value="both">Combined (porter + night cleaning)</option>
-        </select>
-      </label>
-      <label>Notes <textarea class="qf-noscript-input" name="notes" rows="3" maxlength="500"></textarea></label>
-      <button class="qf-noscript-btn" type="submit">Send request</button>
-    </form>
-    <p class="qf-noscript-contact">Prefer to reach out directly?
+    <p>The quote form needs JavaScript to run. Please enable JavaScript and reload this page.</p>
+    <p class="qf-noscript-contact">Or email us directly and we'll reply within 24 hours with a custom cleaning proposal:
       <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a>
-      &middot;
-      <a href="tel:+16463030816">(646) 303-0816</a>
     </p>
   </div>
 </noscript>
@@ -1129,7 +1110,7 @@
         <p class="qf2-spam-hint">
           <span class="qf2-prompt-sub-desktop">Check spam, it comes from </span>
           <span class="qf2-prompt-sub-mobile">Check spam, from </span>
-          <strong>alina@eccofacilities.com</strong>
+          <strong>info@eccofacilities.com</strong>
         </p>
         <a href="/" class="qf2-back-link">&larr; Back to Ecco</a>
       </div>
