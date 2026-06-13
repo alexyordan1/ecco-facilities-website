@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cormorant Garamond vs Fraunces — same hero, side by side</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f5f5;color:#0B1D38;line-height:1.5}
+.label{position:absolute;top:24px;left:32px;z-index:5;display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,0,0,.85);color:#fff;backdrop-filter:blur(8px)}
+.label b{font-weight:700;background:#fff;color:#000;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:0}
+.label em{opacity:.7;font-style:normal;letter-spacing:.06em}
+.note{position:absolute;bottom:18px;left:32px;right:32px;font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(240,233,215,.6);letter-spacing:.04em;line-height:1.55}
+
+.hero{position:relative;background:#0B1D38;min-height:600px;display:grid;place-items:center;padding:80px 32px;overflow:hidden;border-bottom:2px solid #f5f5f5}
+.hero-bg{position:absolute;inset:0;background:url('images/stock/4.webp') center/cover no-repeat;opacity:.2;z-index:0}
+.hero-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,29,56,.35) 0%,rgba(11,29,56,.85) 100%);z-index:1}
+.hero-inner{position:relative;z-index:2;text-align:center;max-width:1000px;color:#F0E9D7}
+.kicker{display:inline-flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,233,215,.78);margin-bottom:28px}
+.kicker::before,.kicker::after{content:"";display:block;width:44px;height:1px;background:rgba(240,233,215,.45)}
+
+/* CORMORANT GARAMOND (real on the live site) */
+.h1-cormorant{font-family:'Cormorant Garamond','Fraunces',Georgia,serif;font-size:60px;font-weight:400;line-height:1.08;letter-spacing:-.005em;color:#F0E9D7;margin-bottom:22px}
+.h1-cormorant em{font-style:italic;font-weight:500;background:linear-gradient(90deg,#8fd48c,#5ba8e6,#6bd568,#8fd48c);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+
+/* FRAUNCES (what I had wrongly in BRAND.md) */
+.h1-fraunces{font-family:'Fraunces',Georgia,serif;font-size:60px;font-weight:500;line-height:1.08;letter-spacing:-.03em;color:#F0E9D7;margin-bottom:22px;font-variation-settings:'opsz' 144}
+.h1-fraunces em{font-style:italic;font-weight:500;background:linear-gradient(90deg,#8fd48c,#5ba8e6,#6bd568,#8fd48c);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+
+.sub{font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;color:rgba(240,233,215,.85);max-width:540px;margin:0 auto 32px}
+.cta{display:inline-flex;padding:14px 30px;border-radius:12px;background:#2D7A32;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;text-decoration:none}
+
+/* Headline-only comparison (no hero context, white bg, easier to compare letterforms) */
+.specimen{padding:48px 56px;background:#FAFBFC;border-top:1px solid #E5E9EF}
+.specimen-row{display:grid;grid-template-columns:120px 1fr;gap:32px;align-items:baseline;padding:20px 0;border-bottom:1px solid #EDF0F5}
+.specimen-row:last-child{border-bottom:none}
+.specimen-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6B7A8D}
+.specimen-label em{display:block;font-style:normal;font-weight:400;letter-spacing:0;text-transform:none;color:#7A8A9E;margin-top:4px;font-size:10.5px}
+.spec-cormorant{font-family:'Cormorant Garamond',Georgia,serif;font-size:54px;font-weight:600;line-height:1.1;letter-spacing:-.005em;color:#0B1D38}
+.spec-cormorant em{font-style:italic;font-weight:500;color:#2D7A32}
+.spec-fraunces{font-family:'Fraunces',Georgia,serif;font-size:54px;font-weight:600;line-height:1.1;letter-spacing:-.018em;color:#0B1D38;font-variation-settings:'opsz' 96}
+.spec-fraunces em{font-style:italic;font-weight:500;color:#2D7A32}
+</style>
+</head>
+<body>
+
+<!-- ─────────── HERO with CORMORANT GARAMOND ─────────── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-veil"></div>
+  <span class="label"><b>1</b> Cormorant Garamond <em>(what your site has now)</em></span>
+  <div class="hero-inner">
+    <div class="kicker">NYC's eco-certified facility partner</div>
+    <h1 class="h1-cormorant">A clean space should never come at the expense of your <em>budget.</em></h1>
+    <p class="sub">Premium janitorial and day-porter services, powered by 100% eco-certified products.</p>
+    <a href="#" class="cta">Request your proposal</a>
+  </div>
+  <p class="note">Weight 400 · letterspacing -.005em · color #F0E9D7 warm cream · classic Garamond shapes — narrower, more humanist, calligraphic stress</p>
+</section>
+
+<!-- ─────────── HERO with FRAUNCES ─────────── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-veil"></div>
+  <span class="label"><b>2</b> Fraunces <em>(what BRAND.md said — wrong)</em></span>
+  <div class="hero-inner">
+    <div class="kicker">NYC's eco-certified facility partner</div>
+    <h1 class="h1-fraunces">A clean space should never come at the expense of your <em>budget.</em></h1>
+    <p class="sub">Premium janitorial and day-porter services, powered by 100% eco-certified products.</p>
+    <a href="#" class="cta">Request your proposal</a>
+  </div>
+  <p class="note">Weight 500 · letterspacing -.03em · optical-size 144 axis · modern serif — wider, more architectural, sharper contrast</p>
+</section>
+
+<!-- ─────────── HEADLINE-ONLY (clean comparison on white bg) ─────────── -->
+<section class="specimen">
+  <div class="specimen-row">
+    <span class="specimen-label">1 · Cormorant<em>weight 600 italic</em></span>
+    <div class="spec-cormorant">Two core services. Tailored to <em>any</em> commercial space.</div>
+  </div>
+  <div class="specimen-row">
+    <span class="specimen-label">2 · Fraunces<em>weight 600 italic, opsz 96</em></span>
+    <div class="spec-fraunces">Two core services. Tailored to <em>any</em> commercial space.</div>
+  </div>
+  <div class="specimen-row">
+    <span class="specimen-label">1 · Cormorant<em>large display 64px</em></span>
+    <div class="spec-cormorant" style="font-size:64px">A cleaner space for every <em>person</em>.</div>
+  </div>
+  <div class="specimen-row">
+    <span class="specimen-label">2 · Fraunces<em>large display 64px</em></span>
+    <div class="spec-fraunces" style="font-size:64px;font-variation-settings:'opsz' 144">A cleaner space for every <em>person</em>.</div>
+  </div>
+</section>
+
+</body>
+</html>

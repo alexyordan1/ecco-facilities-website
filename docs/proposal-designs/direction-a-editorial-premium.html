@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal · Meridian Legal Partners · Ecco Facilities</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Allura&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0B1D38;
+    --navy-soft: #1C2E4F;
+    --cream: #F8F4ED;
+    --cream-deep: #EFE9DC;
+    --page: #FDFBF7;
+    --gold: #C9A961;
+    --gold-deep: #A88840;
+    --ink: #1A1E2C;
+    --muted: #6B7A8D;
+    --rule: #E5DFD3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: 'DM Sans', Arial, sans-serif;
+    color: var(--ink);
+    background: #E8E1CE;
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .serif { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; }
+  .italic { font-style: italic; }
+  .proposal {
+    max-width: 8.5in;
+    margin: 2rem auto;
+    box-shadow: 0 20px 80px rgba(11,29,56,0.18), 0 6px 20px rgba(11,29,56,0.08);
+  }
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    background: var(--page);
+    padding: 1in 0.95in 1in 0.95in;
+    position: relative;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* Page chrome */
+  .page-header {
+    position: absolute;
+    top: 0.55in;
+    left: 0.95in;
+    right: 0.95in;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .page-header .monogram {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 18px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--navy);
+  }
+  .page-footer {
+    position: absolute;
+    bottom: 0.55in;
+    left: 0.95in;
+    right: 0.95in;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* Typography primitives */
+  .label {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .rule-gold {
+    height: 1px;
+    background: var(--gold);
+    width: 48px;
+    margin: 14px 0 36px;
+    border: 0;
+  }
+  .rule-thin {
+    height: 1px;
+    background: var(--rule);
+    border: 0;
+    margin: 24px 0;
+  }
+  h1.chapter {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 46px;
+    line-height: 1.08;
+    color: var(--navy);
+    letter-spacing: -0.015em;
+    margin-bottom: 14px;
+  }
+  .chapter-sub {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 44px;
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 5in;
+  }
+  h2.section {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--navy);
+    margin-top: 36px;
+    margin-bottom: 10px;
+  }
+  p { margin: 0 0 1em 0; font-size: 15px; color: var(--ink); }
+  .lead {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--navy-soft);
+  }
+  .dropcap::first-letter {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 62px;
+    line-height: 0.9;
+    float: left;
+    padding: 6px 12px 0 0;
+    color: var(--navy);
+    font-weight: 400;
+  }
+
+  /* Cover page */
+  .cover {
+    background: var(--page);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.1in 0.95in 0.85in;
+  }
+  .cover-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .cover-top .monogram-block { display: flex; flex-direction: column; }
+  .cover-top .monogram-mark {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 38px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .cover-top .monogram-sub {
+    font-size: 9.5px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 10px;
+  }
+  .cover-middle {
+    margin: auto 0;
+    padding: 0.6in 0;
+  }
+  .cover-middle .label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  .cover-middle hr {
+    width: 56px;
+    margin: 0 0 40px;
+    background: var(--gold);
+    height: 1px;
+    border: 0;
+  }
+  .cover-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 78px;
+    line-height: 0.98;
+    color: var(--navy);
+    letter-spacing: -0.025em;
+    margin-bottom: 18px;
+  }
+  .cover-subtitle {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--muted);
+    font-weight: 400;
+    max-width: 5.5in;
+    line-height: 1.4;
+  }
+  .cover-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    border-top: 1px solid var(--rule);
+    padding-top: 32px;
+  }
+  .cover-meta .col { display: flex; flex-direction: column; gap: 20px; }
+  .cover-meta .entry { }
+  .cover-meta .entry .k {
+    font-size: 9.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .cover-meta .entry .v {
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .cover-baseline {
+    margin-top: 38px;
+    padding-top: 20px;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    text-align: center;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* Letter page */
+  .letter { padding-top: 1.2in; }
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 22px;
+    margin-bottom: 44px;
+  }
+  .letterhead .mark {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 28px;
+    color: var(--navy);
+  }
+  .letterhead .address {
+    text-align: right;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+  .letter-date {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 26px;
+  }
+  .letter-recipient {
+    margin-bottom: 36px;
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .letter-recipient strong { color: var(--navy); font-weight: 600; }
+  .letter-body p {
+    font-size: 15.5px;
+    line-height: 1.85;
+    margin-bottom: 1.3em;
+    color: var(--ink);
+  }
+  .letter-sign {
+    margin-top: 48px;
+  }
+  .letter-sign .close {
+    font-style: italic;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 26px;
+  }
+  .signature-mark {
+    font-family: 'Allura', 'DM Serif Display', cursive;
+    font-size: 64px;
+    color: var(--navy);
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    width: 3.2in;
+    line-height: 1;
+  }
+  .signature-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--navy);
+  }
+  .signature-title {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Overview page */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 24px;
+  }
+  .overview-row {
+    display: grid;
+    grid-template-columns: 2.3in 1fr;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .overview-row:first-child { border-top: 1px solid var(--rule); }
+  .overview-row .k {
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .overview-row .v {
+    font-size: 15.5px;
+    color: var(--navy);
+    font-family: 'DM Serif Display', Georgia, serif;
+  }
+  .overview-row .v.numeric {
+    font-size: 17px;
+  }
+  .overview-note {
+    margin-top: 36px;
+    font-size: 15px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  /* Understanding / pull quote */
+  .fact-table {
+    border-top: 1px solid var(--navy);
+    border-bottom: 1px solid var(--navy);
+    margin: 20px 0 40px;
+    padding: 8px 0;
+  }
+  .fact-row {
+    display: grid;
+    grid-template-columns: 1.8in 1fr;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .fact-row:last-child { border-bottom: none; }
+  .fact-row .k {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .fact-row .v {
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .pullquote {
+    background: var(--cream);
+    padding: 36px 44px 36px 76px;
+    margin: 40px 0;
+    position: relative;
+    border-left: 2px solid var(--gold);
+  }
+  .pullquote::before {
+    content: '\201C';
+    position: absolute;
+    left: 28px;
+    top: 10px;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 90px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .pullquote p {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--navy);
+    margin: 0 0 14px;
+    font-style: italic;
+  }
+  .pullquote .attr {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* Principles (Our Approach) */
+  .principle {
+    margin: 30px 0;
+    display: grid;
+    grid-template-columns: 0.8in 1fr;
+    gap: 20px;
+    align-items: baseline;
+  }
+  .principle .num {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 34px;
+    color: var(--gold-deep);
+    line-height: 1;
+  }
+  .principle h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 20px;
+    color: var(--navy);
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .principle p { font-size: 14.5px; color: var(--ink); line-height: 1.7; }
+
+  /* Scope lists */
+  .scope-block { margin-bottom: 30px; }
+  .scope-block h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 17px;
+    color: var(--navy);
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+  .scope-block .cadence {
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .scope-list {
+    columns: 2;
+    column-gap: 36px;
+    font-size: 13.5px;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+  .scope-list .item {
+    break-inside: avoid;
+    padding-left: 18px;
+    position: relative;
+  }
+  .scope-list .item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 6px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* Schedule */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin: 24px 0;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .schedule-grid .day {
+    background: var(--page);
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .schedule-grid .day.active {
+    background: var(--navy);
+    color: var(--page);
+  }
+  .schedule-grid .day.active .dlabel,
+  .schedule-grid .day.active .dtime { color: var(--page); }
+  .schedule-grid .day .dlabel {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .schedule-grid .day .dtime {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 13px;
+    color: var(--navy);
+  }
+
+  /* Team */
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 22px;
+  }
+  .team-card {
+    border: 1px solid var(--rule);
+    padding: 22px 24px;
+    background: var(--page);
+  }
+  .team-card h4 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .team-card .role {
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .team-card p { font-size: 13.5px; line-height: 1.7; margin: 0; }
+
+  /* Investment */
+  .price-card {
+    background: var(--cream);
+    border: 1px solid var(--cream-deep);
+    padding: 46px 40px;
+    margin: 26px 0 36px;
+    text-align: center;
+    position: relative;
+  }
+  .price-card::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .price-card .label {
+    display: block;
+    margin-bottom: 16px;
+    color: var(--gold-deep);
+  }
+  .price-card .amount {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 72px;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  .price-card .amount .cents {
+    font-size: 28px;
+    vertical-align: super;
+    letter-spacing: 0;
+  }
+  .price-card .period {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .inclusion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 26px;
+  }
+  .inclusion-col h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 16px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    font-weight: 400;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .inclusion-col ul { list-style: none; }
+  .inclusion-col li {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--ink);
+    padding-left: 20px;
+    position: relative;
+  }
+  .inclusion-col.included li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    color: var(--gold-deep);
+    font-weight: 600;
+  }
+  .inclusion-col.excluded li::before {
+    content: '\2014';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+  .addons {
+    margin-top: 32px;
+    padding: 24px 28px;
+    background: var(--page);
+    border: 1px solid var(--rule);
+  }
+  .addons h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 16px;
+    color: var(--navy);
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+  .addon-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--rule);
+    font-size: 13px;
+  }
+  .addon-row:last-child { border-bottom: none; }
+  .addon-row .label-txt { color: var(--ink); }
+  .addon-row .price-txt { color: var(--navy); font-weight: 600; font-family: 'DM Serif Display', Georgia, serif; }
+  .terms-preview {
+    margin-top: 32px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .terms-preview strong { color: var(--navy); font-weight: 600; }
+
+  /* QA mechanisms */
+  .qa-block { margin: 26px 0; padding-left: 24px; border-left: 2px solid var(--gold); }
+  .qa-block h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 19px;
+    color: var(--navy);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .qa-block p { font-size: 14px; line-height: 1.75; color: var(--ink); }
+
+  /* Sustainability */
+  .commit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .commit-card {
+    background: var(--cream);
+    padding: 24px 28px;
+    border-left: 2px solid var(--gold);
+  }
+  .commit-card h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 17px;
+    color: var(--navy);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .commit-card p { font-size: 13px; line-height: 1.7; color: var(--ink); margin: 0; }
+
+  /* Why Ecco stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--navy);
+    border-bottom: 1px solid var(--navy);
+    margin: 28px 0 40px;
+  }
+  .stat {
+    padding: 30px 20px;
+    text-align: center;
+    border-right: 1px solid var(--rule);
+  }
+  .stat:last-child { border-right: none; }
+  .stat .num {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 52px;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat .lbl {
+    margin-top: 10px;
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .diff { margin: 26px 0; }
+  .diff h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .diff p { font-size: 14.5px; line-height: 1.75; color: var(--ink); }
+
+  /* Case study */
+  .case-study {
+    background: var(--cream);
+    padding: 48px 52px;
+    margin: 24px 0 32px;
+    position: relative;
+  }
+  .case-study .quote-mark {
+    position: absolute;
+    top: 22px;
+    left: 24px;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 100px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .case-study p.quote {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--navy);
+    font-style: italic;
+    margin-bottom: 28px;
+    padding-left: 40px;
+  }
+  .case-study .attr-block {
+    padding-left: 40px;
+    border-top: 1px solid var(--gold);
+    padding-top: 18px;
+  }
+  .case-study .attr-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .case-study .attr-role {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .case-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 20px;
+  }
+  .case-metric {
+    background: var(--page);
+    padding: 18px 14px;
+    text-align: center;
+  }
+  .case-metric .mn {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 24px;
+    color: var(--navy);
+    line-height: 1.1;
+  }
+  .case-metric .ml {
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* Next steps */
+  .three-ways {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    margin: 24px 0 36px;
+    border: 1px solid var(--rule);
+  }
+  .way {
+    padding: 28px 24px;
+    border-right: 1px solid var(--rule);
+  }
+  .way:last-child { border-right: none; }
+  .way .num {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 28px;
+    color: var(--gold-deep);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .way h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+  .way p { font-size: 13px; line-height: 1.65; color: var(--ink); margin: 0; }
+  .timeline {
+    margin-top: 30px;
+    border-top: 1px solid var(--navy);
+    padding-top: 24px;
+  }
+  .timeline h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 18px;
+    font-weight: 400;
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 1.1in 1fr;
+    padding: 11px 0;
+    border-bottom: 1px dotted var(--rule);
+    font-size: 13.5px;
+  }
+  .tl-row:last-child { border-bottom: none; }
+  .tl-row .d {
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 600;
+    padding-top: 2px;
+  }
+  .tl-row .t { color: var(--ink); }
+
+  /* Signature page */
+  .sig-block {
+    background: var(--cream);
+    padding: 44px 48px;
+    margin: 30px 0;
+  }
+  .sig-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .sig-col h3 {
+    font-size: 10.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 36px;
+  }
+  .sig-line {
+    border-bottom: 1px solid var(--navy);
+    height: 48px;
+    margin-bottom: 8px;
+  }
+  .sig-label { font-size: 13px; color: var(--navy); font-weight: 600; }
+  .sig-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .sig-date {
+    margin-top: 22px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .sig-date .line {
+    flex: 1;
+    border-bottom: 1px solid var(--rule);
+    height: 16px;
+  }
+  .fine-print {
+    margin-top: 32px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    padding: 0 30px;
+  }
+
+  /* Print */
+  @media print {
+    html, body { background: white; }
+    .proposal { margin: 0; box-shadow: none; max-width: none; }
+    .page {
+      page-break-after: always;
+      padding: 0.8in 0.85in;
+      min-height: auto;
+      width: auto;
+    }
+    .page:last-child { page-break-after: auto; }
+    .screen-only { display: none !important; }
+  }
+  @page { size: letter; margin: 0; }
+
+  /* Screen helpers */
+  .screen-banner {
+    max-width: 8.5in;
+    margin: 1rem auto 0;
+    background: var(--navy);
+    color: var(--page);
+    padding: 14px 20px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .screen-banner a { color: var(--gold); text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="screen-banner screen-only">
+  Direction A · Editorial Premium · Print (Cmd+P) → Save as PDF to preview final form
+</div>
+
+<div class="proposal">
+
+  <!-- ============================================================ -->
+  <!-- PAGE I — COVER                                                -->
+  <!-- ============================================================ -->
+  <section class="page cover">
+    <div class="cover-top">
+      <div class="monogram-block">
+        <div class="monogram-mark">Ecco</div>
+        <div class="monogram-sub">Facilities · NYC</div>
+      </div>
+      <div class="label">Volume I · 2026</div>
+    </div>
+
+    <div class="cover-middle">
+      <span class="label">A Proposal of Service</span>
+      <hr>
+      <h1 class="cover-title">Meridian<br>Legal Partners</h1>
+      <p class="cover-subtitle">A considered plan for the quiet, reliable care of your workspace &mdash; prepared with intention, offered with warmth.</p>
+    </div>
+
+    <div>
+      <div class="cover-meta">
+        <div class="col">
+          <div class="entry">
+            <div class="k">Proposal No.</div>
+            <div class="v">PROP&ndash;2026&ndash;0142</div>
+          </div>
+          <div class="entry">
+            <div class="k">Issued</div>
+            <div class="v">April 21, 2026</div>
+          </div>
+          <div class="entry">
+            <div class="k">Valid Until</div>
+            <div class="v">May 21, 2026</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="entry">
+            <div class="k">Prepared For</div>
+            <div class="v">Sarah Chen<br><span style="font-size:12px;color:var(--muted);font-family:'DM Sans';font-weight:400">Director of Operations</span></div>
+          </div>
+          <div class="entry">
+            <div class="k">Prepared By</div>
+            <div class="v">Alex Mercedes<br><span style="font-size:12px;color:var(--muted);font-family:'DM Sans';font-weight:400">Founder, Ecco Facilities</span></div>
+          </div>
+          <div class="entry">
+            <div class="k">At the Location</div>
+            <div class="v">350 Park Avenue, Suite 1200<br><span style="font-size:12px;color:var(--muted);font-family:'DM Sans';font-weight:400">New York, NY 10022</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="cover-baseline">Ecco Facilities LLC · eccofacilities.com · info@eccofacilities.com</div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE II — LETTER FROM THE FOUNDER                             -->
+  <!-- ============================================================ -->
+  <section class="page letter">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Page Two &middot; A Letter</span>
+    </div>
+
+    <div class="letterhead" style="margin-top:0.4in">
+      <div class="mark">Ecco Facilities</div>
+      <div class="address">
+        54 State Street<br>
+        Albany, NY · eccofacilities.com<br>
+        info@eccofacilities.com
+      </div>
+    </div>
+
+    <div class="letter-date">April 21, 2026</div>
+
+    <div class="letter-recipient">
+      <strong>Sarah Chen</strong><br>
+      Director of Operations<br>
+      Meridian Legal Partners<br>
+      350 Park Avenue, Suite 1200<br>
+      New York, NY 10022
+    </div>
+
+    <div class="letter-body">
+      <p class="dropcap">Thank you for inviting us to propose on the care of your space. Following our conversation on April 3rd, I understand you are navigating the frustration of a current provider whose Monday recovery has been inconsistent&mdash;particularly after long weekends. In a practice where clients begin arriving at 8:30am sharp, that inconsistency is more than an inconvenience; it sets the tone for everything that follows.</p>
+
+      <p>The proposal you hold is our considered answer. It pairs a dedicated three-person team&mdash;assigned to your account and yours alone&mdash;with a Monday-morning guarantee: your space will be ready at 7:45am, every Monday, without exception. We have built Ecco around this quiet kind of reliability. No rotation of unfamiliar faces. No dispatched crews rushing between five accounts. Just one team, yours, who knows which conference room you favor for client meetings and which plant in reception should be left alone.</p>
+
+      <p>Beyond the operational answer, we have tried to reflect in this document the standard we sensed inside Meridian: considered, deliberate, quietly excellent. Should something we have proposed miss the mark, I would welcome the correction&mdash;the best partnerships are built by amending the first draft, not by accepting it whole. And if it is close enough to right, I would be grateful to begin.</p>
+
+      <p>The following pages describe our approach, the exact scope of our service, and the investment. I am, of course, available for any conversation you wish to have before signing. Whatever you decide, thank you for considering us.</p>
+    </div>
+
+    <div class="letter-sign">
+      <div class="close">With warmth and care,</div>
+      <div class="signature-mark">Alex Mercedes</div>
+      <div class="signature-name">Alex Mercedes</div>
+      <div class="signature-title">Founder · Ecco Facilities</div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>ii</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE III — EXECUTIVE OVERVIEW                                 -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section I &middot; Overview</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section I</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">At a Glance</h1>
+      <p class="chapter-sub">The proposal, distilled to its essentials. Details follow in the sections to come.</p>
+
+      <div class="overview-grid">
+        <div class="overview-row">
+          <div class="k">Service</div>
+          <div class="v">Janitorial Care &mdash; evening cadence</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Frequency</div>
+          <div class="v">Three evenings per week &mdash; Monday, Wednesday, Friday</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Hours on Site</div>
+          <div class="v">7:00pm &ndash; 10:00pm (three hours, dedicated crew)</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Team</div>
+          <div class="v">One Lead Technician &middot; Two Service Technicians</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Commencement</div>
+          <div class="v">May 15, 2026</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Term</div>
+          <div class="v">Twelve months, auto-renewing &mdash; cancellable with cause at any time</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Monthly Investment</div>
+          <div class="v numeric">&dollar;3,850 &mdash; all inclusive</div>
+        </div>
+        <div class="overview-row">
+          <div class="k">Products</div>
+          <div class="v">100% Green Seal certified &mdash; no exceptions</div>
+        </div>
+      </div>
+
+      <p class="overview-note">What follows is the longer version of each line above &mdash; the reasoning, the mechanics, and the considered details. Read what is useful to you and skip what is not; we have tried to make each section capable of standing alone.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>iii</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE IV — UNDERSTANDING YOUR NEEDS                            -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section II &middot; Understanding</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section II</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Understanding<br>Your Space</h1>
+      <p class="chapter-sub">Our proposal begins with listening. The following is what we learned during our site visit on April 3rd, and how we have interpreted it.</p>
+
+      <div class="fact-table">
+        <div class="fact-row"><div class="k">Property</div><div class="v">350 Park Avenue, Suite 1200, New York, NY 10022</div></div>
+        <div class="fact-row"><div class="k">Space Type</div><div class="v">Corporate law office &mdash; client-facing environment</div></div>
+        <div class="fact-row"><div class="k">Total Area</div><div class="v">Approximately 8,500 square feet</div></div>
+        <div class="fact-row"><div class="k">Floors</div><div class="v">Two (12th and 13th floor of building, connected via internal stair)</div></div>
+        <div class="fact-row"><div class="k">Restrooms</div><div class="v">Six (four staff, two client-facing)</div></div>
+        <div class="fact-row"><div class="k">Occupants</div><div class="v">Approximately 45 employees &middot; 3 meeting rooms &middot; 1 client lounge</div></div>
+        <div class="fact-row"><div class="k">Business Hours</div><div class="v">Monday &ndash; Friday, 8:00am &ndash; 7:00pm</div></div>
+        <div class="fact-row"><div class="k">Access</div><div class="v">After-hours security check-in &middot; building pass coordination with facilities</div></div>
+      </div>
+
+      <div class="pullquote">
+        <p>Our current provider is inconsistent on Mondays, especially after holidays. We need someone who is reliable and proactive, not reactive.</p>
+        <div class="attr">Sarah Chen &mdash; during our site visit, April 3, 2026</div>
+      </div>
+
+      <p>Two things stood out to us. The first is the quality of the space itself: considered lighting, honest materials, an attention to the small objects on every surface. This is not an office assembled by a procurement department; it has been made deliberately, and it asks for a service that will honor that deliberateness.</p>
+
+      <p>The second is the specific nature of the pain. A missed Monday is not a missed visit&mdash;it is a client's first impression, a partner's first frustration, a receptionist's first apology of the week. The proposal that follows has been shaped by this particular pain.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>iv</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE V — OUR APPROACH                                         -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section III &middot; Approach</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section III</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">How We Think<br>About Clean</h1>
+      <p class="chapter-sub">Three principles that quietly govern everything we do. They are the answer to the question: why would this be different?</p>
+
+      <div class="principle">
+        <div class="num">I.</div>
+        <div>
+          <h3>Dedicated, Not Dispatched</h3>
+          <p>Your team is <em>assigned</em> to your account. They know your space, your priorities, your quiet preferences. No rotation of unfamiliar faces; no dispatched crews arriving late from another building across town. When a team member is out, the replacement has been pre-introduced to your space and your account file &mdash; they arrive knowing what matters.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="num">II.</div>
+        <div>
+          <h3>Measured, Not Rushed</h3>
+          <p>We build schedules that allow for the work to be done properly &mdash; not squeezed between other accounts. Our crews are assigned to no more than two buildings per shift, with generous travel time in between. A tight schedule is the first cause of missed details; our answer is to not build tight schedules.</p>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="num">III.</div>
+        <div>
+          <h3>Transparent, Not Invisible</h3>
+          <p>Monthly performance reports, visible digital checklists, a direct line to your account manager that does not route through a call center. You should always know where your service stands. And on the rare occasion something is missed, the correction arrives before you have finished typing the email.</p>
+        </div>
+      </div>
+
+      <hr class="rule-thin" style="margin-top:40px">
+
+      <p class="lead" style="margin-top:20px">These three principles are not promises. They are the cost structure of our business: we pay more, we staff more, we invest more in the account file than most competitors. The price you see in Section VI reflects this choice.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>v</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE VI — SCOPE OF SERVICE                                    -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section IV &middot; Scope</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section IV</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Scope of Service</h1>
+      <p class="chapter-sub">Exactly what we will do. Nothing hidden, nothing vague. If it is not listed here, it is not included &mdash; and we will never charge without asking.</p>
+
+      <div class="scope-block">
+        <div class="cadence">Every Visit &middot; M / W / F &middot; 7pm&ndash;10pm</div>
+        <h3>The Standard Round</h3>
+        <div class="scope-list">
+          <div class="item">Full restroom sanitation (six restrooms, all fixtures, mirrors, dispensers)</div>
+          <div class="item">Vacuum all carpeted areas (offices, corridors, reception)</div>
+          <div class="item">Mop hardwood and tile (reception, kitchen, restrooms)</div>
+          <div class="item">Kitchen / breakroom: surfaces, appliance exteriors, sink, dishwasher load</div>
+          <div class="item">Trash and recycling removal from all stations, bin reline</div>
+          <div class="item">Conference rooms: table disinfection, chair reset, glass</div>
+          <div class="item">Offices: desk surfaces, general tidying (per each occupant's stated preference)</div>
+          <div class="item">High-touch surfaces: doorknobs, light switches, elevator buttons, shared phones</div>
+          <div class="item">Reception and client lounge: deliberate reset to first-impression standard</div>
+          <div class="item">Interior glass doors and partitions (streak-free)</div>
+          <div class="item">Daily checklist completed on tablet, submitted to your portal</div>
+          <div class="item">Security sign-out with building, arrival/departure logged</div>
+        </div>
+      </div>
+
+      <div class="scope-block">
+        <div class="cadence">First Week of Each Month</div>
+        <h3>The Monthly Additions</h3>
+        <div class="scope-list">
+          <div class="item">Deep-clean of all restrooms (grout, fixtures, vents)</div>
+          <div class="item">Refrigerator interior &mdash; full</div>
+          <div class="item">Baseboards throughout</div>
+          <div class="item">HVAC vent wipe (all accessible)</div>
+          <div class="item">Interior window-frame dust (accessible)</div>
+          <div class="item">Light fixture dust (accessible)</div>
+        </div>
+      </div>
+
+      <div class="scope-block">
+        <div class="cadence">Every Quarter</div>
+        <h3>The Quarterly Additions</h3>
+        <div class="scope-list">
+          <div class="item">Interior window detailing (all accessible panes)</div>
+          <div class="item">Carpet spot-treatment audit with photo documentation</div>
+          <div class="item">Kitchen deep-clean (cabinetry, appliance interiors)</div>
+          <div class="item">Conference room chair-and-upholstery audit</div>
+        </div>
+      </div>
+
+      <div class="scope-block">
+        <div class="cadence">Annually &middot; Scheduled with Facilities</div>
+        <h3>The Annual Services</h3>
+        <div class="scope-list">
+          <div class="item">Full professional carpet deep-clean</div>
+          <div class="item">Floor waxing and buffing (hard surfaces)</div>
+          <div class="item">Full window detailing (interior, all accessible)</div>
+          <div class="item">Comprehensive surface inventory and wear report</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>vi</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE VII — SCHEDULE & TEAM                                    -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section V &middot; Schedule &amp; Team</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section V</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Your Team<br>&amp; Schedule</h1>
+      <p class="chapter-sub">The people who will know your space. The pattern that will govern their visits. The protocol that will keep the building calm.</p>
+
+      <h2 class="section">The Weekly Cadence</h2>
+      <div class="schedule-grid">
+        <div class="day"><div class="dlabel">Mon</div><div class="dtime">7&ndash;10pm</div></div>
+        <div class="day"><div class="dlabel">Tue</div><div class="dtime">&mdash;</div></div>
+        <div class="day active"><div class="dlabel">Wed</div><div class="dtime">7&ndash;10pm</div></div>
+        <div class="day"><div class="dlabel">Thu</div><div class="dtime">&mdash;</div></div>
+        <div class="day active"><div class="dlabel">Fri</div><div class="dtime">7&ndash;10pm</div></div>
+        <div class="day"><div class="dlabel">Sat</div><div class="dtime">&mdash;</div></div>
+        <div class="day active"><div class="dlabel">Mon</div><div class="dtime">7&ndash;10pm</div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);font-style:italic">Your space is serviced three evenings per week, after hours, ensuring zero disruption to your workday &mdash; and readiness by 7:45am every Monday without exception.</p>
+
+      <h2 class="section">The People</h2>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="role">Lead Technician</div>
+          <h4>[Crew Chief Name]</h4>
+          <p>Present every visit. Your on-site point of contact. Nine years with Ecco, previously led accounts at two NYC law firms of similar size. Holds BSC &amp; GBAC training certifications.</p>
+        </div>
+        <div class="team-card">
+          <div class="role">Service Technician</div>
+          <h4>[Technician One]</h4>
+          <p>Dedicated to your account. Bonded, insured, background-checked. Completed 120-hour Ecco onboarding with on-site shadow training at three reference accounts.</p>
+        </div>
+        <div class="team-card">
+          <div class="role">Service Technician</div>
+          <h4>[Technician Two]</h4>
+          <p>Dedicated to your account. Bonded, insured, background-checked. Bilingual English / Spanish, specialization in floor care and carpet treatment.</p>
+        </div>
+        <div class="team-card">
+          <div class="role">Account Manager (Off-Site)</div>
+          <h4>[Manager Name]</h4>
+          <p>Weekly check-in. Monthly walk-through with you. Escalation handler. Direct line available 24/7 &mdash; no call center, no queue.</p>
+        </div>
+      </div>
+
+      <h2 class="section">Access &amp; Security</h2>
+      <div style="font-size:14px;line-height:1.8;color:var(--ink)">
+        <p><strong style="color:var(--navy)">Arrival:</strong> Crew arrives 6:55pm sharp; sign-in with building security; badge verification with facilities team.</p>
+        <p><strong style="color:var(--navy)">Access:</strong> Coordinated in advance with your facilities team &mdash; keys, fobs, and alarm codes held only by Lead Technician and Account Manager.</p>
+        <p><strong style="color:var(--navy)">Departure:</strong> Daily sign-out log with building, alarm reset, completion photo of reception submitted to your portal.</p>
+        <p><strong style="color:var(--navy)">Emergencies:</strong> Direct line to Account Manager, 24/7. Spill, break-in, urgent request &mdash; crew dispatched within 90 minutes during weekday hours.</p>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>vii</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE VIII — YOUR INVESTMENT                                   -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section VI &middot; Investment</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section VI</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Your Investment</h1>
+      <p class="chapter-sub">Transparent, simple, no surprises. The price that follows includes everything &mdash; materials, labor, insurance, and our standard of care.</p>
+
+      <div class="price-card">
+        <div class="label">Monthly Investment</div>
+        <div class="amount"><span class="cents">$</span>3,850<span style="font-size:20px;color:var(--muted);letter-spacing:0.1em;margin-left:8px;vertical-align:middle">/ mo</span></div>
+        <div class="period">All Inclusive &middot; No Add-Ons Required</div>
+      </div>
+
+      <div class="inclusion-grid">
+        <div class="inclusion-col included">
+          <h3>What is included</h3>
+          <ul>
+            <li>Three weekly service visits (156 per year)</li>
+            <li>Dedicated crew of three professionals</li>
+            <li>All Green Seal certified supplies and equipment</li>
+            <li>Monthly deep-clean rotation (see Scope)</li>
+            <li>Quarterly deep-clean additions</li>
+            <li>Annual services (carpet, wax, windows)</li>
+            <li>Monthly performance report</li>
+            <li>24/7 emergency response line</li>
+            <li>General liability insurance ($2M coverage)</li>
+            <li>Workers' compensation coverage</li>
+            <li>All applicable taxes and equipment costs</li>
+            <li>Daily digital checklist and reporting portal</li>
+          </ul>
+        </div>
+        <div class="inclusion-col excluded">
+          <h3>What is not included</h3>
+          <ul>
+            <li>Emergency biohazard cleanup &mdash; quoted separately</li>
+            <li>Post-construction cleanup &mdash; quoted separately</li>
+            <li>Appliance repairs or replacements</li>
+            <li>Snow removal or exterior landscaping</li>
+            <li>Exterior window detailing (ground-level only included)</li>
+            <li>Event &amp; after-party cleanup (see add-ons)</li>
+            <li>Furniture moving or reassembly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="addons">
+        <h3>Optional Additions</h3>
+        <div class="addon-row"><span class="label-txt">Day Porter coverage (weekday, 4 hours)</span><span class="price-txt">$1,950 / mo</span></div>
+        <div class="addon-row"><span class="label-txt">Exterior window detailing (quarterly)</span><span class="price-txt">$275 / qtr</span></div>
+        <div class="addon-row"><span class="label-txt">Event cleanup (per event, up to 100 guests)</span><span class="price-txt">$425 / event</span></div>
+        <div class="addon-row"><span class="label-txt">Kitchen fridge deep-clean (weekly)</span><span class="price-txt">$95 / mo</span></div>
+        <div class="addon-row"><span class="label-txt">On-call emergency response (after-hours)</span><span class="price-txt">$150 / call</span></div>
+      </div>
+
+      <div class="terms-preview">
+        <p><strong>Term &middot;</strong> 12-month initial term, auto-renewing annually. Month-to-month available at $4,000/mo.</p>
+        <p><strong>Payment &middot;</strong> Net 15. ACH preferred; check accepted. No setup fees, no deposits.</p>
+        <p><strong>Annual adjustment &middot;</strong> CPI-linked, capped at 4% per year. We will notify 60 days in advance.</p>
+        <p><strong>Cancellation &middot;</strong> With cause, 30 days. Without cause, 60 days. No penalties.</p>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>viii</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE IX — QUALITY ASSURANCE                                   -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section VII &middot; Quality Assurance</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section VII</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">How We Keep<br>It Right</h1>
+      <p class="chapter-sub">Quality is a system, not a promise. These are the four mechanisms that make the promise real &mdash; and the consequences when they fail.</p>
+
+      <div class="qa-block">
+        <h3>I. The Daily Checklist</h3>
+        <p>Every visit, your crew completes a 42-point checklist on tablet. You receive a weekly digest of completed tasks with timestamps and Lead Technician signature. The checklist is never blank by default; every item is explicitly marked complete or flagged with note.</p>
+      </div>
+
+      <div class="qa-block">
+        <h3>II. The Monthly Walk-Through</h3>
+        <p>Your Account Manager walks the space with you (or your designate) once per month. We look together. We correct together. The walk is documented with photos; concerns raised are resolved before the next walk &mdash; or the issue is escalated in writing to our leadership team.</p>
+      </div>
+
+      <div class="qa-block">
+        <h3>III. The 24-Hour Guarantee</h3>
+        <p>If something is wrong &mdash; anything &mdash; call, text, or email. A crew returns within 24 hours, no charge, no debate, no invoice adjustment required. We do not ask you to prove it; if you noticed, it matters.</p>
+      </div>
+
+      <div class="qa-block">
+        <h3>IV. The Satisfaction Audit</h3>
+        <p>Quarterly, a brief 3-question survey sent to you and up to two designates. If our rolling score falls below 4.0 out of 5.0 for two consecutive quarters, we restructure your team at our cost &mdash; or we part ways without penalty, your choice.</p>
+      </div>
+
+      <hr class="rule-thin" style="margin-top:40px">
+
+      <p class="lead">We are not selling a service. We are selling the absence of thought about the service. You should be able to forget we exist, except for the clean reception every Monday morning.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>ix</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE X — SUSTAINABILITY                                       -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section VIII &middot; Sustainability</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section VIII</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Cleaning,<br>Responsibly</h1>
+      <p class="chapter-sub">Not a marketing line. A methodology. The word in our name &mdash; Ecco &mdash; is the one we had to earn.</p>
+
+      <p>The cleaning industry has a quiet carbon and chemical footprint: ammonia-based solvents, single-use microfiber, gas-powered equipment, mystery imports labeled "eco" without evidence. We have chosen to build a counter-example. Every choice below is documented and auditable.</p>
+
+      <div class="commit-grid">
+        <div class="commit-card">
+          <h3>I. Green Seal Certified &mdash; 100%</h3>
+          <p>Every product we use is Green Seal GS-37 certified. No exceptions. No "green when convenient." We publish our full product list at request.</p>
+        </div>
+        <div class="commit-card">
+          <h3>II. Microfiber Over Single-Use</h3>
+          <p>Color-coded cloths, laundered weekly in our own facility, replaced on a 90-day rotation. No paper beyond restroom necessities.</p>
+        </div>
+        <div class="commit-card">
+          <h3>III. Battery, Not Gasoline</h3>
+          <p>Our vacuums and scrubbers are HEPA-filtered and electric. Quieter, cleaner, no CO emissions in your space. Batteries recycled at end of life.</p>
+        </div>
+        <div class="commit-card">
+          <h3>IV. Traceable Supply Chain</h3>
+          <p>We source from three domestic suppliers whose practices we have audited. No mystery imports. Full chain of custody on request.</p>
+        </div>
+      </div>
+
+      <hr class="rule-thin" style="margin-top:40px">
+
+      <p class="lead">Our clients' sustainability reports include our service data on request &mdash; we provide the documentation, audit trails, and certifications that make ESG reporting defensible.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>x</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE XI — WHY PARTNER WITH ECCO                               -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section IX &middot; Why Ecco</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section IX</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Why Partner<br>With Ecco</h1>
+      <p class="chapter-sub">A brief case for partnership &mdash; for the partner deciding between us and three similar proposals.</p>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="num">12+</div>
+          <div class="lbl">Years Serving NYC</div>
+        </div>
+        <div class="stat">
+          <div class="num">2,000+</div>
+          <div class="lbl">Clients Across NYC</div>
+        </div>
+        <div class="stat">
+          <div class="num">100%</div>
+          <div class="lbl">Green Seal Certified</div>
+        </div>
+      </div>
+
+      <div class="diff">
+        <h3>I. We are built for accounts, not routes.</h3>
+        <p>Most cleaning companies optimize around routes &mdash; fitting as many stops as possible into a shift. We optimize around <em>accounts</em> &mdash; fitting as few stops as possible into a crew's shift, so the work can breathe. This is more expensive to run. It is also the reason our work does not feel rushed.</p>
+      </div>
+
+      <div class="diff">
+        <h3>II. Our people stay.</h3>
+        <p>Industry average crew turnover is 210% annually. Ours is under 35%. That means the same faces, the same standards, the same care, year over year. Turnover is not a labor problem &mdash; it is a quality problem dressed up as a labor problem.</p>
+      </div>
+
+      <div class="diff">
+        <h3>III. We write it down.</h3>
+        <p>Every detail &mdash; your preferred trash-bag color, which door to use first, the plant in reception that needs no watering &mdash; lives in your account file. When a team member is out, the replacement arrives knowing these things. Institutional memory is not an accident; it is a practice.</p>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>xi</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE XII — CASE STUDY                                         -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section X &middot; Case Study</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section X</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">In Someone<br>Else's Words</h1>
+      <p class="chapter-sub">A similar account &mdash; a similar size, a similar standard &mdash; two years into partnership.</p>
+
+      <div class="case-study">
+        <div class="quote-mark">&ldquo;</div>
+        <p class="quote">When we switched to Ecco in 2023, we expected the honeymoon to end. It hasn't. Two years in, we still haven't had to send a single reminder email. That sounds small, but as anyone who has managed facilities knows, it is the point of everything.</p>
+        <div class="attr-block">
+          <div class="attr-name">[CLIENT NAME]</div>
+          <div class="attr-role">Director of Operations &middot; [FIRM NAME] &middot; 3,200 sqft &middot; Janitorial &middot; Partner since 2023</div>
+        </div>
+      </div>
+
+      <h2 class="section">The Numbers Behind the Words</h2>
+      <div class="case-metrics">
+        <div class="case-metric">
+          <div class="mn">10 days</div>
+          <div class="ml">Onboarding</div>
+        </div>
+        <div class="case-metric">
+          <div class="mn">24 mo.</div>
+          <div class="ml">Zero missed visits</div>
+        </div>
+        <div class="case-metric">
+          <div class="mn">4.9/5</div>
+          <div class="ml">Quarterly survey avg.</div>
+        </div>
+        <div class="case-metric">
+          <div class="mn">0</div>
+          <div class="ml">Escalations to leadership</div>
+        </div>
+      </div>
+
+      <p style="margin-top:30px">The account above is available for reference call at your request &mdash; we will coordinate introduction within 48 hours. Additional references in office, medical, and fitness verticals are available upon request.</p>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>xii</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE XIII — NEXT STEPS                                        -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section XI &middot; Next Steps</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section XI</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Three Ways<br>to Begin</h1>
+      <p class="chapter-sub">Whichever is easiest for you. We have tried to remove friction from every path.</p>
+
+      <div class="three-ways">
+        <div class="way">
+          <div class="num">I.</div>
+          <h3>By signature</h3>
+          <p>Sign the acknowledgment on the final page and return to info@eccofacilities.com. We begin onboarding within 48 hours.</p>
+        </div>
+        <div class="way">
+          <div class="num">II.</div>
+          <h3>By reply</h3>
+          <p>Reply to this email with "yes" or "let's proceed." We will send a brief service agreement for e-signature that afternoon.</p>
+        </div>
+        <div class="way">
+          <div class="num">III.</div>
+          <h3>By conversation</h3>
+          <p>Email info@eccofacilities.com with "call me" in the subject line. Alex Mercedes will call you personally within two business hours.</p>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <h3>What Happens Next &mdash; The 14-Day Onboarding</h3>
+        <div class="tl-row"><div class="d">Day 1</div><div class="t">Acceptance received. Founder confirms receipt personally within 2 hours.</div></div>
+        <div class="tl-row"><div class="d">Day 2&ndash;3</div><div class="t">Service agreement executed. Account file initiated. Team assignment confirmed.</div></div>
+        <div class="tl-row"><div class="d">Day 4&ndash;7</div><div class="t">On-site introduction of Lead Technician to your facilities contact. Key/access coordination. Portal setup.</div></div>
+        <div class="tl-row"><div class="d">Day 8&ndash;14</div><div class="t">Soft start: first three visits supervised by founder. Early corrections, preference-mapping, account file finalized.</div></div>
+        <div class="tl-row"><div class="d">May 15</div><div class="t">Full service commences under standard cadence. Monthly walk-through scheduled for June 15.</div></div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities</span>
+      <span>xiii</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE XIV — SIGNATURE                                          -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <span class="monogram">Ecco</span>
+      <span>Section XII &middot; Acknowledgment</span>
+    </div>
+
+    <div style="margin-top:0.4in">
+      <div class="label">Section XII</div>
+      <hr class="rule-gold">
+      <h1 class="chapter">Acknowledgment<br>&amp; Signature</h1>
+      <p class="chapter-sub">If this proposal, as written, is acceptable to you &mdash; a signature below is sufficient. Our formal service agreement follows within five business days, consistent with this document.</p>
+
+      <div class="sig-block">
+        <div class="sig-row">
+          <div class="sig-col">
+            <h3>Client Acceptance</h3>
+            <div class="sig-line"></div>
+            <div class="sig-label">Sarah Chen</div>
+            <div class="sig-sub">Director of Operations · Meridian Legal Partners</div>
+            <div class="sig-date"><span>Date</span><span class="line"></span></div>
+          </div>
+          <div class="sig-col">
+            <h3>Ecco Facilities</h3>
+            <div class="sig-line"></div>
+            <div class="sig-label">Alex Mercedes</div>
+            <div class="sig-sub">Founder · Ecco Facilities LLC</div>
+            <div class="sig-date"><span>Date</span><span class="line"></span>April 21, 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section">Summary of Agreement</h2>
+      <div class="fact-table" style="border-top:1px solid var(--navy);border-bottom:1px solid var(--navy)">
+        <div class="fact-row"><div class="k">Service</div><div class="v">Janitorial &mdash; 3x weekly (M/W/F), 7&ndash;10pm</div></div>
+        <div class="fact-row"><div class="k">Investment</div><div class="v">$3,850 / month, all inclusive</div></div>
+        <div class="fact-row"><div class="k">Term</div><div class="v">12 months, auto-renewing, cancellable with cause</div></div>
+        <div class="fact-row"><div class="k">Commencement</div><div class="v">May 15, 2026</div></div>
+        <div class="fact-row"><div class="k">First Payment Due</div><div class="v">June 1, 2026 (Net 15 from May service)</div></div>
+      </div>
+
+      <div class="fine-print">
+        This proposal is valid for thirty (30) days from the issue date of April 21, 2026. Acceptance of this document constitutes mutual intent to enter service; the final service agreement governing warranties, insurance certificates, and formal terms follows within five (5) business days of acceptance. Pricing is locked for twelve (12) months from the service commencement date. Prepared in good faith on April 21, 2026, by Ecco Facilities LLC.
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Ecco Facilities &middot; eccofacilities.com</span>
+      <span>xiv &middot; End of Proposal</span>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

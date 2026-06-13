@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal for Commercial Cleaning Services · Meridian Legal Partners · Ecco Facilities LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Allura&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0B1D38;
+    --navy-2: #1C2E4F;
+    --green: #2D7A32;
+    --green-soft: #EAF5EB;
+    --page: #FFFFFF;
+    --page-2: #FAFBFC;
+    --ink: #0A0F1F;
+    --ink-2: #1A2235;
+    --muted: #5B6578;
+    --muted-2: #8993A5;
+    --line: #D9DEE7;
+    --line-soft: #EDF0F5;
+    --line-strong: #0B1D38;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: #E4E8EF;
+    line-height: 1.55;
+    font-size: 13.5px;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.005em;
+  }
+
+  .proposal {
+    max-width: 8.5in;
+    margin: 2rem auto;
+    box-shadow: 0 18px 60px rgba(11,29,56,0.15), 0 4px 16px rgba(11,29,56,0.06);
+  }
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    background: var(--page);
+    position: relative;
+    page-break-after: always;
+    padding: 0.7in 0.75in 0.65in;
+    display: flex;
+    flex-direction: column;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* === Page chrome === */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 32px;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .page-header .brand {
+    color: var(--navy);
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .page-header .brand::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background: var(--navy);
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .page-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--muted-2);
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+  .page-footer .pageno {
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* === Typography === */
+  h1.doc-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  h2.sec-head {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  h3.sec-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--navy);
+  }
+  h3.sec-title .num {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-right: 14px;
+    padding: 3px 8px;
+    background: var(--line-soft);
+    border-radius: 4px;
+    position: relative;
+    top: -3px;
+  }
+  h4.sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    margin: 18px 0 10px;
+  }
+  p { font-size: 13.5px; margin-bottom: 10px; color: var(--ink-2); line-height: 1.65; }
+
+  /* === Tables (the workhorse) === */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+    background: var(--page);
+  }
+  table.data thead th {
+    background: var(--navy);
+    color: var(--page);
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 12px;
+    text-align: left;
+    border: 1px solid var(--navy);
+  }
+  table.data thead th.center { text-align: center; }
+  table.data tbody td {
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+  table.data tbody td.label {
+    background: var(--page-2);
+    font-weight: 600;
+    color: var(--navy);
+    width: 2in;
+  }
+  table.data tbody td.center {
+    text-align: center;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  table.data tbody td.green-check {
+    text-align: center;
+    color: var(--green);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  table.data tbody tr:nth-child(even) td:not(.label) { background: var(--page-2); }
+  table.data caption {
+    caption-side: top;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 0 6px;
+  }
+
+  /* === Cover page === */
+  .cover-page {
+    padding: 0.85in 0.8in 0.65in;
+    display: flex;
+    flex-direction: column;
+  }
+  .cover-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--navy);
+    padding-bottom: 22px;
+    margin-bottom: 50px;
+  }
+  .cover-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-brand .mark {
+    width: 36px;
+    height: 36px;
+    background: var(--navy);
+    border-radius: 6px;
+    position: relative;
+  }
+  .cover-brand .mark::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 2px;
+  }
+  .cover-brand .name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .cover-brand .sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .cover-top-right {
+    text-align: right;
+  }
+  .cover-top-right .tag {
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .cover-top-right .refno {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.005em;
+  }
+  .cover-hero {
+    margin-bottom: 50px;
+  }
+  .cover-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .cover-title-main {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .cover-client {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink-2);
+    letter-spacing: -0.01em;
+  }
+  .cover-client strong { color: var(--navy); font-weight: 700; }
+
+  .cover-block {
+    border: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+  .cover-block-title {
+    background: var(--page-2);
+    padding: 8px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .cover-block-body {
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    font-size: 12px;
+  }
+  .cover-block-body .row { display: flex; justify-content: space-between; gap: 14px; padding: 4px 0; }
+  .cover-block-body .k { color: var(--muted); font-weight: 500; }
+  .cover-block-body .v { color: var(--navy); font-weight: 600; text-align: right; }
+  .cover-foot {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10.5px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .cover-foot .bc { color: var(--navy); font-weight: 700; }
+
+  /* === Letter page === */
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 38px;
+  }
+  .letterhead .mark-lh {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .letterhead .mark-lh .icon {
+    width: 32px;
+    height: 32px;
+    background: var(--navy);
+    border-radius: 5px;
+    position: relative;
+  }
+  .letterhead .mark-lh .icon::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    width: 7px;
+    height: 7px;
+    background: var(--green);
+    border-radius: 2px;
+  }
+  .letterhead .mark-lh .name-lh {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+    line-height: 1.1;
+  }
+  .letterhead .mark-lh .name-lh .sub {
+    display: block;
+    font-size: 9.5px;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 3px;
+  }
+  .letterhead .org-info {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.65;
+    font-weight: 500;
+  }
+  .letterhead .org-info strong { color: var(--navy); font-weight: 700; display: block; font-size: 12px; margin-bottom: 3px; }
+
+  .letter-meta {
+    display: grid;
+    grid-template-columns: 1fr 3in;
+    gap: 24px;
+    margin-bottom: 34px;
+  }
+  .letter-meta .date-col { }
+  .letter-meta .date-col .d { font-size: 13px; color: var(--navy); font-weight: 600; }
+  .letter-meta .date-col .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--line-soft);
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-top: 6px;
+  }
+  .letter-meta .recipient {
+    border: 1px solid var(--line);
+    padding: 14px 18px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .letter-meta .recipient strong { display: block; color: var(--navy); font-weight: 700; font-size: 13px; }
+  .letter-meta .recipient .role { color: var(--muted); margin-bottom: 6px; }
+  .letter-meta .recipient .addr { color: var(--ink-2); }
+  .letter-subject {
+    padding: 12px 16px;
+    background: var(--navy);
+    color: var(--page);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+  }
+  .letter-subject .lbl {
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-right: 10px;
+    font-weight: 700;
+  }
+  .letter-body p { font-size: 13.5px; line-height: 1.7; margin-bottom: 12px; color: var(--ink); }
+  .letter-sign { margin-top: 32px; }
+  .letter-sign .close { font-size: 12.5px; color: var(--ink-2); font-weight: 500; margin-bottom: 14px; }
+  .signature-mark {
+    font-family: 'Allura', cursive;
+    font-size: 48px;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+    width: 2.8in;
+    border-bottom: 1px solid var(--line);
+  }
+  .signature-name { font-weight: 700; font-size: 12.5px; color: var(--navy); }
+  .signature-title { font-size: 11px; color: var(--muted); margin-top: 1px; font-weight: 500; }
+
+  /* === Compliance layout === */
+  .compliance-intro {
+    padding: 16px 18px;
+    background: var(--page-2);
+    border-left: 3px solid var(--navy);
+    margin-bottom: 22px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .compliance-intro strong { color: var(--navy); font-weight: 700; }
+  .dual-tables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* === Scope === */
+  .scope-intro {
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .scope-intro strong { color: var(--navy); font-weight: 700; }
+  table.scope-table th.freq {
+    width: 0.65in;
+    text-align: center;
+    font-size: 9.5px;
+  }
+  table.scope-table td.freq {
+    text-align: center;
+    font-weight: 700;
+    color: var(--green);
+    font-size: 13px;
+    background: var(--page);
+  }
+  table.scope-table td.freq.off { color: var(--line); }
+  table.scope-table td.task { font-size: 12px; color: var(--ink-2); }
+  .scope-cat {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--navy);
+    padding: 10px 12px;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .scope-cat .area-meta {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: none;
+  }
+
+  /* === Staffing === */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 10px 0 20px;
+  }
+  .schedule-grid .d {
+    padding: 10px 6px;
+    text-align: center;
+    border: 1px solid var(--line);
+    font-size: 10.5px;
+  }
+  .schedule-grid .d.on { background: var(--navy); color: var(--page); border-color: var(--navy); }
+  .schedule-grid .d .dlb {
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .schedule-grid .d.on .dlb { color: rgba(255,255,255,0.7); }
+  .schedule-grid .d .dtm { color: var(--navy); font-size: 11px; font-weight: 600; }
+  .schedule-grid .d.on .dtm { color: var(--page); }
+
+  /* === Pricing === */
+  .price-summary {
+    background: var(--navy);
+    color: var(--page);
+    padding: 22px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .price-summary .cell { border-right: 1px solid rgba(255,255,255,0.15); padding-right: 14px; }
+  .price-summary .cell:last-child { border-right: none; }
+  .price-summary .k { font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55); font-weight: 700; margin-bottom: 6px; }
+  .price-summary .v { font-size: 19px; font-weight: 700; color: var(--page); letter-spacing: -0.015em; line-height: 1.1; }
+  .price-summary .v .small { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.6); margin-left: 4px; }
+  .price-summary .cell.hero .v { font-size: 26px; color: var(--page); }
+  .price-summary .cell.hero .k { color: rgba(255,255,255,0.75); }
+
+  /* === Transition === */
+  .timeline {
+    border: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 0.9in 0.9in 1fr;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    align-items: stretch;
+  }
+  .timeline-row:last-child { border-bottom: none; }
+  .timeline-row.head {
+    background: var(--navy);
+    color: var(--page);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .timeline-row .c { padding: 9px 12px; border-right: 1px solid var(--line); color: var(--ink-2); }
+  .timeline-row.head .c { border-right: 1px solid rgba(255,255,255,0.15); color: var(--page); }
+  .timeline-row .c:last-child { border-right: none; }
+  .timeline-row .c.day { font-weight: 700; color: var(--navy); background: var(--page-2); }
+  .timeline-row.head .c.day { color: var(--page); background: transparent; }
+
+  /* === Signature block === */
+  .sig-block {
+    border: 1px solid var(--line);
+    padding: 26px 32px;
+    margin: 18px 0;
+  }
+  .sig-block h4 {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sig-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 22px;
+  }
+  .sig-col .line {
+    border-bottom: 2px solid var(--navy);
+    height: 42px;
+    margin-bottom: 6px;
+  }
+  .sig-col .who { font-size: 12px; color: var(--navy); font-weight: 700; }
+  .sig-col .role { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .sig-col .date {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sig-col .date .line-sm { flex: 1; border-bottom: 1px solid var(--line); height: 12px; }
+
+  .summary-mini {
+    border: 1px solid var(--line);
+    background: var(--page-2);
+    padding: 18px 22px;
+    margin: 14px 0;
+  }
+  .summary-mini h4 {
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .summary-mini .row {
+    display: grid;
+    grid-template-columns: 1.6in 1fr;
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px dotted var(--line);
+  }
+  .summary-mini .row:last-child { border-bottom: none; }
+  .summary-mini .row .k { color: var(--muted); font-weight: 600; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; align-self: center; }
+  .summary-mini .row .v { color: var(--navy); font-weight: 600; }
+
+  .fine {
+    font-size: 10px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* === Screen banner === */
+  .ff-banner {
+    max-width: 8.5in;
+    margin: 1rem auto 0;
+    background: var(--navy);
+    color: var(--page);
+    padding: 11px 16px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .ff-banner .dot { color: var(--green); }
+
+  @media print {
+    html, body { background: white; }
+    .proposal { margin: 0; box-shadow: none; max-width: none; }
+    .page { page-break-after: always; min-height: auto; width: auto; }
+    .page:last-child { page-break-after: auto; }
+    .ff-banner { display: none; }
+  }
+  @page { size: letter; margin: 0; }
+
+  /* === Brand logo (real PNG) === */
+  .brand-logo-img {
+    display: block;
+    height: auto;
+    width: auto;
+  }
+  .brand-logo-xs { height: 22px; }
+  .brand-logo-sm { height: 34px; }
+  .brand-logo-md { height: 52px; }
+</style>
+</head>
+<body>
+
+<div class="ff-banner">Direction B · Professional <span class="dot">·</span> 8-page NYC Commercial Cleaning Standard <span class="dot">·</span> Cmd+P to PDF</div>
+
+<div class="proposal">
+
+  <!-- ============================================================ -->
+  <!-- PAGE 1 — COVER                                                -->
+  <!-- ============================================================ -->
+  <section class="page cover-page">
+    <div class="cover-top">
+      <div class="cover-brand">
+        <img class="brand-logo-img brand-logo-md" src="/images/logo-horizontal.png" alt="Ecco Facilities">
+      </div>
+      <div class="cover-top-right">
+        <div class="tag">Proposal No.</div>
+        <div class="refno">PROP&ndash;2026&ndash;0142</div>
+      </div>
+    </div>
+
+    <div class="cover-hero">
+      <div class="cover-eyebrow">Proposal for Commercial Cleaning Services</div>
+      <h1 class="cover-title-main">Janitorial Services Proposal.</h1>
+      <div class="cover-client">Prepared for <strong>Meridian Legal Partners</strong> &mdash; 350 Park Avenue, Suite 1200, New York, NY 10022</div>
+    </div>
+
+    <div class="cover-block">
+      <div class="cover-block-title">Document Identification</div>
+      <div class="cover-block-body">
+        <div class="row"><span class="k">Issued</span><span class="v">April 21, 2026</span></div>
+        <div class="row"><span class="k">Valid Until</span><span class="v">May 21, 2026</span></div>
+        <div class="row"><span class="k">Prepared For</span><span class="v">Sarah Chen, Dir. of Operations</span></div>
+        <div class="row"><span class="k">Prepared By</span><span class="v">Alex Mercedes, Founder</span></div>
+        <div class="row"><span class="k">Document Version</span><span class="v">1.0</span></div>
+        <div class="row"><span class="k">Pages</span><span class="v">8 + Appendices</span></div>
+      </div>
+    </div>
+
+    <div class="cover-block">
+      <div class="cover-block-title">Firm Identification</div>
+      <div class="cover-block-body">
+        <div class="row"><span class="k">Legal Name</span><span class="v">Ecco Facilities, LLC</span></div>
+        <div class="row"><span class="k">Federal EIN</span><span class="v">99&ndash;2745452</span></div>
+        <div class="row"><span class="k">Tax Classification</span><span class="v">LLC</span></div>
+        <div class="row"><span class="k">Registered Address</span><span class="v">54 State Street, Albany, NY</span></div>
+        <div class="row"><span class="k">Years in Business</span><span class="v">12+</span></div>
+        <div class="row"><span class="k">Union Status</span><span class="v">Non-Union</span></div>
+      </div>
+    </div>
+
+    <div class="cover-block">
+      <div class="cover-block-title">Insurance Coverage &mdash; Summary</div>
+      <div class="cover-block-body">
+        <div class="row"><span class="k">General Liability</span><span class="v">$2,000,000</span></div>
+        <div class="row"><span class="k">Workers' Compensation</span><span class="v">$1,000,000</span></div>
+        <div class="row"><span class="k">Commercial Auto (Non-Owned)</span><span class="v">$1,000,000</span></div>
+        <div class="row"><span class="k">Umbrella / Excess Liability</span><span class="v">$5,000,000</span></div>
+        <div class="row"><span class="k">NY State Disability</span><span class="v">Compliant</span></div>
+        <div class="row"><span class="k">COI Available on Request</span><span class="v">Yes &mdash; Additional Insured Avail.</span></div>
+      </div>
+    </div>
+
+    <div class="cover-foot">
+      <span class="bc">ECCOFACILITIES.COM</span>
+      <span>INFO@ECCOFACILITIES.COM</span>
+      <span>PAGE 01 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 2 — TRANSMITTAL LETTER                                   -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Transmittal Letter</span>
+    </div>
+
+    <div class="letterhead">
+      <img class="brand-logo-img brand-logo-sm" src="/images/logo-horizontal.png" alt="Ecco Facilities">
+      <div class="org-info">
+        <strong>Registered Office</strong>
+        54 State Street, Albany, NY<br>
+        EIN 99&ndash;2745452 &middot; LLC<br>
+        eccofacilities.com &middot; info@eccofacilities.com
+      </div>
+    </div>
+
+    <div class="letter-meta">
+      <div class="date-col">
+        <div class="d">April 21, 2026</div>
+        <span class="tag">Proposal PROP-2026-0142</span>
+      </div>
+      <div class="recipient">
+        <strong>Sarah Chen</strong>
+        <div class="role">Director of Operations</div>
+        <div class="addr">Meridian Legal Partners<br>350 Park Avenue, Suite 1200<br>New York, NY 10022</div>
+      </div>
+    </div>
+
+    <div class="letter-subject">
+      <span class="lbl">RE:</span>Proposal for Janitorial Services at 350 Park Avenue, Suite 1200 &mdash; Meridian Legal Partners
+    </div>
+
+    <div class="letter-body">
+      <p>Dear Ms. Chen,</p>
+      <p>Ecco Facilities, LLC is pleased to submit the attached proposal for janitorial services at your Suite 1200 office at 350 Park Avenue. Based on our site visit of April 3, 2026, the proposal covers a three-visits-per-week cadence (Monday, Wednesday, Friday evenings) with a dedicated three-person crew, monthly walk-throughs, and the 24-hour service guarantee typical of our Class A accounts.</p>
+      <p>The proposal is structured in eight sections: Firm Profile &amp; Compliance, Scope of Work, Staffing &amp; Schedule, Pricing &amp; Terms, Transition Plan, and Acknowledgment. All insurance coverage, EIN, and compliance data is disclosed on the cover sheet and in Section 02. Certificate of Insurance, W-9, and supporting documentation are available upon execution.</p>
+      <p>Should you require any modification to scope, staffing, or schedule, we welcome the opportunity to revise. I am available directly at <strong>info@eccofacilities.com</strong> for any question prior to acceptance.</p>
+      <p>We thank you for the opportunity to be considered.</p>
+    </div>
+
+    <div class="letter-sign">
+      <div class="close">Sincerely,</div>
+      <div class="signature-mark">Alex Mercedes</div>
+      <div class="signature-name">Alex Mercedes</div>
+      <div class="signature-title">Founder &middot; Ecco Facilities, LLC</div>
+    </div>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 02 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 3 — FIRM PROFILE & COMPLIANCE                            -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Section 02 &middot; Firm Profile &amp; Compliance</span>
+    </div>
+
+    <h2 class="sec-head">Section 02</h2>
+    <h3 class="sec-title"><span class="num">02</span>Firm Profile &amp; Compliance</h3>
+
+    <div class="compliance-intro">
+      <strong>Ecco Facilities, LLC</strong> is a New York&ndash;registered commercial cleaning services company with 12+ years of operation across the five boroughs, serving 2,000+ accounts spanning corporate offices, medical, retail, and fitness facilities. We operate as a non-union provider with W-2 employees and maintain insurance coverage consistent with Class A commercial office requirements.
+    </div>
+
+    <div class="dual-tables">
+      <table class="data">
+        <caption>Firm Identification</caption>
+        <tbody>
+          <tr><td class="label">Legal Name</td><td>Ecco Facilities, LLC</td></tr>
+          <tr><td class="label">DBA</td><td>Ecco Facilities</td></tr>
+          <tr><td class="label">Federal EIN</td><td>99&ndash;2745452</td></tr>
+          <tr><td class="label">Tax Classification</td><td>LLC</td></tr>
+          <tr><td class="label">Registered Office</td><td>54 State Street, Albany, NY</td></tr>
+          <tr><td class="label">Contact</td><td>info@eccofacilities.com</td></tr>
+          <tr><td class="label">Website</td><td>eccofacilities.com</td></tr>
+        </tbody>
+      </table>
+
+      <table class="data">
+        <caption>Experience &amp; Capacity</caption>
+        <tbody>
+          <tr><td class="label">Years in Business</td><td>12+ years</td></tr>
+          <tr><td class="label">Clients Served</td><td>2,000+ across NYC</td></tr>
+          <tr><td class="label">Service Area</td><td>NYC &mdash; five boroughs</td></tr>
+          <tr><td class="label">Account Types</td><td>Office, Medical, Retail, Fitness, Industrial</td></tr>
+          <tr><td class="label">Avg. Account Size</td><td>2,500&ndash;25,000 sqft</td></tr>
+          <tr><td class="label">References</td><td>Available on request</td></tr>
+          <tr><td class="label">EMR (Safety Rating)</td><td>Available on request</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <table class="data">
+      <caption>Insurance Coverage</caption>
+      <thead>
+        <tr>
+          <th>Coverage Type</th>
+          <th>Limit</th>
+          <th>Carrier</th>
+          <th>Additional Insured</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Commercial General Liability</td><td class="center">$2,000,000 aggregate</td><td>On COI</td><td class="green-check">&#10003;</td></tr>
+        <tr><td>Workers' Compensation</td><td class="center">$1,000,000</td><td>On COI</td><td class="green-check">&#10003;</td></tr>
+        <tr><td>Commercial Auto &mdash; Non-Owned</td><td class="center">$1,000,000</td><td>On COI</td><td class="green-check">&#10003;</td></tr>
+        <tr><td>Umbrella / Excess Liability</td><td class="center">$5,000,000</td><td>On COI</td><td class="green-check">&#10003;</td></tr>
+        <tr><td>NY State Statutory Disability</td><td class="center">Compliant</td><td>On COI</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:18px;">Certificate of Insurance (ACORD 25) issued to Meridian Legal Partners upon contract execution, with building management named as additional insured if required.</p>
+
+    <div class="dual-tables">
+      <table class="data">
+        <caption>Certifications &amp; Training</caption>
+        <tbody>
+          <tr><td class="label">Green Products</td><td>Green Seal GS-37 certified &mdash; 100% of cleaning chemicals</td></tr>
+          <tr><td class="label">EPA Safer Choice</td><td>Yes &mdash; where available</td></tr>
+          <tr><td class="label">OSHA Training</td><td>10-hour (technicians) + 30-hour (supervisors)</td></tr>
+          <tr><td class="label">Equipment</td><td>HEPA-filtered vacuums &middot; battery-electric scrubbers</td></tr>
+          <tr><td class="label">Bloodborne Pathogens</td><td>Annual training &mdash; all on-site staff</td></tr>
+          <tr><td class="label">COVID/Biohazard Protocols</td><td>CDC-aligned &middot; post-2020 enhanced standards</td></tr>
+        </tbody>
+      </table>
+
+      <table class="data">
+        <caption>Business Practices</caption>
+        <tbody>
+          <tr><td class="label">Employee Classification</td><td>W-2 (no 1099 field labor)</td></tr>
+          <tr><td class="label">Union Status</td><td>Non-union</td></tr>
+          <tr><td class="label">MBE / WBE / DBE</td><td>Not certified</td></tr>
+          <tr><td class="label">E-Verify</td><td>Enrolled &mdash; all hires verified</td></tr>
+          <tr><td class="label">Background Checks</td><td>National + NY state &mdash; pre-hire</td></tr>
+          <tr><td class="label">Bonded</td><td>Yes</td></tr>
+          <tr><td class="label">NYC DCWP License</td><td>Not required for commercial scope</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 03 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 4 — SCOPE OF WORK (matrix)                               -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Section 03 &middot; Scope of Work</span>
+    </div>
+
+    <h2 class="sec-head">Section 03</h2>
+    <h3 class="sec-title"><span class="num">03</span>Scope of Work &mdash; Task Matrix</h3>
+
+    <p class="scope-intro">The following task-by-frequency matrix defines the complete cleaning scope contracted. Frequency symbols: <strong>&#10003; = included at stated frequency</strong>. Tasks not listed are not included and will be quoted separately if requested. Site: <strong>350 Park Avenue, Suite 1200 &mdash; ~8,500 sqft &middot; 2 floors &middot; 6 restrooms &middot; ~45 occupants</strong>.</p>
+
+    <div class="scope-cat">Offices, Corridors &amp; Reception <span class="area-meta">~5,200 sqft</span></div>
+    <table class="data scope-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th class="freq">Daily</th>
+          <th class="freq">Weekly</th>
+          <th class="freq">Monthly</th>
+          <th class="freq">Qtr</th>
+          <th class="freq">Annual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="task">Empty trash &amp; recycling; reline bins</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Vacuum all carpeted areas</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Dust-mop and damp-mop hard floors</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Desk surfaces &amp; general tidying (per occupant preference)</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Disinfect high-touch surfaces (doorknobs, switches, elevator buttons)</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Spot-clean interior glass doors and partitions</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Detail reception and client lounge (first-impression reset)</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Full interior glass &amp; partition cleaning</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Baseboards throughout</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">HVAC vent wipe (all accessible)</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Light fixture dust (accessible)</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Carpet spot-treatment audit with photo documentation</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Professional carpet deep-clean</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td></tr>
+        <tr><td class="task">Floor wax &amp; buff (hard surfaces)</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td></tr>
+      </tbody>
+    </table>
+
+    <div class="scope-cat">Restrooms <span class="area-meta">6 units &middot; 4 staff / 2 client-facing</span></div>
+    <table class="data scope-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th class="freq">Daily</th>
+          <th class="freq">Weekly</th>
+          <th class="freq">Monthly</th>
+          <th class="freq">Qtr</th>
+          <th class="freq">Annual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="task">Disinfect all fixtures (toilets, urinals, sinks, faucets)</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Refill consumables (soap, towels, tissue, seat covers)</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Empty trash, sanitary receptacles; reline</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Mop floors with disinfectant</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Clean mirrors, chrome, partition surfaces</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Deep-scrub grout, tile, fixtures</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Descale faucets, drains, urinal screens</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 04 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 5 — SCOPE continued                                      -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Section 03 (cont.) &middot; Scope of Work</span>
+    </div>
+
+    <div class="scope-cat">Kitchen / Breakroom <span class="area-meta">shared staff kitchen</span></div>
+    <table class="data scope-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th class="freq">Daily</th>
+          <th class="freq">Weekly</th>
+          <th class="freq">Monthly</th>
+          <th class="freq">Qtr</th>
+          <th class="freq">Annual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="task">Wipe down countertops, tables, and surfaces</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Clean appliance exteriors (microwave, coffee station, fridge)</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Load and run dishwasher; empty if clean</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Sanitize sink and faucet</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Empty trash &amp; recycling; reline</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Refrigerator interior deep-clean</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Cabinetry &amp; appliance-interior deep-clean</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td></tr>
+      </tbody>
+    </table>
+
+    <div class="scope-cat">Conference &amp; Client-Facing Areas <span class="area-meta">3 meeting rooms &middot; 1 client lounge</span></div>
+    <table class="data scope-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th class="freq">Daily</th>
+          <th class="freq">Weekly</th>
+          <th class="freq">Monthly</th>
+          <th class="freq">Qtr</th>
+          <th class="freq">Annual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="task">Disinfect conference tables and chair armrests</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Reset chairs to standard position</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Clean glass table surfaces; streak-free</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Empty trash &amp; recycling; reline</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td></tr>
+        <tr><td class="task">Chair upholstery audit; spot-clean as needed</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq off">&mdash;</td><td class="freq">&#10003;</td><td class="freq off">&mdash;</td></tr>
+      </tbody>
+    </table>
+
+    <div class="scope-cat">Quality Assurance &amp; Reporting <span class="area-meta">included in base scope</span></div>
+    <table class="data">
+      <tbody>
+        <tr><td class="label">Daily Checklist</td><td>42-point digital checklist completed on tablet at each visit; submitted to client portal with timestamps and Lead Technician signature.</td></tr>
+        <tr><td class="label">Weekly Digest</td><td>Emailed summary of all visits, tasks completed, any flagged items or maintenance concerns observed.</td></tr>
+        <tr><td class="label">Monthly Walk-Through</td><td>Account Manager walks the space with client designate; documented with photos; action items logged.</td></tr>
+        <tr><td class="label">24-Hour Response Guarantee</td><td>Any issue reported via phone, email, or portal triggers a crew return within 24 hours at no additional charge.</td></tr>
+        <tr><td class="label">Quarterly Satisfaction Survey</td><td>3-question survey to client and up to two designates. Rolling score below 4.0/5.0 for two quarters triggers team restructure or termination without penalty.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 05 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 6 — STAFFING & SCHEDULE                                  -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Section 04 &middot; Staffing &amp; Schedule</span>
+    </div>
+
+    <h2 class="sec-head">Section 04</h2>
+    <h3 class="sec-title"><span class="num">04</span>Staffing, Schedule &amp; Access</h3>
+
+    <h4 class="sub-title">Crew Composition &amp; Employment Terms</h4>
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Count</th>
+          <th>Classification</th>
+          <th>Training / Credentials</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Lead Technician (on-site crew chief)</td><td class="center">1</td><td>W-2 Full-time</td><td>OSHA 30-hour · 9+ yrs industry tenure</td></tr>
+        <tr><td>Service Technician</td><td class="center">2</td><td>W-2 Full-time</td><td>OSHA 10-hour · 120-hr Ecco onboarding</td></tr>
+        <tr><td>Account Manager (off-site)</td><td class="center">1</td><td>W-2 Full-time</td><td>OSHA 30-hour · escalation &amp; reporting</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin-top:-6px;margin-bottom:18px;">
+      Supervisor-to-worker ratio: 1:2. All on-site staff are W-2 employees (no 1099 field labor), E-Verify verified, pre-hire background-checked (national + NY), bonded, uniformed, and carry company photo ID visible during visits.
+    </p>
+
+    <h4 class="sub-title">Weekly Cadence</h4>
+    <div class="schedule-grid">
+      <div class="d on"><div class="dlb">Mon</div><div class="dtm">7&ndash;10pm</div></div>
+      <div class="d"><div class="dlb">Tue</div><div class="dtm">&mdash;</div></div>
+      <div class="d on"><div class="dlb">Wed</div><div class="dtm">7&ndash;10pm</div></div>
+      <div class="d"><div class="dlb">Thu</div><div class="dtm">&mdash;</div></div>
+      <div class="d on"><div class="dlb">Fri</div><div class="dtm">7&ndash;10pm</div></div>
+      <div class="d"><div class="dlb">Sat</div><div class="dtm">&mdash;</div></div>
+      <div class="d"><div class="dlb">Sun</div><div class="dtm">&mdash;</div></div>
+    </div>
+    <table class="data">
+      <tbody>
+        <tr><td class="label">Visits / Week</td><td>3 (Monday, Wednesday, Friday evenings)</td></tr>
+        <tr><td class="label">Hours On Site / Visit</td><td>3.0 hours (7:00pm &ndash; 10:00pm)</td></tr>
+        <tr><td class="label">Total Hours / Week</td><td>9.0 hours (crew of 3 = 27 labor-hours)</td></tr>
+        <tr><td class="label">Visits / Year</td><td>156 (accounting for holidays; full scope maintained)</td></tr>
+        <tr><td class="label">Monday Readiness Guarantee</td><td>Space ready by 7:45am every Monday, without exception</td></tr>
+      </tbody>
+    </table>
+
+    <h4 class="sub-title">Access &amp; Security Protocol</h4>
+    <table class="data">
+      <tbody>
+        <tr><td class="label">Arrival</td><td>Crew arrives 6:55pm. Sign-in with building security. Badge verification with facilities contact.</td></tr>
+        <tr><td class="label">Access Method</td><td>Keys, fobs, and alarm codes held only by Lead Technician and Account Manager. Coordinated with your facilities team.</td></tr>
+        <tr><td class="label">Departure</td><td>Daily sign-out log with building security. Alarm reset. Completion photo of reception submitted to client portal.</td></tr>
+        <tr><td class="label">Emergency Response</td><td>Direct line to Account Manager, 24/7. Crew dispatched within 90 minutes during weekday business hours for urgent incidents.</td></tr>
+        <tr><td class="label">Incident Reporting</td><td>Any observed damage, security concern, or maintenance issue documented and transmitted within 4 hours.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 06 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 7 — PRICING & TERMS                                      -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Section 05 &middot; Pricing &amp; Terms</span>
+    </div>
+
+    <h2 class="sec-head">Section 05</h2>
+    <h3 class="sec-title"><span class="num">05</span>Pricing &amp; Contract Terms</h3>
+
+    <div class="price-summary">
+      <div class="cell hero">
+        <div class="k">Monthly Investment</div>
+        <div class="v">$3,850<span class="small">/ mo</span></div>
+      </div>
+      <div class="cell">
+        <div class="k">Per Square Foot</div>
+        <div class="v">$0.453<span class="small">/ sqft / mo</span></div>
+      </div>
+      <div class="cell">
+        <div class="k">Per Visit</div>
+        <div class="v">$296.15<span class="small">/ visit</span></div>
+      </div>
+      <div class="cell">
+        <div class="k">Annualized</div>
+        <div class="v">$46,200<span class="small">/ yr</span></div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:20px;">
+      Benchmark: $0.453/sqft/month sits in the middle range for NYC Class A corporate office janitorial with dedicated crew, Green Seal products, and 3&times;/week cadence ($0.35&ndash;$0.60 typical range, Q1 2026). Pricing includes all materials, labor, supervision, insurance, equipment, taxes, and the 156-visit annual cycle.
+    </p>
+
+    <h4 class="sub-title">Optional Services &mdash; Activate Anytime</h4>
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Frequency / Unit</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Day Porter coverage (weekday, 4 hours/day)</td><td>Monthly recurring</td><td class="center">$1,950 / mo</td></tr>
+        <tr><td>Exterior window detailing (interior surfaces only included in base)</td><td>Quarterly</td><td class="center">$275 / qtr</td></tr>
+        <tr><td>Event / after-party cleanup (up to 100 guests)</td><td>Per event</td><td class="center">$425 / event</td></tr>
+        <tr><td>Kitchen fridge deep-clean (weekly)</td><td>Monthly recurring</td><td class="center">$95 / mo</td></tr>
+        <tr><td>On-call emergency response (after-hours, non-covered)</td><td>Per call</td><td class="center">$150 / call</td></tr>
+        <tr><td>Biohazard / post-construction cleanup</td><td>Per incident</td><td class="center">Quoted separately</td></tr>
+      </tbody>
+    </table>
+
+    <h4 class="sub-title">Contract Terms</h4>
+    <table class="data">
+      <tbody>
+        <tr><td class="label">Initial Term</td><td>Twelve (12) months from commencement date of May 15, 2026</td></tr>
+        <tr><td class="label">Auto-Renewal</td><td>Annual, unless written notice of non-renewal provided 60 days prior to anniversary</td></tr>
+        <tr><td class="label">Month-to-Month Alternative</td><td>Available at $4,000/mo in lieu of 12-month commitment</td></tr>
+        <tr><td class="label">Payment Terms</td><td>Net 15 from invoice date. ACH preferred; check accepted.</td></tr>
+        <tr><td class="label">First Payment Due</td><td>June 1, 2026 (Net 15 from May service cycle)</td></tr>
+        <tr><td class="label">Setup Fees / Deposits</td><td>None</td></tr>
+        <tr><td class="label">Annual Price Adjustment</td><td>CPI-linked (NY-Metro Area), capped at 4% per annum; 60-day written notice</td></tr>
+        <tr><td class="label">Termination with Cause</td><td>30 days written notice. No penalty.</td></tr>
+        <tr><td class="label">Termination without Cause</td><td>60 days written notice. No penalty.</td></tr>
+        <tr><td class="label">Pricing Lock</td><td>Rate locked through May 14, 2027 (initial term)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 07 / 08</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 8 — TRANSITION + ACKNOWLEDGMENT                          -->
+  <!-- ============================================================ -->
+  <section class="page">
+    <div class="page-header">
+      <div class="brand">Ecco Facilities, LLC</div>
+      <span>Section 06 &middot; Transition &amp; Acknowledgment</span>
+    </div>
+
+    <h2 class="sec-head">Section 06</h2>
+    <h3 class="sec-title"><span class="num">06</span>Transition Plan &amp; Acknowledgment</h3>
+
+    <h4 class="sub-title">Fourteen-Day Onboarding &mdash; May 1 through May 14, 2026</h4>
+    <div class="timeline">
+      <div class="timeline-row head">
+        <div class="c day">Day</div>
+        <div class="c">Owner</div>
+        <div class="c">Deliverable</div>
+      </div>
+      <div class="timeline-row"><div class="c day">Day 01</div><div class="c">Ecco &middot; Founder</div><div class="c">Acceptance confirmed personally within 2 hours. COI, W-9, and licenses transmitted.</div></div>
+      <div class="timeline-row"><div class="c day">Day 02&ndash;03</div><div class="c">Both</div><div class="c">Service agreement executed. Named-insured addendum processed with building management. Account file initiated.</div></div>
+      <div class="timeline-row"><div class="c day">Day 04&ndash;05</div><div class="c">Ecco &middot; AM</div><div class="c">On-site introduction of Lead Technician and Account Manager to facilities contact. Key/fob/code coordination.</div></div>
+      <div class="timeline-row"><div class="c day">Day 06&ndash;07</div><div class="c">Ecco</div><div class="c">Digital portal provisioned; checklist configured to site specifics; preference-mapping interviews with key occupants.</div></div>
+      <div class="timeline-row"><div class="c day">Day 08&ndash;14</div><div class="c">Ecco &middot; Founder</div><div class="c">Soft-start phase: first three visits supervised on-site by founder. Corrections captured; account file finalized.</div></div>
+      <div class="timeline-row"><div class="c day">May 15</div><div class="c">Ecco &middot; Crew</div><div class="c">Full service commences under standard cadence. First monthly walk-through scheduled for June 15, 2026.</div></div>
+    </div>
+
+    <div class="sig-block">
+      <h4>Acknowledgment &amp; Acceptance</h4>
+      <div class="sig-row">
+        <div class="sig-col">
+          <div class="line"></div>
+          <div class="who">Sarah Chen</div>
+          <div class="role">Director of Operations &middot; Meridian Legal Partners</div>
+          <div class="date"><span>Date</span><div class="line-sm"></div></div>
+        </div>
+        <div class="sig-col">
+          <div class="line"></div>
+          <div class="who">Alex Mercedes</div>
+          <div class="role">Founder &middot; Ecco Facilities, LLC</div>
+          <div class="date"><span>Date</span><div class="line-sm"></div>April 21, 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-mini">
+      <h4>Summary of Agreement</h4>
+      <div class="row"><div class="k">Service</div><div class="v">Janitorial &mdash; 3&times; weekly (M/W/F), 7:00pm&ndash;10:00pm</div></div>
+      <div class="row"><div class="k">Site</div><div class="v">350 Park Avenue, Suite 1200 &middot; ~8,500 sqft</div></div>
+      <div class="row"><div class="k">Investment</div><div class="v">$3,850 / month &middot; all inclusive</div></div>
+      <div class="row"><div class="k">Term</div><div class="v">12 months, auto-renewing, cancellable with cause (30d) or without cause (60d)</div></div>
+      <div class="row"><div class="k">Commencement</div><div class="v">May 15, 2026</div></div>
+      <div class="row"><div class="k">First Invoice</div><div class="v">May 31, 2026 &middot; First Payment Due June 15, 2026 (Net 15)</div></div>
+      <div class="row"><div class="k">References</div><div class="v">Available upon request</div></div>
+      <div class="row"><div class="k">Appendices Available</div><div class="v">COI (ACORD 25) · W-9 · OSHA training records · SDS index</div></div>
+    </div>
+
+    <div class="fine">
+      This proposal is valid for thirty (30) days from the issue date of April 21, 2026. Acceptance of this document by both parties below constitutes mutual intent to enter service under the terms stated herein. A formal service agreement incorporating these terms, together with required attachments (Certificate of Insurance, W-9, any building-specific addenda), will be executed within five (5) business days of acceptance. Pricing is locked for twelve (12) months from the service commencement date of May 15, 2026. Ecco Facilities, LLC — 54 State Street, Albany, NY · EIN 99-2745452.
+    </div>
+
+    <div class="page-footer">
+      <span>ECCO FACILITIES, LLC &middot; PROP&ndash;2026&ndash;0142</span>
+      <span class="pageno">Page 08 / 08 &middot; End of Proposal</span>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
