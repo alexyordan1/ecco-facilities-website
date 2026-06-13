@@ -43,3 +43,4 @@ docs/claude-design-input/
 test-results/
 playwright-report/
 bun.lock
+.dead-archive/
