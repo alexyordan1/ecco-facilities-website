@@ -160,7 +160,7 @@ Exentos del sistema: focus rings (accesibilidad), el pulso del rotador, el cajó
 
 ## Deuda conocida (no unificado aún)
 
-- **Rojos de error.** `.v-hint.bad` está declarado DOS veces con rojos distintos (`#ff6b6b` y `#e84c3d`); `.fg .v-err` usa `#ff6b6b`, `.form-field .v-err` usa `#e84c3d`, `.footer-nl-status.is-err` usa `#ffb4b4`. Todos **evitan** `--color-red:#B23B3B` y varios fallan AA en claro (#ff6b6b=2.78:1). Además `--color-red` no se voltea en dark (2.18:1 sobre card). Pendiente: unificar a `--color-red` + variante dark `#EB8C8C` (5.27:1). Es la próxima unificación propuesta.
+- **Rojos de error.** `.v-hint.bad` está declarado DOS veces con rojos distintos (`#ff6b6b` y `#e84c3d`), `.v-err`/`.v-msg`/`.day-count.need` usan `#ff6b6b` — todos fallan AA en claro. PERO **solo se renderizan en las páginas legacy** `quote-janitorial`/`quote-dayporter` (se borran en F7), así que NO se unifican ahora (sería pulir código muerto). El único rojo de error VIVO es `.footer-nl-status.is-err` `#ffb4b4` sobre el footer navy = 9.97:1 (AAA, ambos modos) — correcto. El token `--color-red:#B23B3B` no se voltea en dark (2.18:1 sobre card) pero su único consumidor es el borde de `.pain-card` (anti-patrón border-left, se rehace en F4). Cuando los formularios reales (careers, quote V2) se rehagan, usar `--color-red` + variante dark `#EB8C8C` (5.27:1).
 - **Fuente display.** `--font-display` aún lista `'Fraunces'` primero; debe quedar `'Cormorant Garamond'` primera cuando el quote form migre (F5).
 - **Quote form.** `quote.html` sigue en el sistema `qf2-*` (`quote-flow.css`) con Fraunces, emojis y su propio dark. Migración al sistema del sitio = Fase 5.
 - **Píldora Alina** tapa el botón Accept del cookie banner en móvil (375px). = Fase 2 (chrome).
