@@ -261,6 +261,7 @@ var MAX_MESSAGES = 20;
 var tooltipShown = false;
 
 setTimeout(function() {
+  if (typeof eccoConsentResolved !== 'undefined' && !eccoConsentResolved) return;
   if (!isOpen && !tooltipShown) { tooltip.classList.add('show'); tooltipShown = true; setTimeout(function() { tooltip.classList.remove('show'); }, 8000); }
 }, 5000);
 var scrollHideTooltip = false;
@@ -902,8 +903,31 @@ if (savedState) {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-/* Schedule proactive page nudge */
-schedulePageNudge();
+/* Consent gate: hold Alina (toggle, tooltip, nudge) until cookie consent is resolved,
+   so the launcher never covers the cookie banner's Accept button on mobile. */
+var eccoConsentResolved = true;
+try { eccoConsentResolved = !!localStorage.getItem('ecco_cookies'); } catch (e) {}
+function eccoStartEngagement() {
+  if (!isOpen && !tooltipShown) {
+    setTimeout(function() {
+      if (!isOpen && !tooltipShown) { tooltip.classList.add('show'); tooltipShown = true; setTimeout(function() { tooltip.classList.remove('show'); }, 8000); }
+    }, 1500);
+  }
+  schedulePageNudge();
+}
+if (eccoConsentResolved) {
+  eccoStartEngagement();
+} else {
+  toggle.style.display = 'none';
+  var eccoReveal = function() {
+    if (eccoConsentResolved) return;
+    eccoConsentResolved = true;
+    toggle.style.display = '';
+    eccoStartEngagement();
+  };
+  window.addEventListener('ecco:consent-accepted', eccoReveal, { once: true });
+  window.addEventListener('ecco:consent-declined', eccoReveal, { once: true });
+}
 
 toggle.addEventListener('click', function() {
   isOpen = !isOpen;
