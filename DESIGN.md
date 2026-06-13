@@ -1,185 +1,177 @@
-# Design System
+# Design System — eccofacilities.com
 
-## Visual theme
+> Documenta el sistema de diseño **del sitio completo** (no solo del quote form). Reescrito 2026-06-12 al cerrar la Fase 1 de estandarización. Las cifras de contraste son **computadas y verificadas**, no estimadas. Para el porqué de cada decisión ver la sección "Decisiones" al final y `PRODUCT.md`.
 
-**Cream sanctuary, sage as the only voice.** The form sits on warm cream/sage-tint backgrounds (`#EEF2ED` to `#F6F9F5`) with white card containers. Sage (`#2D7A32`) is the single saturated color, used for actions, accents, and the Alina script. Navy (`#0B1D38`) is the ink. Peach (`#DFE7E0`) is the secondary surface tint, mostly used for icon discs and subtle separators.
+## Arquitectura de estilos
 
-**Color strategy:** Restrained-to-Committed. Sage carries about 15-25% of any given screen's surface (CTAs + active states + script accents + flow-bar progress). Cream is the dominant surface; white is the card. Peach is for icon backgrounds and dashed dividers.
+Tres hojas de estilo cargan en cascada (en este orden):
 
-**Theme:** Light by default + opt-in dark variant ("Editorial midnight").
-Physical scenes that defined each:
-- Light: *"Office facilities manager at her desk under fluorescent ceiling light, mid-morning, comparing three vendor quotes between meetings."*
-- Dark: *"Property manager reviewing three quotes from her living-room couch at 8pm with a single warm lamp on, evening winding down before bed."*
+1. **`css/styles.css`** — sistema principal. Empieza con `@layer reset,tokens,base,components,variants,overrides,utilities;` y el `:root` de tokens. La mayoría de reglas viven **sin capa** (unlayered), por lo que **ganan** sobre cualquier regla en `@layer`. El bloque `@media (prefers-color-scheme:dark)` está al final, sin capa.
+2. **`css/components.css`** — primitivas compartidas (`.btn`, `.card`, `.nav`, `.footer`, `.cert-badge`, `.testimonial`…) dentro de `@layer components`. Lo cargan 21 páginas DESPUÉS de styles.css. Como está en `@layer`, **pierde** ante las reglas unlayered de styles.css cuando ambas definen el mismo selector. Tiene su propio `@media dark` al final para los selectores que styles.css no cubre (`.card`, `.badge-green`).
+3. **`css/quote-flow.css`** — SOLO `quote.html`. Sistema legacy `qf2-*` del formulario, con su propio dark. Pendiente de migrar al sistema del sitio en la Fase 5 (ver Deuda conocida).
 
-The dark variant is **not auto-applied via `prefers-color-scheme`** — the user toggles it explicitly via `.qf2-theme-toggle` (sun/moon button bottom-right). Choice persists in `localStorage` as `ecco_theme`. This honors the Adult brand voice (no surprise theme swaps); it also avoids the cascade trap from D95 where 40 V1 `@media(prefers-color-scheme:dark)` blocks were leaking. The new dark token set is fresh, V2-aligned, and lives under `[data-theme="dark"]` selector.
+> **Regla de oro de la cascada (lección 2026-06-12):** styles.css unlayered gana sobre components.css @layer. Verificar SIEMPRE en navegador qué regla gana antes de "arreglar" un selector — razonar sobre un archivo en aislamiento lleva a falsos positivos.
 
-The previous note said "Dark mode would feel wrong" — and a generic SaaS dark would have. The Editorial Midnight variant keeps the editorial register: surface is `#1B2733` (warm teal-navy, NOT clinical blue), ink is `#EFE8D7` (marfil tostado, NOT pure white), peach disc becomes `#3A322A` (dorado tostado), sage lifts to `#6FB376` for 6.8:1 contrast on the dark surface. The form reads as "magazine printed on dark stock with marker-green annotations" rather than "tool that switches to dark by default to look modern".
+## Dirección visual
 
-**Anti-pattern check:** Resists category-reflex (cleaning industry → spray-bottle green or steel blue). Sage is closer to a magazine masthead than to a "fresh clean" gradient. No glassmorphism, no gradient text, no hero metrics, no identical card grids in production.
+**Híbrido editorial: navy + crema cálido, sage como única voz.** Las secciones de contenido viven sobre crema cálido (`#FAF7F2` fondo, `#F5F1EA` secciones) con tinta navy. Los heroes y banners CTA son navy oscuro (`#0B1D38`) con titulares Cormorant en **marfil** (`#F5F1E6`, no blanco puro). Sage (`#2D7A32`) es el único color saturado: acciones, acentos, links, focus. El azul fue eliminado (Fase 1 C3).
 
-## Color Palette
+**Estrategia de color:** Restrained-to-Committed. Sage ocupa ~10-20% de cualquier pantalla (CTAs + estados activos + links + barra de progreso). Crema domina la superficie; el blanco es la tarjeta.
 
-All values defined as CSS custom properties on `.qf2-stage`:
+**Excepción documentada:** el rotador del hero del homepage usa 6 colores por palabra (`--topic-health/team/people/planet/future/budget`) — decisión explícita de Alex (2026-06-12), scoped SOLO al rotador, no contradice el sage-único.
 
-```css
---qf2-cream:        #EEF2ED;  /* primary surface */
---qf2-cream-2:      #F6F9F5;  /* lighter surface for nested */
---qf2-peach:        #DFE7E0;  /* icon-disc, subtle separators (legacy name) */
---qf2-peach-deep:   #C4D4C5;  /* hover for peach surfaces */
---qf2-edge-warm:    rgba(45,122,50,.16);  /* sage 16% — card borders */
---qf2-ink:          #0B1D38;  /* primary text */
---qf2-muted:        #6B7A8D;  /* secondary text, hints */
---qf2-sage:         #2D7A32;  /* primary accent — CTAs, active state, links */
---qf2-sage-bright:  #3D9A43;  /* sage hover, lighter gradient */
---qf2-sage-soft:    rgba(45,122,50,.08);  /* sage tint for backgrounds */
-```
+## Tema claro/oscuro
 
-**OKLCH values (for future migration / variants):**
-- Sage `#2D7A32` ≈ `oklch(0.51 0.13 142)`
-- Cream `#EEF2ED` ≈ `oklch(0.94 0.01 142)`
-- Ink `#0B1D38` ≈ `oklch(0.20 0.05 251)`
+**Dark mode AUTOMÁTICO vía `prefers-color-scheme`, en TODO el sitio, sin botón.** (Decisión de Alex 2026-06-12: "quiero dark en todo el sitio y que funcione automatico no quiero nada de boton".) Anula la nota vieja de este doc sobre un toggle opt-in con `[data-theme=dark]` / `localStorage ecco_theme` — ese mecanismo fue retirado.
 
-**Contrast** (verified):
-- Sage on cream: 6.8:1 (AAA)
-- Ink on cream: 14.6:1 (AAA)
-- Muted on cream: 4.6:1 (AA)
-- White on sage (active state): 6.4:1 (AAA)
+Editorial Midnight mantiene el registro editorial: superficie `#1B2733` (teal-navy cálido, NO azul clínico), tinta `#EFE8D7` (marfil tostado, NO blanco puro), sage sube a `#6FB376`. Los heroes/footer/cookie navy son **continuidad** (ya son oscuros, no cambian). Cada página incluye `<meta name="theme-color">` dual y `color-scheme:light dark`.
 
-### Dark variant — "Editorial Midnight"
+### Tokens de rol dual (clave del dark)
 
-Activated via `[data-theme="dark"]` on `<html>`. Same token names, dark values:
+Tres tokens existen para dividir roles que un solo token no puede voltear:
 
-```css
---qf2-cream:        #1B2733;  /* primary surface — warm teal-navy */
---qf2-cream-2:      #243441;  /* card surface, slightly lighter */
---qf2-peach:        #3A322A;  /* icon-disc — dorado tostado, keeps warm */
---qf2-peach-deep:   #4A4036;
---qf2-edge-warm:    rgba(111,179,118,.22);  /* sage 22% — borders pop on dark */
---qf2-ink:          #EFE8D7;  /* marfil tostado — NOT pure white */
---qf2-muted:        #8A9AAB;
---qf2-sage:         #6FB376;  /* lifted lightness for 6.8:1 contrast on dark */
---qf2-sage-bright:  #82C589;
---qf2-sage-soft:    rgba(111,179,118,.14);
-```
-
-Contrast (verified for dark):
-- Sage on midnight: 6.5:1 (AAA)
-- Ink (marfil) on midnight: 13.8:1 (AAA)
-- Muted on midnight: 5.2:1 (AA)
-- Marfil on sage (active state): 4.1:1 (AA)
-
-## Typography
-
-**Three families, three roles.** Each loaded from Google Fonts at the top of `quote.html`.
-
-```css
---qf2-fb: 'DM Sans', system-ui, sans-serif;       /* body, UI, buttons, chips */
---qf2-fd: 'Fraunces', 'Cormorant Garamond', serif; /* display H1/H2 italic accents */
---qf2-fh: 'Caveat', cursive;                       /* handwritten transitions */
-```
-
-**Scale (desktop, mobile in parentheses):**
-
-| Role | Size | Weight | Family |
+| Token | Rol | Claro | Dark |
 |---|---|---|---|
-| H2 (prompt-title) | 40px (22px) | 500 | Fraunces |
-| Card label | 15px (13.5-14.5px) | 600 | DM Sans |
-| Card hint | 12.5px (11.5-12px) | 400 | DM Sans muted |
-| Body / fields | 15px (14px) | 400 | DM Sans |
-| CTA primary | 16px (14.5px) | 600 | DM Sans |
-| Chip | 13px (13px) | 500 | DM Sans |
-| Caveat helpers | 17-20px (15-16px) | 500 | Caveat |
-| Eyebrow / kicker | 9-11px | 700 | DM Sans uppercase letter-spacing 0.14em |
+| `--color-surface-card` | fondo de tarjetas/secciones blancas | `#FFF` | `#243441` |
+| `--color-white` | texto blanco sobre navy | `#FFF` | `#FFF` (no cambia) |
+| `--color-heading` | color de titulares | `#0B1D38` | `#EFE8D7` |
+| `--color-navy` | fondo de superficies navy | `#0B1D38` | `#0B1D38` (no cambia) |
+| `--color-accent-text` | sage como texto/acento | `#2D7A32` | `#6FB376` |
 
-**Italic-serif rule:** the Fraunces italic accent is reserved for ONE meaningful word per H2 (`how big is the *space*?`, `What kind of *space*?`, `Here's your *snapshot*.`). Never two, never zero on prompt screens.
+`background:var(--color-white)` se migró a `var(--color-surface-card)` y `color:var(--color-navy)` a `var(--color-heading)` (~139 reescrituras, valor idéntico en claro). Inline styles con estos valores también se migraron (no se pueden voltear con media query).
 
-**Typography tier system (D59, 2026-04-27 — final):** Two tiers + one persona stamp. Caveat reduced to a **single use** after legibility feedback.
+## Paleta de color — tokens reales (`css/styles.css :root`)
 
-- **Persona stamp (Caveat — the ONLY usage).** `.qf2-alina-hero-text .qf2-alina-name` only. The italic script reads as Alina's signature on her message pill; everywhere else the cursive form was found to slow comprehension. Hard-locked to this single selector.
-- **Tier 1 — Editorial (Fraunces italic).** Section labels phrased as questions, sub-promises, H2 accent words, porter title numerals, time-summary numerals. Selectors: `.qf2-section-label`, `.qf-dp-prompt-promise`, `.qf2-sum-edit-header`, `h2 em`.
-- **Tier 2 — UI (DM Sans, weights and italic vary).** Everything else. Body, controls, helpers, status, eyebrows, links, presets. Italic + sage for "voice" moments (e.g. "Heads up~", "I'll send the team:", closers). Plain weight for content. Eyebrow uppercase 700 0.14em tracking for section markers in the snapshot.
+```css
+/* Navy / ink */
+--color-navy:#0B1D38; --color-navy-light:#15294D; --color-navy-x-light:#1E3562;
+/* Sage (único acento; --color-blue/-light son ALIAS de sage tras la muerte del azul) */
+--color-green:#2D7A32; --color-green-light:#3D9A43;
+--color-green-bg:rgba(45,122,50,.07); --color-green-border:rgba(45,122,50,.18);
+--color-blue:#2D7A32; --color-blue-light:#2D7A32; /* alias legacy → sage */
+--color-accent-text:#2D7A32;
+/* Superficies */
+--color-bg:#FAF7F2; --color-cream:#F5F1EA; --color-white:#FFF; --color-surface-card:#FFF; --color-marfil:#F5F1E6;
+/* Texto */
+--color-heading:#0B1D38; --color-text-dark:#1A1E2C; --color-text-body:#495568;
+--color-text-muted:#4F5C6E; --color-text-light:#4F5C6E; /* muted y light unificados */
+--color-text-safe:#CBD6E1; --color-text-white-muted:#C8D5E2; /* sobre navy */
+/* Estado */
+--color-red:#B23B3B;
+/* Bordes */
+--color-border:#DFE4EC; --color-border-subtle:#EDF0F5;
+--color-border-dark:rgba(255,255,255,.08); --color-border-dark-light:rgba(255,255,255,.12);
+```
 
-**Hard rule:** Never reintroduce Caveat outside the Alina-name selector. The Facility Manager target scans under time pressure; cursive script slows comprehension. "Voice moments" use **DM Sans italic sage** instead — warm and readable.
+### Override dark (`@media (prefers-color-scheme:dark) :root`)
 
-## Layout
+```css
+--color-bg:#1B2733; --color-cream:#243441; --color-surface-card:#243441;
+--color-heading:#EFE8D7; --color-text-dark:#EFE8D7; --color-text-body:#C9C0AE;
+--color-text-muted:#9BA8B8; --color-text-light:#9BA8B8;
+--color-accent-text:#6FB376; --color-blue:#6FB376; --color-blue-light:#6FB376;
+--color-border:rgba(111,179,118,.22); --color-border-subtle:rgba(255,255,255,.08);
+/* texto sobre sage en dark: #0F1A20 (hardcoded en parches de componente) */
+```
 
-**Stacking model:** All step screens are absolutely positioned overlays inside `#qfStage`. One has `.is-active` at any moment. The previous step crossfades to opacity 0 + `inert` + `aria-hidden`. Inactive screens have `[hidden]` + the defensive `display:none !important` rule (Sprint 1).
+### Contraste — VERIFICADO (computado 2026-06-12)
 
-**Spacing scale:** generous but rhythmic, not uniform.
-- Hero pill ↓ prompt: 12-18px
-- Prompt ↓ grid: 12-18px
-- Grid ↓ catch-all: 18-12px
-- Card padding: 12px (was 16/14/14, compacted in Sprint 1)
-- Grid gap: 10px (was 16, compacted in Sprint 1)
+**Claro** (umbral AA 4.5:1 texto, 3:1 grande/no-texto):
+| Par | Ratio | |
+|---|---|---|
+| texto principal #1A1E2C / bg #FAF7F2 | 15.52 | AAA |
+| texto body #495568 / bg | 7.06 | AAA |
+| muted #4F5C6E / cream #F5F1EA | 6.04 | AA |
+| sage #2D7A32 / bg | 4.99 | AA |
+| sage / cream | 4.73 | AA |
+| error #B23B3B / cream | 5.21 | AA |
+| marfil #F5F1E6 / navy #0B1D38 | 14.92 | AAA |
+| blanco / sage #2D7A32 | 5.33 | AA |
 
-**Breakpoints:** single transition at `max-width: 700px`. No tablet tier.
+**Dark** (sobre bg #1B2733 / card #243441):
+| Par | Ratio | |
+|---|---|---|
+| ink #EFE8D7 / bg | 12.42 | AAA |
+| ink / card | 10.47 | AAA |
+| body #C9C0AE / bg | 8.40 | AAA |
+| body / card | 7.08 | AAA |
+| muted #9BA8B8 / bg | 6.27 | AA |
+| muted / card | 5.29 | AA |
+| sage #6FB376 / bg | 6.06 | AA |
+| sage / card | 5.11 | AA |
+| texto #0F1A20 / sage #6FB376 | 7.05 | AAA |
 
-**Container max-widths:**
-- `.qf2-prompt`: 760px
-- `.qf2-grid-3` / `.qf2-grid-6`: 920px
-- `.qf2-summary`: 920px
-- `.qf2-space-other-wrap`: 480px
-- Body inner padding: 40px desktop, 18px mobile
+## Tipografía
 
-**Mobile body padding-bottom:** 76px (Sprint 1 — clears the `.qf2-ask-alina-float` pill).
+```css
+--font-display:'Fraunces','Cormorant Garamond',Georgia,serif; /* ver Deuda: Fraunces aún primero */
+--font-body:'DM Sans',system-ui,sans-serif;
+```
 
-## Components
+En las páginas de marketing solo se carga **Cormorant Garamond** (Fraunces no se carga → cae a Cormorant). El quote form sí carga Fraunces. Las itálicas son **sintéticas** en marketing (decisión de Alex: no cargar ejes itálicos reales, C7a descartado). DM Sans para cuerpo, UI, botones, eyebrows.
 
-### Card (`.qf2-card`)
-White background, sage-edge-warm border, 20px radius. Vertical layout (icon top, label, hint). Hover: sage border + lift 1px. Selected: sage fill + checkmark via `::after`. Mobile: 2-column grid, padding 10/8, min-height 96px.
+### Escala de titulares — 3 niveles (Fase 1 C7b)
 
-### Card icon (`.qf2-card-icon`)
-52×52 peach disc with centered emoji glyph (28px). Sage box-shadow `0 0 0 1px rgba(45,122,50,.18), 0 6px 12px -4px rgba(11,29,56,.14)`. Mobile: 40×40 + 22px font. Gradient variant for "Other" replaced with regular peach in Sprint 2 (`School` card).
+| Nivel | Uso | Tamaño | Peso |
+|---|---|---|---|
+| Sección | `.sec-ttl`, `.svc-ttl`, `.story-sec h2`, `.form-head h2`, `.eco-content h2`, `.service-detail-head h2` | `clamp(2.2rem,4vw,3.2rem)` | 600 |
+| Bloque | `.cta-banner h2`, `.message-sec h2`, `.guarantee-ttl`, `.article-content h2` | `clamp(1.7rem,2.8vw,2.3rem)` | 600 |
+| Tarjeta | `.legal-section h2`, `.promise-ttl` | `1.4rem` | 600 |
 
-### Chip (`.qf2-chip`)
-Pill 999px radius, white background, sage border, 13px DM Sans. Min-height 44px (touch target). `.is-selected` → sage fill + white + 1° rotate. Hover lift 1px.
+Los heroes (`.hero h1`, `.hero-v2 .hero-ttl-*`, D155) tienen su propia escala, intactos. Familia display Cormorant en todos. Eyebrows: DM Sans uppercase 700, tracking 0.14em.
 
-### Preset chip (`.qf2-chip-preset`)
-Subset of chip. Caveat italic muted by default. **Active state (Sprint 1 fix):** swaps to DM Sans 600 white on solid sage — never green-on-green.
+## Elevación (Fase 1 C8)
 
-### Quiz chip (`.qf2-quiz-chip`)
-For the "Not sure?" recommender. Pill, white, sage border, 13px. Card-style shadow (Sprint 1) for elevation parity with the cards above.
+**4 sombras + par sage + 3 radios.** 43 recetas hard-coded se mapearon a estos tokens; 41 radios a 3 valores.
 
-### CTA primary (`.qf2-cta`)
-Pill 999px, sage fill, white text, 16px DM Sans 600, 16/36 padding, 52px min-height. Sage shadow `0 8px 20px -4px rgba(45,122,50,.4)`. Hover: lift 2px + amplified shadow.
+```css
+--shadow-sm:0 2px 8px rgba(11,29,56,.06);   /* chips, inputs */
+--shadow-md:0 4px 20px rgba(11,29,56,.08);  /* cards */
+--shadow-lg:0 8px 32px rgba(11,29,56,.12);  /* hover, popovers */
+--shadow-xl:0 20px 60px rgba(11,29,56,.16); /* modales, heroes */
+--shadow-sage:0 10px 28px rgba(45,122,50,.3);        /* CTA reposo */
+--shadow-sage-hover:0 14px 32px -8px rgba(45,122,50,.55); /* CTA hover */
+--radius:12px; --radius-lg:18px; --radius-pill:999px;
+```
 
-### Field (`.qf2-field`)
-White card with sage-edge border + sage focus ring (`0 0 0 4px var(--qf2-sage-soft)`). Icon left, input right. Cream-ringed when erroring.
-
-### Field helper (`.qf2-field-helper`)
-Caveat 17px sage 500 (Sprint 1). Lives below `.qf2-field`. Mobile 15px.
-
-### Field error (`.qf2-field-err`)
-DM Sans 13.5px 500 red `#B23B3B` (Sprint 1). Mobile 13px.
-
-### Alina pill (`.qf2-alina-hero`)
-Floating header pill, white card, 28px avatar of Alina (real photo), `Alina ·` label in sage Caveat, message in DM Sans. Per-screen message changes ("The type tells me how to staff this").
-
-### Floating helper (`.qf2-ask-alina-float`)
-Bottom-left sticky pill, "Ask Alina anything". Persistent across all screens. Mobile body padding-bottom reserves clearance (Sprint 1).
-
-### Flow-bar
-Desktop: horizontal rail with 7 station dots + connecting line (sage when active). Stations: SERVICE / SPACE / YOU / SIZE / SCHEDULE / LOCATION / REVIEW.
-Mobile: condensed to "Step 2 of 7" + percentage rail.
+Exentos del sistema: focus rings (accesibilidad), el pulso del rotador, el cajón direccional del nav, los insets a medida del hero D155, hairlines 2-3px, círculos 50%.
 
 ## Motion
 
-- **Transition between steps:** opacity 0 → 1 over 400ms `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo). The previous step fades while the new one fades in.
-- **Hover lifts:** `translateY(-1px)` over 200ms `cubic-bezier(.34,1.56,.64,1)` (slight overshoot — only place we use spring; never on layout properties).
-- **Card selection:** `transform: rotate(-1deg)` for chips when selected (subtle hand-stamped feel, never on cards).
-- **No bounce, no elastic, no parallax, no scroll-driven reveals.**
-- **Reduced motion:** all transforms collapse to opacity-only when `prefers-reduced-motion: reduce`.
+- Transiciones con `--ease` / `--ease-out`; spring (`--ease-spring`) SOLO en hover lifts (overshoot leve), nunca en propiedades de layout.
+- Sin bounce, sin elastic, sin parallax pesado. Reveals con IntersectionObserver (`.rv`), nunca sobre contenido que deba verse on-load.
+- `prefers-reduced-motion`: kill-switch global + el rotador se pausa (también con pestaña oculta / hero fuera de viewport).
 
-## Iconography
+## Iconografía
 
-- **8 service/space cards use system color emojis** (Sprint 2 swap from photos): 🧹 ☀️ 🔄 🏢 🏥 🛍️ 🍽️ 🏋️ 🏫 ❓
-- **SVG icons elsewhere** (field icons, flow-bar dots, trust strip, success page): single-stroke 1.5-2px, sage current color, 16-22px viewBox 24.
-- **No filled / dual-tone illustrations.** Outline only.
+- Marketing: SVG single-stroke 1.5-2px, sage `currentColor`, viewBox 24.
+- Quote form: aún usa emojis de sistema en las tarjetas (migración a SVG pendiente, Fase 5).
+- Outline only, sin dual-tone.
 
-## Components NOT to use
+## Anti-patrones (no usar)
 
-- Side-stripe borders (`border-left: 4px solid sage`). Use full sage-edge borders or background tints.
-- Gradient text. Single sage color always.
-- Glassmorphism / backdrop-filter. Solid surfaces.
-- Hero-metric template. The form has no `98% retention` numbers. Trust strip uses 1-line text + tiny SVG, not big stats.
-- Identical 3-column card grids on landing-style screens. The form's 3×2 grids are functional pickers, not features-list grids.
+- **Franjas laterales** (`border-left:4px solid` como acento). Usar bordes completos o tintes de fondo. (DEUDA: `.pain-card` de why-ecco aún lo usa — F4.)
+- **Texto con gradiente.** Color sólido siempre.
+- **Glassmorphism decorativo.** El nav usa backdrop-filter intencionalmente; nada más.
+- **Hero-metric template** (números grandes 200+/12+/0). La fila hero-metrics se elimina en F4.
+- **Grids de tarjetas idénticas** como lista de features.
+- **Em dashes** en copy. Comas, puntos, dos puntos.
+- **Title Case.** Sentence case siempre.
+
+## Deuda conocida (no unificado aún)
+
+- **Rojos de error.** `.v-hint.bad` está declarado DOS veces con rojos distintos (`#ff6b6b` y `#e84c3d`); `.fg .v-err` usa `#ff6b6b`, `.form-field .v-err` usa `#e84c3d`, `.footer-nl-status.is-err` usa `#ffb4b4`. Todos **evitan** `--color-red:#B23B3B` y varios fallan AA en claro (#ff6b6b=2.78:1). Además `--color-red` no se voltea en dark (2.18:1 sobre card). Pendiente: unificar a `--color-red` + variante dark `#EB8C8C` (5.27:1). Es la próxima unificación propuesta.
+- **Fuente display.** `--font-display` aún lista `'Fraunces'` primero; debe quedar `'Cormorant Garamond'` primera cuando el quote form migre (F5).
+- **Quote form.** `quote.html` sigue en el sistema `qf2-*` (`quote-flow.css`) con Fraunces, emojis y su propio dark. Migración al sistema del sitio = Fase 5.
+- **Píldora Alina** tapa el botón Accept del cookie banner en móvil (375px). = Fase 2 (chrome).
+- **Páginas legacy** `quote-janitorial.html`/`quote-dayporter.html` (301-redirected pero desplegadas) — se borran en Fase 7.
+
+## Deploy / caché
+
+- Cache-busting por `?v=` en el MISMO commit que el asset. Minificar CSS SOLO con `bunx clean-css-cli` (verificar que no pierda la 1ª línea `@layer…;:root{}`); NUNCA perl/regex sobre CSS minificado.
+- `_headers`: `/css/*` y `/js/*` a `max-age=300, stale-while-revalidate=86400` (Fase 1 — cierra la ventana de envenenamiento de caché del busting por query string; ver `feedback_cdn_prefetch_poisoning`).
+- Verificación post-deploy: poll SOLO del HTML hasta ver el `?v=` nuevo, +90s de margen, luego comprobar el asset SOLO vía variante desechable `&check=`. Verificar en vivo, no solo preview.
+
+## Decisiones (Fase 1, todas consultadas y aprobadas por Alex 2026-06-12)
+
+C1 superficies beige editorial · C2 grises AA #4F5C6E · C3 muerte del azul → sage · C4 titulares marfil #F5F1E6 · C5 rotador multicolor conservado (solo fixes técnicos) · C6 rojo único #B23B3B · C7b escalera tipográfica 3 niveles (C7a itálicas reales descartado) · C8 elevación 4+2 sombras / 3 radios · C9 dark Editorial Midnight sitewide automático (G1 chrome+tokens, G2 páginas interiores) · C10 esta documentación.

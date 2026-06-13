@@ -4,6 +4,8 @@
 
 product
 
+> Nota: el sitio tiene dos registros mezclados. El **marketing** (`/`, `/services`, landings) es *brand* — el diseño ES el producto. El **quote form** (`/quote`) es *product* — el diseño sirve a la tarea. La voz de marca (Editorial · Warm · Adult) es común a ambos.
+
 ## Users
 
 **Primary:** Facility Managers at mid-market commercial properties (offices, medical clinics, retail stores, schools, restaurants, fitness studios) in NYC + 5 boroughs. They're vendor-shopping under time pressure — comparing 3 quotes in 20 minutes between meetings.
@@ -27,15 +29,17 @@ Success = a Facility Manager saying "this feels run by adults" within 30 seconds
 
 **Three words:** Editorial · Warm · Adult.
 
-- **Editorial** — italic-serif accents, magazine-like headlines, Caveat script for transitions ("Not sure? I can help you pick"), hand-curated feel. The form reads like a postcard, not a SaaS funnel.
-- **Warm** — Alina (the persistent helper persona with a real headshot, not a chatbot avatar) frames every step. Copy is conversational ("Let's get acquainted.", "Here's your snapshot.") without being twee.
-- **Adult** — no over-promising microcopy, no urgency timers, no fake scarcity. The voice respects that the user is busy and competent. We avoid dramatic transitions, gradient text, and "we'll change your life" energy.
+- **Editorial** — italic-serif accents (Cormorant Garamond), magazine-like headlines, hand-curated feel. The site reads like a postcard, not a SaaS funnel.
+- **Warm** — Alina (the persistent helper persona with a real headshot, not a chatbot avatar) frames the quote experience and the site chat. Copy is conversational ("Let's get acquainted.", "Here's your snapshot.") without being twee.
+- **Adult** — no over-promising microcopy, no urgency timers, no fake scarcity, no impossible absolutes ("0 missed services", "no exceptions"). The voice respects that the user is busy and competent. We avoid dramatic transitions, gradient text, and "we'll change your life" energy.
 
 **Voice rules:**
-- Use sentence case in copy, not Title Case. Title Case feels corporate.
-- Italic-serif accents on key nouns ("how big is the *space*?"). Reserved for the H2.
-- Caveat script (a sage handwritten font) for transitional helpers ("Talk soon~", "I'll pass that to our crew~"). Never for primary actions.
-- No em-dashes. Use periods or commas.
+- Use sentence case in copy, not Title Case. Title Case feels corporate. (Sitewide cleanup is a Fase 4 task.)
+- Italic-serif accents on key nouns ("how big is the *space*?"). Reserved for headlines. Italics are synthetic on marketing (real italic axes not loaded, by decision).
+- Caveat script (a sage handwritten font): hard-locked to a SINGLE use — Alina's signature on the quote form. Never elsewhere, never for actions.
+- No em-dashes. Use periods or commas. (Sitewide: ~240 em dashes still pending Fase 4 cleanup.)
+- One primary CTA label sitewide: **"Get your free proposal"** (replaces 10+ variants — Fase 2/4 rollout).
+- No phone number anywhere on the site (decision). Contact = info@eccofacilities.com.
 
 ## Anti-references
 
@@ -54,7 +58,7 @@ What this is NOT, with concrete callouts:
 
 3. **Show one decision at a time.** No "fill in 14 fields" screens. Each step asks one thing (with one optional second thing). When a step looks crowded (Schedule has 14 selectable items), that's a signal to refactor the step, not to "polish" it.
 
-4. **Sage on cream, never green-on-green.** Our palette is sage (`#2D7A32`) as the single accent on cream/peach neutrals. Green-on-green active states (the bug we fixed in Sprint 1) violate this — when an element activates, it should swap to sage-fill + white-text, not "lighter green on green." Contrast is non-negotiable.
+4. **Sage on cream, never green-on-green.** Our palette is sage (`#2D7A32`) as the single accent on warm-cream neutrals (`#FAF7F2`/`#F5F1EA`); blue was removed entirely. When an element activates, it swaps to sage-fill + white-text, not "lighter green on green." Contrast is non-negotiable and verified computed (see DESIGN.md), not estimated.
 
 5. **The form serves the sales team, not the user's vanity.** We do NOT congratulate the user for filling out a form. No confetti, no "great job!" copy, no progress dopamine. The reward is a quote, not a moment of delight.
 
@@ -66,6 +70,13 @@ What this is NOT, with concrete callouts:
 - **ARIA viewport-aware** — `aria-hidden` toggles via `matchMedia('(max-width: 900px)')` for elements that change visibility responsively.
 - **Inert pattern** — staged screens use `[hidden]` + JS-toggled `inert` + `aria-hidden="true"` so screen readers don't traverse 7 form sections at once. (Hardened in Sprint 1.)
 - **Semantic headings only** — h1 → h2 → h3 in order, no skips.
-- **Reduced motion** — honor `prefers-reduced-motion`; the existing slide-keyframes between steps already crossfade instead of slide when this is set.
-- **Color contrast** — 4.5:1 for body, 3:1 for large text. Sage `#2D7A32` on cream `#EEF2ED` passes 6.8:1.
-- **No required fields that gate non-FM users.** "Your role" should be optional or chip-based, not free-text required (Sprint 2 fix).
+- **Reduced motion** — honor `prefers-reduced-motion`; crossfade instead of slide, and the hero rotator pauses.
+- **Color contrast** — 4.5:1 for body, 3:1 for large/non-text. Verified computed both modes (DESIGN.md): sage `#2D7A32` on cream `#F5F1EA` = 4.73:1 (AA), muted `#4F5C6E` = 6.04:1. The old "6.8:1" claim was false and was corrected.
+- **Dark mode is automatic** (`prefers-color-scheme`, sitewide, no toggle) — every component verified AA in both modes.
+- **No required fields that gate non-FM users.** "Your role" should be optional or chip-based, not free-text required.
+
+## Decisiones de estandarización (Alex, 2026-06-12)
+
+Las 14 decisiones que rigen la reforma del sitio están en la memoria del proyecto (`project_site_standardization_2026_06`) y resumidas en `DESIGN.md`. Las que tocan producto/voz: teléfono ninguno · CTA único "Get your free proposal" · dark automático sitewide · testimonios anónimos coherentes (sin nombres reales; fuera aggregateRating) · consentimiento real (Consent Mode default-denied) · solo claims confirmados (hoja de datos pendiente de Alex) · dirección solo área de servicio · iconos SVG sage · chat Alina reconstruido (fuera HubSpot chat).
+
+**Gate de la Fase 4 (reescritura de copy):** Alex debe responder `docs/audits/2026-06-10-hoja-de-datos-claims.md` (KEEP/ADJUST/REMOVE por claim) antes de tocar el copy de las páginas.
