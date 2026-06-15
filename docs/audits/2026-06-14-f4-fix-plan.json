@@ -1,0 +1,286 @@
+{
+ "note": "F4 fix plan. Footer mdash, js/main.js pillars, and terms section 3 fine-print are ALREADY FIXED -- do not touch.",
+ "groups": {
+  "index": [
+   {
+    "file": "index.html",
+    "severity": "high",
+    "quote": "<div class=\"trust-quote-stars\" role=\"img\" aria-label=\"5 out of 5 stars\"><svg viewBox=\"0 0 24 24\"><polygon points=\"12 2 ...\"/></svg>...",
+    "why": "Confirmed at lines 164, 172, 180. Each of the three testimonial cards renders a row of five filled-star SVGs wrapped in a div with role=\"img\" and aria-label=\"5 out of 5 stars\". This is Ecco's own trust-UI chrome, NOT text inside the (deferred) testimonial quote itself, so the known-deferred testimonial-content exception does not apply. The confirmed rules explicitly BAN any '5.0 rating' / star-rat",
+    "fix": "Delete the entire <div class=\"trust-quote-stars\" ...>...</div> block (with its five star SVGs and the aria-label=\"5 out of 5 stars\") from all three cards at lines 164, 172, and 180. Keep only the quote text and the author/role footer. Bump the relevant cache-buster if the .trust-quote-stars CSS rule becomes unused."
+   },
+   {
+    "file": "index.html",
+    "severity": "high",
+    "quote": "<div class=\"cert-marquee-track\" aria-label=\"Our certifications and credentials\">",
+    "why": "Confirmed at line 86. The marquee group label 'Our certifications and credentials' frames everything inside as Ecco's OWN certifications, and the badges it wraps include bare 'Green Seal certified' (line 87/95) and 'EPA Safer Choice' (line 88/96) with no 'products' qualifier. Under this company-possessive framing the badges read as company-level certifications, implying Ecco itself is Green Seal /",
+    "fix": "Retitle the marquee aria-label so it no longer claims company-level certification, e.g. aria-label=\"Our products and service standards\", and scope the eco badge labels to products (see next two findings)."
+   },
+   {
+    "file": "index.html",
+    "severity": "medium",
+    "quote": "<span class=\"cert-badge-label\">Green Seal certified</span>",
+    "why": "Confirmed at lines 87 and 95 (the duplicate loop copy). The badge reads 'Green Seal certified' with no 'products' qualifier. On its own, and especially under the line-86 'Our certifications and credentials' framing, a 'Green Seal certified' badge implies the company/service holds the certification. The confirmed rule requires 'Green Seal certified products'; a bare company-scoped 'Green Seal certi",
+    "fix": "Change both occurrences (lines 87 and 95) of <span class=\"cert-badge-label\">Green Seal certified</span> to <span class=\"cert-badge-label\">Green Seal certified products</span>. Similarly scope the adjacent 'EPA Safer Choice' badge to products for consistency."
+   },
+   {
+    "file": "index.html",
+    "severity": "medium",
+    "quote": "<span class=\"hero-kicker-text\">NYC's eco-certified facility partner</span>",
+    "why": "Confirmed at line 69. The hero kicker calls Ecco itself 'NYC's eco-certified facility partner' \u2014 a company-level eco-certified claim about the partner/company. Per the confirmed rule the company is NOT certified (only the products are); company-level eco-certification claims are banned. This is Ecco's own headline voice, not a quote or comment. Real problem.",
+    "fix": "Reword to product-scoped phrasing, e.g. 'NYC's facility partner, powered by eco-certified products' or 'NYC's eco-conscious facility partner'. This also keeps it consistent with the hero subhead at line 74 ('powered by eco-certified products')."
+   },
+   {
+    "file": "index.html",
+    "severity": "medium",
+    "quote": "<div class=\"ddsc\">Green Seal + EPA Safer Choice certified</div>",
+    "why": "Confirmed at line 49: the nav dropdown subcopy for the 'Eco-friendly cleaning NYC' link reads 'Green Seal + EPA Safer Choice certified' with no 'products' qualifier. As written it describes the service/offering as certified rather than the products, which under the confirmed rule reads as a company/service-level cert claim. The fix is trivial and matches the product-scoped standard. Real problem (",
+    "fix": "Change line 49 subcopy to 'Green Seal + EPA Safer Choice certified products'."
+   },
+   {
+    "file": "index.html",
+    "severity": "medium",
+    "quote": "<span class=\"cert-badge-label\">Satisfaction guaranteed</span>",
+    "why": "Confirmed: bare 'Satisfaction guaranteed' badge at lines 91 and 99, the CTA trust-strip bullet '\u2713 Satisfaction guaranteed' at line 405, and the 'Guaranteed' pillar label at line 347. The only guarantee permitted by the confirmed rules is the bounded 'tell us within 24 hours and we re-clean at no charge'. A blanket 'Satisfaction guaranteed' is an unconditional guarantee with no qualifying copy on t",
+    "fix": "Replace the bare 'Satisfaction guaranteed' badge text (lines 91, 99) and the CTA bullet (line 405) with bounded re-clean wording, e.g. 'Re-clean guarantee' or 'Not happy? We re-clean'. Soften the pillar label at line 347 (e.g. 'Re-clean guarantee'). Separately, the JS pillar copy at js/main.js line 42 must be rewritten to drop 'always', 'No questions asked', and 'no fine print' and replaced with the approved 'tell us within 24 hours and we re-clean at no charge' wording (note: that JS line was not in this batch but is the same banned-claim family)."
+   },
+   {
+    "file": "index.html",
+    "severity": "medium",
+    "quote": "Your dedicated team arrives trained on your space, your standards, and your schedule. Same crew, every visit.",
+    "why": "Confirmed at line 332 ('Same crew, every visit.') and line 150 ('Your dedicated team every visit. They know your space.'). Both are absolute reliability claims using 'every visit' / 'same crew' as a guarantee, which is functionally the banned 'always the same face' / 'no turnover' absolute. Real staffing has sick days, coverage and turnover \u2014 the site's own pillar JS even says 'If someone's unavai",
+    "fix": "Soften both to non-absolutes. Line 332: drop 'Same crew, every visit.' in favor of e.g. 'A consistent, dedicated team who knows your space.' Line 150: change to e.g. 'Your dedicated team, visit after visit. They know your space.' (remove the literal 'every visit' absolute used as a reliability guarantee)."
+   },
+   {
+    "file": "index.html",
+    "type": "consistency",
+    "fix": "Add 'on business days' to visible same-day response claims: 'Same-day response' cert badge (~lines 93/101) and 'Same-day response from your account team' (~line 155) -> 'Same-day response on business days'."
+   }
+  ],
+  "about-why": [
+   {
+    "file": "about.html",
+    "severity": "medium",
+    "quote": "Learn about Ecco Facilities LLC: 12+ years of eco-friendly facility services in NYC.",
+    "why": "Confirmed at about.html lines 16, 18, 25 (name=description, og:description, twitter:description). The phrasing '12+ years of eco-friendly facility services in NYC' attaches the 12+ years to services performed BY the LLC, which reads as company age (the company has provided NYC facility services for 12 years). This is exactly the construction the confirmed rule bans ('any phrasing that makes the LL",
+    "fix": "In about.html lines 16, 18, and 25, change the content attribute to attribute the 12+ years to founder/industry experience, e.g. 'Learn about Ecco Facilities LLC: founded in NYC by industry insiders with 12+ years of facility services experience, committed to doing cleaning the right way.' Apply the identical edit to all three meta tags (description, og:description, twitter:description) so they stay in sync."
+   },
+   {
+    "file": "about.html",
+    "type": "consistency",
+    "fix": "Re-label ambiguous 12+ stat tiles ('Years of experience'/'Years in Industry') to 'Years of founder experience' so the LLC doesn't read as 12 years old."
+   }
+  ],
+  "services": [
+   {
+    "file": "janitorial.html",
+    "severity": "high",
+    "quote": "<div class=\"test-stars\">\u2605 \u2605 \u2605 \u2605 \u2605</div>",
+    "why": "Confirmed at line 204. The five-star glyph element sits ABOVE the testimonial quote (line 205) as part of Ecco's own page markup, not inside the quoted client text. A literal star-rating display is exactly the banned unverifiable star-rating pattern. The deferred-testimonial exception covers only the text inside the quotation marks (line 205), not this rating glyph above it. Genuine violation.",
+    "fix": "Delete the entire element on line 204: <div class=\"test-stars\">\u2605 \u2605 \u2605 \u2605 \u2605</div>. Keep the quote (line 205), name, and role. Also remove the now-unused .test-stars CSS rule if it is not consumed elsewhere (grep all *.html before deleting the CSS per the cross-page purge rule)."
+   },
+   {
+    "file": "services.html",
+    "severity": "high",
+    "quote": "<div class=\"hero-stats\"><span>Janitorial + Day Porter</span><span>Eco-Certified</span><span>Dedicated Teams</span></div>",
+    "why": "Confirmed at line 70. Bare 'Eco-Certified' as a standalone hero trust-stat in Ecco's own voice, with no 'products' qualifier, reads as a company-level certification badge. The company is not certified; only the products are. Banned company-level cert implication.",
+    "fix": "Change the middle <span>Eco-Certified</span> to <span>Eco-Certified Products</span> (or 'Certified Products') so the subject is the products, not the company."
+   },
+   {
+    "file": "services.html",
+    "severity": "high",
+    "quote": "<h2 class=\"sec-ttl sec-ttl-l\">Every service. Every visit. Eco-certified.</h2>",
+    "why": "Confirmed at line 206. Prominent section heading in Ecco's own voice. 'Eco-certified' with no 'products' qualifier, attached to 'Every service' / 'Every visit', implies the SERVICE/company is certified rather than the products. Note the parallel janitorial.html heading (line 196) already uses the safe phrasing 'Every product. Every visit. Eco-certified.' \u2014 services.html says 'Every service', which",
+    "fix": "Reword to keep the subject on products, mirroring janitorial.html: 'Every product. Every visit. Eco-certified.' (preferred for consistency), or 'Every service. Every visit. Certified eco products.'"
+   },
+   {
+    "file": "janitorial.html",
+    "severity": "high",
+    "quote": "<div class=\"hero-badge\"><span class=\"pd\"></span>Recurring Cleaning \u00b7 Eco-Certified</div>",
+    "why": "Confirmed at line 63. Hero badge in Ecco's own voice. Standalone 'Eco-Certified' (no 'products') implies the company/service is certified, which is banned; only products are certified.",
+    "fix": "Change to 'Recurring Cleaning \u00b7 Eco-Certified Products' so the cert is anchored to the products."
+   },
+   {
+    "file": "services.html",
+    "severity": "medium",
+    "quote": "Premium janitorial and day porter services in NYC. Eco-certified, fully insured, dedicated teams.",
+    "why": "Confirmed in all three meta tags: <meta name=description> (line 16), og:description (line 18), twitter:description (line 25). 'Eco-certified' is a bare adjective applied to the services/company in search-result and social-share copy, implying a company-level certification. The sibling janitorial.html meta tags already correctly say 'eco-certified products' \u2014 services.html does not. 'fully insured'",
+    "fix": "In services.html lines 16, 18, and 25, change 'Eco-certified, fully insured, dedicated teams.' to 'Eco-certified products, fully insured, dedicated teams.' so the cert attaches to the products."
+   },
+   {
+    "file": "day-porter.html",
+    "severity": "high",
+    "quote": "You see the difference immediately and maintain it every single day.",
+    "why": "Confirmed at line 133, inside the 'Accountability & consistency' value-card body. This is Ecco's OWN voice (a <p> in a value-card, not inside any quotation marks / not attributed to a client), so the deferred-testimonial exception does not apply. 'every single [X]' used as a reliability/consistency claim is on the explicit banned-absolutes list. Note the same card opens with 'Same professional eve",
+    "fix": "Drop the absolute: e.g. 'You see the difference immediately, and it holds day after day.' or 'You see the difference immediately, and it shows every day.' (remove 'every single')."
+   },
+   {
+    "file": "services.html",
+    "severity": "medium",
+    "quote": "Day porters are there during peak business hours, responding to spills instantly and ensuring your space never looks neglected.",
+    "why": "Confirmed at line 172, inside an 'eco-note' / 'Why it's different' body paragraph in Ecco's own voice (not a client quote). 'your space never looks neglected' is the banned 'never ...' reliability-absolute pattern. 'responding to spills instantly' also overstates capability. Genuine violation of the banned-absolutes rule.",
+    "fix": "Soften and remove the absolute/overstatement: '...responding to spills quickly so your space stays presentable through the day.'"
+   },
+   {
+    "file": "janitorial.html",
+    "severity": "medium",
+    "quote": "Green Seal and EPA Safer Choice certified products. Hospital-grade cleanliness without toxic chemicals.",
+    "why": "Confirmed at line 174, inside the 'Eco-certified products' value-card body in Ecco's own voice. 'Hospital-grade cleanliness' is an unverifiable clinical-standard superlative \u2014 it implies a medical/clinical cleaning standard or certification Ecco has not been shown to hold. This is consistent with the F4 directive to remove unverifiable claims. The 'Green Seal and EPA Safer Choice certified product",
+    "fix": "Replace 'Hospital-grade cleanliness' with a defensible phrasing, e.g. 'Thorough, sanitizing cleanliness without toxic chemicals.' or 'Deep, disinfectant-grade cleaning without toxic chemicals.' Leave the certified-products sentence as-is."
+   },
+   {
+    "file": "day-porter.html",
+    "type": "consistency",
+    "fix": "day-porter.html ~line 129 'requests are handled same-day' -> 'requests are handled same-day on business days'."
+   }
+  ],
+  "testimonials": [
+   {
+    "file": "testimonials.html",
+    "severity": "high",
+    "quote": "<div class=\"stat-num\">24hr</div><div class=\"stat-lbl\">Response Time</div>",
+    "why": "Confirmed at line 194 inside the .stats-bar (div class=\"stats-bar rv\"), which is Ecco's OWN voice, not a client testimonial quote. The confirmed rule allows \"same-day response on business days\" for CLIENT response time and explicitly BANS a contradictory \"24hr response\" framing. This tile is labeled \"Response Time\" (i.e. client response), not proposal/quote turnaround, so the \"within 24 hours\" quo",
+    "fix": "Change the stat-lbl from \"Response Time\" to a quote-turnaround claim (e.g. stat-num \"24hr\" / stat-lbl \"Proposal Turnaround\") which is allowed, OR replace with stat-num \"Same-Day\" / stat-lbl \"Response on business days\" to match the confirmed client-response phrasing. Do not keep a bare \"24hr / Response Time\" tile."
+   },
+   {
+    "file": "testimonials.html",
+    "severity": "high",
+    "quote": "<div class=\"test-stars\">\u2605 \u2605 \u2605 \u2605 \u2605</div>",
+    "why": "Confirmed: a uniform five-star row appears on all six testimonial cards (lines 130, 140, 150, 160, 170, 180), rendered by Ecco's own .test-stars markup OUTSIDE the .test-quote element (the client quotation text). It is therefore Ecco's own UI presentation, not protected content inside a client quote. The confirmed rule BANS \"5.0 rating / Google Reviews / star-rating average.\" A hard-coded identica",
+    "fix": "Remove the six <div class=\"test-stars\">\u2605 \u2605 \u2605 \u2605 \u2605</div> rows (lines 130, 140, 150, 160, 170, 180) from all cards; the featured/section is consistent without them. If a visual accent is wanted, keep only the existing .ind-tag industry tag rather than a star rating. Also remove or repurpose the now-unused .test-stars CSS rule at line 44."
+   },
+   {
+    "file": "testimonials.html",
+    "severity": "medium",
+    "quote": "<div class=\"stat-num\">0</div><div class=\"stat-lbl\">Harsh Chemicals</div>",
+    "why": "Confirmed at line 193 inside the .stats-bar, which is Ecco's OWN voice, not a client quote. \"0\" as a headline stat-num is an absolute zero-claim in the same banned family as \"Zero VOCs\" / \"0 Missed Services\" \u2014 an unverifiable absolute about Ecco's own products. The confirmed rules ban absolutes (\"0\", \"Zero ... ever\", \"without exception\") in Ecco's own copy. The compliant framing is to describe the",
+    "fix": "Reframe without the absolute. E.g. replace with stat-num \"Green\" / stat-lbl \"Certified products\", or stat-num \"Safer Choice\" / stat-lbl \"EPA + Green Seal certified products\" \u2014 i.e. lean on the allowed certified-products phrasing instead of an absolute \"0 / Harsh Chemicals\" tile."
+   },
+   {
+    "file": "testimonials.html",
+    "type": "consistency",
+    "fix": "Re-label the 12+ stat tile to 'Years of founder experience' (not bare 'Years of industry experience')."
+   }
+  ],
+  "sustainability": [
+   {
+    "file": "sustainability.html",
+    "severity": "high",
+    "quote": "<div class=\"stars\">\u2605 \u2605 \u2605 \u2605 \u2605</div>",
+    "why": "Confirmed at line 213. The \u2605\u2605\u2605\u2605\u2605 element sits inside the testimonial-banner div BEFORE the quote, in Ecco's own presentation chrome \u2014 it is NOT inside the client's quoted words (those are the separate <p class=\"quote\"> on line 214). A literal five-star visual reads as a star-rating Ecco is asserting, which the confirmed rules BAN ('5.0 rating'/'star-rating average' \u2192 BANNED). It is not covered by ",
+    "fix": "Delete the entire line 213 (<div class=\"stars\">\u2605 \u2605 \u2605 \u2605 \u2605</div>) from the testimonial-banner, keeping only the quote (line 214) and author attribution (line 215)."
+   },
+   {
+    "file": "sustainability.html",
+    "severity": "medium",
+    "quote": "Hospital-level disinfection through safer formulations that won't aggravate patients with compromised immune systems.",
+    "why": "Confirmed at line 137, in Ecco's own body copy under the 'Patients in Medical Facilities' card (not a client quote). 'Hospital-level disinfection' is an unverifiable clinical-grade efficacy/capability claim, made more risk-laden by pairing it with a safety promise for immunocompromised patients \u2014 a vulnerable population. It is Ecco's own voice and is not defensible as product-scoped buyer info; it",
+    "fix": "Soften to a defensible, non-efficacy-tier claim, e.g. 'Safer formulations chosen to clean effectively without aggravating patients with sensitivities.' Drop 'Hospital-level disinfection' and the implied clinical efficacy guarantee."
+   },
+   {
+    "file": "sustainability.html",
+    "severity": "medium",
+    "quote": "Get started with Ecco's eco-certified cleaning services and see the difference that truly safe products make in your facility.",
+    "why": "Confirmed at line 221, Ecco's own CTA body copy. The confirmed rule states the company/services are NOT certified \u2014 only the PRODUCTS are. 'Ecco's eco-certified cleaning services' attaches 'certified' to the SERVICE offering, implying a company/service-level certification, which is banned. The correct product-scoped phrasing is used elsewhere on the page (line 165: 'eco-certified disinfectants... ",
+    "fix": "Re-scope 'certified' to products: e.g. 'Get started with Ecco's cleaning services using Green Seal and EPA Safer Choice certified products and see the difference that truly safe products make in your facility.' Remove 'eco-certified' as a modifier of 'cleaning services'."
+   }
+  ],
+  "landings": [
+   {
+    "file": "eco-friendly-commercial-cleaning-nyc.html",
+    "severity": "high",
+    "quote": "\"hasCredential\":[{\"@type\":\"EducationalOccupationalCredential\",\"name\":\"Green Seal Certified\",\"credentialCategory\":\"Eco-certification\"},{\"@type\":\"EducationalOccupationalCredential\",\"name\":\"EPA Safer Choice\",\"credentialCategory\":\"Eco-certification\"}]",
+    "why": "Confirmed by reading line 36. The hasCredential array is attached to the LocalBusiness node @id .../#business named 'Ecco Facilities LLC'. In schema.org, hasCredential on an Organization asserts that the ENTITY holds those credentials, so this tells search engines that Ecco Facilities LLC itself is Green Seal Certified and EPA Safer Choice certified. Per the confirmed rule, the company is NOT cert",
+    "fix": "Remove the hasCredential block from the LocalBusiness node. If a structured-data eco signal is desired, attach the certification to the products/materials used (e.g. via the Service node's description referencing 'Green Seal and EPA Safer Choice certified products') rather than as a credential of the business entity."
+   },
+   {
+    "file": "eco-friendly-commercial-cleaning-nyc.html",
+    "severity": "high",
+    "quote": "<title>Eco-Friendly Commercial Cleaning NYC \u2014 Green Seal Certified \u00b7 Ecco Facilities</title>",
+    "why": "Confirmed at lines 15 and 18. The <title> and og:title render 'Green Seal Certified \u00b7 Ecco Facilities' in browser tabs and social/search previews, which reads as a company-level certification claim (Ecco Facilities = Green Seal Certified) rather than 'Green Seal certified products'. That is the banned eco-cert framing applied to the company. Additionally the <title> uses an em dash (\u2014) that is NOT",
+    "fix": "Change 'Green Seal Certified' to 'Green Seal Certified Products' (or 'Green Seal & EPA Certified Products') in <title> (line 15), og:title (line 18), and twitter:title so the phrase modifies the products, not the company. While editing line 15, also replace the em dash with a non-em-dash separator (e.g. a middot or comma) since it is not the allowed brand-suffix exception."
+   },
+   {
+    "file": "eco-friendly-commercial-cleaning-nyc.html",
+    "severity": "medium",
+    "quote": "<span class=\"cert-badge-label\">LEED contributing</span>",
+    "why": "Confirmed at line 95. The label sits inside a .cert-badge in the 'TRUST STRIP \u2014 CERTIFICATIONS' (line 81) alongside genuine product/cert badges ('Green Seal certified products', 'EPA Safer Choice', 'Low-VOC certified products'). Standing alone in a certifications strip, 'LEED contributing' reads as an Ecco company-level LEED credential rather than 'our service can contribute to your building's LEE",
+    "fix": "Relabel the badge to make it contribution/service-scoped, e.g. 'Contributes to LEED' or 'Supports LEED credits', so it does not read as a company certification. Alternatively move it out of the certifications strip into body copy where the EQ-credit context (lines 132-133, 224-225) is present."
+   },
+   {
+    "file": "manhattan-office-cleaning.html",
+    "severity": "high",
+    "quote": "<div class=\"testimonial-stars\" style=\"display:flex;justify-content:center;gap:.2rem;margin-bottom:1rem;color:var(--color-green)\" aria-label=\"5 out of 5 stars\">",
+    "why": "Confirmed at lines 196-202. The block renders five filled star SVGs and carries aria-label='5 out of 5 stars'. The stars and the aria-label are Ecco's own markup that decorates the testimonial card \u2014 they are NOT text inside the client quote (the quote itself is the italic <p> at line 203, which is the deferred-anonymization item). A rendered five-filled-star graphic plus a '5 out of 5 stars' acce",
+    "fix": "Delete the testimonial-stars <div> (lines 196-202) including the five star SVGs and the aria-label='5 out of 5 stars'. If a decorative element is wanted above the quote, replace it with a non-rating visual (e.g. a quotation-mark glyph) with no rating semantics. Do this on any other landing page that mirrors this star block."
+   },
+   {
+    "file": "eco-friendly-commercial-cleaning-nyc.html",
+    "severity": "medium",
+    "quote": "Sustainable equipment that lasts a decade, not a season.",
+    "why": "Confirmed at line 129, inside a card body paragraph ('Safe for the environment') in Ecco's own voice \u2014 not a client quote. 'lasts a decade' is a specific, quantified durability claim about the equipment with no substantiation, presented as flat fact. It is the kind of unverifiable quantitative claim a prospect could challenge. Not a banned-keyword violation, but a genuine new-unverifiable claim a ",
+    "fix": "Soften to a non-quantified durability statement, e.g. 'Durable equipment built to last, not single-season disposables.' Remove the specific 'a decade' figure unless Alex can substantiate it."
+   },
+   {
+    "file": "eco-friendly-commercial-cleaning-nyc.html",
+    "severity": "medium",
+    "quote": "Trap 99% more particles than cotton.",
+    "why": "Confirmed at line 184, in a card body paragraph about microfiber cloths in Ecco's own voice. '99% more particles than cotton' is a precise statistic stated as a flat fact. Microfiber-vs-cotton figures vary widely by source/product, and presenting an exact 99% without attribution is a factually risky unverifiable claim. (Note line 188's 'Capture 99.97% of particles >= 0.3 microns' for HEPA is an in",
+    "fix": "Either attribute the figure to a credible source/study inline, or soften to a non-numeric claim such as 'Trap far more fine particles than cotton.'"
+   }
+  ],
+  "legal-util": [
+   {
+    "file": "careers.html",
+    "severity": "medium",
+    "quote": "Our low turnover isn't luck. It's by design.",
+    "why": "Confirmed at careers.html line 198, inside the message-sec body \u2014 Ecco's OWN voice, not a client testimonial quote. It asserts a staffing-stability metric (low turnover) as fact. This is the same unverifiable family the rules ban ('no turnover' / 'always the same face' staffing-reliability absolutes). 'Low turnover ... by design' is unverifiable and asserted as a guarantee. The sentence immediatel",
+    "fix": "Delete the sentence 'Our low turnover isn't luck. It's by design.' The preceding clause ('that stability is what gives you consistent, reliable service') already conveys staffing stability without an unverifiable turnover metric. Alternatively replace with a process statement: 'Because we invest in our people, our crews tend to stay, which helps us give you familiar, consistent service.'"
+   },
+   {
+    "file": "careers.html",
+    "severity": "medium",
+    "quote": "Every person who enters your facility has been background-checked, professionally trained, and is part of a company that values their work.",
+    "why": "Confirmed at careers.html line 198, Ecco's own voice (message-sec body, not a client quote). The rules explicitly ban 'every single person ... background-checked' and any 'every single [X]' used as a reliability/capability claim. 'Every person who enters your facility has been background-checked' is materially the same universal-quantifier construction \u2014 it asserts a 100% claim about staffing scre",
+    "fix": "Soften the universal quantifier: 'Our team members are background-checked, professionally trained, and part of a company that values their work.' This keeps the allowed 'background-checked' descriptor while removing the banned 'every person ... has been' absolute."
+   },
+   {
+    "file": "careers.html",
+    "severity": "medium",
+    "quote": "Many team leads and supervisors started as cleaning technicians. Clear path forward.",
+    "why": "Confirmed at careers.html line 114, inside the 'Room to Grow' benefit-card \u2014 Ecco's own voice, and NOT inside a job posting. (It is critical to note this is the benefits grid, not the #positions pos-cards; the careers job-postings deferral covers only the Cleaning Technician / Day Porter / Team Lead pos-card listings, which begin at line 124. This benefit-card is not deferred.) 'Many team leads an",
+    "fix": "Reframe as opportunity rather than asserted history: 'We promote from within where we can \u2014 a clear path from technician to team lead.' (avoid the em dash per brand rule: 'We promote from within where we can, with a clear path from technician to team lead.') This removes the unverifiable 'many ... started as' historical assertion."
+   },
+   {
+    "file": "sitemap.html",
+    "severity": "medium",
+    "quote": "Navigate every page on our site, services, company info, resources, quotes, and more, all in one organized directory.",
+    "why": "Confirmed at sitemap.html line 66 \u2014 this is the visible page-hero-sub, Ecco's own voice (not a quote, not in script/comment). It is a garbled run-on: 'on our site, services, company info, resources, quotes' reads as a single broken series where 'services / company info / etc.' are not grammatically parallel with 'on our site,' and the trailing ', all in one organized directory' is a comma-spliced ",
+    "fix": "Repair the series and clause break to match the clean meta version, e.g.: 'Browse our services, company info, resources, and quote pages, all in one organized directory.' (Keep it comma-joined per brand em-dash ban.)"
+   }
+  ],
+  "blog-posts": [
+   {
+    "file": "blog/eco-certified-cleaning-matters.html",
+    "severity": "medium",
+    "quote": "This isn't a cost-saving measure for us, in fact, it costs more.",
+    "why": "Confirmed at line 92, in Ecco's own body paragraph (not a client quote). 'This isn't a cost-saving measure for us' and 'it costs more' are two independent clauses joined only by commas around 'in fact' \u2014 a genuine comma splice / run-on that a careful reader would notice. It is a real grammar/markup defect in Ecco's own copy.",
+    "fix": "In blog/eco-certified-cleaning-matters.html line 92, change to 'This isn't a cost-saving measure for us. In fact, it costs more.' (period) or 'This isn't a cost-saving measure for us; in fact, it costs more.' (semicolon)."
+   },
+   {
+    "file": "blog/eco-certified-cleaning-matters.html",
+    "severity": "medium",
+    "quote": "Ready for eco-certified cleaning that actually works?",
+    "why": "Confirmed at line 114, a CTA <h2> in Ecco's own loud voice. Per the confirmed eco rule, Ecco uses CERTIFIED PRODUCTS but the company/service itself is NOT certified; the safe framing is product-level ('eco-certified products'). The entire page is otherwise scrupulous about 'eco-certified products'/'eco-certified cleaning products', so 'eco-certified cleaning' here attaches the certification to the",
+    "fix": "In blog/eco-certified-cleaning-matters.html line 114, reword to product-level: 'Ready for cleaning with eco-certified products that actually works?' or a neutral 'Ready for greener cleaning that actually works?'. (Note: line 85 'When you choose eco-certified cleaning' has the same drift and could be aligned in the same pass.)"
+   }
+  ],
+  "quote": [
+   {
+    "file": "quote.html",
+    "type": "consistency",
+    "fix": "Welcome trust strip (~line 299) 'NYC businesses served' is unverifiable client-count residue -> replace with a non-count trust signal e.g. 'All 5 boroughs' or 'Fully insured'."
+   }
+  ]
+ }
+}

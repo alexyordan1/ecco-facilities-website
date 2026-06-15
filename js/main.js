@@ -38,12 +38,12 @@ document.querySelectorAll('.footer-nl-form').forEach(function(form) {
   var detail = document.getElementById('pillar-detail');
   if (!pillars.length || !detail) return;
   var data = [
-    { badge: '$', title: 'Transparent, custom pricing', text: 'Every proposal is built from scratch for your space. No generic packages, no hidden fees. You only pay for what you need. Most clients are surprised at how competitive our pricing is \u2014 you\u2019ll have transparent numbers within 24 hours.' },
-    { badge: '\u2713', title: 'Satisfaction guaranteed \u2014 always', text: 'We re-clean at no charge. No questions asked, no fine print. If anything doesn\u2019t meet your standards, we send your team back within 24 hours. Your satisfaction isn\u2019t negotiable.' },
+    { badge: '$', title: 'Transparent, custom pricing', text: 'Every proposal is built from scratch for your space. No generic packages, no hidden fees. You only pay for what you need. Most clients are surprised at how competitive our pricing is, and you\u2019ll have transparent numbers within 24 hours.' },
+    { badge: '\u2713', title: 'Re-clean guarantee', text: 'If anything isn\u2019t right, tell us within 24 hours and we\u2019ll re-clean the affected areas at no charge.' },
     { badge: '\u26A1', title: 'Start in days, not weeks', text: 'Most new clients are fully onboarded within 5-7 business days. For urgent needs, we can often begin within 48 hours. Your dedicated team arrives trained on your specific space and standards.' },
-    { badge: '\uD83C\uDF3F', title: '100% eco-certified products', text: 'Green Seal certified, EPA Safer Choice approved. Biodegradable, plant-based, completely safe for children, pets, and people with allergies. No harsh chemicals ever enter your space.' },
-    { badge: '\u221E', title: 'Flexible terms, no lock-ins', text: 'We don\u2019t lock you into rigid multi-year contracts. We earn your business every visit. If you\u2019re not happy, adjust or cancel. We keep clients because we\u2019re great \u2014 not because of fine print.' },
-    { badge: '\uD83D\uDC65', title: 'Your dedicated team, every visit', text: 'Consistency is core. Your team learns your space, preferences, and standards. No random crew rotations. If someone\u2019s unavailable, we notify you and send a trained backup.' }
+    { badge: '\uD83C\uDF3F', title: 'Eco-certified products', text: 'We use Green Seal and EPA Safer Choice certified products. Biodegradable, plant-based, and safe for children, pets, and people with allergies, with no harsh chemicals.' },
+    { badge: '\u221E', title: 'Flexible terms, no lock-ins', text: 'We don\u2019t lock you into rigid multi-year contracts. If something isn\u2019t working, you can adjust or cancel. We aim to keep your business by earning it, not by locking you in.' },
+    { badge: '\uD83D\uDC65', title: 'A consistent, dedicated team', text: 'Consistency is core. Your team learns your space, preferences, and standards. If someone\u2019s unavailable, we notify you and send a trained backup.' }
   ];
   pillars.forEach(function(btn) {
     btn.addEventListener('click', function() {
