@@ -21,7 +21,7 @@
     --nav-h:74px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:var(--nav-h)}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:var(--nav-h);background:var(--black);overscroll-behavior:none}
   body{
     background:var(--black);
     color:var(--ink);
