@@ -1,0 +1,818 @@
+/* ════════════════════════════════════════════════════════════
+   Quote wizard — Noir skin. Styles the existing qf2-* markup
+   (engine + classes untouched). Loaded only on quote.html.
+   Relies on noir.css tokens + .qf-stage/.qf-screen wrappers.
+   ════════════════════════════════════════════════════════════ */
+
+/* responsive text spans used across screens (mobile-first) */
+.qf2-prompt-sub-desktop,.qf2-prompt-sub-mobile{display:inline}
+.qf2-prompt-sub-desktop{display:none}
+@media(min-width:600px){
+  .qf2-prompt-sub-mobile{display:none}
+  .qf2-prompt-sub-desktop{display:inline}
+}
+
+/* keyboard-shortcuts affordance — subtle, desktop only */
+.qf-kbd-help{position:absolute;top:calc(var(--nav-h) + .4rem);right:1rem;z-index:5}
+.qf-kbd-help-trigger{list-style:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);color:var(--ink-faint);display:grid;place-items:center;cursor:pointer;font-size:.85rem}
+.qf-kbd-help-trigger::-webkit-details-marker{display:none}
+.qf-kbd-help-panel{position:absolute;right:0;top:38px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:14px 16px;width:230px}
+.qf-kbd-help-title{font-size:.78rem;color:var(--ink);font-weight:500;margin-bottom:.5rem}
+.qf-kbd-help-list{display:grid;grid-template-columns:auto 1fr;gap:.4rem .8rem;font-size:.76rem;color:var(--ink-dim)}
+.qf-kbd-help-list kbd{background:var(--surface-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.72rem;color:var(--ink)}
+@media(max-width:760px){.qf-kbd-help{display:none}}
+
+/* 2026-06-21 — welcome greeting pill removed entirely; its rules deleted. */
+
+/* prompt */
+.qf2-body{position:relative}
+.qf2-prompt{margin-bottom:.2rem}
+.qf2-prompt-title{font-family:var(--font-display);font-weight:300;font-size:clamp(1.55rem,4.6vw,2.05rem);line-height:1.1;letter-spacing:-.01em;color:var(--ink);text-wrap:balance}
+.qf2-prompt-title em{font-style:italic;color:var(--accent-soft)}
+.qf2-prompt-sub{color:var(--ink-faint);font-size:.86rem;font-weight:300;margin-top:8px;line-height:1.5}
+.qf2-prompt-sub-time{color:var(--ink-dim)}
+
+/* service cards */
+.qf2-grid-3{display:flex;flex-direction:column;gap:11px;margin-top:clamp(1.2rem,3.2vw,1.6rem)}
+.qf2-card{display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;background:var(--surface-1);border:1px solid var(--line);border-radius:15px;padding:15px;cursor:pointer;font-family:inherit;transition:border-color .25s,transform .25s,background .25s}
+.qf2-card:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+.qf2-card.is-selected,.qf2-card[aria-pressed="true"]{border-color:var(--accent);background:rgba(var(--accent-rgb),.07)}
+.qf2-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.qf2-card-icon{width:42px;height:42px;border-radius:11px;border:1px solid rgba(var(--accent-rgb),.4);display:grid;place-items:center;color:var(--accent);flex:none;font-size:1.2rem}
+.qf2-card-icon svg{width:21px;height:21px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.qf2-card-body{display:flex;flex-direction:column;min-width:0}
+.qf2-card-label{font-family:var(--font-display);font-weight:400;font-size:1.08rem;color:var(--ink)}
+.qf2-card-includes{font-size:.81rem;color:var(--ink-dim);font-weight:300;line-height:1.5;margin-top:3px}
+
+/* "not sure?" quiz toggle */
+.qf2-not-sure-link{margin-top:15px;font-size:.84rem;color:var(--ink-dim);background:none;border:none;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0}
+.qf2-not-sure-link::before{content:"?";width:18px;height:18px;border-radius:50%;border:1px solid var(--line-strong);display:grid;place-items:center;font-size:.7rem;color:var(--accent);flex:none}
+.qf2-not-sure-link:hover{color:var(--accent)}
+
+/* trust strip */
+.qf2-welcome-trust{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:clamp(1.4rem,4vw,1.9rem);padding-top:1.1rem;border-top:1px solid var(--line)}
+.qf2-welcome-trust-item{font-size:.72rem;color:var(--ink-faint);display:inline-flex;align-items:center;gap:5px}
+.qf2-welcome-trust-item svg{width:13px;height:13px;stroke:var(--accent);stroke-width:2;fill:none}
+.qf2-welcome-trust-sep{color:var(--ink-faint);opacity:.5;font-size:.7rem}
+
+/* quiz panel */
+.qf2-quiz-panel{margin-top:1.1rem;background:var(--surface-1);border:1px solid var(--line);border-radius:15px;padding:16px}
+.qf2-quiz-panel[hidden]{display:none}
+.qf2-quiz-q{font-size:.92rem;color:var(--ink);font-weight:400;margin-bottom:.8rem}
+.qf2-quiz-q-desktop{display:none}
+@media(min-width:600px){.qf2-quiz-q-mobile{display:none}.qf2-quiz-q-desktop{display:inline}}
+.qf2-quiz-chips{display:flex;flex-direction:column;gap:9px}
+.qf2-quiz-chip{font-size:.86rem;color:var(--ink-dim);background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:44px;text-align:left;cursor:pointer;font-family:inherit;transition:border-color .2s,color .2s,background .2s}
+.qf2-quiz-chip:hover{border-color:var(--line-strong)}
+.qf2-quiz-chip.is-selected,.qf2-quiz-chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-soft);background:rgba(var(--accent-rgb),.08)}
+.qf2-quiz-result{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink-dim)}
+.qf2-quiz-result[hidden]{display:none}
+.qf2-quiz-result-hand{color:var(--ink-faint);font-size:.8rem;display:block;margin-bottom:.2rem}
+.qf2-quiz-result strong{color:var(--accent-soft);font-family:var(--font-display);font-weight:400;font-size:1.05rem}
+
+/* ── flowbar (progress) — shared across non-welcome screens ── */
+/* AYS Ola 4 CRIT-4 — the desktop 7-station rail (.qf2-flowbar) was frozen to
+   the pre-reorder station order, and updateRail() targets a dead V1 class so
+   it never re-renders. It only ever surfaced in the 760–879px band (≥880px is
+   re-hidden by the @media at L390). Rather than ship a wrong rail, drop the
+   desktop rail entirely: the compact progress bar (.qf2-flowbar-mobile, driven
+   live by qfRenderRailProgress) is correct and now shows at every width. */
+.qf2-flowbar{display:none}
+.qf2-flowbar-mobile{display:flex;align-items:center;gap:12px;margin-bottom:clamp(1.2rem,4vw,1.8rem)}
+.qf2-flowbar-back{width:44px;height:44px;min-width:44px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink-dim);display:grid;place-items:center;cursor:pointer;flex:none;transition:border-color .25s,color .25s}
+.qf2-flowbar-back:hover{border-color:var(--line-strong);color:var(--ink)}
+.qf2-flowbar-back svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
+.qf2-flowbar-rail{display:flex;align-items:center;list-style:none;flex:1;margin:0;padding:0}
+.qf2-flowbar-station{display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--ink-faint);white-space:nowrap}
+.qf2-flowbar-station::after{content:"";flex:1;height:1px;background:var(--line);margin:0 .6rem;min-width:12px}
+.qf2-flowbar-station:last-child::after{display:none}
+.qf2-flowbar-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--line-strong);flex:none}
+.qf2-flowbar-station.is-done{color:var(--ink-dim)} .qf2-flowbar-station.is-done .qf2-flowbar-dot{background:var(--accent);border-color:var(--accent)}
+.qf2-flowbar-station.is-active{color:var(--accent)} .qf2-flowbar-station.is-active .qf2-flowbar-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.2)}
+.qf2-flowbar-step-count{font-size:.72rem;color:var(--ink-faint);flex:none}
+.qf2-flowbar-skip{font-size:.78rem;color:var(--ink-faint);background:none;border:none;font-family:inherit;cursor:pointer;flex:none;min-height:44px;padding:0 .2rem}
+.qf2-flowbar-skip:hover{color:var(--accent)}
+.qf2-flowbar-mobile-progress{flex:1;min-width:0}
+.qf2-flowbar-mobile-track{height:4px;border-radius:99px;background:rgba(244,242,236,.1);overflow:hidden}
+.qf2-flowbar-mobile-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.qf2-flowbar-mobile-label{font-size:.72rem;color:var(--ink-faint);margin-top:7px}
+
+/* ── space 6-card grid ── */
+.qf2-grid-6{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:clamp(1.1rem,3vw,1.5rem)}
+@media(min-width:520px){.qf2-grid-6{grid-template-columns:repeat(3,1fr)}}
+.qf2-grid-6 .qf2-card{flex-direction:column;align-items:flex-start;gap:9px}
+.qf2-card-hint{font-size:.76rem;color:var(--ink-dim);font-weight:300;line-height:1.4;margin-top:2px}
+.qf2-space-other-wrap{margin-top:14px}
+.qf2-space-other-prompt{font-size:.82rem;color:var(--ink-faint);font-weight:300;margin-bottom:.6rem}
+.qf2-space-other-prompt span{color:var(--ink-dim)}
+
+/* ── fields (shared) ── */
+.qf2-field{display:flex;align-items:center;gap:10px;background:var(--surface-1);border:1px solid var(--line);border-radius:13px;padding:0 14px;min-height:52px;transition:border-color .2s;margin-bottom:0}
+.qf2-field:focus-within{border-color:var(--accent)}
+.qf2-field-ico{color:var(--ink-faint);flex:none;display:grid;place-items:center}
+.qf2-field-ico svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
+.qf2-field input{flex:1;width:100%;background:none;border:none;color:var(--ink);font-family:inherit;font-size:16px;font-weight:300;padding:14px 0;min-height:44px}
+.qf2-field input::placeholder{color:var(--ink-faint)}
+.qf2-field input:focus{outline:none}
+.qf2-field-helper{font-size:.78rem;color:var(--accent-soft);margin-top:.45rem;font-weight:300}
+.qf2-field-helper[hidden]{display:none}
+.qf2-field-err{font-size:.8rem;color:#E8A0A0;margin-top:.45rem}
+.qf2-field-err[hidden]{display:none}
+
+/* ── CTA (shared) ── */
+.qf2-cta{margin-top:clamp(1.2rem,3vw,1.5rem);width:100%;background:var(--accent);color:var(--accent-ink);border:none;border-radius:99px;padding:16px;font-family:var(--font-body);font-size:1rem;font-weight:500;cursor:pointer;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .2s,transform .2s}
+.qf2-cta:hover{filter:brightness(1.05)} .qf2-cta:active{transform:scale(.99)}
+.qf2-cta[hidden]{display:none}
+.qf2-cta[disabled],.qf2-cta.is-loading{opacity:.6;cursor:default}
+@media(prefers-reduced-motion:reduce){.qf2-flowbar-mobile-fill,.qf2-card,.qf2-cta{transition:none}}
+
+/* ── info / You step ── */
+.qf2-fields{display:flex;flex-direction:column;gap:11px;margin-top:clamp(1.1rem,3vw,1.5rem)}
+.qf2-field-block{display:flex;flex-direction:column}
+.qf2-cta-hint{text-align:center;font-size:.78rem;color:var(--ink-faint);margin-top:10px;font-weight:300}
+
+/* ── chips (situation / timeline / days — reusable pills) ── */
+.qf2-chip-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-top:1.5rem;display:block}
+.qf2-chip-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:.7rem}
+.qf2-chip{font-size:.88rem;color:var(--ink-dim);background:var(--surface-1);border:1px solid var(--line);border-radius:99px;padding:11px 16px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:border-color .2s,color .2s,background .2s}
+.qf2-chip:hover{border-color:var(--line-strong)}
+.qf2-chip.is-selected,.qf2-chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-soft);background:rgba(var(--accent-rgb),.08)}
+.qf2-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ── size step ── */
+.qf2-size-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:clamp(1.1rem,3vw,1.5rem)}
+@media(min-width:520px){.qf2-size-grid{grid-template-columns:repeat(3,1fr)}}
+.qf2-size-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--surface-1);border:1px solid var(--line);border-radius:14px;padding:18px 10px;min-height:80px;cursor:pointer;font-family:inherit;transition:border-color .25s,transform .25s,background .25s}
+.qf2-size-card:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+.qf2-size-card.is-selected,.qf2-size-card[aria-pressed="true"]{border-color:var(--accent);background:rgba(var(--accent-rgb),.07)}
+.qf2-size-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.qf2-size-sqft-value{font-family:var(--font-display);font-weight:400;font-size:1.15rem;color:var(--ink);line-height:1.1}
+.qf2-size-sqft-unit{font-size:.72rem;color:var(--ink-faint);letter-spacing:.04em}
+.qf2-size-visit-card{border-style:dashed}
+.qf2-size-visit-body{display:flex;flex-direction:column;align-items:center;gap:1px}
+.qf2-size-visit-label{font-family:var(--font-display);font-weight:400;font-size:1.02rem;color:var(--accent-soft)}
+.qf2-size-visit-hint{font-size:.7rem;color:var(--ink-faint)}
+.qf2-numeric-wrap{display:flex;flex-direction:column;gap:.5rem;margin-top:1.2rem}
+.qf2-numeric-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.qf2-numeric-input{background:var(--surface-1);border:1px solid var(--line);border-radius:13px;color:var(--ink);font-family:inherit;font-size:16px;font-weight:300;padding:14px;min-height:52px;width:100%}
+.qf2-numeric-input::placeholder{color:var(--ink-faint)}
+.qf2-numeric-input:focus{outline:none;border-color:var(--accent)}
+.qf2-walk-hint{display:flex;align-items:center;gap:10px;margin-top:1rem;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.2);border-radius:12px;padding:11px 13px;font-size:.82rem;color:var(--ink-dim);font-weight:300}
+.qf2-walk-hint[hidden]{display:none}
+.qf2-walk-hint-avatar img{width:22px;height:22px;border-radius:50%;flex:none}
+
+/* ── days screen (janitorial schedule) ── */
+.qf-day-card{flex:0 0 auto;min-width:56px;justify-content:center;padding:11px 14px}
+/* AYS Ola 4 POLISH — on phones the 7 day chips flex-wrapped to a ragged 5+2.
+   Lay just the day row (not the presets row) on an even 7-col grid so every
+   chip is the same width and the row stays balanced. */
+@media (max-width:560px){
+  #qfScreen_days .qf2-chip-row[aria-label="Select days"]{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:6px;
+  }
+  #qfScreen_days .qf2-chip-row[aria-label="Select days"] .qf-day-card{
+    min-width:0;padding:11px 4px;font-size:.82rem;
+  }
+}
+.qf2-chip-preset{font-size:.8rem;background:none;color:var(--ink-faint)}
+.qf2-chip-preset:hover{color:var(--ink);border-color:var(--line-strong)}
+.qf2-time-cluster{margin-top:1.6rem}
+.qf2-time-cluster[data-gated="1"]{opacity:.4;pointer-events:none}
+.qf2-section-label{font-family:var(--font-display);font-weight:400;font-size:1.1rem;color:var(--ink);margin-bottom:.3rem}
+.qf2-time-helper{font-size:.8rem;color:var(--ink-faint);font-weight:300;margin-bottom:.7rem}
+.qf2-chip.qf2-chip-time{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:11px 16px;border-radius:13px;min-height:56px}
+.qf2-chip-time-label{font-size:.9rem;color:inherit;font-weight:400;display:block}
+.qf2-chip-time-range{font-size:.7rem;color:var(--ink-faint);font-weight:300;display:block}
+.qf2-chip.qf2-chip-time.is-selected .qf2-chip-time-range,.qf2-chip.qf2-chip-time[aria-pressed="true"] .qf2-chip-time-range{color:var(--accent-soft)}
+.qf2-time-toast{font-size:.78rem;color:var(--accent-soft);margin-top:.6rem}
+.qf2-time-toast[hidden]{display:none}
+.qf-s4-count{font-size:.74rem;color:var(--ink-faint);display:block;margin-top:1rem}
+.qf-s4-count[hidden]{display:none}
+
+/* ── location step ── */
+.qf2-location-hint{background:rgba(var(--accent-rgb),.05);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-top:1rem}
+.qf2-location-hint-label{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.qf2-location-hint-body{font-size:.8rem;color:var(--ink-dim);font-weight:300;margin-top:.2rem;line-height:1.45}
+/* Google Places autocomplete dropdown — dark */
+.pac-container{background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;margin-top:4px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-family:var(--font-body);z-index:9999}
+.pac-container::after{display:none!important}
+.pac-item{color:var(--ink-dim);border-top:1px solid var(--line);padding:8px 12px;cursor:pointer;font-size:.86rem}
+.pac-item:hover,.pac-item-selected{background:var(--surface-3)}
+.pac-item-query{color:var(--ink)}
+.pac-matched{color:var(--accent-soft)}
+.pac-icon{display:none}
+
+/* ════════ shared dynamic components ════════ */
+/* resume banner (#2) */
+.qf-resume-banner{margin-bottom:1.2rem}
+.qf-resume-inner{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:14px;padding:12px 14px}
+.qf-resume-ico{flex:none;color:var(--accent);display:grid;place-items:center}
+.qf-resume-ico svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none}
+.qf-resume-text{flex:1;font-size:.85rem;color:var(--ink-dim);font-weight:300;line-height:1.4}
+.qf-resume-text b,.qf-resume-text strong{color:var(--ink);font-weight:500}
+.qf-resume-btn{font-family:inherit;cursor:pointer;border-radius:99px;font-size:.8rem;font-weight:500;padding:9px 15px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;flex:none;border:1px solid var(--line)}
+.qf-resume-resume,.qf-resume-btn.qf-resume-resume{background:var(--accent);color:var(--accent-ink);border:none}
+.qf-resume-btn:not(.qf-resume-resume){background:none;color:var(--ink-dim)}
+.qf-resume-btn:not(.qf-resume-resume):hover{color:var(--ink);border-color:var(--line-strong)}
+
+/* toast */
+.qf-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;max-width:min(92vw,420px);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+.qf-toast-ico{flex:none;color:var(--accent);display:grid;place-items:center}
+.qf-toast-ico svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
+.qf-toast-body{flex:1;font-size:.84rem;color:var(--ink-dim);font-weight:300;line-height:1.4}
+.qf-toast-body b,.qf-toast-body strong{color:var(--ink);font-weight:500}
+.qf-toast-close{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px}
+.qf-toast-error .qf-toast-ico{color:#E8A0A0}
+.qf-toast-warn .qf-toast-ico{color:var(--accent-soft)}
+
+/* checkpoint interstitial */
+.qf-checkpoint{display:flex;flex-direction:column;align-items:center;text-align:center;padding:clamp(2rem,10vh,5rem) 0;max-width:460px;margin:0 auto}
+.qf-checkpoint-avatar{position:relative;width:80px;height:80px;margin-bottom:1.2rem}
+.qf-checkpoint-avatar img{width:80px;height:80px;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.4)}
+.qf-checkpoint-pulse{position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.4);animation:qfpulse 2s ease-out infinite}
+@keyframes qfpulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.25);opacity:0}}
+.qf-checkpoint-eyebrow{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.qf-checkpoint-title{font-family:var(--font-display);font-weight:300;font-size:clamp(1.5rem,4.5vw,2rem);color:var(--ink);margin:.5rem 0 1rem;line-height:1.1}
+.qf-checkpoint-title em{font-style:italic;color:var(--accent-soft)}
+.qf-checkpoint-list{font-size:.95rem;color:var(--ink-dim);font-weight:300;line-height:1.7;max-width:36ch}
+.qf-checkpoint-progress{width:120px;height:3px;border-radius:99px;background:var(--line);margin:1.6rem 0;overflow:hidden}
+.qf-checkpoint-progress span{display:block;height:100%;background:var(--accent);width:40%;animation:qfcp 1.6s ease-in-out infinite}
+@keyframes qfcp{0%{margin-left:-40%}100%{margin-left:100%}}
+.qf-checkpoint-skip{font-size:.85rem;color:var(--ink-dim);background:none;border:1px solid var(--line);border-radius:99px;padding:11px 20px;min-height:44px;font-family:inherit;cursor:pointer}
+.qf-checkpoint-skip:hover{color:var(--accent);border-color:var(--accent)}
+@media(prefers-reduced-motion:reduce){.qf-checkpoint-pulse,.qf-checkpoint-progress span{animation:none}}
+
+/* review snapshot */
+.qf2-summary{display:flex;flex-direction:column;gap:9px;margin-top:clamp(1.1rem,3vw,1.4rem)}
+.qf2-sum-row{display:flex;align-items:center;gap:12px;background:var(--surface-1);border:1px solid var(--line);border-radius:13px;padding:13px 14px;transition:border-color .2s}
+.qf2-sum-row:hover{border-color:var(--line-strong)}
+.qf2-sum-row-ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:var(--accent);flex:none;background:rgba(var(--accent-rgb),.08)}
+.qf2-sum-row-ico svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.qf2-sum-row-main{flex:1;min-width:0}
+.qf2-sum-row-label{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.qf2-sum-row-value{font-size:.92rem;color:var(--ink);margin-top:2px;word-wrap:break-word}
+.qf2-sum-row-subvalue{font-size:.8rem;color:var(--ink-dim);font-weight:300;margin-top:1px}
+.qf2-edit-btn{font-size:.78rem;color:var(--accent);background:none;border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;cursor:pointer;flex:none}
+.qf2-edit-btn:hover{border-color:var(--accent)}
+
+/* inline edit panels */
+.qf2-sum-edit-panel,.qf2-edit-panel{background:var(--surface-2);border:1px solid var(--accent);border-radius:13px;padding:14px}
+.qf2-sum-edit-header,.qf2-edit-note{font-size:.8rem;color:var(--ink-dim);margin-bottom:.7rem}
+.qf2-sum-edit-fields{display:flex;flex-direction:column;gap:9px}
+.qf2-edit-input{background:var(--surface-1);border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:inherit;font-size:16px;font-weight:300;padding:12px 13px;min-height:48px;width:100%}
+.qf2-edit-input:focus{outline:none;border-color:var(--accent)}
+.qf2-sum-edit-actions{display:flex;gap:9px;margin-top:.9rem}
+.qf2-sum-edit-save{flex:1;background:var(--accent);color:var(--accent-ink);border:none;border-radius:99px;padding:11px;font-family:inherit;font-size:.88rem;font-weight:500;cursor:pointer;min-height:44px}
+.qf2-sum-edit-cancel{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:99px;padding:11px 18px;font-family:inherit;font-size:.88rem;cursor:pointer;min-height:44px}
+.qf2-confirm-badge{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;color:var(--accent-soft)}
+
+/* phone opt-in + notes + trust (review) */
+.qf2-phone-optin-link{margin-top:14px;font-size:.84rem;color:var(--ink-dim);background:none;border:none;font-family:inherit;cursor:pointer;min-height:44px}
+.qf2-phone-optin-link:hover{color:var(--accent)}
+.qf2-phone-optin-expanded{margin-top:.6rem}
+.qf2-phone-optin-expanded[hidden]{display:none}
+.qf2-textarea-wrap{position:relative;margin-top:14px}
+.qf2-textarea{background:var(--surface-1);border:1px solid var(--line);border-radius:13px;color:var(--ink);font-family:inherit;font-size:16px;font-weight:300;padding:13px 14px;width:100%;resize:none;min-height:78px}
+.qf2-textarea:focus{outline:none;border-color:var(--accent)}
+.qf2-textarea::placeholder{color:var(--ink-faint)}
+.qf2-textarea-counter{position:absolute;right:12px;bottom:10px;font-size:.7rem;color:var(--ink-faint)}
+.qf2-trust{display:flex;flex-wrap:wrap;gap:7px 14px;margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.qf2-trust-item{font-size:.72rem;color:var(--ink-faint);display:inline-flex;align-items:center;gap:6px}
+.qf2-trust-item svg{width:13px;height:13px;stroke:var(--accent);stroke-width:2;fill:none}
+
+/* what-happens-next (#3) */
+.qf-next{display:flex;flex-direction:column;gap:.7rem;margin-top:clamp(1.2rem,3vw,1.6rem);padding-top:1.2rem;border-top:1px solid var(--line)}
+.qf-next-item{display:flex;align-items:center;gap:11px;font-size:.84rem;color:var(--ink-dim);font-weight:300}
+.qf-next-n{width:24px;height:24px;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.4);color:var(--accent);font-size:.72rem;font-weight:500;display:grid;place-items:center;flex:none}
+
+/* Turnstile slot — reserve space (anti-CLS) */
+#qfTurnstile{margin-top:1rem;min-height:65px;display:flex;justify-content:center}
+
+/* floating submit CTA (review) */
+.qf-plan-floating-cta{position:fixed;left:0;right:0;bottom:0;z-index:900;padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--black) 70%,transparent)}
+.qf-plan-floating-cta[hidden]{display:none}
+.qf-plan-floating-cta .qf2-cta{margin-top:0;max-width:560px;margin-inline:auto}
+
+/* success */
+.qf2-success-body{text-align:center;max-width:480px;margin:0 auto;padding-top:1rem}
+.qf2-success-title{font-family:var(--font-display);font-weight:300;font-size:clamp(1.8rem,5vw,2.6rem);color:var(--ink);line-height:1.05}
+.qf2-success-title em{font-style:italic;color:var(--accent-soft)}
+.qf2-success-subtitle{font-size:1rem;color:var(--ink-dim);font-weight:300;margin-top:.9rem;line-height:1.6}
+.qf2-success-extra,.qf2-success-ref{font-size:.85rem;color:var(--ink-faint);margin-top:1rem}
+.qf2-success-ref strong{color:var(--ink-dim)}
+
+/* ════════ porter cards (day-porter path) ════════ */
+.qf-dp-prompt-promise{font-size:.86rem;color:var(--ink-faint);font-weight:300;margin-top:.4rem}
+.qf-dp-porters{display:flex;flex-direction:column;gap:11px;margin-top:1.2rem}
+.qf-dp-porter{background:var(--surface-1);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.qf-dp-porter.is-open,.qf-dp-porter.is-active{border-color:var(--line-strong)}
+.qf-dp-porter-header{display:flex;align-items:center;gap:11px;padding:14px;cursor:pointer;width:100%;background:none;border:none;font-family:inherit;text-align:left}
+.qf-dp-porter-title{font-family:var(--font-display);font-weight:400;font-size:1.02rem;color:var(--ink);flex:none}
+.qf-dp-porter-info,.qf-dp-porter-summary{font-size:.8rem;color:var(--ink-dim);font-weight:300;flex:1;min-width:0}
+.qf-dp-porter-chevron,.qf-dp-arrow{margin-left:auto;color:var(--ink-faint);flex:none;transition:transform .25s}
+.qf-dp-porter.is-open .qf-dp-porter-chevron{transform:rotate(180deg)}
+.qf-dp-porter-chevron svg,.qf-dp-arrow svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
+.qf-dp-porter-actions{display:flex;gap:8px}
+.qf-dp-porter-edit,.qf-dp-porter-remove{background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink-dim);font-family:inherit;font-size:.76rem;padding:6px 10px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.qf-dp-porter-remove:hover{color:#E8A0A0;border-color:rgba(232,160,160,.4)}
+.qf-dp-porter-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:1rem}
+.qf-dp-section{display:flex;flex-direction:column;gap:.6rem}
+.qf-dp-day-row{display:flex;flex-wrap:wrap;gap:8px}
+.qf-dp-presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.qf-dp-preset{font-size:.78rem;color:var(--ink-faint);background:none;border:1px solid var(--line);border-radius:99px;padding:8px 13px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;cursor:pointer}
+.qf-dp-preset:hover{color:var(--ink);border-color:var(--line-strong)}
+.qf-dp-preset-sep{color:var(--ink-faint);opacity:.4}
+.qf-dp-hours-mode{display:flex;gap:8px}
+.qf-dp-hours-mode-opt{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;color:var(--ink-dim);font-family:inherit;font-size:.84rem;padding:11px;min-height:46px;cursor:pointer}
+.qf-dp-hours-mode-opt.is-selected,.qf-dp-hours-mode-opt[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-soft);background:rgba(var(--accent-rgb),.08)}
+.qf-dp-time-row,.qf-dp-custom-row{display:flex;align-items:center;gap:10px}
+.qf-dp-custom-day{font-size:.8rem;color:var(--ink-dim);min-width:48px;flex:none}
+.qf-dp-time-field{flex:1}
+.qf-dp-time-input{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:inherit;font-size:16px;padding:10px 12px;min-height:46px;width:100%}
+.qf-dp-time-input:focus{outline:none;border-color:var(--accent)}
+.qf-dp-time-summary,.qf-dp-custom-empty{font-size:.8rem;color:var(--ink-faint);font-weight:300}
+.qf-dp-custom-rows{display:flex;flex-direction:column;gap:8px}
+.qf-dp-add-porter{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line-strong);border-radius:13px;padding:14px;color:var(--ink-dim);font-family:inherit;font-size:.9rem;cursor:pointer;margin-top:11px;min-height:50px}
+.qf-dp-add-porter:hover{border-color:var(--accent);color:var(--accent)}
+.qf-dp-add-porter-plus{font-size:1.2rem;line-height:1;color:var(--accent)}
+.qf-dp-cta-wrap{margin-top:1.4rem}
+.qf-dp-cta-status{display:block;text-align:center;font-size:.76rem;color:var(--ink-faint);margin-top:.6rem}
+.qf-dp-team-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
+.qf-dp-team-preview-tag{font-size:.72rem;color:var(--ink-dim);background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+
+/* ============================================================
+   QUOTE WIZARD — "MARQUEE" (full-bleed NYC skyline, content over)
+   The dusk photo IS the stage on every screen; content sits on it
+   with an editorial scrim and translucent frosted tiles.
+   Pure CSS on FROZEN DOM/JS — no new nodes, engine untouched.
+   ============================================================ */
+
+/* The stage = the full-bleed dusk photo + a bottom-weighted scrim,
+   on EVERY screen. Mobile keeps the photo — it's the identity. */
+.qf-stage{
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.66) 0%, rgba(12,14,13,.40) 20%, rgba(12,14,13,.28) 46%, rgba(12,14,13,.58) 74%, rgba(12,14,13,.92) 92%, var(--black) 100%),
+    url(../images/stock/ecco-nyc-dusk.jpg);
+  background-size:cover;
+  background-position:center 42%;
+  background-repeat:no-repeat;
+}
+
+/* ── Welcome background = ECCO team in a conference room (Alex's pick 2026-06-21).
+   Strong left+bottom scrim keeps the white headline + cards legible over it.
+   background-size:cover + repeat inherited from .qf-stage above. ── */
+.qf-stage:has(#qfScreen_welcome.is-active){
+  background-image:
+    linear-gradient(90deg, rgba(12,14,13,.92) 0%, rgba(12,14,13,.70) 34%, rgba(12,14,13,.38) 62%, rgba(12,14,13,.46) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.34) 40%, rgba(12,14,13,.88) 100%),
+    url(../images/stock/welcome-team-conference.jpg);
+  background-position:center 30%;
+}
+
+
+.qf-stage::before{ display:none; }   /* drop the old centered accent glow */
+
+/* Translucent frosted tiles so the skyline reads behind the content —
+   the Marquee "floating on the photo" feel. Accent states preserved. */
+.qf2-card,.qf2-field,.qf2-quiz-panel,.qf2-size-card,.qf2-numeric-input,
+.qf2-sum-row,.qf2-textarea,.qf2-edit-input,.qf-resume-inner,
+.qf2-sum-edit-panel,.qf2-edit-panel{
+  background:rgba(13,16,15,.55);
+  -webkit-backdrop-filter:blur(14px) saturate(1.1);
+          backdrop-filter:blur(14px) saturate(1.1);
+  border-color:var(--line-strong);
+}
+.qf2-chip,.qf2-quiz-chip{
+  background:rgba(13,16,15,.50);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-color:var(--line-strong);
+}
+.qf2-card.is-selected,.qf2-card[aria-pressed="true"],
+.qf2-size-card.is-selected,.qf2-size-card[aria-pressed="true"]{
+  background:rgba(var(--accent-rgb),.16);
+}
+.qf2-chip.is-selected,.qf2-chip[aria-pressed="true"],
+.qf2-quiz-chip.is-selected,.qf2-quiz-chip[aria-pressed="true"]{
+  background:rgba(var(--accent-rgb),.18);
+}
+
+/* Editorial headline scale + a soft shadow for legibility on the photo. */
+.qf2-prompt-title{
+  font-size:clamp(1.85rem,5.2vw,2.6rem);
+  text-shadow:0 2px 26px rgba(0,0,0,.5);
+}
+.qf2-success-title{ text-shadow:0 2px 26px rgba(0,0,0,.5); }
+/* light secondary text needs a shadow to stay legible over the photo */
+.qf2-prompt-sub,.qf2-success-subtitle,.qf2-cta-hint{
+  text-shadow:0 1px 12px rgba(0,0,0,.55);
+}
+/* AYS Ola 4 HI-7 — the small secondary labels sit over the photo too. The
+   same soft shadow keeps the flowbar text, trust strip, card blurbs and chips
+   clear of bright patches (WCAG AA). Harmless over the dark frosted chips. */
+.qf2-flowbar-step-count,.qf2-flowbar-skip,.qf2-flowbar-mobile-label,
+.qf2-welcome-trust-item,.qf2-trust-item,.qf2-card-includes,
+.qf2-chip,.qf2-chip-time-range,.qf2-timeline-when,.qf2-timeline-what{
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+}
+
+/* ---- DESKTOP: content left-anchored, skyline fills the canvas ---- */
+@media (min-width:880px){
+  .qf-stage{
+    align-items:flex-start;
+    justify-content:center;
+    padding-left:clamp(48px,7vw,120px);
+    padding-right:clamp(40px,8vw,140px);
+    padding-top:clamp(3rem,8vh,5rem);
+    background:
+      linear-gradient(90deg, rgba(12,14,13,.88) 0%, rgba(12,14,13,.55) 32%, rgba(12,14,13,.14) 64%, transparent 84%),
+      linear-gradient(180deg, rgba(12,14,13,.34) 0%, rgba(12,14,13,.12) 42%, rgba(12,14,13,.52) 100%),
+      url(../images/stock/ecco-nyc-dusk.jpg);
+    background-size:cover;
+    background-position:center 22%;
+    background-repeat:no-repeat;
+  }
+  .qf-stage .qf-screen.is-active{ margin:0; max-width:600px; }
+  /* the 7-station rail (~820px) can't fit the column — use the compact bar */
+  .qf2-flowbar{ display:none; }
+  .qf2-flowbar-mobile{ display:flex; }
+  /* welcome = the marquee hero: oversized headline */
+  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(2.8rem,4.4vw,4rem); line-height:1; }
+  /* keep the fixed submit CTA aligned to the left content column */
+  .qf-plan-floating-cta .qf2-cta{ margin-inline:0; }
+}
+
+/* ============================================================
+   WELCOME = the Marquee HERO — exactly like the approved mockup #2:
+   full-bleed dusk skyline, content fills the lower canvas (not a side
+   column), oversized headline, the 3 service tiles in a horizontal row
+   (icon on top). Scoped to .is-welcome so the other screens are
+   unaffected (those get their own per-screen photo + layout next).
+   ============================================================ */
+/* tiles are icon-on-top on every viewport (mobile = stacked tiles) */
+.qf-screen.is-welcome .qf2-grid-3 .qf2-card{
+  flex-direction:column; align-items:flex-start; gap:12px; padding:17px;
+}
+.qf-screen.is-welcome .qf2-card-icon{ width:40px; height:40px; }
+
+@media (min-width:880px){
+  /* bottom-anchored content + bottom-weighted scrim; skyline fills the top */
+  .qf-stage:has(.qf-screen.is-welcome.is-active){
+    align-items:flex-start;
+    justify-content:flex-end;
+    padding:clamp(40px,6vh,72px) clamp(48px,7vw,110px);
+    background:
+      linear-gradient(180deg, rgba(12,14,13,.26) 0%, rgba(12,14,13,.06) 24%, rgba(12,14,13,.50) 62%, rgba(12,14,13,.90) 90%, var(--black) 100%),
+      linear-gradient(90deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.10) 46%, transparent 74%),
+      url(../images/stock/ecco-nyc-dusk.jpg);
+    background-size:cover;
+    background-position:center 26%;
+    background-repeat:no-repeat;
+  }
+  /* content spans wide across the bottom — NOT a 600px side column */
+  .qf-stage .qf-screen.is-welcome.is-active{ max-width:920px; margin:0; }
+  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(3rem,5.4vw,4.6rem); line-height:.98; }
+  .qf-screen.is-welcome .qf2-prompt-sub{ font-size:1.12rem; max-width:48ch; }
+  /* the 3 tiles in a horizontal row */
+  .qf-screen.is-welcome .qf2-grid-3{ flex-direction:row; gap:14px; }
+  .qf-screen.is-welcome .qf2-grid-3 .qf2-card{ flex:1 1 0; min-width:0; padding:20px; }
+  .qf-screen.is-welcome .qf2-card-label{ font-size:1.18rem; }
+}
+
+/* ---- REDUCED MOTION ---------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  .qf2-card,.qf2-cta,.qf2-size-card,.qf2-chip{ transition:none; }
+}
+
+/* ============================================================
+   SUCCESS SCREEN FIX — timeline, ref chip, spam hint, back link.
+   Fixes the broken ~full-size .qf2-timeline-ico svg (24x24, no w/h).
+   .qf2-success-body is centered; timeline left-aligned internally,
+   centered as a group. base + desktop.
+   ============================================================ */
+.qf2-timeline{
+  display:flex; flex-direction:column; gap:0;
+  margin:1.6rem auto 0; max-width:340px;
+  text-align:left; position:relative;
+}
+.qf2-timeline::before{
+  content:""; position:absolute; left:17px; top:20px; bottom:20px;
+  width:1px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(var(--accent-rgb),.5) 0%, var(--line) 100%);
+}
+.qf2-timeline-item{
+  display:flex; align-items:flex-start; gap:14px;
+  padding:11px 0; position:relative;
+}
+.qf2-timeline-ico{
+  flex:none; width:34px; height:34px; border-radius:50%;
+  display:grid; place-items:center;
+  background:rgba(var(--accent-rgb),.10);
+  border:1px solid rgba(var(--accent-rgb),.45);
+  color:var(--accent); position:relative; z-index:1;
+  box-shadow:0 0 0 4px var(--black);
+}
+.qf2-timeline-ico svg{          /* THE FIX: full-size -> 17px */
+  width:17px; height:17px; display:block;
+  stroke:currentColor; stroke-width:2; fill:none;
+}
+.qf2-timeline-text{
+  display:flex; flex-direction:column; gap:2px;
+  padding-top:2px; min-width:0;
+}
+.qf2-timeline-when{            /* small uppercase accent label (solid color) */
+  font-size:.66rem; letter-spacing:.12em; text-transform:uppercase;
+  font-weight:600; color:var(--accent);
+}
+.qf2-timeline-what{
+  font-size:.9rem; line-height:1.5; font-weight:300; color:var(--ink-dim);
+}
+.qf2-reference-id{
+  margin:1.7rem auto 0;
+  display:inline-flex; align-items:center; gap:.5ch; flex-wrap:wrap;
+  justify-content:center;
+  background:var(--surface-2); border:1px solid var(--line-strong);
+  border-radius:99px; padding:9px 16px; min-height:40px;
+  font-size:.78rem; color:var(--ink-faint); font-weight:300;
+}
+.qf2-reference-id strong{
+  font-family:var(--font-display); font-weight:400; font-size:.95rem;
+  color:var(--accent-soft); letter-spacing:.04em; cursor:help;
+}
+.qf2-spam-hint{
+  margin:1rem auto 0; max-width:300px;
+  font-size:.76rem; line-height:1.5; color:var(--ink-faint); font-weight:300;
+}
+.qf2-spam-hint strong{ color:var(--ink-dim); font-weight:400; }
+.qf2-back-link{
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:1.8rem; min-height:44px; padding:0 4px;
+  font-size:.85rem; color:var(--ink-dim); font-weight:300;
+  text-decoration:none; transition:color .25s ease;
+}
+.qf2-back-link:hover,
+.qf2-back-link:focus-visible{ color:var(--accent); }
+.qf2-back-link:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+@media (prefers-reduced-motion:reduce){ .qf2-back-link{ transition:none; } }
+.qf2-success-next{ margin-top:.9rem; font-size:.8rem; color:var(--ink-dim); font-weight:300; }
+.qf2-success-next a{ color:var(--ink-dim); text-decoration:underline; text-underline-offset:2px; transition:color .25s ease; }
+.qf2-success-next a:hover,.qf2-success-next a:focus-visible{ color:var(--accent); }
+
+@media (min-width:880px){
+  .qf-screen.is-success .qf2-success-body{ max-width:460px; }
+  .qf2-timeline{ max-width:360px; }
+}
+
+/* ============================================================
+   PHASE 2 — PER-SCREEN PHOTOS + FULL-CANVAS LAYOUT
+   Each screen gets its own full-bleed photo and, on desktop, the
+   content fills the canvas (wide, centered) instead of a side column.
+   Scoped per screen via :has(#qfScreen_X.is-active).
+   ============================================================ */
+
+/* ---- SPACE — the premium lobby; "the spaces we care for" ---- */
+.qf-stage:has(#qfScreen_space.is-active){
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.86) 0%, rgba(12,14,13,.78) 22%, rgba(12,14,13,.74) 50%, rgba(12,14,13,.84) 78%, rgba(12,14,13,.96) 94%, var(--black) 100%),
+    url(../images/stock/ecco-cc-hero-lobby.jpg);
+  background-size:cover; background-position:center 42%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_space.is-active){
+    align-items:center; justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
+    background:
+      radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.88) 0%, rgba(12,14,13,.83) 48%, rgba(12,14,13,.80) 76%, rgba(12,14,13,.92) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.76) 0%, rgba(12,14,13,.68) 36%, rgba(12,14,13,.84) 100%),
+      url(../images/stock/ecco-cc-hero-lobby.jpg);
+    background-size:cover; background-position:center 42%; background-repeat:no-repeat;
+  }
+  /* content fills the canvas — wide, centered, NOT a 600px side column */
+  #qfScreen_space.is-active{ max-width:1000px; margin:0 auto; width:100%; }
+  #qfScreen_space .qf2-prompt-title{ font-size:clamp(2.4rem,4vw,3.4rem); }
+  #qfScreen_space .qf2-prompt{ text-align:center; }
+  #qfScreen_space .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+  /* the 6 cards spread wide across the canvas */
+  #qfScreen_space .qf2-grid-6{ grid-template-columns:repeat(3,1fr); gap:14px; max-width:none; }
+  #qfScreen_space .qf2-grid-6 .qf2-card{ padding:22px 20px; min-height:122px; }
+  #qfScreen_space .qf2-space-other-wrap,
+  #qfScreen_space .qf2-cta{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+
+/* SPACE cards — each shows its REAL space-type photo (icon top, label bottom). */
+.qf-screen.is-space .qf2-grid-6 .qf2-card{
+  position:relative; overflow:hidden;
+  justify-content:space-between;          /* icon top, label pinned bottom */
+  min-height:172px;
+  background-size:cover; background-position:center;
+  border-color:var(--line-strong);
+  -webkit-backdrop-filter:none; backdrop-filter:none;   /* the photo replaces the frost */
+  transition:transform .3s ease, border-color .25s ease, box-shadow .3s ease;
+}
+.qf-screen.is-space .qf2-grid-6 .qf2-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(var(--accent-rgb),.55);
+  box-shadow:0 18px 42px -22px rgba(0,0,0,.9);
+}
+.qf-screen.is-space .qf2-grid-6 .qf2-card.is-selected,
+.qf-screen.is-space .qf2-grid-6 .qf2-card[aria-pressed="true"]{
+  border-color:var(--accent);
+  background-color:transparent;
+  box-shadow:0 0 0 1px var(--accent), 0 18px 46px -20px rgba(var(--accent-rgb),.45);
+}
+.qf-screen.is-space .qf2-card-icon{
+  background:rgba(12,14,13,.5); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  border-color:rgba(var(--accent-rgb),.6);
+}
+.qf-screen.is-space .qf2-card-label{ text-shadow:0 1px 10px rgba(0,0,0,.75); }
+.qf-screen.is-space .qf2-card-hint{ color:var(--ink-dim); text-shadow:0 1px 8px rgba(0,0,0,.75); }
+/* per-card photo + scrim (bottom-weighted for the label; overlay normalizes bright shots) */
+.qf-screen.is-space .qf2-card[data-space="Office"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.52) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.86) 100%),url(../images/stock/ecco-v-corporate.jpg); }
+.qf-screen.is-space .qf2-card[data-space="Medical"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.56) 0%,rgba(12,14,13,.44) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-medical.jpg); }
+.qf-screen.is-space .qf2-card[data-space="Retail"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-retail.jpg); }
+.qf-screen.is-space .qf2-card[data-space="Restaurant"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-restaurant.jpg); }
+.qf-screen.is-space .qf2-card[data-space="Fitness"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.44) 0%,rgba(12,14,13,.30) 38%,rgba(12,14,13,.82) 100%),url(../images/stock/ecco-v-gym.jpg); }
+.qf-screen.is-space .qf2-card[data-space="School"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.60) 0%,rgba(12,14,13,.46) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-school.jpg); }
+
+/* ---- SIZE — a wide modern office; conveys scale/footage ---- */
+.qf-stage:has(#qfScreen_size.is-active){
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.64) 0%, rgba(12,14,13,.44) 24%, rgba(12,14,13,.40) 52%, rgba(12,14,13,.64) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
+    url(../images/stock/hero-office.jpg);
+  background-size:cover; background-position:center 55%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_size.is-active){
+    align-items:center; justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
+    background:
+      radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.68) 0%, rgba(12,14,13,.56) 48%, rgba(12,14,13,.54) 76%, rgba(12,14,13,.74) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.54) 0%, rgba(12,14,13,.40) 36%, rgba(12,14,13,.60) 100%),
+      url(../images/stock/hero-office.jpg);
+    background-size:cover; background-position:center 52%; background-repeat:no-repeat;
+  }
+  #qfScreen_size.is-active{ max-width:900px; margin:0 auto; width:100%; }
+  #qfScreen_size .qf2-prompt{ text-align:center; }
+  #qfScreen_size .qf2-prompt-title{ font-size:clamp(2.4rem,4vw,3.4rem); }
+  #qfScreen_size .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+  #qfScreen_size .qf2-size-grid{ grid-template-columns:repeat(3,1fr); gap:14px; max-width:none; }
+  #qfScreen_size .qf2-numeric-wrap,
+  #qfScreen_size .qf2-walk-hint,
+  #qfScreen_size .qf2-cta{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+/* refined range cards (bigger, number prominent) — all viewports */
+.qf-screen.is-size .qf2-size-card{ min-height:100px; padding:22px 12px; }
+.qf-screen.is-size .qf2-size-sqft-value{ font-size:1.55rem; }
+.qf-screen.is-size .qf2-walk-hint-ico{ display:grid; place-items:center; flex:none; color:var(--accent); }
+.qf-screen.is-size .qf2-walk-hint-ico svg{ width:18px; height:18px; fill:none; stroke:currentColor; }
+/* capped CTAs must be block-level (flex) so margin:auto centers them
+   (the base .qf2-cta is inline-flex, which margin:auto can't center) */
+#qfScreen_space .qf2-cta, #qfScreen_size .qf2-cta{ display:flex; }
+
+
+/* ---- DAYS — window-cleaning in action (B&W); "the work / schedule" ---- */
+.qf-stage:has(#qfScreen_days.is-active){
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.72) 0%, rgba(12,14,13,.56) 24%, rgba(12,14,13,.52) 52%, rgba(12,14,13,.72) 80%, rgba(12,14,13,.93) 95%, var(--black) 100%),
+    url(../images/stock/ecco-clean-squeegee-bw.jpg);
+  background-size:cover; background-position:center 35%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_days.is-active){
+    align-items:center; justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
+    background:
+      radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.78) 0%, rgba(12,14,13,.66) 48%, rgba(12,14,13,.64) 76%, rgba(12,14,13,.80) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.66) 100%),
+      url(../images/stock/ecco-clean-squeegee-bw.jpg);
+    background-size:cover; background-position:center 38%; background-repeat:no-repeat;
+  }
+  #qfScreen_days.is-active{ max-width:720px; margin:0 auto; width:100%; }
+  #qfScreen_days .qf2-prompt{ text-align:center; }
+  #qfScreen_days .qf2-prompt-title{ font-size:clamp(2.3rem,3.8vw,3.2rem); }
+  #qfScreen_days .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+/* center chips + their labels on the centered full-canvas screens */
+#qfScreen_days .qf2-chip-row,
+#qfScreen_info .qf2-chip-row,
+#qfScreen_location .qf2-chip-row{ justify-content:center; }
+#qfScreen_days .qf2-chip-label, #qfScreen_info .qf2-chip-label, #qfScreen_location .qf2-chip-label,
+#qfScreen_days .qf2-section-label, #qfScreen_days .qf2-time-helper{ text-align:center; }
+/* input fields + edit inputs need MORE opacity than cards so placeholders/
+   icons stay legible over a photo (cards carry their own content; inputs don't) */
+.qf2-field, .qf2-numeric-input, .qf2-textarea, .qf2-edit-input{ background:rgba(11,14,13,.78); }
+.qf2-field-ico{ color:var(--ink-dim); }
+.qf2-field input::placeholder, .qf2-numeric-input::placeholder, .qf2-textarea::placeholder{ color:var(--ink-dim); }
+/* review snapshot rows + panels also carry text → bump opacity over photos */
+.qf2-sum-row, .qf-resume-inner, .qf2-sum-edit-panel, .qf2-edit-panel{ background:rgba(11,14,13,.72); }
+
+/* ---- SCHEDULE (porters) — B/W mopping; cleaning in motion (Alex's pick 2026-06-21, swapped from pro-wiping) ---- */
+.qf-stage:has(#qfScreen_schedule.is-active){
+  background:
+    radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.58) 0%, rgba(12,14,13,.50) 50%, rgba(12,14,13,.78) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.42) 38%, rgba(12,14,13,.78) 100%),
+    url(../images/stock/ecco-clean-mopping-bw.jpg);
+  background-size:cover; background-position:center 38%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_schedule.is-active){
+    align-items:center; justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
+    background:
+      radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.58) 0%, rgba(12,14,13,.50) 50%, rgba(12,14,13,.78) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.42) 38%, rgba(12,14,13,.78) 100%),
+      url(../images/stock/ecco-clean-mopping-bw.jpg);
+    background-size:cover; background-position:center 38%; background-repeat:no-repeat;
+  }
+  #qfScreen_schedule.is-active{ max-width:720px; margin:0 auto; width:100%; }
+  #qfScreen_schedule .qf2-prompt{ text-align:center; }
+  #qfScreen_schedule .qf2-prompt-title{ font-size:clamp(2.3rem,3.8vw,3.2rem); }
+  #qfScreen_schedule .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+
+/* ---- LOCATION — terracotta industrial interior (Alex's pick 2026-06-21) ---- */
+.qf-stage:has(#qfScreen_location.is-active){
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.42) 26%, rgba(12,14,13,.40) 54%, rgba(12,14,13,.58) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
+    url(../images/stock/int-terracotta.jpg);
+  background-size:cover; background-position:center 45%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_location.is-active){
+    align-items:center; justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
+    background:
+      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.52) 0%, rgba(12,14,13,.44) 48%, rgba(12,14,13,.46) 76%, rgba(12,14,13,.72) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.46) 0%, rgba(12,14,13,.36) 36%, rgba(12,14,13,.66) 100%),
+      url(../images/stock/int-terracotta.jpg);
+    background-size:cover; background-position:center 45%; background-repeat:no-repeat;
+  }
+  #qfScreen_location.is-active{ max-width:640px; margin:0 auto; width:100%; }
+  #qfScreen_location .qf2-prompt{ text-align:center; }
+  #qfScreen_location .qf2-prompt-title{ font-size:clamp(2.2rem,3.6vw,3rem); }
+  #qfScreen_location .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+
+/* ---- INFO / IDENTITY — premium reception; "where your proposal goes" ---- */
+.qf-stage:has(#qfScreen_info.is-active){
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.74) 0%, rgba(12,14,13,.56) 26%, rgba(12,14,13,.52) 54%, rgba(12,14,13,.72) 80%, rgba(12,14,13,.93) 95%, var(--black) 100%),
+    url(../images/stock/ecco-trust-hero.jpg);
+  background-size:cover; background-position:center 40%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_info.is-active){
+    align-items:center; justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
+    background:
+      radial-gradient(130% 120% at 50% 46%, rgba(12,14,13,.74) 0%, rgba(12,14,13,.60) 46%, rgba(12,14,13,.58) 74%, rgba(12,14,13,.78) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.46) 38%, rgba(12,14,13,.62) 100%),
+      url(../images/stock/ecco-trust-hero.jpg);
+    background-size:cover; background-position:center 42%; background-repeat:no-repeat;
+  }
+  #qfScreen_info.is-active{ max-width:640px; margin:0 auto; width:100%; }
+  #qfScreen_info .qf2-prompt{ text-align:center; }
+  #qfScreen_info .qf2-prompt-title{ font-size:clamp(2.2rem,3.6vw,3rem); }
+  #qfScreen_info .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+
+/* ---- REVIEW — B/W window pole; cleaner at glass (Alex's pick 2026-06-21, swapped from spray-noir) ---- */
+.qf-stage:has(#qfScreen_contact.is-active){
+  background:
+    radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
+    url(../images/stock/bw-window-pole.jpg);
+  background-size:cover; background-position:center 45%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_contact.is-active){
+    align-items:center; justify-content:flex-start;
+    padding:clamp(2.5rem,5vh,4rem) clamp(40px,6vw,90px) clamp(6rem,12vh,8rem);
+    background:
+      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
+      url(../images/stock/bw-window-pole.jpg);
+    background-size:cover; background-position:center 45%; background-repeat:no-repeat;
+  }
+  #qfScreen_contact.is-active{ max-width:720px; margin:0 auto; width:100%; }
+  #qfScreen_contact .qf2-prompt{ text-align:center; }
+  #qfScreen_contact .qf2-prompt-title{ font-size:clamp(2.2rem,3.6vw,3rem); }
+  #qfScreen_contact .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
+}
+
+/* ---- SUCCESS — spray noir (locked 2026-06-21; bg holds steady across contact→submit) ---- */
+.qf-stage:has(#qfScreen_success.is-active){
+  background:
+    linear-gradient(180deg, rgba(12,14,13,.54) 0%, rgba(12,14,13,.42) 26%, rgba(12,14,13,.44) 54%, rgba(12,14,13,.62) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
+    url(../images/stock/bw-spray-noir.jpg);
+  background-size:cover; background-position:center 52%; background-repeat:no-repeat;
+}
+@media (min-width:880px){
+  .qf-stage:has(#qfScreen_success.is-active){
+    align-items:center; justify-content:center;
+    background:
+      radial-gradient(130% 120% at 50% 44%, rgba(12,14,13,.48) 0%, rgba(12,14,13,.44) 50%, rgba(12,14,13,.64) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.42) 0%, rgba(12,14,13,.36) 40%, rgba(12,14,13,.72) 100%),
+      url(../images/stock/bw-spray-noir.jpg);
+    background-size:cover; background-position:center 52%; background-repeat:no-repeat;
+  }
+}

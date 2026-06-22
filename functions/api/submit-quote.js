@@ -175,6 +175,8 @@ export async function onRequestPost(context) {
       'space','spaceOther','urg','size','exactSize','janDays',
       'hrs','customHrs','startTime','porterHours','dpDays','dpPorters','porters','porterCount','dpAreas','areaOther',
       'timeOfDay','serviceCertainty','needsSiteWalk','scheduleAtypical',
+      // 2026-06-20 — modernization signals: situation + timeline chips, lead source.
+      'situation','timeline','source',
       'turnstileToken'
     ]);
     for (const k of Object.keys(body)) {
@@ -222,6 +224,28 @@ export async function onRequestPost(context) {
     // V2 2026-04-24 — serviceCertainty: only allow specific enum values.
     if (body.serviceCertainty && body.serviceCertainty !== 'guided_via_quiz') {
       delete body.serviceCertainty;
+    }
+    // 2026-06-20 — situation + timeline enums (frontend chip groups). Drop any
+    // off-list value; defense-in-depth, frontend already constrains these.
+    if (body.situation && body.situation !== 'new' && body.situation !== 'switching') {
+      delete body.situation;
+    }
+    const TIMELINE_VALUES = new Set(['asap', 'weeks', 'exploring']);
+    if (body.timeline && !TIMELINE_VALUES.has(body.timeline)) {
+      delete body.timeline;
+    }
+    // 2026-06-20 — source attribution object: keep only known string fields,
+    // each trimmed + capped. Drop the whole key if malformed or empty.
+    if (body.source && typeof body.source === 'object' && !Array.isArray(body.source)) {
+      const SRC_FIELDS = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid','referrer','landing'];
+      const cleanSrc = {};
+      for (const f of SRC_FIELDS) {
+        const sv = body.source[f];
+        if (typeof sv === 'string' && sv.trim()) cleanSrc[f] = sv.trim().slice(0, 300);
+      }
+      if (Object.keys(cleanSrc).length) body.source = cleanSrc; else delete body.source;
+    } else if (body.source !== undefined) {
+      delete body.source;
     }
 
     // AYS Ola 3 #4 — Turnstile fail-loud. Production MUST set CF_TURNSTILE_SECRET.
@@ -310,16 +334,30 @@ export async function onRequestPost(context) {
       serviceCertainty: 'service_certainty',
       needsSiteWalk: 'needs_site_walk',
       scheduleAtypical: 'schedule_atypical',
+      // 2026-06-20 — modernization signals
+      situation: 'current_situation',
+      timeline: 'desired_start',
+      source: 'lead_source',
     };
     const URGENCY_MAP = {
       asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'
     };
+    // 2026-06-20 — human-readable labels for the situation + timeline chips.
+    const SITUATION_MAP = { new: 'New (no cleaner today)', switching: 'Switching providers' };
+    const TIMELINE_MAP = { asap: 'As soon as possible', weeks: 'Within a few weeks', exploring: 'Just exploring' };
     const formData = {};
     for (const [k, v] of Object.entries(body)) {
       if (k.startsWith('_') || k === 'turnstileToken') continue;
       const label = KEY_MAP[k] || k;
       let value = v;
       if (k === 'urg' && URGENCY_MAP[v]) value = URGENCY_MAP[v];
+      else if (k === 'situation' && SITUATION_MAP[v]) value = SITUATION_MAP[v];
+      else if (k === 'timeline' && TIMELINE_MAP[v]) value = TIMELINE_MAP[v];
+      else if (k === 'source' && v && typeof v === 'object') {
+        // Flatten the attribution object into a compact "key=value · key=value"
+        // string so it renders cleanly in the lead email + CRM text field.
+        value = Object.entries(v).map(([sk, sv]) => sk + '=' + sv).join(' · ');
+      }
       formData[label] = value;
     }
 

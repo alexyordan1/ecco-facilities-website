@@ -67,11 +67,14 @@
   // screen that owns count + days + hours per porter.
   // 'both' (janitorial + dayporter combined) reuses Janitorial's days
   // for cleaning + the new schedule for porter staffing.
+  // 2026-06-20 — LOGIC RESTRUCTURE: identity (name+email = 'info') moved LATE,
+  // after all anonymous scoping, just before review. ONE canonical spine for
+  // every service (the divergent 'unsure' path is removed; users must pick a
+  // service card to advance).
   var FLOWS = {
-    janitorial: ['welcome', 'space', 'info', 'size', 'days', 'location', 'contact', 'success'],
-    dayporter:  ['welcome', 'space', 'info', 'schedule', 'location', 'contact', 'success'],
-    both:       ['welcome', 'space', 'info', 'size', 'days', 'schedule', 'location', 'contact', 'success'],
-    unsure:     ['welcome', 'info', 'space', 'location', 'size', 'days', 'contact', 'success']
+    janitorial: ['welcome', 'space', 'size', 'days', 'location', 'info', 'contact', 'success'],
+    dayporter:  ['welcome', 'space', 'schedule', 'location', 'info', 'contact', 'success'],
+    both:       ['welcome', 'space', 'size', 'days', 'schedule', 'location', 'info', 'contact', 'success']
   };
 
   /* -----------------------------------------------------------------------
@@ -79,43 +82,35 @@
      ----------------------------------------------------------------------- */
   // Rail station `key` must match a flow step name (used to locate current station).
   // Flow steps that don't have a station (welcome, checkpoint, success) pass through the rail.
+  // 2026-06-20 — rail order now MATCHES FLOWS exactly (identity 'You' moved to
+  // the end, before Review) so the progress map never disagrees with the real
+  // screen order.
   var RAIL_CONFIGS = {
     janitorial: [
       { key: 'welcome',  label: 'Service' },
-      { key: 'info',     label: 'You' },
       { key: 'space',    label: 'Space' },
-      { key: 'location', label: 'Location' },
       { key: 'size',     label: 'Size' },
       { key: 'days',     label: 'Schedule' },
+      { key: 'location', label: 'Location' },
+      { key: 'info',     label: 'You' },
       { key: 'contact',  label: 'Review' }
     ],
-    // D55 — dayporter mirrors the Janitorial 7-station rail; the new
-    // `schedule` station owns staffing + days + hours.
     dayporter: [
       { key: 'welcome',  label: 'Service' },
       { key: 'space',    label: 'Space' },
-      { key: 'info',     label: 'You' },
       { key: 'schedule', label: 'Schedule' },
       { key: 'location', label: 'Location' },
+      { key: 'info',     label: 'You' },
       { key: 'contact',  label: 'Review' }
     ],
     both: [
       { key: 'welcome',  label: 'Service' },
       { key: 'space',    label: 'Space' },
-      { key: 'info',     label: 'You' },
       { key: 'size',     label: 'Size' },
       { key: 'days',     label: 'Cleaning' },
       { key: 'schedule', label: 'Porter' },
       { key: 'location', label: 'Location' },
-      { key: 'contact',  label: 'Review' }
-    ],
-    unsure: [
-      { key: 'welcome',  label: 'Service' },
       { key: 'info',     label: 'You' },
-      { key: 'space',    label: 'Space' },
-      { key: 'location', label: 'Location' },
-      { key: 'size',     label: 'Size' },
-      { key: 'days',     label: 'Schedule' },
       { key: 'contact',  label: 'Review' }
     ]
   };
@@ -147,12 +142,10 @@
   var railFill     = document.getElementById('qfRailFill');
   var greetingEl   = document.getElementById('qfGreeting');
   var typingDots   = document.getElementById('qfTypingDots');
-  var liveNumEl    = document.getElementById('qfLiveNum');
-  // D125 (2026-05-01) — askAlinaBtn / Ask-Alina floating pills retired.
-  // The chat was a stub (toast "Chat will open here in production");
-  // never wired to a backend on /quote. User: "no hace sentido". The
-  // static `.qf2-alina-hero` per-screen pills (persona stamp + helper
-  // copy) stay; only the interactive ask-feature is gone.
+  // D125 (2026-05-01) — floating chat-pill stub retired (was a toast
+  // "Chat will open here in production", never wired to a backend on
+  // /quote). 2026-06-21 — the per-screen greeting pills were also removed
+  // when the greeting persona was retired.
   // Exit-intent overlay fully retired in D76. The pattern (cursor-leave
   // captures email) read as a TaskRabbit-style urgency grab, conflicting
   // with the "Adult, no urgency" voice rule in PRODUCT.md. The form
@@ -281,7 +274,14 @@
     specialInstructions: '',
     serviceCertainty: null,
     needsSiteWalk:  false,
-    scheduleAtypical: false
+    scheduleAtypical: false,
+    // Modernization signals — situation (info-screen chips: new vs switching),
+    // timeline (location-screen chips: asap / weeks / exploring), and source
+    // (utm/referrer/landing attribution captured at boot). All optional, all
+    // non-PII, all persisted in the draft and shipped by buildSubmitPayload.
+    situation:      null,
+    timeline:       null,
+    source:         null
   };
 
   /* =======================================================================
@@ -654,58 +654,13 @@
   });
 
   /* -----------------------------------------------------------------------
-     Alina copy — contextual messages per screen
+     per-screen contextual copy (persona retired)
      ----------------------------------------------------------------------- */
-  var ALINA_MESSAGES = {
-    janitorial: 'Perfect choice. Now let\u2019s find the right plan for your space.',
-    dayporter:  'Great pick. Let\u2019s match you with the right setup.',
-    both:       'Smart move. Full 24/7 coverage. Let\u2019s get to know your space.',
-    unsure:     'No worries, I\u2019ll help you figure it out. Let\u2019s start here.'
-  };
 
-  // Alina copy indexed by SPACE (not service) — every space shares the same
-  // Janitorial/Day Porter mechanics so the space is the real source of truth
-  // for what the user cares about.
-  var ALINA_S3 = {
-    Office:     'Most offices like yours are between 3K\u20139K sq ft. Pick the closest range.',
-    Medical:    'Clinics typically range 1,500\u20135,000 sq ft. Labs and surgical centers can run bigger.',
-    Retail:     'Most NYC retail spaces are under 6,000 sq ft. Pick your range.',
-    Restaurant: 'Restaurants are usually 2K\u20135K sq ft. Kitchen counts toward the total.',
-    Fitness:    'Gyms range widely: boutiques under 3K, full facilities 10K+. Pick the closest.',
-    Other:      'Pick the closest range or enter the exact number below.'
-  };
 
-  var ALINA_S4_BY_SPACE = {
-    Office:     'For offices, Monday\u2013Friday is most common. Weekends only if you need them.',
-    Medical:    'Medical spaces usually match patient-facing days. Pick what fits your schedule.',
-    Retail:     'Retail often needs full 7-day coverage. Weekends matter most.',
-    Restaurant: 'Restaurants usually need 6\u20137 days. After-hours is the key window.',
-    Fitness:    'Gyms and studios often need daily coverage during open hours.',
-    Other:      'Pick the days that match your schedule.'
-  };
 
-  var ALINA_PORTER_BY_SPACE = {
-    Office:     'For an office like yours, 1 porter usually covers it. But you decide!',
-    Medical:    'Medical spaces need tight sanitization. 1 dedicated porter works for clinics, 2+ for larger facilities.',
-    Retail:     'For retail, 1 porter handles front-of-house freshness. Multi-floor stores usually go with 2.',
-    Restaurant: 'Restaurants often need 1\u20132 porters during service: one front, one back.',
-    Fitness:    'Gyms benefit from porters on equipment and locker rooms. 1\u20132 usually works.',
-    Other:      'Pick what fits your space. We\u2019ll fine-tune on the call.'
-  };
 
-  var ALINA_HOURS_BY_SPACE = {
-    Office:     'Set the hours for each porter. Most offices go 8 AM to 5 PM.',
-    Medical:    'Set the hours to match your patient-facing windows, usually 8 AM to 6 PM.',
-    Retail:     'Set the hours to match your store hours, usually 10 AM to 9 PM.',
-    Restaurant: 'Set the hours. Restaurants typically need 11 AM to close.',
-    Fitness:    'Set the hours. Gyms usually open 5 AM to 10 PM.',
-    Other:      'Set the hours that match your operation.'
-  };
 
-  var ALINA_WINDOW = {
-    janitorial: 'Last scheduling detail. When works best for our team?',
-    both:       'When should the janitorial team come in?'
-  };
 
 
   // AYS Ola 4 Commit L ME-6 — S4_TITLES used to hold raw HTML ("Which <em>days</em>…")
@@ -756,7 +711,7 @@
   }
 
   var SERVICE_LABELS = {
-    janitorial: 'Janitorial',
+    janitorial: 'Commercial Cleaning',
     dayporter:  'Day Porter',
     both:       'Both Services',
     unsure:     'Help me decide'
@@ -773,7 +728,7 @@
                    : 'Good evening';
 
   if (greetingEl) {
-    greetingEl.innerHTML = timeGreeting + ', I\u2019m <em>Alina</em> <span class="qf-wave" aria-hidden="true">\uD83D\uDC4B</span>';
+    greetingEl.innerHTML = timeGreeting + ' <span class="qf-wave" aria-hidden="true">\uD83D\uDC4B</span>';
   }
 
   /* -----------------------------------------------------------------------
@@ -786,30 +741,10 @@
     }, 500);
   }
 
-  /* -----------------------------------------------------------------------
-     Feature #2: Live counter — random 5-12, changes every 25-40s
-     ----------------------------------------------------------------------- */
-  function updateLiveCounter() {
-    if (!liveNumEl) return;
-    liveNumEl.textContent = String(5 + Math.floor(Math.random() * 8));
-  }
-  // Ola 3 — store the pending timer so the success-screen cleanup and
-  // beforeunload can cancel it. Previously the recursive setTimeout chain
-  // kept ticking after the form completed, touching a DOM node that was
-  // about to be removed.
-  var _qfLiveCounterTimer = null;
-  function scheduleLiveCounter() {
-    var delay = 25000 + Math.random() * 15000;
-    _qfLiveCounterTimer = setTimeout(function () {
-      _qfLiveCounterTimer = null;
-      updateLiveCounter();
-      scheduleLiveCounter();
-    }, delay);
-  }
-  function cancelLiveCounter() {
-    if (_qfLiveCounterTimer) { clearTimeout(_qfLiveCounterTimer); _qfLiveCounterTimer = null; }
-  }
-  scheduleLiveCounter();
+  // Live "5-12 people viewing" counter REMOVED (fabricated social proof). Its
+  // #qfLiveNum target was already deleted from the redesign markup; the no-op
+  // stub below keeps the guarded cleanup callers (beforeunload + success) safe.
+  function cancelLiveCounter() {}
 
   /* =======================================================================
      HELPERS
@@ -817,7 +752,7 @@
 
   /** Get current flow array for selected service, fallback to unsure */
   function getFlow() {
-    return FLOWS[STATE.service] || FLOWS.unsure;
+    return FLOWS[STATE.service] || FLOWS.both;
   }
 
   /** Get index of a named step in the current flow, -1 if not found */
@@ -829,22 +764,6 @@
     return -1;
   }
 
-  /** Swap Alina bubble text with fade */
-  function swapAlinaText(el, newText) {
-    if (!el || el.textContent === newText) return;
-    el.classList.add('is-swapping');
-    setTimeout(function () {
-      el.textContent = newText;
-      el.classList.remove('is-swapping');
-    }, 220);
-  }
-
-  /** Get the Alina text element for a given screen */
-  function getAlinaTextEl(screenName) {
-    var screen = SCREENS[screenName];
-    if (!screen) return null;
-    return screen.querySelector('.qf-alina-says-text');
-  }
 
   /* -----------------------------------------------------------------------
      Rail — dynamic rebuild + updates
@@ -855,7 +774,7 @@
       an API or localStorage, the old pattern was one rename away from XSS. */
   function buildRail(service) {
     if (!railStations) return;
-    var config = RAIL_CONFIGS[service] || RAIL_CONFIGS.unsure;
+    var config = RAIL_CONFIGS[service] || RAIL_CONFIGS.both;
     // Clear existing content
     while (railStations.firstChild) railStations.removeChild(railStations.firstChild);
     config.forEach(function (station, i) {
@@ -884,7 +803,7 @@
     });
   }
 
-  /** Update progress ring on Alina avatars — shows % of flow completed */
+  /** Update progress ring — shows % of flow completed */
   function updateProgressRing(currentName) {
     var flow = getFlow();
     var currentIdx = flow.indexOf(currentName);
@@ -896,7 +815,7 @@
 
   /** Animate greeting letter-by-letter (only once on load).
    *  A11y: the full greeting is set as aria-label so screen readers read
-   *  "Welcome, I'm Alina" as one phrase. Each character span is hidden
+   *  the time-of-day greeting as one phrase. Each character span is hidden
    *  from assistive tech via aria-hidden. */
   function animateGreeting() {
     if (!greetingEl || greetingEl.dataset.animated === '1') return;
@@ -960,7 +879,7 @@
     qfRenderRailProgress();
     if (!railStations) return;
     var flow = getFlow();
-    var config = RAIL_CONFIGS[STATE.service] || RAIL_CONFIGS.unsure;
+    var config = RAIL_CONFIGS[STATE.service] || RAIL_CONFIGS.both;
     var stations = railStations.querySelectorAll('.qf-rail-station');
     if (!stations.length) return;
 
@@ -1037,7 +956,7 @@
   function syncFlowBar(name) {
     if (!flowBar) return;
     flowBar.hidden = false;
-    // Toggle helper classes on the main so CSS can hide the rail + ask-alina
+    // Toggle helper classes on the main so CSS can hide the rail + ask-pill
     // until the user has picked a service, plus a standalone "final" mode
     // for the contact/summary screen (no cascade).
     var root = document.querySelector('main.q-flow');
@@ -1060,7 +979,7 @@
      SCREEN NAVIGATION
      ======================================================================= */
 
-  // Dynamic reveal navigation — screens born on demand, scroll to Alina message
+  // Dynamic reveal navigation — screens born on demand, scroll to the prompt
   function goToScreen(name, direction) {
     var to = SCREENS[name];
     if (!to) return;
@@ -1117,6 +1036,32 @@
     to.removeAttribute('aria-hidden');
     STATE.currentStepName = name;
 
+    // AYS Ola 4 CRIT-3 — move focus to the new screen's heading on every
+    // transition. Without this, keyboard + screen-reader users were dropped
+    // at the top of the now-inert previous screen (the old scroll target,
+    // a greeting bubble, no longer exists). preventScroll leaves the smooth
+    // scroll animation below in charge of the visual move. The polite live
+    // region then announces position ("Step N of M") without re-reading the
+    // heading the focus move already voices.
+    try {
+      var _titleEl = to.querySelector('.qf2-prompt-title');
+      if (_titleEl) {
+        _titleEl.setAttribute('tabindex', '-1');
+        _titleEl.focus({ preventScroll: true });
+      }
+      var _announcer = document.getElementById('qfStepAnnouncer');
+      if (_announcer) {
+        var _flow = (typeof getFlow === 'function') ? (getFlow() || []) : [];
+        var _cur = _flow.indexOf(name);
+        var _countable = _flow.filter(function (n) { return n !== 'checkpoint' && n !== 'success'; });
+        var _total = _countable.length;
+        var _done = _flow.slice(0, _cur + 1).filter(function (n) { return n !== 'checkpoint' && n !== 'success'; }).length;
+        _announcer.textContent = name === 'success' ? ''
+          : name === 'contact' ? 'Last step.'
+          : 'Step ' + Math.max(1, Math.min(_done, _total)) + ' of ' + _total + '.';
+      }
+    } catch (e) {}
+
     // D53 — telemetry: fire step_view for every screen activation.
     qfTrack('quote_step_view', {
       step_name: name,
@@ -1158,56 +1103,13 @@
       setTimeout(function () { goNext(); }, duration);
     }
 
-    // Set contextual Alina + title when entering days screen (no pre-selection)
+    // Set title when entering days screen (no pre-selection)
     if (name === 'days') {
-      var alinaEl = getAlinaTextEl('days');
-      if (alinaEl) {
-        // For 'both' the days screen captures only the cleaning schedule; a
-        // separate porter-days screen follows. Lead with that context so the
-        // client doesn't wonder why they'll pick days twice.
-        if (STATE.service === 'both') {
-          alinaEl.textContent = 'First, pick the days you want your space cleaned overnight. You\u2019ll choose porter days next.';
-        } else {
-          alinaEl.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
-        }
-      }
       var s4title = document.getElementById('qfS4Title');
       if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
       setTimeout(syncDaysUI, 80);
     }
 
-    // DP-days step — only reached in 'both' flow. The MutationObserver wired
-    // inside the dpDays block below handles pre-selection + sync; here we
-    // just refresh Alina's context copy based on what the client already
-    // answered on the prior (cleaning) days screen.
-    if (name === 'dpDays') {
-      var dpAlinaEl = document.getElementById('qfAlinaSaysTextS4b');
-      if (dpAlinaEl) {
-        dpAlinaEl.textContent = (Array.isArray(STATE.days) && STATE.days.length)
-          ? 'We pre-selected your cleaning days. Tap to adjust, or keep them if the porter schedule matches.'
-          : 'A porter is on-site during business hours. Pick the days you need one.';
-      }
-    }
-
-    // Size step — personalize Alina by space type when entering (covers
-    // both forward navigation and scroll-back-into-view cases). For the
-    // 'both' flow, prepend a note clarifying this size drives cleaning
-    // pricing (not porter coverage) so the client doesn't second-guess.
-    if (name === 'size' && STATE.space) {
-      var sizeAlinaEl = getAlinaTextEl('size');
-      if (sizeAlinaEl) {
-        var base = ALINA_S3[STATE.space] || ALINA_S3.Other;
-        sizeAlinaEl.textContent = STATE.service === 'both'
-          ? 'This sizes your cleaning scope. ' + base
-          : base;
-      }
-    }
-
-    // Hours step — personalize by space type every time it's entered.
-    if (name === 'hours' && STATE.space) {
-      var hoursAlinaEl = getAlinaTextEl('hours');
-      if (hoursAlinaEl) hoursAlinaEl.textContent = ALINA_HOURS_BY_SPACE[STATE.space] || ALINA_HOURS_BY_SPACE.Other;
-    }
 
     // Re-trigger stagger animations on new screen
     to.querySelectorAll('.qf-service-card, .qf-screen-inner > *, .qf-meta-chip, .qf-day-card').forEach(function (c) {
@@ -1220,12 +1122,12 @@
     updateRail();
     updateProgressRing(name);
 
-    // Smooth scroll so Alina message slides to the top.
+    // Smooth scroll so the prompt title slides to the top.
     // AYS Ola 3 #11 — trim the 400ms pre-scroll delay to 120ms (lets the enter
     // animation begin but not drag) and cut the scroll duration to 320ms.
     // Perceived latency drops from ~900ms → ~440ms.
     setTimeout(function () {
-      var scrollTarget = to.querySelector('.qf-alina-says') || to;
+      var scrollTarget = to.querySelector('.qf2-prompt-title') || to;
       var absTop = 0;
       var el = scrollTarget;
       while (el) { absTop += el.offsetTop; el = el.offsetParent; }
@@ -1250,13 +1152,13 @@
 
     // Re-align the bubble after the previous screens finish their
     // is-done collapse transition. The first scroll calculation above uses
-    // offsetTop values captured before the collapse settles, so the Alina
-    // bubble often lands ~300-400px below the flow bar (especially on the
+    // offsetTop values captured before the collapse settles, so the prompt
+    // title often lands ~300-400px below the flow bar (especially on the
     // hours step where buildPorterRows also mutates the DOM mid-transition).
     // This correction pass runs once the layout has settled.
     setTimeout(function () {
       if (STATE.currentStepName !== name) return;
-      var bubble = to.querySelector('.qf-alina-says');
+      var bubble = to.querySelector('.qf2-prompt-title');
       if (!bubble) return;
       var rect = bubble.getBoundingClientRect();
       var flowBarH = flowBar && !flowBar.hidden ? flowBar.offsetHeight : 0;
@@ -1296,6 +1198,16 @@
       _qfPendingNav = { fn: goNext };
       return;
     }
+    // AYS Ola 4 HI-6 — if the user hopped back from the review screen to fix
+    // one step, Continue jumps straight back to review instead of re-walking
+    // every intermediate step (their values are already filled). Gated on the
+    // exact hopped step so it can never skip a later step like the email gate.
+    if (STATE.returnToReview && STATE.currentStepName === STATE.returnToReview && SCREENS.contact) {
+      STATE.returnToReview = null;
+      goToScreen('contact', 'fwd');
+      saveDraft();
+      return;
+    }
     var flow = getFlow();
     var idx = getStepIndex(STATE.currentStepName);
     if (idx < 0 || idx >= flow.length - 1) return;
@@ -1323,7 +1235,7 @@
       // AYS Ola 3 #24 — single read via getBoundingClientRect instead of
       // the offsetTop walking loop (which forced a layout flush on every
       // parent.offsetTop read, then another inside the RAF animation).
-      var scrollTarget = prevScreen.querySelector('.qf-alina-says') || prevScreen;
+      var scrollTarget = prevScreen.querySelector('.qf2-prompt-title') || prevScreen;
       var targetRect = scrollTarget.getBoundingClientRect();
       var flowBarH = flowBar && !flowBar.hidden ? flowBar.offsetHeight : 0;
       var html = document.documentElement;
@@ -1381,7 +1293,7 @@
             qfToast({
               type: 'success',
               title: 'Starting fresh',
-              message: 'New quote with ' + label + '. Your previous answers were cleared.',
+              message: 'New proposal with ' + label + '. Your previous answers were cleared.',
               duration: 3500
             });
           } catch(e){}
@@ -1419,7 +1331,7 @@
       // D127 — labels match the welcome card copy. "Janitorial" → "Night cleaning"
       // surfaces user-facing; "Janitorial" stays in the blurb as SEO keyword.
       var QF2_QUIZ_LABELS = {
-        janitorial: { name: 'Night cleaning', blurb: '· janitorial after-hours, evenings + weekends.' },
+        janitorial: { name: 'Commercial Cleaning', blurb: '· after-hours, evenings + weekends.' },
         dayporter:  { name: 'Day Porter',     blurb: '· on-site during your business hours.' },
         both:       { name: 'Combined',       blurb: '· janitorial + porter, one team.' }
       };
@@ -1706,9 +1618,9 @@
         var emVal  = email     ? email.value.trim()         : '';
         var posVal = position  ? position.value.trim()      : '';
 
-        if (!fnVal) { qf2ShowInfoErr("I'll need your first name to send your quote.", firstName); return; }
-        if (!lnVal) { qf2ShowInfoErr("And your last name, keeps the records tidy.", lastName); return; }
-        if (!emVal) { qf2ShowInfoErr("Drop me your email so I can send the quote over.", email); return; }
+        if (!fnVal) { qf2ShowInfoErr("Please add your first name so we can send your proposal.", firstName); return; }
+        // 2026-06-20 — last name DEMOTED to optional (it earned nothing for a 24h email).
+        if (!emVal) { qf2ShowInfoErr("Add your email so we can send the proposal over.", email); return; }
         if (!EMAIL_RE.test(emVal)) { qf2ShowInfoErr("Hmm, that email doesn't look right. Double-check?", email); return; }
         var typoSuggestion = suggestEmailCorrection(emVal);
         if (typoSuggestion) { qf2ShowInfoErr('Did you mean ' + typoSuggestion + '? Tap to fix it.', email); return; }
@@ -1723,14 +1635,6 @@
         STATE.userLastName = lnVal;
         STATE.userEmail    = emVal;
         STATE.userPosition = posVal;
-
-        // Personalize Alina for the next step
-        var alinaEl = getAlinaTextEl('space');
-        if (alinaEl) {
-          var greeting = STATE.userName ? (STATE.userName + ', ') : '';
-          var msg = ALINA_MESSAGES[STATE.service] || ALINA_MESSAGES.janitorial;
-          alinaEl.textContent = greeting + msg.charAt(0).toLowerCase() + msg.slice(1);
-        }
 
         setRailValue('info', STATE.userName || 'Done');
         goNext();
@@ -1821,24 +1725,14 @@
         }
         if (companyVal.length > 120) companyVal = companyVal.slice(0, 120);
 
-        if (!addr) {
-          showLocErr('Please enter your address or ZIP code so we can match you with the right local team.', addressInput);
+        // 2026-06-20 — SOFT address validation. A lead form captures intent, not
+        // USPS format; the rep normalizes on the follow-up. Accept building names
+        // ("Bryant Park"), cross-streets ("Lex & 42nd"), ZIPs, or full addresses.
+        if (!addr || addr.length < 4) {
+          showLocErr('Where should we send the team? A street address, building name, or ZIP all work.', addressInput);
           return;
         }
-        var isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(addr);
-        var hasStreetShape = addr.length >= 6 && /\d/.test(addr) && /[A-Za-z]{2,}/.test(addr);
-        if (!isZip && !hasStreetShape) {
-          var digitsOnly = /^\s*\d+\s*$/.test(addr);
-          var msg;
-          if (digitsOnly) {
-            var n = addr.replace(/\D/g, '').length;
-            msg = 'A US ZIP code is 5 digits (you entered ' + n + '). Try your full ZIP or a street address.';
-          } else {
-            msg = 'Include a street number + name or a 5-digit ZIP (e.g. "10001" or "350 5th Ave").';
-          }
-          showLocErr(msg, addressInput);
-          return;
-        }
+        if (addr.length > 200) addr = addr.slice(0, 200);
         clearLocErr();
         STATE.companyName = companyVal;
         STATE.userAddress = addr;
@@ -1863,7 +1757,7 @@
 
     // V2 — Atypical schedule heads-up (mockup G demo G). When the user
     // reaches the Location step and STATE.scheduleAtypical is set, inject
-    // an Alina mini-bubble at the top of the body warning them that we'll
+    // a mini-bubble at the top of the body warning them that we'll
     // double-check the schedule. Idempotent — only injects once per visit.
     var locObserver = registerObserver(new MutationObserver(function (muts) {
       muts.forEach(function (m) {
@@ -1886,17 +1780,9 @@
       var t = (STATE.timeOfDay && STATE.timeOfDay.length === 1) ? TIME_LABEL[STATE.timeOfDay[0]] : 'this schedule';
       var bubble = document.createElement('div');
       bubble.className = 'qf2-atypical-heads-up';
-      var ava = document.createElement('div');
-      ava.className = 'qf2-atypical-heads-up-avatar';
-      var img = document.createElement('img');
-      img.src = 'images/alina-avatar-96.jpg';
-      img.alt = '';
-      img.width = 26; img.height = 26;
-      ava.appendChild(img);
       var text = document.createElement('div');
       text.className = 'qf2-atypical-heads-up-text';
-      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. I'll double-check with you when I prepare the quote, no worries.";
-      bubble.appendChild(ava);
+      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. We'll double-check with you when we prepare the proposal — no worries.";
       bubble.appendChild(text);
       // Insert after the prompt
       var prompt = body.querySelector('.qf2-prompt');
@@ -1905,7 +1791,7 @@
     }
 
     // V2 — Out-of-area warning (mockup G demo F). On address blur, detect
-    // non-NYC inputs (NJ/CT/PA/etc) and show an Alina warning bubble with
+    // non-NYC inputs (NJ/CT/PA/etc) and show a warning bubble with
     // "Yes, waitlist me" and "Continue anyway" actions.
     var addrField = document.getElementById('qfAddress');
     var fieldsWrap = SCREENS.location.querySelector('.qf2-fields');
@@ -1933,20 +1819,13 @@
       if (!addrField || !isOutOfNYC(addrField.value)) return;
       var bubble = document.createElement('div');
       bubble.className = 'qf2-out-of-area';
-      var ava = document.createElement('div');
-      ava.className = 'qf2-out-of-area-avatar';
-      var img = document.createElement('img');
-      img.src = 'images/alina-avatar-96.jpg';
-      img.alt = '';
-      img.width = 26; img.height = 26;
-      ava.appendChild(img);
       var text = document.createElement('div');
       text.className = 'qf2-out-of-area-text';
       var hand = document.createElement('span');
       hand.className = 'qf2-hand';
       hand.textContent = 'Hmm,';
       text.appendChild(hand);
-      text.appendChild(document.createTextNode(" that's outside NYC. Want me to add you to the waitlist?"));
+      text.appendChild(document.createTextNode(" that's outside NYC. Want us to add you to the waitlist?"));
       var actions = document.createElement('div');
       actions.className = 'qf2-out-of-area-actions';
       var yesBtn = document.createElement('button');
@@ -1967,7 +1846,6 @@
       actions.appendChild(yesBtn);
       actions.appendChild(noBtn);
       text.appendChild(actions);
-      bubble.appendChild(ava);
       bubble.appendChild(text);
       fieldsWrap.insertAdjacentElement('afterend', bubble);
     }
@@ -1997,12 +1875,7 @@
 
       var flow = getFlow();
       var nextStep = flow[flow.indexOf('space') + 1];
-      if (nextStep === 'size') {
-        var alinaSize = getAlinaTextEl('size');
-        if (alinaSize) alinaSize.textContent = ALINA_S3[STATE.space] || ALINA_S3.Office;
-      } else if (nextStep === 'days') {
-        var alinaDays = getAlinaTextEl('days');
-        if (alinaDays) alinaDays.textContent = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
+      if (nextStep === 'days') {
         var s4title = document.getElementById('qfS4Title');
         if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
       }
@@ -2104,11 +1977,6 @@
     function proceedFromSize(sizeVal) {
       STATE.size = sizeVal;
 
-      // Set Alina message for days step
-      var alinaEl = getAlinaTextEl('days');
-      var s4msg = ALINA_S4_BY_SPACE[STATE.space] || ALINA_S4_BY_SPACE.Other;
-      if (alinaEl) alinaEl.textContent = s4msg;
-
       // Set contextual title
       var s4title = SCREENS.days ? SCREENS.days.querySelector('.qf-s4-title, [id="qfS4Title"]') : null;
       if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
@@ -2159,7 +2027,7 @@
           // user a next step. Facilities over 1M sq ft are legitimately
           // common for campuses, so we route them to a direct call instead
           // of losing the lead outright.
-          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
+          showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Email info@eccofacilities.com and we\u2019ll tailor a custom proposal.');
           return;
         }
         clearSizeErr();
@@ -2262,7 +2130,7 @@
           return;
         }
         if (n > 1000000) {
-          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Email info@eccofacilities.com and we\u2019ll tailor a custom quote.');
+          if (typeof showSizeErr === 'function') showSizeErr('For facilities over 1M sq ft, let\u2019s chat directly. Email info@eccofacilities.com and we\u2019ll tailor a custom proposal.');
           return;
         }
         STATE.sizeExact = Math.round(n);
@@ -2340,20 +2208,6 @@
       presetBtns.forEach(function (p) { if (p.dataset.preset === 'weekdays') p.classList.add('is-active'); });
     }
 
-    // Alina reacts only when user manually changes from the default. Don't
-    // override the space-tailored entry message just because no days are
-    // selected yet — the Continue button handles the "pick at least one"
-    // validation on submit.
-    var alinaEl = getAlinaTextEl('days');
-    if (alinaEl && STATE.currentStepName === 'days') {
-      var n = STATE.days.length;
-      if (n === 7) {
-        alinaEl.textContent = 'Every day? That\u2019s serious coverage. Love it.';
-      } else if (n > 0 && !arraysEqual(STATE.days, WEEKDAYS)) {
-        alinaEl.textContent = n + ' day' + (n > 1 ? 's' : '') + ' selected. Adjust anytime.';
-      }
-      // n === 0 or weekdays-match: keep the space-tailored entry message.
-    }
   }
 
   /** Compare two arrays of strings (sorted) for equality */
@@ -2372,7 +2226,7 @@
       btn.addEventListener('click', function () {
         // Ola 3 — debounce rapid double-taps. Before this guard a fat-finger
         // double-click would toggle-on-toggle-off and silently drop the day
-        // the user meant to select, firing two Alina messages in 50ms.
+        // the user meant to select, firing two helper messages in 50ms.
         if (btn.dataset.qfBusy === '1') return;
         btn.dataset.qfBusy = '1';
         setTimeout(function () { btn.dataset.qfBusy = ''; }, 150);
@@ -2767,7 +2621,7 @@
       return dpEl('div', { class: 'qf-dp-porter-body' }, [
         dpEl('div', { class: 'qf-dp-section' }, [
           // 2026-04-27 — labels phrased as questions to feel like a small
-          // dialogue beat from Alina, not noun headers. Mobile keeps the
+          // dialogue beat, not noun headers. Mobile keeps the
           // same copy (no abbreviation needed for short questions).
           dpEl('div', { class: 'qf2-section-label' }, 'Which days do they work?'),
           dpRenderDayChips(porterIdx),
@@ -3056,7 +2910,7 @@
               if (typeof qfToast === 'function') {
                 qfToast({
                   type: 'warn',
-                  title: 'No quote to review yet',
+                  title: 'No proposal to review yet',
                   message: 'Looks like your draft cleared. Let’s start fresh.',
                   duration: 3500
                 });
@@ -3099,7 +2953,7 @@
       // SERVICE row: primary = service name, sub = descriptive caption.
       // Was "Janitorial · recurring" (redundant for Janitorial, mixes label
       // and qualifier with `·`). Now: "Janitorial" / "Recurring after-hours…"
-      var SERVICE_NAMES = { janitorial: 'Janitorial', dayporter: 'Day Porter', both: 'Combined', unsure: 'Help me decide' };
+      var SERVICE_NAMES = { janitorial: 'Commercial Cleaning', dayporter: 'Day Porter', both: 'Combined', unsure: 'Help me decide' };
       var SERVICE_CAPTIONS = {
         janitorial: 'Recurring after-hours cleaning',
         dayporter:  'On-site during business hours',
@@ -3148,7 +3002,7 @@
         if (STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
-          visitInd.textContent = "I'll see it in person.";
+          visitInd.textContent = "We'll see it in person.";
           spaceEl.appendChild(visitInd);
         }
       }
@@ -3162,7 +3016,7 @@
         if (STATE.serviceCertainty === 'guided_via_quiz') {
           var badge = document.createElement('div');
           badge.className = 'qf2-confirm-badge';
-          badge.textContent = "Alina helps. I'll confirm the details.";
+          badge.textContent = "We'll confirm the details.";
           svcEl.parentElement.appendChild(badge);
         }
       }
@@ -3172,9 +3026,9 @@
       var ctaLbl = ctaBtn?.querySelector('.qf-rv-send-btn-label');
       if (ctaLbl) {
         // D100 (2026-05-01) — copy aligned with Ola 5 spec ("Request my quote").
-        // Previous "Send it to Alina" anthropomorphized the form too much; the
-        // user's mental model is "I'm requesting a quote" not "I'm DM'ing Alina".
-        ctaLbl.textContent = STATE.needsSiteWalk ? 'Request my quote + book visit' : 'Request my quote';
+        // Previous "send it to a person" copy anthropomorphized the form too
+        // much; the user's mental model is "I'm requesting a quote", not a DM.
+        ctaLbl.textContent = STATE.needsSiteWalk ? 'Send my request + book visit' : 'Send my request';
       }
 
       // V2 — CTA subtext (site walk variant)
@@ -3184,7 +3038,7 @@
       if (STATE.needsSiteWalk && ctaBtn) {
         var subtext = document.createElement('p');
         subtext.className = 'qf2-cta-subtext';
-        subtext.textContent = "I'll email you a calendar link right after.";
+        subtext.textContent = "We'll reach out to schedule the visit.";
         ctaBtn.insertAdjacentElement('afterend', subtext);
       }
 
@@ -3507,6 +3361,10 @@
             panel.remove();
             row.classList.remove('is-editing');
             btn.textContent = 'Edit';
+            // AYS Ola 4 HI-6 — flag a return-to-review for schedule edits so
+            // Continue snaps back here. NOT for 'service': changing the service
+            // can change the whole flow, so that path must re-walk normally.
+            STATE.returnToReview = (section === 'days') ? step : null;
             if (step && typeof goToScreen === 'function') {
               try { goToScreen(step, 'back'); } catch(e){}
             }
@@ -3584,7 +3442,7 @@
     // removed keeps the bundle lean and avoids running dead functions on submit.
 
     function populateSummary() {
-      // AYS Ola 8 — Idea 2 "Review with Alina as host". Single-column hero + summary card.
+      // AYS Ola 8 — Idea 2 "Review as a single hosted step". Single-column hero + summary card.
       var serviceFocus = SERVICE_LABELS[STATE.service] || STATE.service || '';
 
       // Hero title: "Got it, <em>Priya</em>. Here's your snapshot." (one line)
@@ -3679,7 +3537,7 @@
 
       var svcName, svcFreq, svcSub;
       if (svc === 'janitorial') {
-        svcName = 'Janitorial';
+        svcName = 'Commercial Cleaning';
         svcFreq = cadenceLabel(daysCount) || 'your schedule';
         svcSub = 'Eco-certified \u00b7 insured \u00b7 uniformed team';
       } else if (svc === 'dayporter') {
@@ -3697,7 +3555,7 @@
         svcSub = 'Day porter + janitorial \u00b7 eco-certified';
       } else {
         svcName = 'Help me decide';
-        svcFreq = 'Alina will recommend';
+        svcFreq = 'We’ll recommend';
         svcSub = 'Based on your space + schedule, we\u2019ll propose the best fit';
       }
       setVal('qfSumService', svcName);
@@ -3741,7 +3599,7 @@
       } else if (svc === 'both') {
         // In 'both' this row is the cleaning schedule. Subline clarifies
         // that we handle timing ourselves (overnight by default).
-        schedSubText = 'Overnight cleaning';
+        schedSubText = 'After-hours cleaning';
       }
       var schedTimeEl = document.getElementById('qfSumTime');
       if (schedTimeEl) schedTimeEl.textContent = schedSubText;
@@ -4272,6 +4130,20 @@
           return out;
         });
       }
+      // Modernization #5 — situation + timeline chip picks. Optional; null when
+      // the user skips them. Backend ALLOWED_KEYS + value maps gate these.
+      if (STATE.situation) payload.situation = STATE.situation;
+      if (STATE.timeline) payload.timeline = STATE.timeline;
+      // Modernization #6 — lead source attribution. STATE.source is a small
+      // {utm_*, referrer, landing} object stashed at boot. Ship only the
+      // non-empty fields so the lead email stays clean.
+      if (STATE.source && typeof STATE.source === 'object') {
+        var src = {};
+        Object.keys(STATE.source).forEach(function (k) {
+          if (STATE.source[k]) src[k] = STATE.source[k];
+        });
+        if (Object.keys(src).length) payload.source = src;
+      }
       // Drop empty/null fields so form_data stays clean
       Object.keys(payload).forEach(function (k) {
         var v = payload[k];
@@ -4285,21 +4157,23 @@
     // Check that all required fields for the current service are captured
     function validateForSubmit() {
       var errs = [];
-      if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks off. Needs an @ symbol and a domain so we can send your quote.' });
+      if (!STATE.userEmail || !EMAIL_RE.test(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks off. Needs an @ symbol and a domain so we can send your proposal.' });
       // Ola 3 — re-check disposable + typo at submit. User may have edited
       // the email in the summary panel to a disposable/typo'd address after
       // passing the initial info-step check.
       else if (suggestEmailCorrection(STATE.userEmail)) errs.push({ field: 'email', msg: 'Email looks like a typo. Did you mean ' + suggestEmailCorrection(STATE.userEmail) + '?' });
       else if (isDisposableEmail(STATE.userEmail)) errs.push({ field: 'email', msg: 'Please use a real work email so we can deliver your proposal.' });
-      if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'We need your first name to send the quote.' });
+      if (!STATE.userName || !STATE.userName.trim()) errs.push({ field: 'name', msg: 'We need your first name to send the proposal.' });
       if (STATE.userPhone && !isValidPhone(STATE.userPhone)) errs.push({ field: 'phone', msg: 'Phone looks off. Try the 10-digit format (area code first).' });
-      // AYS Ola 4 Commit L HI-4 — mirror the stricter check from the location step.
-      var _a = STATE.userAddress || '';
-      var _isZip = /^\s*\d{5}(-\d{4})?\s*$/.test(_a);
-      var _hasStreet = _a.length >= 6 && /\d/.test(_a) && /[A-Za-z]{2,}/.test(_a);
-      if (!_a || (!_isZip && !_hasStreet)) errs.push({ field: 'address', msg: 'We need a ZIP or street address to match you with the local team.' });
-      if (!STATE.space) errs.push({ field: 'space', msg: 'Pick a space type so we can quote it right.' });
-      if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Pick a size range so we can quote it right.' });
+      // AYS Ola 4 CRIT-2 — the old guard required a strict ZIP/street shape,
+      // but the location step now accepts a building name, landmark, ZIP, or
+      // street ≥4 chars. "Bryant Park" passed the step then got rejected here
+      // with no way to satisfy it (dead-end submit). Mirror the location step
+      // exactly so anything that clears the step also clears submit.
+      var _a = (STATE.userAddress || '').trim();
+      if (!_a || _a.length < 4) errs.push({ field: 'address', msg: 'Where should we send the team? A street address, building name, or ZIP all work.' });
+      if (!STATE.space) errs.push({ field: 'space', msg: 'Pick a space type so we can scope it right.' });
+      if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Pick a size range so we can scope it right.' });
       // D61 — fix critical bug: pure Day Porter flow doesn't visit the
       // janitorial days screen, so STATE.days is empty. The old check
       // rejected every Day Porter submission. Now: jan/unsure require
@@ -4387,11 +4261,41 @@
         if (issues.length) {
           var first = issues[0];
           qfToast({ type:'warn', title:'Please review your answers', message: first.msg, duration: 5500 });
-          // Open the inline editor for the offending field so user can fix it here
-          var editBtn = document.querySelector('[data-edit="' + first.field + '"]');
+          // AYS Ola 4 CRIT-1 — open the inline editor for the offending field.
+          // The error fields (email/name/phone/address/space/size/days/dpDays/
+          // porters) don't each have a matching [data-edit] button — the review
+          // only has four edit rows (service/info/space-location/schedule). The
+          // old lookup querySelector('[data-edit=email]') returned null for
+          // most fields → failed submit silently opened nothing and dead-ended.
+          // Map each error field to the review row that actually edits it.
+          if (first.field === 'phone') {
+            // Phone lives in the optional opt-in expander, not a summary row.
+            var phoneToggle = document.getElementById('qf2PhoneOptinToggle');
+            if (phoneToggle && phoneToggle.getAttribute('aria-expanded') !== 'true') phoneToggle.click();
+            var phoneInput = document.getElementById('qfUserPhone');
+            if (phoneInput) { try { phoneInput.scrollIntoView({ block: 'center', behavior: 'smooth' }); phoneInput.focus(); } catch (e) {} }
+            return;
+          }
+          if (first.field === 'size' || first.field === 'space') {
+            // No inline editor exists for these on the review screen — send the
+            // user straight back to the relevant step to supply the missing
+            // value. Only reachable via a corrupted/partial draft restore (the
+            // normal flow forces these steps before submit).
+            if (typeof goToScreen === 'function') { try { goToScreen(first.field, 'back'); } catch (e) {} }
+            return;
+          }
+          var FIELD_TO_SECTION = {
+            email: 'info', name: 'info',
+            address: 'space-location', space: 'space-location', size: 'space-location',
+            days: 'schedule', dpDays: 'schedule', porters: 'schedule'
+          };
+          var sectionKey = FIELD_TO_SECTION[first.field] || first.field;
+          var editBtn = document.querySelector('.qf2-sum-row[data-section="' + sectionKey + '"] .qf2-edit-btn[data-edit]')
+                     || document.querySelector('[data-edit="' + sectionKey + '"]')
+                     || document.querySelector('[data-edit="' + first.field + '"]');
           if (editBtn) {
             editBtn.click();
-            var row = editBtn.closest('.qf-rev-row');
+            var row = editBtn.closest('.qf2-sum-row, .qf-rev-row');
             if (row) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
           }
           return;
@@ -4669,7 +4573,7 @@
           if (shareBtn && !shareBtn._qfWired) {
             shareBtn._qfWired = true;
             var shareTitle = 'Ecco Facilities · commercial cleaning in NYC';
-            var shareText = 'I just requested a quote from Ecco Facilities for commercial cleaning. Thought it might be worth a look if you manage a space in NYC.';
+            var shareText = 'I just requested a proposal from Ecco Facilities for commercial cleaning. Thought it might be worth a look if you manage a space in NYC.';
             var shareUrl = 'https://eccofacilities.com/';
             shareBtn.addEventListener('click', function () {
               qfHaptic(QF_HAPTIC.select);
@@ -4750,7 +4654,7 @@
   }
 
   /* =======================================================================
-     Flow bar — back button + Ask Alina
+     Flow bar — back button
      ======================================================================= */
   if (flowBackBtn) {
     flowBackBtn.addEventListener('click', function () {
@@ -4758,10 +4662,9 @@
     });
   }
 
-  // D125 — Ask Alina chat handler removed (the pill stub was never wired
-  // to a backend on /quote; opening showed a placeholder toast). The
-  // per-screen static `.qf2-alina-hero` headers stay — those are persona
-  // copy, not interactive chat.
+  // D125 — chat-pill handler removed (the stub was never wired to a backend
+  // on /quote; opening showed a placeholder toast). 2026-06-21 — the
+  // per-screen greeting pills were removed when the persona was retired.
 
   // D128 — Theme toggle handler removed. Dark mode now auto-applies via
   // CSS `@media (prefers-color-scheme: dark)` so no JS is needed; the
@@ -4840,7 +4743,7 @@
       var val = email ? email.value.trim() : '';
       if (!val || !EMAIL_RE.test(val)) {
         if (email) { email.classList.add('qf-input-invalid'); email.focus(); }
-        qfToast({ type:'warn', title:'Valid email needed', message:'We need a real email to send your resume link.', duration: 4500 });
+        qfToast({ type:'warn', title:'Valid email needed', message:'Add a valid email so we can follow up.', duration: 4500 });
         return;
       }
       // Fix #27 — actually persist the partial lead so we can follow up
@@ -4975,7 +4878,7 @@
 
     // (Pre-highlighting the prior card was removed — the green ring read as
     // "selected" to users. The resume banner above is enough context.)
-    var SERVICE_NAMES = { janitorial:'Janitorial', dayporter:'Day Porter', both:'Both Services', unsure:'that plan' };
+    var SERVICE_NAMES = { janitorial:'Commercial Cleaning', dayporter:'Day Porter', both:'Both Services', unsure:'that plan' };
     var niceName = SERVICE_NAMES[draft.service] || 'your plan';
 
     // AYS Ola 3 #1+#25 — XSS fix. The previous version inlined `draft.userName`
@@ -5058,10 +4961,8 @@
         var alreadyExplained;
         try { alreadyExplained = !!localStorage.getItem(FIRST_SAVE_FLAG); } catch (_) { alreadyExplained = false; }
         if (alreadyExplained) return;
-        var hasEmail = window.STATE && window.STATE.userEmail;
-        var msg = hasEmail
-          ? "Saved. Come back from this device, or check " + window.STATE.userEmail + " for the resume link."
-          : "Saved on this device. Add your email at the You step so we can mail you the resume link.";
+        // Resume is localStorage-only (same device) — never promise an emailed link.
+        var msg = "Saved on this device. Reopen this page on the same device to pick up where you left off.";
         try {
           if (typeof qfToast === 'function') {
             qfToast({ type: 'success', title: 'Draft saved', message: msg, duration: 5500 });
@@ -5280,88 +5181,7 @@
     });
   })();
 
-  // Sprint 5 R-B — Alina hero pill: tap-to-expand with extended help text.
-  // Each per-step pill carries data-alina-help. Click swaps the visible
-  // message to the help copy; click again or click any other pill restores.
-  // Stores original message in data-alina-original so we can revert.
-  //
-  // D40 — push the body's top: down by the expanded pill's overflow so it
-  // doesn't overlap the H2 below. Required because .qf2-hero-wrap and
-  // .qf2-body are independently absolute-positioned; without this hook the
-  // pill grew vertically into the H2 region (most visible on mobile where
-  // the help text wraps to 3-4 lines).
-  function updateBodyTopForPill(pill) {
-    var stage = pill.closest('.qf-screen');
-    if (!stage) return;
-    var body = stage.querySelector('.qf2-body');
-    var heroWrap = stage.querySelector('.qf2-hero-wrap');
-    if (!body || !heroWrap) return;
-    // Cache the default top from CSS the first time we see this body.
-    if (!body.hasAttribute('data-qf-default-top')) {
-      body.setAttribute('data-qf-default-top', String(parseInt(window.getComputedStyle(body).top, 10) || 0));
-    }
-    var defaultTop = parseInt(body.getAttribute('data-qf-default-top'), 10) || 0;
-    var expanded = pill.getAttribute('aria-expanded') === 'true';
-    if (!expanded) {
-      body.style.top = '';
-      body.style.transition = '';
-      return;
-    }
-    var heroTop = heroWrap.getBoundingClientRect().top - (stage.getBoundingClientRect().top || 0);
-    var pillBottom = heroTop + pill.getBoundingClientRect().height;
-    var minTop = Math.ceil(pillBottom + 14); // 14px breathing buffer
-    if (minTop > defaultTop) {
-      body.style.transition = 'top .25s cubic-bezier(0.16, 1, 0.3, 1)';
-      body.style.top = minTop + 'px';
-    } else {
-      body.style.top = '';
-    }
-  }
-
-  document.addEventListener('click', function (e) {
-    var pill = e.target.closest('.qf2-alina-hero[role="button"]');
-    if (!pill) return;
-    var help = pill.getAttribute('data-alina-help');
-    if (!help) return;
-    var textEl = pill.querySelector('.qf2-alina-hero-text');
-    if (!textEl) return;
-    var expanded = pill.getAttribute('aria-expanded') === 'true';
-    if (expanded) {
-      // Collapse: restore original
-      var orig = pill.getAttribute('data-alina-original');
-      if (orig) textEl.innerHTML = orig;
-      pill.setAttribute('aria-expanded', 'false');
-    } else {
-      // Expand: stash current, show help
-      pill.setAttribute('data-alina-original', textEl.innerHTML);
-      // Keep the "Alina ·" prefix when present, swap the rest.
-      var nameEl = textEl.querySelector('.qf2-alina-name');
-      if (nameEl) {
-        textEl.innerHTML = nameEl.outerHTML + ' &middot; ' + help;
-      } else {
-        textEl.textContent = help;
-      }
-      pill.setAttribute('aria-expanded', 'true');
-    }
-    // D40 — re-measure on next frame so layout has settled.
-    requestAnimationFrame(function () { updateBodyTopForPill(pill); });
-  });
-  // D40 — also re-measure when viewport resizes (text wraps differently).
-  window.addEventListener('resize', function () {
-    var pill = document.querySelector('.qf-screen.is-active .qf2-alina-hero[aria-expanded="true"]');
-    if (pill) updateBodyTopForPill(pill);
-  });
-  // Keyboard activation (Enter/Space) on the pill — already handled by
-  // browser default for elements with role="button" + tabindex=0, but only
-  // when the click handler fires. The line below ensures Space doesn't scroll.
-  document.addEventListener('keydown', function (e) {
-    var pill = e.target.closest && e.target.closest('.qf2-alina-hero[role="button"]');
-    if (!pill) return;
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      pill.click();
-    }
-  });
+  /* 2026-06-21 — welcome greeting pill + its tap-to-expand handler removed (persona retired). */
 
   // Sprint 4b D17 + Sprint 5 R-D — keyboard shortcuts on the active screen.
   // Esc → back. Digits 1-9 → activate Nth picker card (not while typing).
@@ -5431,5 +5251,68 @@
       }
     }
   });
+
+  /* -----------------------------------------------------------------------
+     Modernization #6 — lead source attribution. Captured once at boot:
+     utm_* / click-ids from the query string, the external referrer, and the
+     landing path. Stashed on STATE.source (non-PII, persisted in the draft)
+     and shipped flattened by buildSubmitPayload. Runs unconditionally — a
+     direct visit still records its landing page.
+     ----------------------------------------------------------------------- */
+  (function captureSource() {
+    try {
+      var src = {};
+      if (location.search) {
+        var p = new URLSearchParams(location.search);
+        ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid']
+          .forEach(function (k) { var v = p.get(k); if (v) src[k] = v.slice(0, 200); });
+      }
+      var ref = document.referrer || '';
+      // Only external referrers matter — drop same-origin internal navigation.
+      if (ref && ref.indexOf(location.origin) !== 0) src.referrer = ref.slice(0, 300);
+      var landing = (location.pathname || '') + (location.search || '');
+      if (landing) src.landing = landing.slice(0, 300);
+      if (Object.keys(src).length && typeof STATE !== 'undefined') STATE.source = src;
+    } catch (e) { /* attribution is best-effort, never blocks the flow */ }
+  })();
+
+  /* -----------------------------------------------------------------------
+     Modernization #5 — situation + timeline signal chips. Two single-select
+     groups (.qf2-chip[data-situation] on the info screen, [data-timeline] on
+     the location screen). The pick mirrors to STATE (auto-persisted via
+     saveDraft), updates aria-pressed for SR users, and emits telemetry.
+     Re-clicking the active chip clears it. A draft restore re-glows the
+     previously chosen chip.
+     ----------------------------------------------------------------------- */
+  (function wireSignalChips() {
+    function wireGroup(attr, stateKey, eventName) {
+      var chips = document.querySelectorAll('.qf2-chip[data-' + attr + ']');
+      if (!chips.length) return;
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var val = chip.getAttribute('data-' + attr);
+          var alreadyOn = STATE[stateKey] === val;
+          chips.forEach(function (c) {
+            var on = !alreadyOn && c === chip;
+            c.classList.toggle('is-selected', on);
+            c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+          STATE[stateKey] = alreadyOn ? null : val;
+          try { saveDraft(); } catch (e) {}
+          if (STATE[stateKey]) {
+            qfTrack(eventName, { value: STATE[stateKey], step: STATE.currentStepName });
+          }
+        });
+      });
+      // Reflect a restored draft value on the chips.
+      var current = STATE[stateKey];
+      if (current) {
+        var active = document.querySelector('.qf2-chip[data-' + attr + '="' + current + '"]');
+        if (active) { active.classList.add('is-selected'); active.setAttribute('aria-pressed', 'true'); }
+      }
+    }
+    wireGroup('situation', 'situation', 'quote_situation_pick');
+    wireGroup('timeline', 'timeline', 'quote_timeline_pick');
+  })();
 
 })();
