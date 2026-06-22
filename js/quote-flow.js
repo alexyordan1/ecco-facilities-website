@@ -1122,49 +1122,31 @@
     updateRail();
     updateProgressRing(name);
 
-    // Smooth scroll so the prompt title slides to the top.
-    // AYS Ola 3 #11 — trim the 400ms pre-scroll delay to 120ms (lets the enter
-    // animation begin but not drag) and cut the scroll duration to 320ms.
-    // Perceived latency drops from ~900ms → ~440ms.
+    // Every screen opens at the very top so the sticky step bar is always the
+    // first thing in view. We scroll to 0 (not to the prompt title) — the old
+    // scroll-to-title pushed the step bar above the fold ("queda por mitad o ni
+    // sale") and a second correction pass re-jumped the page ("demasiado
+    // movimiento"). One short animated scroll to top, then a settle guard.
     setTimeout(function () {
-      var scrollTarget = to.querySelector('.qf2-prompt-title') || to;
-      var absTop = 0;
-      var el = scrollTarget;
-      while (el) { absTop += el.offsetTop; el = el.offsetParent; }
-      var flowBarH = flowBar && !flowBar.hidden ? flowBar.offsetHeight : 0;
-      var targetY = Math.max(0, absTop - flowBarH - 4);
       var html = document.documentElement;
-      var prevBehavior = html.style.scrollBehavior;
       html.style.scrollBehavior = 'auto';
       var startY = html.scrollTop;
-      var diff = targetY - startY;
-      if (Math.abs(diff) < 2) { html.style.scrollBehavior = prevBehavior; return; }
+      if (startY < 2) return;            // already at top — no movement at all
       var startTime = null;
       requestAnimationFrame(function step(ts) {
         if (!startTime) startTime = ts;
-        var p = Math.min((ts - startTime) / 320, 1);
+        var p = Math.min((ts - startTime) / 280, 1);
         var e = p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2, 3)/2;
-        html.scrollTop = startY + diff * e;
+        html.scrollTop = startY * (1 - e);
         if (p < 1) requestAnimationFrame(step);
-        // keep scrollBehavior as auto (don't restore — CSS smooth fights programmatic scroll)
       });
     }, 120);
 
-    // Re-align the bubble after the previous screens finish their
-    // is-done collapse transition. The first scroll calculation above uses
-    // offsetTop values captured before the collapse settles, so the prompt
-    // title often lands ~300-400px below the flow bar (especially on the
-    // hours step where buildPorterRows also mutates the DOM mid-transition).
-    // This correction pass runs once the layout has settled.
+    // Settle guard: once the previous screen's collapse animation finishes the
+    // layout can shift a few px. Snap back to the top (no jump-to-title).
     setTimeout(function () {
       if (STATE.currentStepName !== name) return;
-      var bubble = to.querySelector('.qf2-prompt-title');
-      if (!bubble) return;
-      var rect = bubble.getBoundingClientRect();
-      var flowBarH = flowBar && !flowBar.hidden ? flowBar.offsetHeight : 0;
-      var delta = rect.top - flowBarH - 8;
-      if (Math.abs(delta) <= 2) return;
-      window.scrollBy({ top: delta, behavior: 'smooth' });
+      if (document.documentElement.scrollTop > 2) document.documentElement.scrollTop = 0;
     }, 620);
   }
 
