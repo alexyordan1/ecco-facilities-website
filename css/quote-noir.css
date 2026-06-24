@@ -855,9 +855,15 @@
 .qf-dp-time-input:autofill,
 .qf-rev-input:autofill{
   -webkit-text-fill-color:var(--ink) !important;
+  -webkit-box-shadow:0 0 0 1000px #0b0e0d inset !important;
+          box-shadow:0 0 0 1000px #0b0e0d inset !important;
   caret-color:var(--ink);
-  transition:background-color 9999s ease-out 0s, color 9999s ease-out 0s;
 }
+/* Wrapped text fields are transparent over the .qf2-field wrapper; the box-shadow
+   above only masks the input box, so make the wrapper opaque when autofilled to
+   kill the frosted seam (matches the input's solid #0b0e0d mask). */
+.qf2-field:has(input:-webkit-autofill),
+.qf2-field:has(input:autofill){ background:#0b0e0d; }
 
 /* Strip the iOS inner-shadow / rounded UA chrome on text-like inputs (NOT the
    time inputs — appearance:none there can drop the picker indicator). */
