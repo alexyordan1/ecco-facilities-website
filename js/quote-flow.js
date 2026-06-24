@@ -1582,7 +1582,7 @@
         }
         var typo = (typeof suggestEmailCorrection === 'function') ? suggestEmailCorrection(val) : null;
         if (typo) {
-          qf2ShowInfoErr('Did you mean ' + typo + '? Tap to fix it.', emailField);
+          qf2ShowInfoErr('Did you mean ' + typo + '?', emailField);
           return;
         }
         if (typeof isDisposableEmail === 'function' && isDisposableEmail(val)) {
@@ -1618,7 +1618,7 @@
         if (!emVal) { qf2ShowInfoErr("Add your email so we can send the proposal over.", email); return; }
         if (!EMAIL_RE.test(emVal)) { qf2ShowInfoErr("Hmm, that email doesn't look right. Double-check?", email); return; }
         var typoSuggestion = suggestEmailCorrection(emVal);
-        if (typoSuggestion) { qf2ShowInfoErr('Did you mean ' + typoSuggestion + '? Tap to fix it.', email); return; }
+        if (typoSuggestion) { qf2ShowInfoErr('Did you mean ' + typoSuggestion + '?', email); return; }
         if (isDisposableEmail(emVal)) { qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", email); return; }
         // Sprint 2 D13 — role is now optional. Owners, restaurateurs, school
         // administrators, and other non-FM buyers shouldn't be gated on a
@@ -2220,7 +2220,14 @@
     // Reduces initial visible-decision count on Step 5 from 14 to 10.
     var timeCluster = document.getElementById('qf2TimeCluster');
     if (timeCluster) {
-      timeCluster.setAttribute('data-gated', STATE.days.length === 0 ? '1' : '0');
+      var _gated = STATE.days.length === 0;
+      timeCluster.setAttribute('data-gated', _gated ? '1' : '0');
+      // FIX 2026-06-24 (M13): the time chips were mouse-blocked (pointer-events)
+      // but still keyboard-reachable with no signal they were inert. Mirror the
+      // gated state to AT so screen-reader users hear "dimmed/unavailable".
+      timeCluster.querySelectorAll('.qf2-chip').forEach(function (chip) {
+        chip.setAttribute('aria-disabled', _gated ? 'true' : 'false');
+      });
     }
 
     // Preset highlight
@@ -4655,48 +4662,9 @@
     }
   }
 
-  /* =======================================================================
-     Time select helpers
-     ======================================================================= */
-
-  /** Populate a <select> with 30-min time slots from 6AM to 10PM */
-  function populateTimeSelect(selectEl, defaultVal) {
-    if (!selectEl) return;
-    // Clear existing options
-    selectEl.innerHTML = '';
-    for (var h = 6; h <= 22; h++) {
-      for (var m = 0; m < 60; m += 30) {
-        if (h === 22 && m === 30) break; // stop at 10:00 PM
-        var val = padTime(h) + ':' + padTime(m);
-        var label = formatTime12(h, m);
-        var opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = label;
-        if (val === defaultVal) opt.selected = true;
-        selectEl.appendChild(opt);
-      }
-    }
-  }
-
-  /** Set both start and end time selects */
-  function setTimeSelects(startEl, endEl, startVal, endVal) {
-    if (startEl) { startEl.value = startVal; STATE.timeStart = startVal; }
-    if (endEl) { endEl.value = endVal; STATE.timeEnd = endVal; }
-  }
-
-  /** Pad single digit to two digits */
-  function padTime(n) {
-    return n < 10 ? '0' + n : String(n);
-  }
-
-  /** Format 24h time to 12h label */
-  function formatTime12(h, m) {
-    var suffix = h >= 12 ? 'PM' : 'AM';
-    var h12 = h % 12;
-    if (h12 === 0) h12 = 12;
-    var minStr = m === 0 ? '' : ':' + padTime(m);
-    return h12 + minStr + ' ' + suffix;
-  }
+  /* Removed 2026-06-24: dead time-select helpers (populateTimeSelect,
+     setTimeSelects, padTime, formatTime12). They populated a <select> that the
+     V2 wizard never renders — zero callers across the engine. */
 
   /* =======================================================================
      Flow bar — back button
