@@ -916,3 +916,48 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 
 /* Size-step error message used a legacy unstyled class — match .qf2-field-err. */
 .qf-info-err{ font-size:.8rem; color:#E8A0A0; margin-top:.45rem; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   INJECTED-ELEMENT STYLES (audit 2026-06-24 — M17/M18/M19/M20)
+   These are created at runtime by quote-flow.js / cookie-consent.js. They were
+   styled only in the old light-theme quote-flow.css (never linked here) or
+   under class names noir.css doesn't define, so they rendered as unstyled UA
+   boxes. Noir-themed equivalents below.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* M20 — "Draft cleared / Undo" toast (start-over). */
+.qf2-undo-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,140%);z-index:1000;display:flex;align-items:center;gap:14px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 16px;max-width:min(92vw,420px);box-shadow:0 14px 40px rgba(0,0,0,.6);opacity:0;transition:transform .25s ease,opacity .25s ease}
+.qf2-undo-toast.is-shown{transform:translate(-50%,0);opacity:1}
+.qf2-undo-toast-msg{font-size:.86rem;color:var(--ink-dim)}
+.qf2-undo-toast-btn{flex:none;min-height:44px;padding:0 14px;border-radius:9px;border:1px solid var(--accent);background:rgba(var(--accent-rgb),.12);color:var(--accent-soft);font-family:inherit;font-size:.84rem;cursor:pointer}
+.qf2-undo-toast-btn:hover{background:rgba(var(--accent-rgb),.2)}
+
+/* M20 — offline status banner. */
+.qf2-offline-banner{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1001;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 16px;max-width:min(92vw,420px);font-size:.84rem;color:var(--ink-dim);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+
+/* M18/M20 — first-visit hint pill on the welcome screen. */
+.qf2-first-visit-hint{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 8px 6px 14px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);font-size:.8rem;color:var(--ink-dim);transition:opacity .25s ease,transform .25s ease}
+.qf2-first-visit-hint.is-leaving{opacity:0;transform:translateY(-4px)}
+.qf2-first-visit-dismiss{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink-faint);font-size:1rem;line-height:1;cursor:pointer}
+.qf2-first-visit-dismiss:hover{color:var(--ink);border-color:var(--line-strong)}
+
+/* M20 — gentle shake when a gated time chip is tapped before picking days. */
+@keyframes qf2-cluster-shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+.qf2-time-cluster-shake{animation:qf2-cluster-shake .55s cubic-bezier(.36,.07,.19,.97) both}
+
+/* M17 — cookie consent banner (cookie-consent.js emits .cookie-banner/.cookie-btn/.visible). */
+.cookie-banner{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(180%);z-index:1200;display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1.2rem;width:min(92vw,640px);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:14px;padding:14px 18px;box-shadow:0 18px 50px rgba(0,0,0,.6);transition:transform .4s cubic-bezier(.22,.9,.3,1)}
+.cookie-banner.visible{transform:translateX(-50%) translateY(0)}
+.cookie-banner p{flex:1;min-width:200px;margin:0;font-size:.82rem;font-weight:300;line-height:1.5;color:var(--ink-dim)}
+.cookie-banner p a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.cookie-btn{min-height:44px;padding:0 18px;border-radius:10px;font-family:inherit;font-size:.84rem;cursor:pointer;border:1px solid var(--line-strong);background:none;color:var(--ink-dim)}
+.cookie-btn-accept{border-color:var(--accent);background:var(--accent);color:var(--black);font-weight:500}
+.cookie-btn-decline:hover{color:var(--ink);border-color:var(--ink-dim)}
+@media(max-width:520px){.cookie-banner{flex-direction:column;align-items:stretch}}
+
+/* M19 — resume banner row wraps on small phones (was overflowing 320–375px). */
+@media(max-width:520px){
+  .qf-resume-inner{flex-wrap:wrap}
+  .qf-resume-text{flex:1 1 100%}
+  .qf-resume-btn{flex:1}
+}

@@ -588,6 +588,11 @@
       if (s.dpDays && !Array.isArray(s.dpDays)) s.dpDays = [];
       // V2 2026-04-25 — type-guard new array fields too.
       if (s.timeOfDay && !Array.isArray(s.timeOfDay)) s.timeOfDay = [];
+      // FIX 2026-06-24 (M11): dpPorters was NOT type-guarded — a malformed
+      // (non-array, or array of non-objects) blob crashed the schedule screen
+      // on resume. Coerce to an array of plain porter objects.
+      if (s.dpPorters && !Array.isArray(s.dpPorters)) s.dpPorters = [];
+      else if (Array.isArray(s.dpPorters)) s.dpPorters = s.dpPorters.filter(function (p) { return p && typeof p === 'object'; });
       // V2 2026-04-25 — v1 → v2 migration (per `_v` stamp on snapshot):
       //   - currentStepName 'role' → 'info' (role is now a field on info)
       //   - currentStepName 'checkpoint' → 'contact' (checkpoint absorbed into review)
@@ -1689,13 +1694,28 @@
           qf2LocErr.textContent = msg;
           qf2LocErr.hidden = false;
         }
-        if (el) { try { el.classList.add('qf-input-invalid'); el.focus(); } catch(e){} }
+        // FIX 2026-06-24 (M14): mirror the info step — set aria-invalid +
+        // append the error id to aria-describedby so SR users hear the error.
+        if (el) {
+          try {
+            el.classList.add('qf-input-invalid');
+            el.setAttribute('aria-invalid', 'true');
+            var ex = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+            if (ex.indexOf('qf2LocErr') === -1) { ex.push('qf2LocErr'); el.setAttribute('aria-describedby', ex.join(' ')); }
+            el.focus();
+          } catch (e) {}
+        }
       };
       var clearLocErr = function () {
         if (qf2LocErr) { qf2LocErr.textContent = ''; qf2LocErr.hidden = true; }
         ['qfCompanyName','qfAddress'].forEach(function(id){
           var el = document.getElementById(id);
-          if (el) el.classList.remove('qf-input-invalid');
+          if (el) {
+            el.classList.remove('qf-input-invalid');
+            el.removeAttribute('aria-invalid');
+            var ex = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (t) { return t && t !== 'qf2LocErr'; });
+            if (ex.length) el.setAttribute('aria-describedby', ex.join(' ')); else el.removeAttribute('aria-describedby');
+          }
         });
       };
       var locAddrField = document.getElementById('qfAddress');
@@ -1992,19 +2012,28 @@
       if (!sizeErr) {
         sizeErr = document.createElement('p');
         sizeErr.className = 'qf-info-err';
+        sizeErr.id = 'qf2SizeErr';
         sizeErr.setAttribute('role', 'alert');
-        sizeErr.style.marginTop = '6px';
+        // FIX 2026-06-24 (M15): margin moved to the .qf-info-err CSS rule
+        // (zero-inline-styles convention).
         var wrap = sizeInput.parentNode;
         if (wrap) wrap.appendChild(sizeErr);
       }
       sizeErr.textContent = msg;
       sizeErr.hidden = false;
       sizeInput.classList.add('qf-input-invalid');
+      // FIX 2026-06-24 (M15): aria-invalid + aria-describedby for SR users.
+      sizeInput.setAttribute('aria-invalid', 'true');
+      var ex = (sizeInput.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+      if (ex.indexOf('qf2SizeErr') === -1) { ex.push('qf2SizeErr'); sizeInput.setAttribute('aria-describedby', ex.join(' ')); }
       sizeInput.focus();
     }
     function clearSizeErr() {
       if (sizeErr) { sizeErr.hidden = true; sizeErr.textContent = ''; }
       sizeInput.classList.remove('qf-input-invalid');
+      sizeInput.removeAttribute('aria-invalid');
+      var ex = (sizeInput.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (t) { return t && t !== 'qf2SizeErr'; });
+      if (ex.length) sizeInput.setAttribute('aria-describedby', ex.join(' ')); else sizeInput.removeAttribute('aria-describedby');
     }
     if (sizeSubmit && sizeInput) {
       sizeSubmit.addEventListener('click', function () {
@@ -2170,6 +2199,10 @@
       daysCountEl.textContent = STATE.days.length > 0
         ? STATE.days.length + ' day' + (STATE.days.length > 1 ? 's' : '') + ' selected'
         : '';
+      // FIX 2026-06-24 (M12): a `hidden` element is never rendered NOR announced
+      // by a screen reader, so the aria-live region was dead. Unhide it when it
+      // has content so the count is both visible and announced.
+      daysCountEl.hidden = STATE.days.length === 0;
     }
 
     // D49 — Continue requires BOTH ≥1 day AND ≥1 time window selected.
@@ -4173,6 +4206,10 @@
       // exactly so anything that clears the step also clears submit.
       var _a = (STATE.userAddress || '').trim();
       if (!_a || _a.length < 4) errs.push({ field: 'address', msg: 'Where should we send the team? A street address, building name, or ZIP all work.' });
+      // FIX 2026-06-24 (M2): company is required at the location STEP but was NOT
+      // re-checked here, so blanking it in the review edit panel slipped through
+      // to submit. Mirror the step exactly (non-empty) so the two stay in sync.
+      if (!STATE.companyName || !STATE.companyName.trim()) errs.push({ field: 'company', msg: 'Add the company or organization name so we can address your proposal.' });
       if (!STATE.space) errs.push({ field: 'space', msg: 'Pick a space type so we can scope it right.' });
       if (STATE.service !== 'dayporter' && !STATE.size) errs.push({ field: 'size', msg: 'Pick a size range so we can scope it right.' });
       // D61 — fix critical bug: pure Day Porter flow doesn't visit the
@@ -4287,7 +4324,7 @@
           }
           var FIELD_TO_SECTION = {
             email: 'info', name: 'info',
-            address: 'space-location', space: 'space-location', size: 'space-location',
+            address: 'space-location', company: 'space-location', space: 'space-location', size: 'space-location',
             days: 'schedule', dpDays: 'schedule', porters: 'schedule'
           };
           var sectionKey = FIELD_TO_SECTION[first.field] || first.field;

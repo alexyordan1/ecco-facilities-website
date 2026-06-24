@@ -56,7 +56,7 @@
      is still arriving. <noscript> mirror keeps fonts working with JS off. -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/noir.css?v=12">
-<link rel="stylesheet" href="css/quote-noir.css?v=42">
+<link rel="stylesheet" href="css/quote-noir.css?v=43">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -866,7 +866,7 @@
           <span aria-hidden="true">&rarr;</span>
         </button>
         <p class="qf2-cta-hint">Your proposal, in your inbox within 24h.</p>
-        <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback"></div>
+        <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback" data-expired-callback="qfTurnstileExpired" data-error-callback="qfTurnstileError"></div>
       </div>    </section>
     <!-- SUCCESS SCREEN -->
     <!-- STEP 8 · SUCCESS — V2 mockup G rebuild -->
@@ -989,8 +989,16 @@ document.addEventListener('DOMContentLoaded',()=>{
      contact screen becomes active (via MutationObserver in quote-flow.js).
      Token state lives at the window level so the callback signature
      (set by Cloudflare's API) still works. -->
-<script>window.qfTurnstileToken = null; window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };</script>
-<script defer src="js/quote-flow.js?v=39.9"></script>
+<script>
+window.qfTurnstileToken = null;
+window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
+// FIX 2026-06-24 (M8): a Turnstile token expires after ~5 min. Without these,
+// a user who lingered on the review screen submitted a stale token → silent 403.
+// Null the token (so awaitTurnstile re-executes a fresh challenge) and reset.
+window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
+window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
+</script>
+<script defer src="js/quote-flow.js?v=39.10"></script>
 <script src="js/cookie-consent.js?v=1.4"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

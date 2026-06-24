@@ -152,8 +152,15 @@ export async function onRequestPost(context) {
     try { body = await context.request.json(); }
     catch { return new Response(JSON.stringify({ ok: false, error: 'Invalid JSON' }), { status: 400, headers: corsHeaders }); }
 
-    const { em: email, fn: firstName, ln: lastName, ph: phone, co: company,
-            turnstileToken, formType } = body;
+    const { turnstileToken, formType } = body;
+    // FIX 2026-06-24 (M6/M7): coerce + cap the identity fields at bind time.
+    // The old destructure bound em/fn/ln/ph/co RAW — before the MAX_STR cap loop
+    // below — so they bypassed the 500-char cap and could even arrive as a
+    // non-string (array/object), landing in the CRM/email as-is. __cap forces a
+    // capped string for every downstream consumer.
+    const __cap = (v) => (v == null ? '' : String(v)).slice(0, 500);
+    const email = __cap(body.em), firstName = __cap(body.fn), lastName = __cap(body.ln),
+          phone = __cap(body.ph), company = __cap(body.co);
 
     // FIX 2026-06-24 (H8): honeypot. #qfHpUrl is invisible to real users
     // (sr-only / aria-hidden / tabindex=-1 / autocomplete=off); only naive bots
