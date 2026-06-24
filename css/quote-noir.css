@@ -225,7 +225,10 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-toast-ico{flex:none;color:var(--accent);display:grid;place-items:center}
 .qf-toast-ico svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
 .qf-toast-body{flex:1;font-size:.84rem;color:var(--ink-dim);font-weight:300;line-height:1.4}
-.qf-toast-body b,.qf-toast-body strong{color:var(--ink);font-weight:500}
+/* FIX 2026-06-24: the toast title (<strong>) and message (<span>) were both
+   inline with no separator, so they ran together ("Starting freshNew proposal").
+   Block the title onto its own line above the message. */
+.qf-toast-body b,.qf-toast-body strong{color:var(--ink);font-weight:500;display:block;margin-bottom:1px}
 .qf-toast-close{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px}
 .qf-toast-error .qf-toast-ico{color:#E8A0A0}
 .qf-toast-warn .qf-toast-ico{color:var(--accent-soft)}
