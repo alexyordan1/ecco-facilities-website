@@ -155,6 +155,14 @@ export async function onRequestPost(context) {
     const { em: email, fn: firstName, ln: lastName, ph: phone, co: company,
             turnstileToken, formType } = body;
 
+    // FIX 2026-06-24 (H8): honeypot. #qfHpUrl is invisible to real users
+    // (sr-only / aria-hidden / tabindex=-1 / autocomplete=off); only naive bots
+    // fill it. Fake a success so the bot believes it worked and stops retrying,
+    // without touching the CRM, email, or notification path.
+    if (body.hp && String(body.hp).trim()) {
+      return new Response(JSON.stringify({ ok: true, ref: 'ECJ-OK' }), { status: 200, headers: corsHeaders });
+    }
+
     // AYS Ola 3 #6 — strict email validation (regex hoisted to module scope)
     const MAX_STR = 500;
     if (!email || !EMAIL_RE.test(String(email))) {

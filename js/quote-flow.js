@@ -554,7 +554,12 @@
     try {
       // Never save submitted / success state
       if (STATE.currentStepName === 'success') return;
-      var payload = hasConsent() ? STATE : stripPII(STATE);
+      // FIX 2026-06-24 (H): the local draft is first-party FUNCTIONAL storage
+      // (functionality_storage is 'granted' by default and never leaves the
+      // device — it is not analytics). Declining analytics cookies must NOT
+      // wipe the user's own typed name/email/notes, or "Save for later"
+      // silently loses everything. The draft is cleared on successful submit.
+      var payload = STATE;
       // V2 2026-04-25 — stamp _v: 2 so loadDraft can migrate v1 drafts safely.
       var snap = { _v: 2, s: payload, t: Date.now(), c: hasConsent() ? 1 : 0 };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
@@ -1044,7 +1049,7 @@
     // region then announces position ("Step N of M") without re-reading the
     // heading the focus move already voices.
     try {
-      var _titleEl = to.querySelector('.qf2-prompt-title');
+      var _titleEl = to.querySelector('.qf2-prompt-title, .qf2-success-title');
       if (_titleEl) {
         _titleEl.setAttribute('tabindex', '-1');
         _titleEl.focus({ preventScroll: true });
@@ -1056,7 +1061,7 @@
         var _countable = _flow.filter(function (n) { return n !== 'checkpoint' && n !== 'success'; });
         var _total = _countable.length;
         var _done = _flow.slice(0, _cur + 1).filter(function (n) { return n !== 'checkpoint' && n !== 'success'; }).length;
-        _announcer.textContent = name === 'success' ? ''
+        _announcer.textContent = name === 'success' ? 'Request sent. Your proposal is on its way.'
           : name === 'contact' ? 'Last step.'
           : 'Step ' + Math.max(1, Math.min(_done, _total)) + ' of ' + _total + '.';
       }
@@ -3185,6 +3190,13 @@
     }
     // D63 — wire US-style auto-format on the phone input as the user types.
     attachPhoneAutoFormat(document.getElementById('qfUserPhone'));
+    // FIX 2026-06-24 (H): nothing ever copied #qfUserPhone into STATE, so the
+    // phone the user typed on the review opt-in was silently dropped (never
+    // validated, never submitted). Mirror its value into STATE on input.
+    (function () {
+      var phEl = document.getElementById('qfUserPhone');
+      if (phEl) phEl.addEventListener('input', function () { STATE.userPhone = this.value.trim(); });
+    })();
 
     var qf2NotesArea = document.getElementById('qfSpecialInstructions');
     var qf2NotesCounter = document.getElementById('qf2NotesCounter');
@@ -4040,7 +4052,11 @@
         space: STATE.space,
         size: STATE.size,
         formType: formType,
-        notes: STATE.specialInstructions || ''
+        notes: STATE.specialInstructions || '',
+        // FIX 2026-06-24 (H8): honeypot. Real users never fill #qfHpUrl (it is
+        // sr-only + tabindex=-1 + aria-hidden + autocomplete=off); naive bots
+        // that fill every field do. Server fake-succeeds when this is non-empty.
+        hp: (document.getElementById('qfHpUrl') || { value: '' }).value || ''
       };
       // Schedule days — 'both' now tracks two separate lists (cleaning +
        // porter) so email templates and CRM can render them distinctly. The
@@ -4402,11 +4418,18 @@
         awaitTurnstile().then(function (token) {
           var payload = buildSubmitPayload();
           if (token) payload.turnstileToken = token;
+          // FIX 2026-06-24 (H): bound the client→worker request. Without this,
+          // a stalled connection (flaky mobile, captive portal, cold-start hang)
+          // left the button stuck on "Sending…" forever. On timeout the fetch
+          // aborts → flows to the .catch below (re-enable button, reset token).
+          var _ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+          var _to = _ctrl ? setTimeout(function () { _ctrl.abort(); }, 20000) : null;
           return fetch('/api/submit-quote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+            body: JSON.stringify(payload),
+            signal: _ctrl ? _ctrl.signal : undefined
+          }).finally(function () { if (_to) clearTimeout(_to); });
         }).then(function (res) {
           return res.json().then(function (data) { return { ok: res.ok, status: res.status, data: data }; });
         }).then(function (result) {
@@ -4849,6 +4872,13 @@
         if (freq) STATE.prefillFreq = freq;
         if (urgency) STATE.prefillUrgency = urgency;
       }
+      // FIX 2026-06-24 (H/privacy): strip identifying params from the address
+      // bar after consuming them, so PII (name/email/phone/company/address)
+      // doesn't linger in browser history, the Referer header, or analytics
+      // URL capture. Non-PII params (space/size/utm/...) are preserved.
+      ['firstName', 'lastName', 'email', 'phone', 'company', 'address'].forEach(function (k) { params.delete(k); });
+      var _qs = params.toString();
+      try { history.replaceState(null, '', location.pathname + (_qs ? '?' + _qs : '') + location.hash); } catch (_) {}
     } catch (e) {}
   })();
 
@@ -4934,6 +4964,21 @@
         var d = STATE.days.length === 7 ? 'Every day' : STATE.days.length === 5 ? 'Mon\u2013Fri' : STATE.days.length + ' days';
         setRailValue('days', d);
       }
+      // FIX 2026-06-24 (H): hydrate the live DOM inputs from the restored STATE.
+      // Previously only rail labels were restored, so resumed name/email/company/
+      // address/notes/phone reappeared blank in their fields and could be
+      // re-submitted empty (or silently dropped).
+      [['qfUserFirstName', 'userName'], ['qfUserLastName', 'userLastName'],
+       ['qfUserEmail', 'userEmail'], ['qfUserPosition', 'userPosition'],
+       ['qfCompanyName', 'companyName'], ['qfAddress', 'userAddress'],
+       ['qfSuite', 'userSuite'], ['qfUserPhone', 'userPhone'],
+       ['qfSpecialInstructions', 'specialInstructions']].forEach(function (pair) {
+        var el = document.getElementById(pair[0]);
+        if (el && STATE[pair[1]] != null && STATE[pair[1]] !== '') {
+          el.value = STATE[pair[1]];
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
       banner.remove();
       goToScreen(STATE.currentStepName);
     });
@@ -5184,9 +5229,19 @@
     var t = e.target;
     var isTyping = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
 
-    // Esc → goBack (works anywhere except an open edit panel)
+    // Esc → goBack (works anywhere except an open review edit panel).
+    // FIX 2026-06-24 (H): the V2 review panel class is .qf2-sum-edit-panel
+    // (the old .qf2-edit-panel never matched, so Esc navigated away with a
+    // panel open). Close the open panel first; only goBack when none is open.
     if (e.key === 'Escape' && typeof goBack === 'function') {
-      if (document.querySelector('.qf2-edit-panel')) return;
+      var _openPanel = document.querySelector('.qf2-sum-edit-panel, .qf2-edit-panel');
+      if (_openPanel) {
+        e.preventDefault();
+        _openPanel.remove();
+        var _row = document.querySelector('.qf2-sum-row.is-editing');
+        if (_row) _row.classList.remove('is-editing');
+        return;
+      }
       e.preventDefault();
       goBack();
       return;
