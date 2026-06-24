@@ -56,7 +56,7 @@
      is still arriving. <noscript> mirror keeps fonts working with JS off. -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/noir.css?v=12">
-<link rel="stylesheet" href="css/quote-noir.css?v=41">
+<link rel="stylesheet" href="css/quote-noir.css?v=42">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -978,7 +978,7 @@
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('mobTog').addEventListener('click',()=>document.getElementById('navMenu').classList.toggle('active'));
-  window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20));
+  window.addEventListener('scroll',()=>{var n=document.getElementById('nav');if(n)n.classList.toggle('scrolled',window.scrollY>20);document.body.classList.toggle('qf-scrolled',window.scrollY>4);},{passive:true});
 });
 </script>
 <!-- main.js dropped — the immersive quote page has no shared nav to drive; the wizard engine (quote-flow.js) is self-contained. -->
