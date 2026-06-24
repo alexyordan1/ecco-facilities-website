@@ -221,7 +221,7 @@
     transition:color .25s ease,transform .25s ease;
   }
   .mm-link:hover,.mm-link:focus-visible{color:var(--accent);transform:translateX(5px)}
-  .mm-sub .mm-link{font-size:clamp(1.25rem,5.5vw,1.6rem);color:var(--ink-dim)}
+  .mm-sub .mm-link{font-size:clamp(1.25rem,5.5vw,1.6rem);color:var(--ink-dim);min-height:44px;display:flex;align-items:center}
   .mm-cta{
     margin-top:1.8rem;display:flex;align-items:center;justify-content:center;gap:.5em;
     background:var(--accent);color:var(--accent-ink);font-weight:500;
@@ -412,7 +412,7 @@
     font-size:.95rem;color:var(--ink);
     position:relative;padding-bottom:3px;
   }
-  .link-ghost::before{content:"";position:absolute;inset:-9px -6px;border-radius:8px}
+  .link-ghost::before{content:"";position:absolute;inset:-13px -10px;border-radius:8px} /* 44px hit area (a11y) */
   .link-ghost::after{
     content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;
     background:var(--ink-faint);
@@ -498,7 +498,7 @@
   .rv.in{opacity:1;transform:none}
   /* No-JS safety: if scripts are disabled, reveal content JS would otherwise unhide
      (project rule — no reveal-gated content invisible on load). */
-  @media (scripting: none){ .rv,.rv-light,.rv-child{opacity:1!important;transform:none!important} }
+  @media (scripting: none){ .rv,.rv-light,.rv-child{opacity:1!important;transform:none!important} .hero-rotate .sizer{visibility:visible} }
 
   /* ════════════ SERVICES ════════════ */
   .services .sec-head{margin-bottom:clamp(2.5rem,5vw,4rem)}
@@ -656,8 +656,8 @@
   .feat-cat{position:absolute;top:1rem;left:1rem;z-index:2;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--accent-ink);background:rgba(var(--accent-rgb),.94);padding:.34rem .66rem;border-radius:99px}
   .feat-body{padding:clamp(1.5rem,3vw,2.8rem);display:flex;flex-direction:column;justify-content:center}
   .feat-eyebrow{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:500}
-  .feat-body h2{font-family:var(--font-display);font-weight:300;font-size:clamp(1.6rem,3vw,2.5rem);line-height:1.08;letter-spacing:-.01em;margin:.7rem 0 0;text-wrap:balance}
-  .feat-body h2 em{font-style:italic;color:var(--accent-soft)}
+  .feat-body h2,.feat-body h3{font-family:var(--font-display);font-weight:300;font-size:clamp(1.6rem,3vw,2.5rem);line-height:1.08;letter-spacing:-.01em;margin:.7rem 0 0;text-wrap:balance}
+  .feat-body h2 em,.feat-body h3 em{font-style:italic;color:var(--accent-soft)}
   .feat-body p{margin-top:.9rem;font-size:.96rem;color:var(--ink-dim);font-weight:300;line-height:1.6;max-width:46ch}
   .feat-meta{margin-top:1.1rem;font-size:.76rem;letter-spacing:.04em;color:var(--ink-faint)}
   .feat-readlink{margin-top:1.5rem;font-size:.86rem;font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.45rem}
@@ -1056,7 +1056,7 @@
   .sm-col h2{font-family:var(--font-display);font-weight:400;font-size:1.22rem;color:var(--ink);margin:0;padding-bottom:.7rem;border-bottom:1px solid var(--line);letter-spacing:-.01em}
   .sm-col ul{list-style:none;margin:.35rem 0 0;padding:0}
   .sm-col li{margin:0}
-  .sm-col a{display:block;padding:.55rem 0;color:var(--ink-dim);font-size:.95rem;font-weight:300;line-height:1.35;transition:color .25s ease,padding-left .25s ease;border-bottom:1px solid rgba(244,242,236,.05)}
+  .sm-col a{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:.4rem 0;color:var(--ink-dim);font-size:.95rem;font-weight:300;line-height:1.35;transition:color .25s ease,padding-left .25s ease;border-bottom:1px solid rgba(244,242,236,.05)}
   .sm-col li:last-child a{border-bottom:0}
   .sm-col a:hover,.sm-col a:focus-visible{color:var(--accent);padding-left:.35rem}
   .sm-col a .sm-sub{display:block;font-size:.78rem;color:var(--ink-faint);margin-top:.1rem}
@@ -1078,7 +1078,7 @@
   .notfound .head-actions{margin-top:2.1rem;display:flex;flex-wrap:wrap;gap:.9rem 1.2rem;align-items:center;justify-content:center}
   .notfound .err-links{margin-top:2.7rem;display:flex;flex-wrap:wrap;gap:.6rem 1.6rem;justify-content:center;border-top:1px solid var(--line);padding-top:1.8rem}
   .notfound .err-help{margin-top:1.8rem;font-size:.85rem;color:var(--ink-dim);font-weight:300}
-  .notfound .err-links a{font-size:.9rem;color:var(--ink-dim);font-weight:300;transition:color .25s ease}
+  .notfound .err-links a{display:inline-flex;align-items:center;min-height:44px;font-size:.9rem;color:var(--ink-dim);font-weight:300;transition:color .25s ease}
   .notfound .err-links a:hover,.notfound .err-links a:focus-visible{color:var(--accent)}
 
   /* ════════════ QUOTE WIZARD (Noir) ════════════ */
