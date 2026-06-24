@@ -29,7 +29,9 @@ function redactPII(s) {
 // AYS Ola 3 #6 — strict email regex. Rejects `..user@`, `user..name@`,
 // `user@-domain.com`, and trailing-hyphen domains. MUST match the client-side
 // regex in js/quote-flow.js (line ~906) byte-for-byte.
-const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
+// FIX 2026-06-24 (C2): lookbehind-free — mirror of client. (?<!\.) threw on
+// Safari/iOS <=16.3; equivalent = local part 1+ allowed chars not ending in dot.
+const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]*[A-Za-z0-9_%+\-]@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
 
 // AYS Ola 3 #7 — rate-limit /api/submit-quote. Uses Cloudflare KV with hourly
 // buckets. Limit: 10 submits per IP per hour. Falls open (skip limit) if KV is

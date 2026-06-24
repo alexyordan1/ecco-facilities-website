@@ -1361,7 +1361,10 @@
   // EMAIL_RE byte-for-byte. Rejects `..user@`, `user..x@`, `user@-domain.com`,
   // and trailing-hyphen domains. Client-first validation matches server so
   // users see errors before a round-trip.
-  var EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
+  // FIX 2026-06-24 (C2): lookbehind-free. The old (?<!\.) lookbehind threw a
+  // SyntaxError at parse time on Safari/iOS <=16.3, killing the whole engine.
+  // Equivalent semantics: local part is 1+ allowed chars NOT ending in a dot.
+  var EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]*[A-Za-z0-9_%+\-]@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
   // AYS Ola 3 #31 — disposable-email block list. Soft warning only — some legit
   // users forward to aliases, so we warn but don't block.
   //
@@ -4856,7 +4859,13 @@
      ----------------------------------------------------------------------- */
   (function offerResume() {
     var draft = loadDraft();
-    if (!draft || !draft.service || draft.currentStepName === 'welcome' || draft.currentStepName === 'success') return;
+    // FIX 2026-06-24 (C1): build the resume banner ONLY for a real resumable
+    // draft, but do NOT early-return — the boot IIFEs further down (Turnstile
+    // loader, offline/back-button guards, paste sanitizer, first-visit hint,
+    // save toast) must run for EVERY visitor. They used to be trapped after
+    // this return, so brand-new visitors never got Turnstile → submit 403'd.
+    var __resumable = !!(draft && draft.service && draft.currentStepName !== 'welcome' && draft.currentStepName !== 'success');
+    if (__resumable) {
 
     // (Pre-highlighting the prior card was removed — the green ring read as
     // "selected" to users. The resume banner above is enough context.)
@@ -4928,6 +4937,49 @@
       banner.remove();
       goToScreen(STATE.currentStepName);
     });
+
+    startBtn.addEventListener('click', function () {
+      // Sprint 5 R-C — Undo pattern. Clear immediately (optimistic) but show
+      // a 6-second toast with Undo. Restoring re-saves the draft and re-shows
+      // the banner. After timeout the clear is permanent.
+      var snapshot = null;
+      try { snapshot = localStorage.getItem('ecco_quote_draft_v1'); } catch (_) {}
+      clearDraft();
+      banner.remove();
+
+      // Build undo toast
+      var toast = document.createElement('div');
+      toast.className = 'qf2-undo-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      var msg = document.createElement('span');
+      msg.className = 'qf2-undo-toast-msg';
+      msg.textContent = 'Draft cleared.';
+      var undo = document.createElement('button');
+      undo.type = 'button';
+      undo.className = 'qf2-undo-toast-btn';
+      undo.textContent = 'Undo';
+      toast.appendChild(msg);
+      toast.appendChild(undo);
+      document.body.appendChild(toast);
+      // Slide-in
+      requestAnimationFrame(function () { toast.classList.add('is-shown'); });
+
+      var t = setTimeout(function () {
+        toast.classList.remove('is-shown');
+        setTimeout(function () { toast.remove(); }, 250);
+      }, 6000);
+
+      undo.addEventListener('click', function () {
+        clearTimeout(t);
+        if (snapshot) {
+          try { localStorage.setItem('ecco_quote_draft_v1', snapshot); } catch (_) {}
+        }
+        toast.classList.remove('is-shown');
+        setTimeout(function () { toast.remove(); location.reload(); }, 250);
+      });
+    });
+    } // end if(__resumable) — boot IIFEs below run unconditionally
 
     // H3 D37 — Save-for-later toast. The flowbar's "Save" button already
     // calls saveDraft() and flashes the button text. But on the first save
@@ -5120,47 +5172,6 @@
       });
     })();
 
-    startBtn.addEventListener('click', function () {
-      // Sprint 5 R-C — Undo pattern. Clear immediately (optimistic) but show
-      // a 6-second toast with Undo. Restoring re-saves the draft and re-shows
-      // the banner. After timeout the clear is permanent.
-      var snapshot = null;
-      try { snapshot = localStorage.getItem('ecco_quote_draft_v1'); } catch (_) {}
-      clearDraft();
-      banner.remove();
-
-      // Build undo toast
-      var toast = document.createElement('div');
-      toast.className = 'qf2-undo-toast';
-      toast.setAttribute('role', 'status');
-      toast.setAttribute('aria-live', 'polite');
-      var msg = document.createElement('span');
-      msg.className = 'qf2-undo-toast-msg';
-      msg.textContent = 'Draft cleared.';
-      var undo = document.createElement('button');
-      undo.type = 'button';
-      undo.className = 'qf2-undo-toast-btn';
-      undo.textContent = 'Undo';
-      toast.appendChild(msg);
-      toast.appendChild(undo);
-      document.body.appendChild(toast);
-      // Slide-in
-      requestAnimationFrame(function () { toast.classList.add('is-shown'); });
-
-      var t = setTimeout(function () {
-        toast.classList.remove('is-shown');
-        setTimeout(function () { toast.remove(); }, 250);
-      }, 6000);
-
-      undo.addEventListener('click', function () {
-        clearTimeout(t);
-        if (snapshot) {
-          try { localStorage.setItem('ecco_quote_draft_v1', snapshot); } catch (_) {}
-        }
-        toast.classList.remove('is-shown');
-        setTimeout(function () { toast.remove(); location.reload(); }, 250);
-      });
-    });
   })();
 
   /* 2026-06-21 — welcome greeting pill + its tap-to-expand handler removed (persona retired). */
