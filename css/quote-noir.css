@@ -821,3 +821,87 @@
     background-size:cover; background-position:center 52%; background-repeat:no-repeat;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   NOIR FIELD HARDENING (audit 2026-06-23)
+   Kills old-form / native-chrome leftovers that broke the dark theme once a
+   field was filled, autofilled, errored, or injected at runtime.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Dark native chrome (autofill base, type=time/number pickers, spinners,
+   scrollbars). color-scheme inherits, so scoping it to the stage covers every
+   control in the wizard without touching the rest of the site. */
+.qf-stage{ color-scheme:dark; }
+.qf-dp-time-input, .qf-rev-input{ color-scheme:dark; }
+
+/* Browser autofill — the headline break. Keep each field's own Noir background
+   and force light text instead of the browser's pale-yellow fill + black text.
+   The long background-color transition stops the autofill fill from ever
+   painting, so transparent fields (.qf2-field input) stay transparent and the
+   frosted wrapper shows through. Covers Blink/Safari + Firefox (:autofill). */
+.qf2-field input:-webkit-autofill,
+.qf2-field input:-webkit-autofill:hover,
+.qf2-field input:-webkit-autofill:focus,
+.qf2-field input:-webkit-autofill:active,
+.qf2-numeric-input:-webkit-autofill,
+.qf2-edit-input:-webkit-autofill,
+.qf2-textarea:-webkit-autofill,
+.qf-dp-time-input:-webkit-autofill,
+.qf-rev-input:-webkit-autofill,
+.qf2-field input:autofill,
+.qf2-numeric-input:autofill,
+.qf2-edit-input:autofill,
+.qf2-textarea:autofill,
+.qf-dp-time-input:autofill,
+.qf-rev-input:autofill{
+  -webkit-text-fill-color:var(--ink) !important;
+  caret-color:var(--ink);
+  transition:background-color 9999s ease-out 0s, color 9999s ease-out 0s;
+}
+
+/* Strip the iOS inner-shadow / rounded UA chrome on text-like inputs (NOT the
+   time inputs — appearance:none there can drop the picker indicator). */
+.qf2-field input,
+.qf2-numeric-input,
+.qf2-edit-input,
+.qf2-textarea{ -webkit-appearance:none; appearance:none; }
+
+/* Number input (Size → exact sqft): drop the light OS spinner buttons. */
+.qf2-numeric-input{ -moz-appearance:textfield; }
+.qf2-numeric-input::-webkit-outer-spin-button,
+.qf2-numeric-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+
+/* type=time clock launcher: tint it light so it shows on the dark field. */
+.qf-dp-time-input::-webkit-calendar-picker-indicator,
+.qf-rev-input::-webkit-calendar-picker-indicator{ filter:invert(.85); opacity:.7; cursor:pointer; }
+.qf-dp-time-input:hover::-webkit-calendar-picker-indicator,
+.qf-rev-input:hover::-webkit-calendar-picker-indicator{ opacity:1; }
+
+/* Review-screen porter-hour edit rows (.qf-rev-input + wrappers) — were
+   unstyled white boxes. Mirror the day-porter time field. */
+.qf-rv-porter-hour-row{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; margin-top:12px; }
+.qf-rv-porter-hour-label{ font-size:.8rem; color:var(--ink-dim); min-width:60px; }
+.qf-rv-field-row{ display:flex; align-items:center; gap:8px; }
+.qf-rv-field-sep{ font-size:.8rem; color:var(--ink-faint); }
+.qf-rev-input{
+  background:var(--surface-1); border:1px solid var(--line); border-radius:10px;
+  color:var(--ink); font-family:inherit; font-size:16px; padding:9px 11px; min-height:44px;
+}
+.qf-rev-input:focus{ outline:none; border-color:var(--accent); }
+
+/* Hours-mode pill is a <label>; hide the raw OS radio dot inside it (the
+   .is-active pill already conveys selection). */
+.qf-dp-hours-mode-opt input[type=radio]{
+  position:absolute; width:1px; height:1px; opacity:0; margin:0; pointer-events:none;
+}
+
+/* Validation: the JS marks invalid fields with .qf-input-invalid / .is-error
+   but nothing styled them. Give a soft-red Noir border matching .qf2-field-err. */
+.qf2-numeric-input.qf-input-invalid,
+.qf2-edit-input.qf-input-invalid,
+.qf-dp-time-input.is-error,
+.qf-rev-input.qf-input-invalid{ border-color:#E8A0A0; }
+.qf2-field:has(input.qf-input-invalid){ border-color:#E8A0A0; }
+
+/* Size-step error message used a legacy unstyled class — match .qf2-field-err. */
+.qf-info-err{ font-size:.8rem; color:#E8A0A0; margin-top:.45rem; }
