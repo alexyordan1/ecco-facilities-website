@@ -139,7 +139,7 @@
     // On the careers page the sticky CTA must recruit, not sell — re-point it
     // to the careers inbox instead of the sales proposal form.
     if(document.body.classList.contains('page-careers')){
-      mcta.href = 'mailto:careers@eccofacilities.com';
+      mcta.href = 'mailto:info@eccofacilities.com';
       mcta.innerHTML = 'Apply';
     }
     var mctaToggle = function(){ mcta.classList.toggle('show', window.scrollY > window.innerHeight * 0.7); };
