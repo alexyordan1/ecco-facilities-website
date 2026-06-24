@@ -184,35 +184,56 @@
     backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .4s ease,visibility .4s;
   }
   body.menu-open .nav-scrim{opacity:1;visibility:visible}
+  /* Mobile menu — full-screen modern overlay (redesign 2026-06-24).
+     Replaces the old narrow right-drawer copied from the legacy site:
+     edge-to-edge frosted Noir surface, large Fraunces link type, and a
+     staggered reveal of each row. Same markup + burger + JS (body.menu-open). */
   .mobile-menu{
-    position:fixed;top:0;right:0;bottom:0;z-index:85;
-    width:min(380px,88vw);
-    background:var(--surface-1);
-    border-left:1px solid var(--line-strong);
-    transform:translateX(100%);visibility:hidden;transition:transform .45s cubic-bezier(.2,.7,.2,1),visibility .45s;
+    position:fixed;inset:0;z-index:85;
+    background:rgba(12,14,13,.94);
+    -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity .45s ease,visibility .45s;
     display:flex;flex-direction:column;
-    padding:calc(var(--nav-h) + .5rem) 1.6rem 2rem;
+    padding:calc(var(--nav-h) + 1.4rem) clamp(1.6rem,7vw,3rem) 2rem;
     overflow-y:auto;
   }
-  body.menu-open .mobile-menu{transform:translateX(0);visibility:visible}
-  .mm-label{font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);margin:1.4rem 0 .5rem}
+  body.menu-open .mobile-menu{opacity:1;visibility:visible;pointer-events:auto}
+  /* staggered reveal of each direct row */
+  .mobile-menu > *{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .55s cubic-bezier(.2,.8,.2,1)}
+  body.menu-open .mobile-menu > *{opacity:1;transform:none}
+  body.menu-open .mobile-menu > *:nth-child(1){transition-delay:.06s}
+  body.menu-open .mobile-menu > *:nth-child(2){transition-delay:.10s}
+  body.menu-open .mobile-menu > *:nth-child(3){transition-delay:.14s}
+  body.menu-open .mobile-menu > *:nth-child(4){transition-delay:.17s}
+  body.menu-open .mobile-menu > *:nth-child(5){transition-delay:.20s}
+  body.menu-open .mobile-menu > *:nth-child(6){transition-delay:.23s}
+  body.menu-open .mobile-menu > *:nth-child(7){transition-delay:.26s}
+  body.menu-open .mobile-menu > *:nth-child(8){transition-delay:.29s}
+  body.menu-open .mobile-menu > *:nth-child(9){transition-delay:.32s}
+  body.menu-open .mobile-menu > *:nth-child(n+10){transition-delay:.35s}
+  .mm-label{font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);font-weight:500;margin:1.5rem 0 .25rem}
+  .mobile-menu > .mm-label:first-child{margin-top:.2rem}
   .mm-link{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:.85rem 0;border-bottom:1px solid var(--line);
-    font-size:1.02rem;color:var(--ink);font-weight:300;
-    transition:color .3s ease,padding-left .3s ease;
+    display:block;padding:.3rem 0;border:0;
+    font-family:var(--font-display);font-weight:300;line-height:1.12;
+    font-size:clamp(1.7rem,7.5vw,2.3rem);color:var(--ink);
+    transition:color .25s ease,transform .25s ease;
   }
-  .mm-link:hover{color:var(--accent);padding-left:.3rem}
-  .mm-sub{padding-left:1rem}
-  .mm-sub .mm-link{font-size:.94rem;color:var(--ink-dim)}
+  .mm-link:hover,.mm-link:focus-visible{color:var(--accent);transform:translateX(5px)}
+  .mm-sub .mm-link{font-size:clamp(1.25rem,5.5vw,1.6rem);color:var(--ink-dim)}
   .mm-cta{
-    margin-top:1.6rem;display:flex;align-items:center;justify-content:center;gap:.5em;
+    margin-top:1.8rem;display:flex;align-items:center;justify-content:center;gap:.5em;
     background:var(--accent);color:var(--accent-ink);font-weight:500;
-    padding:1em;border-radius:44px;font-size:.95rem;
+    padding:1em;border-radius:44px;font-size:1rem;min-height:52px;font-family:var(--font-body);
   }
   .mm-foot{margin-top:auto;padding-top:1.8rem;color:var(--ink-faint);font-size:.85rem;font-weight:300}
   .mm-foot a{color:var(--ink-dim)}
   .mm-foot a:hover{color:var(--accent)}
+  @media(prefers-reduced-motion:reduce){
+    .mobile-menu > *{transition:opacity .2s ease}
+    .mobile-menu > *{transform:none}
+  }
   @media(max-width:980px){
     .nav-links{display:none}
     .nav-burger{display:flex}
@@ -1224,6 +1245,14 @@
     .svc-hero .head-actions{flex-direction:column;align-items:stretch;gap:.9rem}
     .svc-hero .head-actions .btn-gold{width:100%;justify-content:center}
     .svc-hero .head-actions .link-ghost{justify-content:center}
+    /* FIX 2026-06-24 (mobile contrast): the base svc-hero scrim is anchored
+       bottom-left for the desktop flex-end layout. On mobile the hero flips to
+       flex-start (text at TOP), so the bare photo showed through behind the
+       eyebrow/h1/lead (user-reported). Re-anchor the scrim over the top band. */
+    .svc-hero-media::after{background:radial-gradient(150% 88% at 50% 20%,rgba(12,14,13,.92) 0%,rgba(12,14,13,.62) 46%,rgba(12,14,13,.32) 74%),linear-gradient(180deg,rgba(12,14,13,.8) 0%,rgba(12,14,13,.52) 38%,rgba(12,14,13,.4) 66%,var(--black) 100%)}
     .img-band{min-height:clamp(280px,72vw,360px)}
-    .img-band-media::after{background:linear-gradient(180deg,rgba(12,14,13,.5) 0%,rgba(12,14,13,.35) 38%,rgba(12,14,13,.86) 100%)}
+    /* FIX 2026-06-24 (mobile contrast): img-band centers its text; the old
+       mobile scrim was weakest (.35) at ~38% — right under the copy. Keep the
+       center band >=.6 so the quote + eyebrow stay legible. */
+    .img-band-media::after{background:linear-gradient(180deg,rgba(12,14,13,.64) 0%,rgba(12,14,13,.6) 50%,rgba(12,14,13,.88) 100%)}
   }
