@@ -186,7 +186,7 @@
       '</div>' +
       '<div class="cta">Ready to get started? Call us at <a href="tel:2125550100">(212) 555-0100</a> or email <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a></div>' +
       '<h2>Why Ecco Facilities?</h2>' +
-      '<p>With 12+ years serving NYC businesses and 200+ satisfied clients, Ecco Facilities delivers premium cleaning services with a commitment to sustainability. Our eco-certified products are safe for your people, your pets, and the planet.</p>' +
+      '<p>With 12+ years serving NYC businesses, Ecco Facilities delivers premium cleaning services with a commitment to sustainability. Our eco-certified products are safe for your people, your pets, and the planet.</p>' +
       '<div class="footer">' +
         '<strong>Ecco Facilities LLC</strong><br>' +
         'eccofacilities.com &bull; info@eccofacilities.com &bull; (212) 555-0100<br>' +
