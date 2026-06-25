@@ -30,7 +30,7 @@ var PAGE_CONTENT = {
   },
   'about': {
     title: 'Your Ecco guide',
-    greeting: "Hey! \uD83D\uDC4B Reading about Ecco?\n\n12+ years in NYC, dedicated teams, eco-certified, 200+ businesses trust us. Want to chat fit or get a quote?\n\nWhat\u2019s most useful?",
+    greeting: "Hey! \uD83D\uDC4B Reading about Ecco?\n\n12+ years in NYC, dedicated teams, and eco-certified products. Want to chat fit or get a quote?\n\nWhat\u2019s most useful?",
     replies: ['What makes you different?', 'NYC coverage', 'Client examples', PRIMARY_QUOTE_CTA]
   },
   'careers': {
@@ -40,7 +40,7 @@ var PAGE_CONTENT = {
   },
   'testimonials': {
     title: 'Cleaning Experience Advisor',
-    greeting: "Hey! \uD83D\uDC4B Checking reviews?\n\n200+ NYC businesses trust Ecco. Want to see what stands out, hear about specific industries, or get a quote?\n\nWhat helps?",
+    greeting: "Hey! \uD83D\uDC4B Checking reviews?\n\nNYC businesses trust Ecco for reliable, eco-certified cleaning. Want to see what stands out, hear about specific industries, or get a quote?\n\nWhat helps?",
     replies: ['Industries you serve?', 'Client retention?', PRIMARY_QUOTE_CTA, 'Talk to the team']
   },
   'why-ecco': {
