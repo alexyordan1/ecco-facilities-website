@@ -385,6 +385,22 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 
 .qf-stage::before{ display:none; }   /* drop the old centered accent glow */
 
+/* ── MÓVIL: arreglo del espacio superior (2026-06-25) ─────────────────────
+   El formulario OCULTA el nav global (header{display:none}), pero la base
+   .qf-stage (noir.css) reserva var(--nav-h) ≈62px en el padding-top — espacio
+   FANTASMA que empujaba cada paso muy abajo y cortaba el contenido inferior en
+   móvil (peor con viewport-fit=cover, que suma el safe-area del notch en el
+   flowbar sticky). Quitamos el nav-h en móvil; el flowbar ya carga su propio
+   clearance del notch en las pantallas de paso. Desktop (≥880px) conserva su
+   padding más abajo (@media min-width:880px). */
+@media (max-width:879px){
+  .qf-stage{ padding-top:clamp(.5rem,1.8vh,.9rem); }
+  /* La pantalla welcome NO tiene flowbar → carga su propio clearance del notch. */
+  .qf-stage:has(#qfScreen_welcome.is-active){
+    padding-top:calc(env(safe-area-inset-top,0px) + clamp(1rem,3.5vh,1.8rem));
+  }
+}
+
 /* Translucent frosted tiles so the skyline reads behind the content —
    the Marquee "floating on the photo" feel. Accent states preserved. */
 .qf2-card,.qf2-field,.qf2-quiz-panel,.qf2-size-card,.qf2-numeric-input,
@@ -865,6 +881,10 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
   -webkit-text-fill-color:var(--ink) !important;
   -webkit-box-shadow:0 0 0 1000px #0b0e0d inset !important;
           box-shadow:0 0 0 1000px #0b0e0d inset !important;
+  /* iOS Safari sometimes ignores the inset box-shadow on autofill; the long
+     background-color transition keeps it from ever painting the pale fill,
+     so the field stays dark even when the shadow trick is dropped. */
+  transition:background-color 9999s ease 0s !important;
   caret-color:var(--ink);
 }
 /* Wrapped text fields are transparent over the .qf2-field wrapper; the box-shadow
