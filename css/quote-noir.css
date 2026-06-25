@@ -360,7 +360,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-stage{
   background:
     linear-gradient(180deg, rgba(12,14,13,.66) 0%, rgba(12,14,13,.40) 20%, rgba(12,14,13,.28) 46%, rgba(12,14,13,.58) 74%, rgba(12,14,13,.92) 92%, var(--black) 100%),
-    url(../images/stock/ecco-nyc-dusk.jpg);
+    url(../images/stock/ecco-nyc-dusk.webp);
   background-size:cover;
   background-position:center 42%;
   background-repeat:no-repeat;
@@ -378,7 +378,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
   background-image:
     linear-gradient(90deg, rgba(12,14,13,.92) 0%, rgba(12,14,13,.70) 34%, rgba(12,14,13,.38) 62%, rgba(12,14,13,.46) 100%),
     linear-gradient(180deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.34) 40%, rgba(12,14,13,.88) 100%),
-    url(../images/stock/welcome-team-conference.jpg);
+    url(../images/stock/welcome-team-conference.webp);
   background-position:center 30%;
 }
 
@@ -439,7 +439,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       linear-gradient(90deg, rgba(12,14,13,.88) 0%, rgba(12,14,13,.55) 32%, rgba(12,14,13,.14) 64%, transparent 84%),
       linear-gradient(180deg, rgba(12,14,13,.34) 0%, rgba(12,14,13,.12) 42%, rgba(12,14,13,.52) 100%),
-      url(../images/stock/ecco-nyc-dusk.jpg);
+      url(../images/stock/ecco-nyc-dusk.webp);
     background-size:cover;
     background-position:center 22%;
     background-repeat:no-repeat;
@@ -476,7 +476,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       linear-gradient(180deg, rgba(12,14,13,.26) 0%, rgba(12,14,13,.06) 24%, rgba(12,14,13,.50) 62%, rgba(12,14,13,.90) 90%, var(--black) 100%),
       linear-gradient(90deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.10) 46%, transparent 74%),
-      url(../images/stock/ecco-nyc-dusk.jpg);
+      url(../images/stock/ecco-nyc-dusk.webp);
     background-size:cover;
     background-position:center 26%;
     background-repeat:no-repeat;
@@ -586,7 +586,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-stage:has(#qfScreen_space.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.86) 0%, rgba(12,14,13,.78) 22%, rgba(12,14,13,.74) 50%, rgba(12,14,13,.84) 78%, rgba(12,14,13,.96) 94%, var(--black) 100%),
-    url(../images/stock/ecco-cc-hero-lobby.jpg);
+    url(../images/stock/ecco-cc-hero-lobby.webp);
   background-size:cover; background-position:center 42%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -596,7 +596,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.88) 0%, rgba(12,14,13,.83) 48%, rgba(12,14,13,.80) 76%, rgba(12,14,13,.92) 100%),
       linear-gradient(180deg, rgba(12,14,13,.76) 0%, rgba(12,14,13,.68) 36%, rgba(12,14,13,.84) 100%),
-      url(../images/stock/ecco-cc-hero-lobby.jpg);
+      url(../images/stock/ecco-cc-hero-lobby.webp);
     background-size:cover; background-position:center 42%; background-repeat:no-repeat;
   }
   /* content fills the canvas — wide, centered, NOT a 600px side column */
@@ -639,18 +639,18 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-screen.is-space .qf2-card-label{ text-shadow:0 1px 10px rgba(0,0,0,.75); }
 .qf-screen.is-space .qf2-card-hint{ color:var(--ink-dim); text-shadow:0 1px 8px rgba(0,0,0,.75); }
 /* per-card photo + scrim (bottom-weighted for the label; overlay normalizes bright shots) */
-.qf-screen.is-space .qf2-card[data-space="Office"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.52) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.86) 100%),url(../images/stock/ecco-v-corporate.jpg); }
-.qf-screen.is-space .qf2-card[data-space="Medical"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.56) 0%,rgba(12,14,13,.44) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-medical.jpg); }
-.qf-screen.is-space .qf2-card[data-space="Retail"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-retail.jpg); }
-.qf-screen.is-space .qf2-card[data-space="Restaurant"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-restaurant.jpg); }
-.qf-screen.is-space .qf2-card[data-space="Fitness"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.44) 0%,rgba(12,14,13,.30) 38%,rgba(12,14,13,.82) 100%),url(../images/stock/ecco-v-gym.jpg); }
-.qf-screen.is-space .qf2-card[data-space="School"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.60) 0%,rgba(12,14,13,.46) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-school.jpg); }
+.qf-screen.is-space .qf2-card[data-space="Office"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.52) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.86) 100%),url(../images/stock/ecco-v-corporate.webp); }
+.qf-screen.is-space .qf2-card[data-space="Medical"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.56) 0%,rgba(12,14,13,.44) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-medical.webp); }
+.qf-screen.is-space .qf2-card[data-space="Retail"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-retail.webp); }
+.qf-screen.is-space .qf2-card[data-space="Restaurant"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-restaurant.webp); }
+.qf-screen.is-space .qf2-card[data-space="Fitness"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.44) 0%,rgba(12,14,13,.30) 38%,rgba(12,14,13,.82) 100%),url(../images/stock/ecco-v-gym.webp); }
+.qf-screen.is-space .qf2-card[data-space="School"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.60) 0%,rgba(12,14,13,.46) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-school.webp); }
 
 /* ---- SIZE — a wide modern office; conveys scale/footage ---- */
 .qf-stage:has(#qfScreen_size.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.64) 0%, rgba(12,14,13,.44) 24%, rgba(12,14,13,.40) 52%, rgba(12,14,13,.64) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
-    url(../images/stock/hero-office.jpg);
+    url(../images/stock/hero-office.webp);
   background-size:cover; background-position:center 55%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -660,7 +660,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.68) 0%, rgba(12,14,13,.56) 48%, rgba(12,14,13,.54) 76%, rgba(12,14,13,.74) 100%),
       linear-gradient(180deg, rgba(12,14,13,.54) 0%, rgba(12,14,13,.40) 36%, rgba(12,14,13,.60) 100%),
-      url(../images/stock/hero-office.jpg);
+      url(../images/stock/hero-office.webp);
     background-size:cover; background-position:center 52%; background-repeat:no-repeat;
   }
   #qfScreen_size.is-active{ max-width:900px; margin:0 auto; width:100%; }
@@ -686,7 +686,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-stage:has(#qfScreen_days.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.72) 0%, rgba(12,14,13,.56) 24%, rgba(12,14,13,.52) 52%, rgba(12,14,13,.72) 80%, rgba(12,14,13,.93) 95%, var(--black) 100%),
-    url(../images/stock/ecco-clean-squeegee-bw.jpg);
+    url(../images/stock/ecco-clean-squeegee-bw.webp);
   background-size:cover; background-position:center 35%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -696,7 +696,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.78) 0%, rgba(12,14,13,.66) 48%, rgba(12,14,13,.64) 76%, rgba(12,14,13,.80) 100%),
       linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.66) 100%),
-      url(../images/stock/ecco-clean-squeegee-bw.jpg);
+      url(../images/stock/ecco-clean-squeegee-bw.webp);
     background-size:cover; background-position:center 38%; background-repeat:no-repeat;
   }
   #qfScreen_days.is-active{ max-width:720px; margin:0 auto; width:100%; }
@@ -723,7 +723,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
   background:
     radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.58) 0%, rgba(12,14,13,.50) 50%, rgba(12,14,13,.78) 100%),
     linear-gradient(180deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.42) 38%, rgba(12,14,13,.78) 100%),
-    url(../images/stock/ecco-clean-mopping-bw.jpg);
+    url(../images/stock/ecco-clean-mopping-bw.webp);
   background-size:cover; background-position:center 38%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -733,7 +733,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.58) 0%, rgba(12,14,13,.50) 50%, rgba(12,14,13,.78) 100%),
       linear-gradient(180deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.42) 38%, rgba(12,14,13,.78) 100%),
-      url(../images/stock/ecco-clean-mopping-bw.jpg);
+      url(../images/stock/ecco-clean-mopping-bw.webp);
     background-size:cover; background-position:center 38%; background-repeat:no-repeat;
   }
   #qfScreen_schedule.is-active{ max-width:720px; margin:0 auto; width:100%; }
@@ -746,7 +746,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-stage:has(#qfScreen_location.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.42) 26%, rgba(12,14,13,.40) 54%, rgba(12,14,13,.58) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
-    url(../images/stock/int-terracotta.jpg);
+    url(../images/stock/int-terracotta.webp);
   background-size:cover; background-position:center 45%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -756,7 +756,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.52) 0%, rgba(12,14,13,.44) 48%, rgba(12,14,13,.46) 76%, rgba(12,14,13,.72) 100%),
       linear-gradient(180deg, rgba(12,14,13,.46) 0%, rgba(12,14,13,.36) 36%, rgba(12,14,13,.66) 100%),
-      url(../images/stock/int-terracotta.jpg);
+      url(../images/stock/int-terracotta.webp);
     background-size:cover; background-position:center 45%; background-repeat:no-repeat;
   }
   #qfScreen_location.is-active{ max-width:640px; margin:0 auto; width:100%; }
@@ -769,7 +769,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-stage:has(#qfScreen_info.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.74) 0%, rgba(12,14,13,.56) 26%, rgba(12,14,13,.52) 54%, rgba(12,14,13,.72) 80%, rgba(12,14,13,.93) 95%, var(--black) 100%),
-    url(../images/stock/ecco-trust-hero.jpg);
+    url(../images/stock/ecco-trust-hero.webp);
   background-size:cover; background-position:center 40%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -779,7 +779,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 120% at 50% 46%, rgba(12,14,13,.74) 0%, rgba(12,14,13,.60) 46%, rgba(12,14,13,.58) 74%, rgba(12,14,13,.78) 100%),
       linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.46) 38%, rgba(12,14,13,.62) 100%),
-      url(../images/stock/ecco-trust-hero.jpg);
+      url(../images/stock/ecco-trust-hero.webp);
     background-size:cover; background-position:center 42%; background-repeat:no-repeat;
   }
   #qfScreen_info.is-active{ max-width:640px; margin:0 auto; width:100%; }
@@ -793,7 +793,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
   background:
     radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
     linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
-    url(../images/stock/bw-window-pole.jpg);
+    url(../images/stock/bw-window-pole.webp);
   background-size:cover; background-position:center 45%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -803,7 +803,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
       linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
-      url(../images/stock/bw-window-pole.jpg);
+      url(../images/stock/bw-window-pole.webp);
     background-size:cover; background-position:center 45%; background-repeat:no-repeat;
   }
   #qfScreen_contact.is-active{ max-width:720px; margin:0 auto; width:100%; }
@@ -816,7 +816,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
 .qf-stage:has(#qfScreen_success.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.54) 0%, rgba(12,14,13,.42) 26%, rgba(12,14,13,.44) 54%, rgba(12,14,13,.62) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
-    url(../images/stock/bw-spray-noir.jpg);
+    url(../images/stock/bw-spray-noir.webp);
   background-size:cover; background-position:center 52%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -825,7 +825,7 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
     background:
       radial-gradient(130% 120% at 50% 44%, rgba(12,14,13,.48) 0%, rgba(12,14,13,.44) 50%, rgba(12,14,13,.64) 100%),
       linear-gradient(180deg, rgba(12,14,13,.42) 0%, rgba(12,14,13,.36) 40%, rgba(12,14,13,.72) 100%),
-      url(../images/stock/bw-spray-noir.jpg);
+      url(../images/stock/bw-spray-noir.webp);
     background-size:cover; background-position:center 52%; background-repeat:no-repeat;
   }
 }
