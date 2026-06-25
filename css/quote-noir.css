@@ -78,12 +78,20 @@
    desktop rail entirely: the compact progress bar (.qf2-flowbar-mobile, driven
    live by qfRenderRailProgress) is correct and now shows at every width. */
 .qf2-flowbar{display:none}
-.qf2-flowbar-mobile{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;margin-bottom:clamp(1.2rem,4vw,1.8rem);padding:max(env(safe-area-inset-top,0px),12px) 1px 14px}
-/* Scrim lives on a ::before so it can fade in only once the page is scrolled —
-   at rest the bar is clean over the photo (no dark box); when content scrolls
-   under the sticky bar the scrim appears to keep the controls legible. */
-.qf2-flowbar-mobile::before{content:"";position:absolute;left:0;right:0;top:-14px;bottom:-18px;background:linear-gradient(180deg,rgba(12,14,13,.97) 0%,rgba(12,14,13,.95) 56%,rgba(12,14,13,.6) 80%,rgba(12,14,13,0) 100%);opacity:0;transition:opacity .3s ease;pointer-events:none}
-body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
+.qf2-flowbar-mobile{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;margin-bottom:clamp(1.2rem,4vw,1.8rem);padding:max(env(safe-area-inset-top,0px),12px) 1px 14px;transition:background-color .35s ease}
+/* On scroll, content slides under the sticky bar. Give it a clean FROSTED bar
+   (blur + subtle tint + hairline) — NOT the old heavy .97 gradient, which read
+   as a black "shadow" over the photo with the controls barely legible. At rest
+   the bar stays clean over the image. (fix 2026-06-25) */
+.qf2-flowbar-mobile::before{display:none}
+body.qf-scrolled .qf2-flowbar-mobile{
+  background:rgba(12,14,13,.78);
+  -webkit-backdrop-filter:blur(16px) saturate(1.15);
+          backdrop-filter:blur(16px) saturate(1.15);
+  border-bottom:1px solid var(--line);
+}
+body.qf-scrolled .qf2-flowbar-step-count,
+body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-flowbar-back{width:44px;height:44px;min-width:44px;border-radius:11px;border:1px solid var(--line);background:none;color:var(--ink-dim);display:grid;place-items:center;cursor:pointer;flex:none;transition:border-color .25s,color .25s}
 .qf2-flowbar-back:hover{border-color:var(--line-strong);color:var(--ink)}
 .qf2-flowbar-back svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
