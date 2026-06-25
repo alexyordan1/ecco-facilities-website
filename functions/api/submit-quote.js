@@ -387,8 +387,9 @@ export async function onRequestPost(context) {
     // owner (internal notification) tracks. Client still affects the
     // user-facing "success" decision; owner failures are logged loudly but
     // don't block the user — the CRM write is the source of truth for ops.
-    const integrations = { supabase: null, activecampaign: null, hubspot: null, postmark: null, postmark_owner: null };
+    const integrations = { supabase: null, d1: null, activecampaign: null, hubspot: null, postmark: null, postmark_owner: null, webhook: null };
     const anyConfigured = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY)
+      || !!env.DB
       || !!(env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY)
       || !!env.HUBSPOT_ACCESS_TOKEN
       || !!env.POSTMARK_API_KEY;
@@ -431,6 +432,30 @@ export async function onRequestPost(context) {
         }
       } catch (dbErr) {
         console.error('[submit-quote] Supabase DB error:', redactPII(dbErr.message));
+      }
+    }
+
+    // 4b. Cloudflare D1 — native, no-pause leads store (2026-06-24, recommended
+    // primary DB). Activates automatically once a D1 database is bound as `DB`
+    // in the Pages project. Mirrors the Supabase schema; apply schema/leads.sql
+    // once with: wrangler d1 execute ecco-leads --file=schema/leads.sql
+    if (env.DB) {
+      integrations.d1 = false;
+      try {
+        await env.DB.prepare(
+          'INSERT INTO leads (ref_number, email, first_name, last_name, phone, company, service, status, form_data, completed_at) ' +
+          'VALUES (?,?,?,?,?,?,?,?,?,?) ' +
+          'ON CONFLICT(email, service) DO UPDATE SET ' +
+          'first_name=excluded.first_name, last_name=excluded.last_name, phone=excluded.phone, ' +
+          'company=excluded.company, status=excluded.status, form_data=excluded.form_data, ' +
+          'ref_number=excluded.ref_number, completed_at=excluded.completed_at'
+        ).bind(
+          refNumber, email, firstName || null, lastName || null, phone || null,
+          company || null, service, 'completed', JSON.stringify(formData), new Date().toISOString()
+        ).run();
+        integrations.d1 = true;
+      } catch (d1Err) {
+        console.error('[submit-quote] D1 error:', redactPII(d1Err.message));
       }
     }
 
@@ -628,6 +653,28 @@ export async function onRequestPost(context) {
           message: redactPII(e.message),
           refNumber
         });
+      }
+    }
+
+    // Instant lead alert (2026-06-24) — POST a compact summary to a generic
+    // webhook so the team is pinged the moment a lead lands. Works with
+    // Slack/Discord incoming webhooks (text/content) and Zapier/Make catch-hooks
+    // (the structured fields). Activates once LEAD_WEBHOOK_URL is set.
+    if (env.LEAD_WEBHOOK_URL) {
+      integrations.webhook = false;
+      try {
+        const who = [firstName, lastName].filter(Boolean).join(' ') || 'New lead';
+        const summary = 'New quote lead — ' + who + ' · ' + (company || 'no company') +
+          ' · ' + service + ' · ' + email + (phone ? ' · ' + phone : '') + ' · ref ' + refNumber;
+        const wRes = await fetchWithTimeout(env.LEAD_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: summary, content: summary, ref: refNumber, name: who, email, phone: phone || '', company: company || '', service })
+        });
+        if (wRes.ok) integrations.webhook = true;
+        else console.error('[submit-quote] lead webhook non-ok:', wRes.status, refNumber);
+      } catch (wErr) {
+        console.error('[submit-quote] lead webhook error:', redactPII(wErr.message));
       }
     }
 
