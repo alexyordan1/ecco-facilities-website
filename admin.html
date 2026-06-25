@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0C0E0D">
+<title>Leads — Ecco Facilities (internal)</title>
+<style>
+:root{--black:#0C0E0D;--surface-1:#101312;--surface-2:#161a18;--line:rgba(244,242,236,.10);--line-strong:rgba(244,242,236,.18);--ink:#F4F2EC;--ink-dim:#A8A89F;--ink-faint:#7d827a;--accent:#9FCB7B;--accent-soft:#BBDD99}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--black);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:300;line-height:1.5;padding:clamp(1rem,4vw,2.4rem)}
+h1{font-size:1.4rem;font-weight:500;letter-spacing:-.01em}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:1.4rem}
+.bar .sp{flex:1}
+.count{color:var(--ink-dim);font-size:.85rem}
+input[type=password],input[type=text]{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;color:var(--ink);font:inherit;font-size:16px;padding:11px 13px;min-height:44px;min-width:240px}
+input:focus{outline:none;border-color:var(--accent)}
+button{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#0C0E0D;font:inherit;font-weight:500;cursor:pointer}
+button.ghost{background:none;color:var(--ink-dim);border-color:var(--line-strong)}
+button:hover{filter:brightness(1.05)}
+.gate{max-width:420px;margin:8vh auto 0;text-align:center;display:flex;flex-direction:column;gap:14px}
+.gate p{color:var(--ink-dim);font-size:.9rem}
+.msg{padding:14px 16px;border-radius:11px;background:var(--surface-1);border:1px solid var(--line-strong);color:var(--ink-dim);font-size:.9rem;margin-top:1rem}
+.msg.err{border-color:#E8A0A0;color:#E8A0A0}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px}
+table{width:100%;border-collapse:collapse;font-size:.86rem;white-space:nowrap}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--surface-2);color:var(--ink-faint);font-weight:500;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-1)}
+td.svc{color:var(--accent-soft)}
+td a{color:var(--accent)}
+.view{cursor:pointer;color:var(--ink-dim);border:1px solid var(--line-strong);border-radius:8px;padding:4px 10px;font-size:.78rem;min-height:32px;background:none}
+.detail td{background:var(--surface-1);white-space:normal}
+.detail pre{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--ink-dim);white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto}
+.hidden{display:none}
+.foot{margin-top:1.4rem;color:var(--ink-faint);font-size:.78rem}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate">
+  <h1>Ecco — leads</h1>
+  <p>Internal dashboard. Enter the access token.</p>
+  <input type="password" id="tok" placeholder="Access token" autocomplete="current-password" aria-label="Access token">
+  <button id="enter">View leads</button>
+  <div id="gateMsg" class="msg hidden"></div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="bar">
+    <h1>Leads</h1>
+    <span id="count" class="count"></span>
+    <span class="sp"></span>
+    <button id="refresh" class="ghost">Refresh</button>
+    <button id="logout" class="ghost">Sign out</button>
+  </div>
+  <div id="appMsg" class="msg hidden"></div>
+  <div id="tableHost"></div>
+  <p class="foot">Newest first · up to 300 · reads the Cloudflare D1 store. For stronger security, put Cloudflare Access in front of this page.</p>
+</div>
+
+<script>
+(function(){
+  var KEY='ecco_admin_token';
+  var gate=document.getElementById('gate'), app=document.getElementById('app');
+  var tok=document.getElementById('tok'), gateMsg=document.getElementById('gateMsg'), appMsg=document.getElementById('appMsg');
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fmtDate=function(s){ if(!s) return '—'; try{var d=new Date(s); if(isNaN(d)) return esc(s); return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return esc(s);} };
+
+  function showMsg(el,text,isErr){ el.textContent=text; el.className='msg'+(isErr?' err':''); }
+
+  function load(){
+    var token=localStorage.getItem(KEY)||'';
+    if(!token){ gate.classList.remove('hidden'); app.classList.add('hidden'); return; }
+    gate.classList.add('hidden'); app.classList.remove('hidden');
+    appMsg.classList.add('hidden');
+    document.getElementById('tableHost').innerHTML='<p class="count" style="padding:1rem 0">Loading…</p>';
+    fetch('/api/leads?limit=300',{headers:{'Authorization':'Bearer '+token}})
+      .then(function(r){ return r.json().then(function(d){return {status:r.status,d:d};}); })
+      .then(function(res){
+        if(res.status===401){ localStorage.removeItem(KEY); gate.classList.remove('hidden'); app.classList.add('hidden'); showMsg(gateMsg,'Token rejected. Try again.',true); gateMsg.classList.remove('hidden'); return; }
+        if(!res.d.ok){ document.getElementById('tableHost').innerHTML=''; showMsg(appMsg,res.d.error||'Could not load leads.',true); appMsg.classList.remove('hidden'); return; }
+        render(res.d.leads||[]);
+        document.getElementById('count').textContent=(res.d.count||0)+' lead'+(res.d.count===1?'':'s');
+      })
+      .catch(function(){ document.getElementById('tableHost').innerHTML=''; showMsg(appMsg,'Network error.',true); appMsg.classList.remove('hidden'); });
+  }
+
+  function render(leads){
+    var host=document.getElementById('tableHost');
+    if(!leads.length){ host.innerHTML='<div class="msg">No leads yet. New submissions will appear here.</div>'; return; }
+    var rows=leads.map(function(L,i){
+      var name=[L.first_name,L.last_name].filter(Boolean).join(' ')||'—';
+      var fd=''; try{ fd=JSON.stringify(JSON.parse(L.form_data||'{}'),null,2); }catch(e){ fd=String(L.form_data||''); }
+      return '<tr>'+
+        '<td>'+fmtDate(L.completed_at||L.created_at)+'</td>'+
+        '<td>'+esc(name)+'</td>'+
+        '<td>'+esc(L.company||'—')+'</td>'+
+        '<td class="svc">'+esc(L.service||'—')+'</td>'+
+        '<td><a href="mailto:'+esc(L.email)+'">'+esc(L.email)+'</a></td>'+
+        '<td>'+(L.phone?'<a href="tel:'+esc(L.phone)+'">'+esc(L.phone)+'</a>':'—')+'</td>'+
+        '<td>'+esc(L.ref_number||'—')+'</td>'+
+        '<td><button class="view" data-i="'+i+'">View</button></td>'+
+      '</tr>'+
+      '<tr class="detail hidden" id="d'+i+'"><td colspan="8"><pre>'+esc(fd)+'</pre></td></tr>';
+    }).join('');
+    host.innerHTML='<div class="tablewrap"><table><thead><tr>'+
+      '<th>Date</th><th>Name</th><th>Company</th><th>Service</th><th>Email</th><th>Phone</th><th>Ref</th><th></th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    host.querySelectorAll('.view').forEach(function(b){
+      b.addEventListener('click',function(){ var row=document.getElementById('d'+b.dataset.i); row.classList.toggle('hidden'); b.textContent=row.classList.contains('hidden')?'View':'Hide'; });
+    });
+  }
+
+  document.getElementById('enter').addEventListener('click',function(){
+    var v=tok.value.trim(); if(!v){ showMsg(gateMsg,'Enter the token.',true); gateMsg.classList.remove('hidden'); return; }
+    localStorage.setItem(KEY,v); load();
+  });
+  tok.addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('enter').click(); });
+  document.getElementById('refresh').addEventListener('click',load);
+  document.getElementById('logout').addEventListener('click',function(){ localStorage.removeItem(KEY); location.reload(); });
+  load();
+})();
+</script>
+</body>
+</html>
