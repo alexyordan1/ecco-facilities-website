@@ -56,7 +56,7 @@
      is still arriving. <noscript> mirror keeps fonts working with JS off. -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/noir.css?v=15">
-<link rel="stylesheet" href="css/quote-noir.css?v=44">
+<link rel="stylesheet" href="css/quote-noir.css?v=45">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -919,6 +919,10 @@
             </div>
           </div>
         </div>
+        <a id="qfBookCta" class="qf2-cta qf-book-cta" href="#" target="_blank" rel="noopener noreferrer" hidden>
+          <span>Book a 15-minute walkthrough</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
         <div class="qf2-reference-id">
           <span class="qf2-prompt-sub-desktop">Your proposal reference: </span>
           <span class="qf2-prompt-sub-mobile">Ref: </span>
@@ -977,9 +981,16 @@
   </div>
 </footer>
 <script>
+/* ── BOOKING LINK (2026-06-25) ──────────────────────────────────────────────
+   Paste your Cal.com / Calendly URL between the quotes and a "Book a 15-minute
+   walkthrough" button appears on the success screen. Leave '' to hide it.
+   Example:  window.QF_BOOKING_URL = 'https://cal.com/ecco/walkthrough';        */
+window.QF_BOOKING_URL = '';
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('mobTog').addEventListener('click',()=>document.getElementById('navMenu').classList.toggle('active'));
   window.addEventListener('scroll',()=>{var n=document.getElementById('nav');if(n)n.classList.toggle('scrolled',window.scrollY>20);document.body.classList.toggle('qf-scrolled',window.scrollY>4);},{passive:true});
+  var bk=document.getElementById('qfBookCta');
+  if(bk && typeof window.QF_BOOKING_URL==='string' && window.QF_BOOKING_URL.trim()){ bk.href=window.QF_BOOKING_URL.trim(); bk.hidden=false; }
 });
 </script>
 <!-- main.js dropped — the immersive quote page has no shared nav to drive; the wizard engine (quote-flow.js) is self-contained. -->

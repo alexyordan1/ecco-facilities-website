@@ -964,3 +964,8 @@ body.qf-scrolled .qf2-flowbar-mobile::before{opacity:1}
   .qf-resume-text{flex:1 1 100%}
   .qf-resume-btn{flex:1}
 }
+
+/* Success-screen "Book a walkthrough" CTA (2026-06-25). Inherits .qf2-cta
+   (full-width centered green button); just resets the <a> underline. Shown only
+   when window.QF_BOOKING_URL is set in quote.html. */
+.qf-book-cta{text-decoration:none}
