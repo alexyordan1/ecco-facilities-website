@@ -4921,11 +4921,6 @@
     var inner = document.createElement('div');
     inner.className = 'qf-resume-inner';
 
-    var ico = document.createElement('span');
-    ico.className = 'qf-resume-ico';
-    ico.setAttribute('aria-hidden', 'true');
-    ico.textContent = '\u23F1\uFE0F';
-
     var textWrap = document.createElement('span');
     textWrap.className = 'qf-resume-text';
     var strong = document.createElement('strong');
@@ -4947,7 +4942,6 @@
     startBtn.className = 'qf-resume-btn qf-resume-start';
     startBtn.textContent = 'Start over';
 
-    inner.appendChild(ico);
     inner.appendChild(textWrap);
     inner.appendChild(resumeBtn);
     inner.appendChild(startBtn);
