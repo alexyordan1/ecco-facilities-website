@@ -253,6 +253,7 @@
     // tracks the chip-selected count (1, 2, 3); dpPorters can grow up to
     // MAX_PORTERS via the "+ Add another porter" button.
     dpPorterCount:  0,
+    dpDaysCustomized: false,  // E: true once the user hand-edits porter days in Combined
     dpPorters:      [],
     // Legacy compat (drained on Phase 3 when V1 handlers are deleted): these
     // still get written by the legacy dpDays / porter / hours handlers and
@@ -2366,8 +2367,12 @@
         // For 'both' service, seed porter days with cleaning days so the user
         // sees their prior selection pre-filled on the next screen. They can
         // adjust freely or use the "Same as cleaning" preset to re-sync.
-        if (STATE.service === 'both' && (!STATE.dpDays || !STATE.dpDays.length)) {
-          STATE.dpDays = STATE.days.slice();
+        if (STATE.service === 'both') {
+          STATE.dpDays = STATE.days.slice(); // keep the legacy mirror current
+          // E-fix: porter days FOLLOW the cleaning days until the user customizes them.
+          if (!STATE.dpDaysCustomized && STATE.dpPorters && STATE.dpPorters.length) {
+            STATE.dpPorters.forEach(function (p) { p.days = STATE.days.slice(); dpSyncCustomHours(p); });
+          }
         }
 
         goNext();
@@ -2879,6 +2884,7 @@
         p.days.push(day);
         p.days.sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
       }
+      if (STATE.service === 'both') STATE.dpDaysCustomized = true; // E: user touched porter days
       dpSyncCustomHours(p);
       dpRender();
     }
@@ -2888,6 +2894,7 @@
       if (preset === 'weekdays') p.days = DP_WEEKDAYS.slice();
       else if (preset === 'every') p.days = DP_DAYS.slice();
       else { p.days = []; p.customHours = {}; }
+      if (STATE.service === 'both') STATE.dpDaysCustomized = true; // E: user touched porter days
       dpSyncCustomHours(p);
       dpRender();
     }
