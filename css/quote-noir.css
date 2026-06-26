@@ -388,6 +388,16 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 #qfScreen_schedule .qf-dp-prompt-promise{text-align:center}
 #qfScreen_location .qf2-location-hint{text-align:center}
 #qfScreen_space .qf2-space-other-prompt{text-align:center}
+/* Day Porter: centrar el contenido de la tarjeta del porter (a pedido 2026-06-26).
+   El header (Porter N + chevron) se queda como barra; el resto se centra para
+   igualar el diseño centrado del resto del wizard. */
+#qfScreen_schedule .qf2-section-label,
+#qfScreen_schedule .qf-dp-time-summary,
+#qfScreen_schedule .qf-dp-custom-day,
+#qfScreen_schedule .qf-dp-time-field label{text-align:center}
+#qfScreen_schedule .qf-dp-day-row,
+#qfScreen_schedule .qf-dp-presets,
+#qfScreen_schedule .qf-dp-team-preview{justify-content:center}
 
 /* ============================================================
    QUOTE WIZARD — "MARQUEE" (full-bleed NYC skyline, content over)
