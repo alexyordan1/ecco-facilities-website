@@ -20,8 +20,10 @@ function resolveCors(origin, env) {
   return 'https://eccofacilities.com';
 }
 
-// Must match submit-quote.js EMAIL_RE byte-for-byte
-const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]+(?<!\.)@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
+// SWEEP-FIX 2026-06-26: now genuinely mirrors submit-quote.js EMAIL_RE. Was the
+// lookbehind (?<!\.) variant that submit-quote deliberately dropped (its C2 fix) —
+// equivalent, lookbehind-free (local part 1+ allowed chars, not ending in a dot).
+const EMAIL_RE = /^(?!\.)(?!.*\.\.)[A-Za-z0-9._%+\-]*[A-Za-z0-9_%+\-]@(?!-)[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/;
 
 async function enforceRateLimit(request, env) {
   const kv = env && env.RATE_LIMIT_KV;

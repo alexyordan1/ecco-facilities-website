@@ -823,7 +823,7 @@ function loadState() {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     var s = JSON.parse(raw);
-    if (!s || !s.savedAt || !s.history || !s.history.length) return null;
+    if (!s || !s.savedAt || !Array.isArray(s.history) || !s.history.length) return null;
     if (Date.now() - s.savedAt > STATE_TTL) { localStorage.removeItem(STORAGE_KEY); return null; }
     return s;
   } catch (e) { return null; }

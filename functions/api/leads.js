@@ -27,7 +27,10 @@ export async function onRequestGet(context) {
 
   const url = new URL(context.request.url);
   const auth = context.request.headers.get('Authorization') || '';
-  const token = auth.replace(/^Bearer\s+/i, '') || url.searchParams.get('key') || '';
+  // SWEEP-FIX 2026-06-26: dropped the ?key= query-string fallback — a long-lived admin
+  // secret in the URL leaks into Cloudflare access logs, browser history, and Referer
+  // headers. admin.html sends the Authorization: Bearer header; ?key= was unused.
+  const token = auth.replace(/^Bearer\s+/i, '') || '';
   if (!token || !safeEqual(token, env.ADMIN_TOKEN)) return json({ ok: false, error: 'Unauthorized' }, 401);
 
   if (!env.DB) return json({ ok: false, error: 'No D1 database bound (DB). Create it + bind it first.' }, 503);

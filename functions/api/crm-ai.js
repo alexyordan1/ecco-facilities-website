@@ -19,14 +19,38 @@ function sbHeaders(env) {
   };
 }
 
+// SWEEP-FIX 2026-06-26: this route proxies the billable Anthropic key. Cap calls per
+// IP/hour to blunt a cost-DoS / free-LLM-relay (graceful no-op if RATE_LIMIT_KV is
+// unbound, matching submit-quote / capture-partial).
+async function enforceRateLimit(request, env) {
+  var kv = env && env.RATE_LIMIT_KV;
+  if (!kv) return true;
+  var ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  var hour = Math.floor(Date.now() / 3600000);
+  var key = 'rl:crmai:' + ip + ':' + hour;
+  var current = parseInt(await kv.get(key) || '0', 10);
+  if (current >= 60) return false;
+  await kv.put(key, String(current + 1), { expirationTtl: 3600 });
+  return true;
+}
+
 export async function onRequestPost(context) {
   var env = context.env;
+
+  try {
+    if (!(await enforceRateLimit(context.request, env))) {
+      return jsonErr('Rate limit reached — try again shortly.', 429);
+    }
+  } catch (e) { /* KV hiccup — fail open so legit CRM use isn't blocked */ }
 
   var body;
   try { body = await context.request.json(); }
   catch (e) { return jsonErr('Invalid request', 400); }
 
-  var message = (body.message || '').trim();
+  // SWEEP-FIX 2026-06-26: cap input length. This route proxies the Anthropic key, so
+  // an uncapped message (or lead_context below) is a cost-DoS / free-LLM-relay vector —
+  // every other endpoint caps its inputs; this one didn't.
+  var message = (body.message || '').trim().slice(0, 8000);
   if (!message) {
     return jsonErr('Message is required', 400);
   }
@@ -63,7 +87,7 @@ export async function onRequestPost(context) {
         'Pipeline value: $' + totalValue.toFixed(2) + '\n';
 
       if (leadContext) {
-        leadsData += '\nCURRENT LEAD BEING VIEWED:\n' + JSON.stringify(leadContext, null, 2) + '\n';
+        leadsData += '\nCURRENT LEAD BEING VIEWED:\n' + JSON.stringify(leadContext, null, 2).slice(0, 4000) + '\n';
       }
     }
   } catch (e) {
@@ -91,7 +115,7 @@ export async function onRequestPost(context) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6-20250527',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         system: systemPrompt,
         messages: [{ role: 'user', content: message }]
