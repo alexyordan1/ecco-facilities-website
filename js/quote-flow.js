@@ -2306,6 +2306,24 @@
     return true;
   }
 
+  /** Keep a porter's custom-hours map in lockstep with its day list: seed an
+   *  entry (from the porter's same-hours) for every selected day, drop entries
+   *  for days no longer selected. No-op unless the porter is in 'custom' hours
+   *  mode. Lives at this SHARED scope — not inside the `if (SCREENS.schedule)`
+   *  block where the other dp* helpers live — because the `if (SCREENS.days)`
+   *  Continue handler re-seeds porter days for the 'both' flow (bug E) and must
+   *  call it too. It only touches `p`'s own fields, so it has no dependency on
+   *  the schedule block's locals. */
+  function dpSyncCustomHours(p) {
+    if (p.hoursMode !== 'custom') return;
+    p.days.forEach(function (day) {
+      if (!p.customHours[day]) p.customHours[day] = { start: p.sameStart, end: p.sameEnd };
+    });
+    Object.keys(p.customHours).forEach(function (day) {
+      if (p.days.indexOf(day) < 0) delete p.customHours[day];
+    });
+  }
+
   if (SCREENS.days) {
     dayBtns.forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -2864,15 +2882,8 @@
     // e.g. remove then re-add a day, or pick a preset). Drop orphans for deselected
     // days so stale per-day hours aren't validated/submitted. Single invariant,
     // enforced at every day/mode mutation point.
-    function dpSyncCustomHours(p) {
-      if (p.hoursMode !== 'custom') return;
-      p.days.forEach(function (day) {
-        if (!p.customHours[day]) p.customHours[day] = { start: p.sameStart, end: p.sameEnd };
-      });
-      Object.keys(p.customHours).forEach(function (day) {
-        if (p.days.indexOf(day) < 0) delete p.customHours[day];
-      });
-    }
+    // dpSyncCustomHours is defined at the shared outer scope (next to
+    // arraysEqual) so the SCREENS.days re-seed can call it too — see bug E.
 
     function dpToggleDay(porterIdx, day) {
       var p = STATE.dpPorters[porterIdx];

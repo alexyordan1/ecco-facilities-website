@@ -112,4 +112,84 @@ test.describe('Combined — full flow', () => {
 
     h.expectNoJsErrors(page);
   });
+
+  test('4 — E: cleaning-day edits re-seed UNTOUCHED porter days, RESPECT customized', async ({ page }) => {
+    const DP_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    // A collapsed porter card renders only its header/summary — the day picker
+    // mounts on expand. So expand before reading/editing its day selection.
+    async function openPorter(idx = 0) {
+      const card = page.locator(`#qfDpPorters .qf-dp-porter[data-porter-idx="${idx}"]`).first();
+      if (!(await card.evaluate((el) => el.classList.contains('is-open')))) {
+        await card.locator('.qf-dp-porter-header').click();
+        await page.waitForTimeout(120);
+      }
+      return card;
+    }
+    // Selected porter days for a given porter card, in week order.
+    async function porterDays(idx = 0) {
+      await openPorter(idx);
+      const sel = page.locator(`#qfDpPorters .qf-dp-porter[data-porter-idx="${idx}"] .qf-day-card.is-selected`);
+      const days = await sel.evaluateAll((els) => els.map((e) => e.getAttribute('data-day')));
+      return days.sort((a, b) => DP_ORDER.indexOf(a) - DP_ORDER.indexOf(b));
+    }
+    // Time windows are single-select TOGGLES — re-clicking the active one
+    // deselects it and breaks the Continue gate. Only click when none is set.
+    async function ensureMorning() {
+      if (!(await page.locator('#qfScreen_days .qf2-chip-time.is-selected').count())) {
+        await page.click('#qfScreen_days .qf2-chip-time[data-time="morning"]');
+      }
+    }
+    const backToDays = async () => {
+      await page.locator('#qfScreen_schedule [data-qf2-back]:visible').first().click();
+      await h.expectActive(page, 'qfScreen_days');
+    };
+
+    await page.click('.qf2-card[data-service="both"]');
+    await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_size');
+    await h.pickSize(page, '1k-3k');
+    await h.expectActive(page, 'qfScreen_days');
+
+    // Cleaning = Mon + Tue.
+    await page.click('#qfScreen_days .qf-day-card[data-day="Monday"]');
+    await page.click('#qfScreen_days .qf-day-card[data-day="Tuesday"]');
+    await ensureMorning();
+    await page.click('#qfDaysContinue');
+    await h.expectActive(page, 'qfScreen_schedule');
+
+    // Seed — porter pre-filled with the cleaning days the user just picked.
+    expect(await porterDays()).toEqual(['Monday', 'Tuesday']);
+
+    // ── Re-seed: change cleaning days WITHOUT touching the porter ──
+    await backToDays();
+    await page.click('#qfScreen_days .qf-day-card[data-day="Monday"]');    // deselect
+    await page.click('#qfScreen_days .qf-day-card[data-day="Tuesday"]');   // deselect
+    await page.click('#qfScreen_days .qf-day-card[data-day="Wednesday"]');
+    await page.click('#qfScreen_days .qf-day-card[data-day="Thursday"]');
+    await ensureMorning();
+    await page.click('#qfDaysContinue');
+    await h.expectActive(page, 'qfScreen_schedule');
+
+    // FOLLOWED — porter days were untouched, so they track the new cleaning days.
+    expect(await porterDays()).toEqual(['Wednesday', 'Thursday']);
+
+    // ── Respect: customize the porter by hand, THEN change cleaning again ──
+    const card = await openPorter(0);
+    await card.locator('.qf-day-card[data-day="Friday"]').click(); // hand-edit → marks customized
+    expect(await porterDays()).toEqual(['Wednesday', 'Thursday', 'Friday']);
+
+    await backToDays();
+    await page.click('#qfScreen_days .qf-day-card[data-day="Wednesday"]'); // deselect
+    await page.click('#qfScreen_days .qf-day-card[data-day="Thursday"]');  // deselect
+    await page.click('#qfScreen_days .qf-day-card[data-day="Monday"]');
+    await ensureMorning();
+    await page.click('#qfDaysContinue');
+    await h.expectActive(page, 'qfScreen_schedule');
+
+    // RESPECTED — porter was customized, so it does NOT re-seed to the cleaning days.
+    expect(await porterDays()).toEqual(['Wednesday', 'Thursday', 'Friday']);
+
+    h.expectNoJsErrors(page);
+  });
 });
