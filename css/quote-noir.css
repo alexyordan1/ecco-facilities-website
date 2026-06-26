@@ -609,7 +609,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- SPACE — the premium lobby; "the spaces we care for" ---- */
 .qf-stage:has(#qfScreen_space.is-active){
   background:
-    linear-gradient(180deg, rgba(12,14,13,.72) 0%, rgba(12,14,13,.5) 22%, rgba(12,14,13,.44) 50%, rgba(12,14,13,.64) 78%, rgba(12,14,13,.92) 94%, var(--black) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.93) 0%, rgba(12,14,13,.86) 22%, rgba(12,14,13,.83) 50%, rgba(12,14,13,.9) 78%, rgba(12,14,13,.98) 94%, var(--black) 100%),
     url(../images/stock/ecco-cc-hero-lobby.webp);
   background-size:cover; background-position:center 42%; background-repeat:no-repeat;
 }
@@ -618,8 +618,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     align-items:center; justify-content:center;
     padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
     background:
-      radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.7) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.54) 76%, rgba(12,14,13,.8) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.5) 0%, rgba(12,14,13,.4) 36%, rgba(12,14,13,.64) 100%),
+      radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.93) 0%, rgba(12,14,13,.89) 48%, rgba(12,14,13,.87) 76%, rgba(12,14,13,.96) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.84) 0%, rgba(12,14,13,.78) 36%, rgba(12,14,13,.9) 100%),
       url(../images/stock/ecco-cc-hero-lobby.webp);
     background-size:cover; background-position:center 42%; background-repeat:no-repeat;
   }
@@ -673,7 +673,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- SIZE — a wide modern office; conveys scale/footage ---- */
 .qf-stage:has(#qfScreen_size.is-active){
   background:
-    linear-gradient(180deg, rgba(12,14,13,.56) 0%, rgba(12,14,13,.32) 24%, rgba(12,14,13,.28) 52%, rgba(12,14,13,.54) 80%, rgba(12,14,13,.9) 95%, var(--black) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.64) 0%, rgba(12,14,13,.44) 24%, rgba(12,14,13,.40) 52%, rgba(12,14,13,.64) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
     url(../images/stock/hero-office.webp);
   background-size:cover; background-position:center 55%; background-repeat:no-repeat;
 }
@@ -682,8 +682,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     align-items:center; justify-content:center;
     padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
     background:
-      radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.56) 0%, rgba(12,14,13,.44) 48%, rgba(12,14,13,.42) 76%, rgba(12,14,13,.64) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.42) 0%, rgba(12,14,13,.3) 36%, rgba(12,14,13,.5) 100%),
+      radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.68) 0%, rgba(12,14,13,.56) 48%, rgba(12,14,13,.54) 76%, rgba(12,14,13,.74) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.54) 0%, rgba(12,14,13,.40) 36%, rgba(12,14,13,.60) 100%),
       url(../images/stock/hero-office.webp);
     background-size:cover; background-position:center 52%; background-repeat:no-repeat;
   }
@@ -709,7 +709,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- DAYS — window-cleaning in action (B&W); "the work / schedule" ---- */
 .qf-stage:has(#qfScreen_days.is-active){
   background:
-    linear-gradient(180deg, rgba(12,14,13,.72) 0%, rgba(12,14,13,.56) 24%, rgba(12,14,13,.52) 52%, rgba(12,14,13,.72) 80%, rgba(12,14,13,.93) 95%, var(--black) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.86) 0%, rgba(12,14,13,.76) 24%, rgba(12,14,13,.72) 52%, rgba(12,14,13,.85) 80%, rgba(12,14,13,.96) 95%, var(--black) 100%),
     url(../images/stock/ecco-clean-squeegee-bw.webp);
   background-size:cover; background-position:center 35%; background-repeat:no-repeat;
 }
@@ -718,8 +718,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     align-items:center; justify-content:center;
     padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
     background:
-      radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.78) 0%, rgba(12,14,13,.66) 48%, rgba(12,14,13,.64) 76%, rgba(12,14,13,.80) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.66) 100%),
+      radial-gradient(130% 110% at 50% 46%, rgba(12,14,13,.88) 0%, rgba(12,14,13,.8) 48%, rgba(12,14,13,.78) 76%, rgba(12,14,13,.9) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.76) 0%, rgba(12,14,13,.66) 36%, rgba(12,14,13,.8) 100%),
       url(../images/stock/ecco-clean-squeegee-bw.webp);
     background-size:cover; background-position:center 38%; background-repeat:no-repeat;
   }
@@ -769,7 +769,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- LOCATION — terracotta industrial interior (Alex's pick 2026-06-21) ---- */
 .qf-stage:has(#qfScreen_location.is-active){
   background:
-    linear-gradient(180deg, rgba(12,14,13,.5) 0%, rgba(12,14,13,.32) 26%, rgba(12,14,13,.3) 54%, rgba(12,14,13,.5) 80%, rgba(12,14,13,.88) 95%, var(--black) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.42) 26%, rgba(12,14,13,.40) 54%, rgba(12,14,13,.58) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
     url(../images/stock/int-terracotta.webp);
   background-size:cover; background-position:center 45%; background-repeat:no-repeat;
 }
@@ -778,8 +778,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     align-items:center; justify-content:center;
     padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
     background:
-      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.44) 0%, rgba(12,14,13,.36) 48%, rgba(12,14,13,.38) 76%, rgba(12,14,13,.64) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.38) 0%, rgba(12,14,13,.28) 36%, rgba(12,14,13,.58) 100%),
+      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.52) 0%, rgba(12,14,13,.44) 48%, rgba(12,14,13,.46) 76%, rgba(12,14,13,.72) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.46) 0%, rgba(12,14,13,.36) 36%, rgba(12,14,13,.66) 100%),
       url(../images/stock/int-terracotta.webp);
     background-size:cover; background-position:center 45%; background-repeat:no-repeat;
   }
@@ -792,7 +792,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- INFO / IDENTITY — premium reception; "where your proposal goes" ---- */
 .qf-stage:has(#qfScreen_info.is-active){
   background:
-    linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.4) 26%, rgba(12,14,13,.36) 54%, rgba(12,14,13,.56) 80%, rgba(12,14,13,.9) 95%, var(--black) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.74) 0%, rgba(12,14,13,.56) 26%, rgba(12,14,13,.52) 54%, rgba(12,14,13,.72) 80%, rgba(12,14,13,.93) 95%, var(--black) 100%),
     url(../images/stock/ecco-trust-hero.webp);
   background-size:cover; background-position:center 40%; background-repeat:no-repeat;
 }
@@ -801,8 +801,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     align-items:center; justify-content:center;
     padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
     background:
-      radial-gradient(130% 120% at 50% 46%, rgba(12,14,13,.62) 0%, rgba(12,14,13,.48) 46%, rgba(12,14,13,.46) 74%, rgba(12,14,13,.7) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.48) 0%, rgba(12,14,13,.34) 38%, rgba(12,14,13,.56) 100%),
+      radial-gradient(130% 120% at 50% 46%, rgba(12,14,13,.74) 0%, rgba(12,14,13,.60) 46%, rgba(12,14,13,.58) 74%, rgba(12,14,13,.78) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.62) 0%, rgba(12,14,13,.46) 38%, rgba(12,14,13,.62) 100%),
       url(../images/stock/ecco-trust-hero.webp);
     background-size:cover; background-position:center 42%; background-repeat:no-repeat;
   }
@@ -815,8 +815,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- REVIEW — B/W window pole; cleaner at glass (Alex's pick 2026-06-21, swapped from spray-noir) ---- */
 .qf-stage:has(#qfScreen_contact.is-active){
   background:
-    radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.56) 0%, rgba(12,14,13,.46) 48%, rgba(12,14,13,.46) 76%, rgba(12,14,13,.74) 100%),
-    linear-gradient(180deg, rgba(12,14,13,.46) 0%, rgba(12,14,13,.36) 36%, rgba(12,14,13,.68) 100%),
+    radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
     url(../images/stock/bw-window-pole.webp);
   background-size:cover; background-position:center 45%; background-repeat:no-repeat;
 }
@@ -825,8 +825,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     align-items:center; justify-content:flex-start;
     padding:clamp(2.5rem,5vh,4rem) clamp(40px,6vw,90px) clamp(6rem,12vh,8rem);
     background:
-      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.56) 0%, rgba(12,14,13,.46) 48%, rgba(12,14,13,.46) 76%, rgba(12,14,13,.74) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.46) 0%, rgba(12,14,13,.36) 36%, rgba(12,14,13,.68) 100%),
+      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
       url(../images/stock/bw-window-pole.webp);
     background-size:cover; background-position:center 45%; background-repeat:no-repeat;
   }
@@ -839,7 +839,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ---- SUCCESS — spray noir (locked 2026-06-21; bg holds steady across contact→submit) ---- */
 .qf-stage:has(#qfScreen_success.is-active){
   background:
-    linear-gradient(180deg, rgba(12,14,13,.46) 0%, rgba(12,14,13,.32) 26%, rgba(12,14,13,.34) 54%, rgba(12,14,13,.54) 80%, rgba(12,14,13,.88) 95%, var(--black) 100%),
+    linear-gradient(180deg, rgba(12,14,13,.54) 0%, rgba(12,14,13,.42) 26%, rgba(12,14,13,.44) 54%, rgba(12,14,13,.62) 80%, rgba(12,14,13,.92) 95%, var(--black) 100%),
     url(../images/stock/bw-spray-noir.webp);
   background-size:cover; background-position:center 52%; background-repeat:no-repeat;
 }
@@ -847,8 +847,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   .qf-stage:has(#qfScreen_success.is-active){
     align-items:center; justify-content:center;
     background:
-      radial-gradient(130% 120% at 50% 44%, rgba(12,14,13,.42) 0%, rgba(12,14,13,.38) 50%, rgba(12,14,13,.58) 100%),
-      linear-gradient(180deg, rgba(12,14,13,.36) 0%, rgba(12,14,13,.3) 40%, rgba(12,14,13,.64) 100%),
+      radial-gradient(130% 120% at 50% 44%, rgba(12,14,13,.48) 0%, rgba(12,14,13,.44) 50%, rgba(12,14,13,.64) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.42) 0%, rgba(12,14,13,.36) 40%, rgba(12,14,13,.72) 100%),
       url(../images/stock/bw-spray-noir.webp);
     background-size:cover; background-position:center 52%; background-repeat:no-repeat;
   }
