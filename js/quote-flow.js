@@ -592,7 +592,25 @@
       // (non-array, or array of non-objects) blob crashed the schedule screen
       // on resume. Coerce to an array of plain porter objects.
       if (s.dpPorters && !Array.isArray(s.dpPorters)) s.dpPorters = [];
-      else if (Array.isArray(s.dpPorters)) s.dpPorters = s.dpPorters.filter(function (p) { return p && typeof p === 'object'; });
+      else if (Array.isArray(s.dpPorters)) {
+        // SWEEP-FIX 2026-06-26: filtering to objects wasn't enough. (1) The render/
+        // validation path (dpPorterIssues, dpRenderDayChips, dpSyncCustomHours) assumes
+        // p.days is an array → a malformed/old-schema draft crashed the Schedule screen
+        // on Resume. (2) p.id flows into innerHTML in dpRenderPorterCard, so a poisoned
+        // id ('1<img onerror=...>') was DOM-XSS. Normalize every porter: id is always a
+        // 1-based position; days an array; customHours an object.
+        s.dpPorters = s.dpPorters.filter(function (p) { return p && typeof p === 'object'; })
+          .map(function (p, i) {
+            return {
+              id: i + 1,
+              hoursMode: p.hoursMode === 'custom' ? 'custom' : 'same',
+              sameStart: typeof p.sameStart === 'string' ? p.sameStart : '08:00',
+              sameEnd: typeof p.sameEnd === 'string' ? p.sameEnd : '16:00',
+              days: Array.isArray(p.days) ? p.days : [],
+              customHours: (p.customHours && typeof p.customHours === 'object') ? p.customHours : {}
+            };
+          });
+      }
       // V2 2026-04-25 — v1 → v2 migration (per `_v` stamp on snapshot):
       //   - currentStepName 'role' → 'info' (role is now a field on info)
       //   - currentStepName 'checkpoint' → 'contact' (checkpoint absorbed into review)
@@ -1117,7 +1135,24 @@
     if (name === 'days') {
       var s4title = document.getElementById('qfS4Title');
       if (s4title) renderS4Title(s4title, S4_TITLES[STATE.service] || S4_TITLES.unsure);
-      setTimeout(syncDaysUI, 80);
+      setTimeout(function () {
+        syncDaysUI();
+        // SWEEP-FIX 2026-06-26: restore the time-window chips from STATE.timeOfDay on
+        // screen ENTRY (Edit "When" -> hop back, or Resume). syncDaysUI restored the DAY
+        // chips but never the TIME chips, so a valid stored timeOfDay rendered as
+        // "nothing selected" and the DOM-reading Continue gate stayed disabled — the
+        // user lost their selection and couldn't advance. Done here (entry-only), NOT
+        // inside syncDaysUI, which also runs on every day toggle and would clobber
+        // in-progress time edits.
+        if (STATE.timeOfDay && STATE.timeOfDay.length && SCREENS.days) {
+          SCREENS.days.querySelectorAll('.qf2-chip-time').forEach(function (c) {
+            var on = STATE.timeOfDay.indexOf(c.getAttribute('data-time')) !== -1;
+            c.classList.toggle('is-selected', on);
+            c.setAttribute('aria-pressed', String(on));
+          });
+          syncDaysUI(); // re-evaluate the Continue gate now that time chips reflect state
+        }
+      }, 80);
     }
 
 
@@ -2086,7 +2121,10 @@
         var s = card.getAttribute('data-size');
         // Sprint 2 D14 — also flag 12K+ enterprise as needing a site walk; that
         // bucket's pricing is too variable to quote without visiting.
-        if (s === 'visit_required' || s === '12k-plus') STATE.needsSiteWalk = true;
+        // SWEEP-FIX 2026-06-26: assign BOTH branches — was sticky-true. Picking 12K+/
+        // "Not sure" set the flag but re-picking a small range card never cleared it,
+        // so a sub-1K lead shipped needsSiteWalk:true + the "book a visit" CTA.
+        STATE.needsSiteWalk = (s === 'visit_required' || s === '12k-plus');
         proceedFromSize(s);
       });
     });
