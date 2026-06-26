@@ -713,6 +713,15 @@
     el.appendChild(document.createTextNode(tpl.after));
   }
 
+  // The 🧹/🧍 service cues are static in quote.html. The "· N of 2" step suffix only
+  // makes sense in the Combined flow (cleaning step 1, porter step 2) — show it only
+  // when service === 'both'. Idempotent; safe to call on every screen entry.
+  function syncServiceCueSteps() {
+    var both = STATE.service === 'both';
+    var steps = document.querySelectorAll('.qf-svc-cue-step');
+    for (var i = 0; i < steps.length; i++) steps[i].hidden = !both;
+  }
+
   var SIZE_LABELS = {
     // Sprint 2 D14 \u2014 rebalanced buckets for better small-business precision.
     // Old "Under 3K" lumped 500 sq ft kiosks with 2,800 sq ft suites.
@@ -1063,6 +1072,7 @@
     to.removeAttribute('inert');
     to.removeAttribute('aria-hidden');
     STATE.currentStepName = name;
+    syncServiceCueSteps(); // 🧹/🧍 "· N of 2" visible only in the Combined flow
 
     // AYS Ola 4 CRIT-3 — move focus to the new screen's heading on every
     // transition. Without this, keyboard + screen-reader users were dropped
