@@ -231,7 +231,12 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-resume-btn:not(.qf-resume-resume):hover{color:var(--ink);border-color:var(--line-strong)}
 
 /* toast */
-.qf-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;max-width:min(92vw,420px);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+/* FIX 2026-06-25: el toast no tenía estado oculto ni regla .is-visible, así que
+   .is-visible era inerte → cada toast quedaba pegado en pantalla para siempre,
+   tapando el área de envío. Estado oculto en reposo + .is-visible lo revela. */
+.qf-toast{position:fixed;left:50%;bottom:24px;z-index:1000;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;max-width:min(92vw,420px);box-shadow:0 14px 40px rgba(0,0,0,.6);opacity:0;transform:translateX(-50%) translateY(140%);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+.qf-toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+@media(prefers-reduced-motion:reduce){.qf-toast,.qf-toast.is-visible{transform:translateX(-50%)}}
 .qf-toast-ico{flex:none;color:var(--accent);display:grid;place-items:center}
 .qf-toast-ico svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
 .qf-toast-body{flex:1;font-size:.84rem;color:var(--ink-dim);font-weight:300;line-height:1.4}
@@ -331,7 +336,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-dp-porter.is-open .qf-dp-porter-chevron{transform:rotate(180deg)}
 .qf-dp-porter-chevron svg,.qf-dp-arrow svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
 .qf-dp-porter-actions{display:flex;gap:8px}
-.qf-dp-porter-edit,.qf-dp-porter-remove{background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink-dim);font-family:inherit;font-size:.76rem;padding:6px 10px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.qf-dp-porter-edit,.qf-dp-porter-remove{background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink-dim);font-family:inherit;font-size:.76rem;padding:6px 10px;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .qf-dp-porter-remove:hover{color:#E8A0A0;border-color:rgba(232,160,160,.4)}
 .qf-dp-porter-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:1rem}
 .qf-dp-section{display:flex;flex-direction:column;gap:.6rem}
@@ -368,6 +373,26 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-dp-cta-status{display:block;text-align:center;font-size:.76rem;color:var(--ink-faint);margin-top:.6rem}
 .qf-dp-team-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
 .qf-dp-team-preview-tag{font-size:.72rem;color:var(--ink-dim);background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+
+/* ════════ QA audit fixes (2026-06-25): clases que el JS aplica pero faltaba estilar + a11y ════════ */
+/* presets de días (Mon–Fri / Every day): el JS pone .is-active pero no había estilo → no se encendían */
+.qf2-chip-preset.is-active{border-color:var(--accent);color:var(--accent-soft);background:rgba(var(--accent-rgb),.12)}
+/* day-porter: estado "Looks good" (.is-ok) se veía gris igual que el error */
+.qf-dp-cta-status.is-ok{color:var(--accent-soft)}
+/* day-porter: tarjeta de porter con error sin señal a nivel de tarjeta */
+.qf-dp-porter.is-error{border-color:#E8A0A0}
+/* day-porter: labels Start/End flotaban a ~16px sin escala/scrim sobre la foto */
+.qf-dp-time-field label{display:block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.3rem;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+/* day-porter: chevron del acordeón era ~18px (toque <44px) */
+.qf-dp-porter-chevron{width:44px;height:44px;min-width:44px;display:inline-grid;place-items:center}
+/* foco de teclado del tab Same/Custom caía en el radio de 1px (invisible) → al pill */
+.qf-dp-hours-mode-opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+/* size: al escribir un número exacto las cards de rango quedan superseded → atenuarlas */
+.qf-screen.is-size .qf2-size-card.is-deselected{opacity:.5}
+/* centrado consistente (eran las únicas líneas a la izquierda en pantallas centradas) */
+#qfScreen_schedule .qf-dp-prompt-promise{text-align:center}
+#qfScreen_location .qf2-location-hint{text-align:center}
+#qfScreen_space .qf2-space-other-prompt{text-align:center}
 
 /* ============================================================
    QUOTE WIZARD — "MARQUEE" (full-bleed NYC skyline, content over)
