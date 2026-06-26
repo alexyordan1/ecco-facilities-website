@@ -712,12 +712,12 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-screen.is-space .qf2-card-label{ text-shadow:0 1px 10px rgba(0,0,0,.75); }
 .qf-screen.is-space .qf2-card-hint{ color:var(--ink-dim); text-shadow:0 1px 8px rgba(0,0,0,.75); }
 /* per-card photo + scrim (bottom-weighted for the label; overlay normalizes bright shots) */
-.qf-screen.is-space .qf2-card[data-space="Office"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.52) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.86) 100%),url(../images/stock/ecco-v-corporate.webp); }
-.qf-screen.is-space .qf2-card[data-space="Medical"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.56) 0%,rgba(12,14,13,.44) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-medical.webp); }
-.qf-screen.is-space .qf2-card[data-space="Retail"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-retail.webp); }
-.qf-screen.is-space .qf2-card[data-space="Restaurant"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-restaurant.webp); }
-.qf-screen.is-space .qf2-card[data-space="Fitness"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.44) 0%,rgba(12,14,13,.30) 38%,rgba(12,14,13,.82) 100%),url(../images/stock/ecco-v-gym.webp); }
-.qf-screen.is-space .qf2-card[data-space="School"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.60) 0%,rgba(12,14,13,.46) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-school.webp); }
+.qf-screen.is-space .qf2-card[data-space="Office"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.52) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.86) 100%),url(../images/stock/ecco-v-corporate-800.webp); }
+.qf-screen.is-space .qf2-card[data-space="Medical"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.56) 0%,rgba(12,14,13,.44) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-medical-800.webp); }
+.qf-screen.is-space .qf2-card[data-space="Retail"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-retail-800.webp); }
+.qf-screen.is-space .qf2-card[data-space="Restaurant"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.50) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.85) 100%),url(../images/stock/ecco-v-restaurant-800.webp); }
+.qf-screen.is-space .qf2-card[data-space="Fitness"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.44) 0%,rgba(12,14,13,.30) 38%,rgba(12,14,13,.82) 100%),url(../images/stock/ecco-v-gym-800.webp); }
+.qf-screen.is-space .qf2-card[data-space="School"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.60) 0%,rgba(12,14,13,.46) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-school-800.webp); }
 
 /* ---- SIZE — a wide modern office; conveys scale/footage ---- */
 .qf-stage:has(#qfScreen_size.is-active){
