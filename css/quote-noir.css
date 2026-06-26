@@ -873,6 +873,61 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   }
 }
 
+/* ─── MÓVIL (<880px): velos full-bleed servidos a -800 para aligerar datos.
+   Los gradientes son VERBATIM de las reglas base de arriba — solo cambia la capa
+   de imagen (background-image), así que el scrim/oscuridad es idéntico; background
+   -size/position/repeat se heredan de la regla base. Desktop (@media min-width:880)
+   conserva el original. welcome-team-conference se omite (667px, sin variante). ─── */
+@media (max-width:879px){
+  .qf-stage{
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.66) 0%, rgba(12,14,13,.40) 20%, rgba(12,14,13,.28) 46%, rgba(12,14,13,.58) 74%, rgba(12,14,13,.92) 92%, var(--black) 100%),
+      url(../images/stock/ecco-nyc-dusk-800.webp);
+  }
+  .qf-stage:has(#qfScreen_space.is-active){
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.93) 0%, rgba(12,14,13,.86) 22%, rgba(12,14,13,.83) 50%, rgba(12,14,13,.9) 78%, rgba(12,14,13,.98) 94%, var(--black) 100%),
+      url(../images/stock/ecco-cc-hero-lobby-800.webp);
+  }
+  .qf-stage:has(#qfScreen_size.is-active){
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.78) 0%, rgba(12,14,13,.66) 24%, rgba(12,14,13,.62) 52%, rgba(12,14,13,.78) 80%, rgba(12,14,13,.95) 95%, var(--black) 100%),
+      url(../images/stock/hero-office-800.webp);
+  }
+  .qf-stage:has(#qfScreen_days.is-active){
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.86) 0%, rgba(12,14,13,.76) 24%, rgba(12,14,13,.72) 52%, rgba(12,14,13,.85) 80%, rgba(12,14,13,.96) 95%, var(--black) 100%),
+      url(../images/stock/ecco-clean-squeegee-bw-800.webp);
+  }
+  .qf-stage:has(#qfScreen_schedule.is-active){
+    background-image:
+      radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.68) 0%, rgba(12,14,13,.6) 50%, rgba(12,14,13,.84) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.6) 0%, rgba(12,14,13,.54) 38%, rgba(12,14,13,.84) 100%),
+      url(../images/stock/ecco-clean-mopping-bw-800.webp);
+  }
+  .qf-stage:has(#qfScreen_location.is-active){
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.74) 0%, rgba(12,14,13,.62) 26%, rgba(12,14,13,.58) 54%, rgba(12,14,13,.74) 80%, rgba(12,14,13,.95) 95%, var(--black) 100%),
+      url(../images/stock/int-terracotta-800.webp);
+  }
+  .qf-stage:has(#qfScreen_info.is-active){
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.8) 0%, rgba(12,14,13,.66) 26%, rgba(12,14,13,.62) 54%, rgba(12,14,13,.8) 80%, rgba(12,14,13,.95) 95%, var(--black) 100%),
+      url(../images/stock/ecco-trust-hero-800.webp);
+  }
+  .qf-stage:has(#qfScreen_contact.is-active){
+    background-image:
+      radial-gradient(130% 110% at 50% 48%, rgba(12,14,13,.66) 0%, rgba(12,14,13,.58) 48%, rgba(12,14,13,.58) 76%, rgba(12,14,13,.82) 100%),
+      linear-gradient(180deg, rgba(12,14,13,.58) 0%, rgba(12,14,13,.48) 36%, rgba(12,14,13,.80) 100%),
+      url(../images/stock/bw-window-pole-800.webp);
+  }
+  .qf-stage:has(#qfScreen_success.is-active){
+    background-image:
+      linear-gradient(180deg, rgba(12,14,13,.7) 0%, rgba(12,14,13,.58) 26%, rgba(12,14,13,.58) 54%, rgba(12,14,13,.76) 80%, rgba(12,14,13,.95) 95%, var(--black) 100%),
+      url(../images/stock/bw-spray-noir-800.webp);
+  }
+}
+
 /* ════════════════════════════════════════════════════════════════════════
    NOIR FIELD HARDENING (audit 2026-06-23)
    Kills old-form / native-chrome leftovers that broke the dark theme once a
