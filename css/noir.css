@@ -4,6 +4,11 @@
     --accent-soft:#BBDD99;
     --accent-ink:#10210B;
     --accent-rgb:159,203,123;
+    /* Day-porter cue color (blue) — pairs with green --accent (cleaning) so the two
+       services are visually distinct in the quote wizard. */
+    --accent-porter:#78AAFF;
+    --accent-porter-soft:#A9C7FF;
+    --accent-porter-rgb:120,170,255;
 
     --black:#0C0E0D;
     --surface-1:#101312;
