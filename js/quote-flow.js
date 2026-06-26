@@ -2804,6 +2804,23 @@
       dpRender();
     }
 
+    // FIX 2026-06-26 — keep customHours in lockstep with the selected days while in
+    // custom mode. Seed a default for any newly-selected day (the row renders
+    // sameStart/sameEnd as a default, but if state has no entry dpPorterIssues
+    // reports "set hours for <day>" and blocks Continue even though a time shows —
+    // e.g. remove then re-add a day, or pick a preset). Drop orphans for deselected
+    // days so stale per-day hours aren't validated/submitted. Single invariant,
+    // enforced at every day/mode mutation point.
+    function dpSyncCustomHours(p) {
+      if (p.hoursMode !== 'custom') return;
+      p.days.forEach(function (day) {
+        if (!p.customHours[day]) p.customHours[day] = { start: p.sameStart, end: p.sameEnd };
+      });
+      Object.keys(p.customHours).forEach(function (day) {
+        if (p.days.indexOf(day) < 0) delete p.customHours[day];
+      });
+    }
+
     function dpToggleDay(porterIdx, day) {
       var p = STATE.dpPorters[porterIdx];
       var i = p.days.indexOf(day);
@@ -2814,6 +2831,7 @@
         p.days.push(day);
         p.days.sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
       }
+      dpSyncCustomHours(p);
       dpRender();
     }
 
@@ -2822,6 +2840,7 @@
       if (preset === 'weekdays') p.days = DP_WEEKDAYS.slice();
       else if (preset === 'every') p.days = DP_DAYS.slice();
       else { p.days = []; p.customHours = {}; }
+      dpSyncCustomHours(p);
       dpRender();
     }
 
@@ -2829,11 +2848,7 @@
       var p = STATE.dpPorters[porterIdx];
       var prev = p.hoursMode;
       p.hoursMode = mode;
-      if (mode === 'custom') {
-        p.days.forEach(function (day) {
-          if (!p.customHours[day]) p.customHours[day] = { start: p.sameStart, end: p.sameEnd };
-        });
-      }
+      dpSyncCustomHours(p);
       dpRender();
       // Telemetry: a switch to "Per day" is a high-signal event because it
       // means the user actually wants per-day hours — useful for ops to
