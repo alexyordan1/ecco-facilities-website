@@ -311,11 +311,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* Turnstile slot — reserve space (anti-CLS) */
 #qfTurnstile{margin-top:1rem;min-height:65px;display:flex;justify-content:center}
 
-/* floating submit CTA (review) */
-.qf-plan-floating-cta{position:fixed;left:0;right:0;bottom:0;z-index:900;padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--black) 70%,transparent)}
-.qf-plan-floating-cta[hidden]{display:none}
-.qf-plan-floating-cta .qf2-cta{margin-top:0;max-width:560px;margin-inline:auto}
-
 /* success */
 .qf2-success-body{text-align:center;max-width:480px;margin:0 auto;padding-top:1rem}
 .qf2-success-title{font-family:var(--font-display);font-weight:300;font-size:clamp(1.8rem,5vw,2.6rem);color:var(--ink);line-height:1.05}
@@ -516,8 +511,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   .qf2-flowbar-mobile{ display:flex; }
   /* welcome = the marquee hero: oversized headline */
   .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(2.8rem,4.4vw,4rem); line-height:1; }
-  /* keep the fixed submit CTA aligned to the left content column */
-  .qf-plan-floating-cta .qf2-cta{ margin-inline:0; }
 }
 
 /* ============================================================
@@ -664,7 +657,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   /* content fills the canvas — wide, centered, NOT a 600px side column */
   #qfScreen_space.is-active{ max-width:1000px; margin:0 auto; width:100%; }
   #qfScreen_space .qf2-prompt-title{ font-size:clamp(2.4rem,4vw,3.4rem); }
-  #qfScreen_space .qf2-prompt{ text-align:center; }
   #qfScreen_space .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
   /* the 6 cards spread wide across the canvas */
   #qfScreen_space .qf2-grid-6{ grid-template-columns:repeat(3,1fr); gap:14px; max-width:none; }
@@ -722,7 +714,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     /* velo heredado del móvil base — igual en ambos viewports (estand. 2026-06-25) */
   }
   #qfScreen_size.is-active{ max-width:900px; margin:0 auto; width:100%; }
-  #qfScreen_size .qf2-prompt{ text-align:center; }
   #qfScreen_size .qf2-prompt-title{ font-size:clamp(2.4rem,4vw,3.4rem); }
   #qfScreen_size .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
   #qfScreen_size .qf2-size-grid{ grid-template-columns:repeat(3,1fr); gap:14px; max-width:none; }
@@ -754,7 +745,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     /* velo heredado del móvil base — igual en ambos viewports (estand. 2026-06-25) */
   }
   #qfScreen_days.is-active{ max-width:720px; margin:0 auto; width:100%; }
-  #qfScreen_days .qf2-prompt{ text-align:center; }
   #qfScreen_days .qf2-prompt-title{ font-size:clamp(2.3rem,3.8vw,3.2rem); }
   #qfScreen_days .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
 }
@@ -787,7 +777,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     /* velo heredado del móvil base — igual en ambos viewports (estand. 2026-06-25) */
   }
   #qfScreen_schedule.is-active{ max-width:720px; margin:0 auto; width:100%; }
-  #qfScreen_schedule .qf2-prompt{ text-align:center; }
   #qfScreen_schedule .qf2-prompt-title{ font-size:clamp(2.3rem,3.8vw,3.2rem); }
   #qfScreen_schedule .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
 }
@@ -806,7 +795,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     /* velo heredado del móvil base — igual en ambos viewports (estand. 2026-06-25) */
   }
   #qfScreen_location.is-active{ max-width:640px; margin:0 auto; width:100%; }
-  #qfScreen_location .qf2-prompt{ text-align:center; }
   #qfScreen_location .qf2-prompt-title{ font-size:clamp(2.2rem,3.6vw,3rem); }
   #qfScreen_location .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
 }
@@ -825,7 +813,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     /* velo heredado del móvil base — igual en ambos viewports (estand. 2026-06-25) */
   }
   #qfScreen_info.is-active{ max-width:640px; margin:0 auto; width:100%; }
-  #qfScreen_info .qf2-prompt{ text-align:center; }
   #qfScreen_info .qf2-prompt-title{ font-size:clamp(2.2rem,3.6vw,3rem); }
   #qfScreen_info .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
 }
@@ -849,7 +836,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     background-size:cover; background-position:center 45%; background-repeat:no-repeat;
   }
   #qfScreen_contact.is-active{ max-width:720px; margin:0 auto; width:100%; }
-  #qfScreen_contact .qf2-prompt{ text-align:center; }
   #qfScreen_contact .qf2-prompt-title{ font-size:clamp(2.2rem,3.6vw,3rem); }
   #qfScreen_contact .qf2-flowbar-mobile{ max-width:560px; margin-left:auto; margin-right:auto; }
 }

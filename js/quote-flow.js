@@ -2225,8 +2225,14 @@
       // FIX 2026-06-24 (M13): the time chips were mouse-blocked (pointer-events)
       // but still keyboard-reachable with no signal they were inert. Mirror the
       // gated state to AT so screen-reader users hear "dimmed/unavailable".
+      // FIX 2026-06-25 (M13b): pointer-events:none only blocks the mouse — the
+      // chips were still Tab-reachable and Enter/Space-activatable. Pull them
+      // from the tab order while gated and restore (tabindex 0) when ungated,
+      // in lockstep with aria-disabled. Activation is also guarded in the chip
+      // click handler below.
       timeCluster.querySelectorAll('.qf2-chip').forEach(function (chip) {
         chip.setAttribute('aria-disabled', _gated ? 'true' : 'false');
+        chip.setAttribute('tabindex', _gated ? '-1' : '0');
       });
     }
 
@@ -2337,6 +2343,10 @@
     }
     qf2TimeChips.forEach(function (chip) {
       chip.addEventListener('click', function () {
+        // M13b — block activation while the cluster is gated. CSS pointer-events
+        // stops the mouse, but Enter/Space and AT-driven clicks still fire here;
+        // bail out so a gated chip can never be toggled on.
+        if (chip.getAttribute('aria-disabled') === 'true') return;
         var t = chip.getAttribute('data-time');
         var isFlexible = (t === 'flexible');
         var allChips = Array.from(qf2TimeChips);
@@ -3501,11 +3511,6 @@
         heroSub.textContent = 'Tap anything that\u2019s off to edit.';
       }
 
-      // Re-evaluate floating CTA visibility once layout settles
-      setTimeout(function () { if (window.qfRecheckFloatingCta) window.qfRecheckFloatingCta(); }, 60);
-
-      // Re-evaluate floating CTA visibility once layout settles
-      setTimeout(function () { if (window.qfRecheckFloatingCta) window.qfRecheckFloatingCta(); }, 60);
       var setVal = function (id, val) {
         var el = document.getElementById(id);
         if (el) el.textContent = val || '\u2014';
@@ -4244,54 +4249,6 @@
       }
       return errs;
     }
-
-    // Floating submit CTA — scroll-driven: shows when inline footer is not in view
-    (function wireFloatingCta() {
-      var floater = document.getElementById('qfPlanFloatingCta');
-      var floaterBtn = document.getElementById('qfFloatingSubmitBtn');
-      var inlineFoot = SCREENS.contact ? SCREENS.contact.querySelector('.qf-rev-foot') : null;
-      var mainBtn = document.getElementById('qfContactSubmit');
-      if (!floater || !floaterBtn || !inlineFoot || !mainBtn) return;
-
-      // Forward click + mirror disabled / aria-busy state
-      floaterBtn.addEventListener('click', function () {
-        if (mainBtn.disabled) return;
-        mainBtn.click();
-      });
-      var mirrorState = function () {
-        floaterBtn.disabled = mainBtn.disabled;
-        if (mainBtn.hasAttribute('aria-busy')) floaterBtn.setAttribute('aria-busy', 'true');
-        else floaterBtn.removeAttribute('aria-busy');
-      };
-      // AYS Ola 4 Commit L HI-2 — register observer for global cleanup so
-      // success transitions and unload can disconnect it.
-      var floaterMirrorObs = registerObserver(new MutationObserver(mirrorState));
-      floaterMirrorObs.observe(mainBtn, { attributes: true, attributeFilter: ['disabled', 'aria-busy'] });
-
-      // Decide visibility based on scroll position + viewport
-      var rafPending = false;
-      window.qfRecheckFloatingCta = function () {
-        var onFinal = document.querySelector('main.q-flow').classList.contains('is-step-final');
-        if (!onFinal) {
-          floater.classList.remove('is-visible');
-          floater.setAttribute('aria-hidden', 'true');
-          return;
-        }
-        var rect = inlineFoot.getBoundingClientRect();
-        // Show floater when the inline CTA is below the visible area (user hasn't
-        // scrolled down to it yet) OR already scrolled past it (above the fold).
-        var outOfView = rect.bottom < 40 || rect.top > (window.innerHeight - 20);
-        floater.classList.toggle('is-visible', outOfView);
-        floater.setAttribute('aria-hidden', outOfView ? 'false' : 'true');
-      };
-      var onScroll = function () {
-        if (rafPending) return;
-        rafPending = true;
-        requestAnimationFrame(function () { rafPending = false; window.qfRecheckFloatingCta(); });
-      };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll);
-    })();
 
     // Submit button
     var submitBtn = document.getElementById('qfContactSubmit');
