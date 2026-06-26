@@ -195,7 +195,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-time-cluster[data-gated="1"]{opacity:.4;pointer-events:none}
 .qf2-section-label{font-family:var(--font-display);font-weight:400;font-size:1.1rem;color:var(--ink);margin-bottom:.3rem}
 .qf2-time-helper{font-size:.8rem;color:var(--ink-faint);font-weight:300;margin-bottom:.7rem}
-.qf2-chip.qf2-chip-time{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:11px 16px;border-radius:13px;min-height:56px}
+.qf2-chip.qf2-chip-time{flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:11px 16px;border-radius:13px;min-height:56px}
 .qf2-chip-time-label{font-size:.9rem;color:inherit;font-weight:400;display:block}
 .qf2-chip-time-range{font-size:.7rem;color:var(--ink-faint);font-weight:300;display:block}
 .qf2-chip.qf2-chip-time.is-selected .qf2-chip-time-range,.qf2-chip.qf2-chip-time[aria-pressed="true"] .qf2-chip-time-range{color:var(--accent-soft)}
@@ -475,6 +475,15 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    móvil + desktop (antes solo space/size/days y solo dentro del @media desktop).
    Welcome conserva su diseño hero (marquee) aparte. */
 .qf-screen:not(.is-welcome) .qf2-prompt{ text-align:center; }
+/* ESTANDARIZACIÓN 2026-06-26: la regla global de .qf2-prompt solo centraba el
+   título + subtítulo. Estos otros textos editoriales del lienzo se quedaban a la
+   izquierda en móvil/desktop — centrarlos también. (.qf2-atypical-heads-up-text
+   se inyecta solo en location, tras el prompt; los helpers viven en space/size/
+   info/contact; el numeric-label solo en size.) NO toca la tarjeta del Day Porter
+   (.qf-dp-*), que es un panel de config deliberadamente alineado a la izquierda. */
+.qf-screen:not(.is-welcome) .qf2-numeric-label,
+.qf-screen:not(.is-welcome) .qf2-field-helper,
+.qf-screen:not(.is-welcome) .qf2-atypical-heads-up-text{ text-align:center; }
 .qf2-success-title{ text-shadow:0 2px 26px rgba(0,0,0,.5); }
 /* light secondary text needs a shadow to stay legible over the photo */
 .qf2-prompt-sub,.qf2-success-subtitle,.qf2-cta-hint{
