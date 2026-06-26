@@ -7,18 +7,22 @@ const h = require('./helpers');
  * in real conditions: network drops, validation, and submit retries.
  * The happy path is already covered by janitorial-flow / dayporter-flow
  * / both-flow.
+ *
+ * Day Porter real flow (mirrors FLOWS): Welcome → Space → Schedule →
+ * Location → Info → Contact. The `info`/"You" step moved to the END on
+ * 2026-06-20.
  */
 
 async function walkToContact(page, opts = {}) {
   await page.click('.qf2-card[data-service="dayporter"]');
   await h.expectActive(page, 'qfScreen_space');
   await h.pickSpace(page, 'Office');
-  await h.expectActive(page, 'qfScreen_info');
-  await h.fillInfo(page, opts.info || {});
   await h.expectActive(page, 'qfScreen_schedule');
   await page.click('#qfDpScheduleContinue');
   await h.expectActive(page, 'qfScreen_location');
   await h.fillLocation(page, opts.location || {});
+  await h.expectActive(page, 'qfScreen_info');
+  await h.fillInfo(page, opts.info || {});
   await h.expectActive(page, 'qfScreen_contact');
 }
 
@@ -89,9 +93,14 @@ test.describe('Error states · validation', () => {
   });
 
   test('Invalid email on Info step blocks Continue', async ({ page }) => {
+    // Info is the last data step (after Location) in the current flow.
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue');
+    await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
     await page.fill('#qfUserFirstName', 'Test');
     await page.fill('#qfUserLastName', 'User');
@@ -106,8 +115,6 @@ test.describe('Error states · validation', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
     await page.click('#qfDpScheduleContinue');
     await h.expectActive(page, 'qfScreen_location');

@@ -4,9 +4,12 @@ const h = require('./helpers');
 
 /**
  * Sprint 5 D24 — Janitorial flow E2E.
- * Real flow: Welcome → Space → Info → Size → Days → Location → Contact.
+ * Real flow (mirrors FLOWS in js/quote-flow.js):
+ *   Welcome → Space → Size → Days → Location → Info → Contact.
+ * NOTE 2026-06-20 — the `info`/"You" step was moved from right-after-Space
+ * to the END (after Location, before Contact). These tests assert that order.
  *
- * NOTE: every transition has a 850ms `_qfTransitioning` guard + a CSS
+ * NOTE: every transition has a 400ms `_qfTransitioning` guard + a CSS
  * crossfade. Tests must `expectActive` after EVERY click that triggers a
  * navigation, otherwise the next click fires while the guard is still
  * locked and silently no-ops.
@@ -22,9 +25,6 @@ test.describe('Janitorial — full flow', () => {
     await h.expectActive(page, 'qfScreen_space');
 
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
 
     await h.pickSize(page, '1k-3k');
@@ -34,17 +34,18 @@ test.describe('Janitorial — full flow', () => {
     await h.expectActive(page, 'qfScreen_location');
 
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     h.expectNoJsErrors(page);
   });
 
-  test('Step 4 — exact sq ft Continue advances (D23 regression)', async ({ page }) => {
+  test('Step 3 — exact sq ft Continue advances (D23 regression)', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
 
     await h.pickSizeExact(page, 1500);
@@ -53,12 +54,10 @@ test.describe('Janitorial — full flow', () => {
     h.expectNoJsErrors(page);
   });
 
-  test('Step 4 — Enter on numeric input also advances', async ({ page }) => {
+  test('Step 3 — Enter on numeric input also advances', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
 
     await page.fill('#qfSizeCustom', '2400');
@@ -68,12 +67,10 @@ test.describe('Janitorial — full flow', () => {
     h.expectNoJsErrors(page);
   });
 
-  test('Step 4 — invalid sq ft (under 100) shows error, stays on screen', async ({ page }) => {
+  test('Step 3 — invalid sq ft (under 100) shows error, stays on screen', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
 
     await page.fill('#qfSizeCustom', '50');
@@ -82,12 +79,10 @@ test.describe('Janitorial — full flow', () => {
     await expect(page.locator('#qfScreen_size')).toHaveClass(/is-active/);
   });
 
-  test('Step 4 — visit_required card flags needsSiteWalk and advances', async ({ page }) => {
+  test('Step 3 — visit_required card flags needsSiteWalk and advances', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
 
     await h.pickSize(page, 'visit_required');
@@ -100,19 +95,17 @@ test.describe('Janitorial — full flow', () => {
     await h.expectActive(page, 'qfScreen_space');
     await page.fill('#qf2SpaceOther', 'warehouse');
     await page.click('#qf2SpaceContinue');
-    await h.expectActive(page, 'qfScreen_info');
+    await h.expectActive(page, 'qfScreen_size');
     h.expectNoJsErrors(page);
   });
 
-  test('Step 4 — Continue advances when card was previously picked + back-navigated (D50)', async ({ page }) => {
+  test('Step 3 — Continue advances when card was previously picked + back-navigated (D50)', async ({ page }) => {
     // Repro: user picks a size CARD → advances → goes back → clicks Continue.
     // Before D50 the Continue handler returned early because the numeric
     // input was empty, so the form looked frozen.
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await page.click('.qf2-size-card[data-size="3k-6k"]');
     await h.expectActive(page, 'qfScreen_days');
@@ -132,7 +125,7 @@ test.describe('Janitorial — full flow', () => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
+    await h.expectActive(page, 'qfScreen_size');
     // Inspect dataLayer for the events we expect.
     const events = await page.evaluate(() => (window.dataLayer || []).map(e => e.event));
     expect(events).toContain('quote_step_view');
@@ -144,12 +137,10 @@ test.describe('Janitorial — full flow', () => {
     h.expectNoJsErrors(page);
   });
 
-  test('Step 5 — Continue blocked without time-window selection (D49)', async ({ page }) => {
+  test('Step 4 — Continue blocked without time-window selection (D49)', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await page.click('.qf2-size-card[data-size="3k-6k"]');
     await h.expectActive(page, 'qfScreen_days');

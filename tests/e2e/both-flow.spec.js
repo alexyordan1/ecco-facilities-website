@@ -4,7 +4,10 @@ const h = require('./helpers');
 
 /**
  * D57 — Combined (Janitorial + Day Porter) flow E2E.
- * Real flow: Welcome → Space → Info → Size → Days (jan) → Schedule (DP) → Location → Contact → Success.
+ * Real flow (mirrors FLOWS in js/quote-flow.js):
+ *   Welcome → Space → Size → Days (jan) → Schedule (DP) → Location → Info → Contact → Success.
+ * NOTE 2026-06-20 — the `info`/"You" step was moved to the END (after
+ * Location, before Contact); these tests assert that order.
  *
  * This is the most complex flow — it exercises the merge of the cleaning
  * schedule (janDays + timeOfDay) and the porter schedule (dpPorters), then
@@ -21,9 +24,6 @@ test.describe('Combined — full flow', () => {
     await h.expectActive(page, 'qfScreen_space');
 
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
 
     await h.pickSize(page, '1k-3k');
@@ -37,6 +37,9 @@ test.describe('Combined — full flow', () => {
     await h.expectActive(page, 'qfScreen_location');
 
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     // Snapshot should show both: cleaning days + porter row(s).
@@ -51,8 +54,6 @@ test.describe('Combined — full flow', () => {
     await page.click('.qf2-card[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Retail');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '6k-12k');
     await h.expectActive(page, 'qfScreen_days');
@@ -74,6 +75,9 @@ test.describe('Combined — full flow', () => {
     await h.expectActive(page, 'qfScreen_location');
 
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     const whenRow = page.locator('#qf2SumWhen');
@@ -88,8 +92,6 @@ test.describe('Combined — full flow', () => {
     await page.click('.qf2-card[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '1k-3k');
     await h.expectActive(page, 'qfScreen_days');
@@ -98,6 +100,8 @@ test.describe('Combined — full flow', () => {
     await page.click('#qfDpScheduleContinue');
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     // Click Edit on the When row → Hop back → should go to Schedule (not Days).

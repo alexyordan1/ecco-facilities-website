@@ -3,9 +3,15 @@ const { expect } = require('@playwright/test');
 
 /**
  * Shared helpers for the quote-form E2E suite.
- * Real flow order (per the desktop flow-bar): Welcome → Space → Info → Size → Days → Location → Contact.
  *
- * Every helper guards against the cookie banner intercepting clicks
+ * Real flow order (mirrors FLOWS in js/quote-flow.js — the `info`/"You" step
+ * was moved to the END of every flow on 2026-06-20, just before contact):
+ *   janitorial: Welcome → Space → Size → Days → Location → Info → Contact
+ *   dayporter:  Welcome → Space → Schedule → Location → Info → Contact
+ *   both:       Welcome → Space → Size → Days → Schedule → Location → Info → Contact
+ *
+ * Helper functions are per-screen and order-agnostic; the specs drive the
+ * order. Every helper guards against the cookie banner intercepting clicks
  * by dismissing it on first visit, and surfaces JS errors via pageerror.
  */
 
@@ -22,8 +28,16 @@ async function dismissCookieBanner(page) {
 }
 
 /**
- * Open the quote form fresh — clears localStorage, reloads, dismisses
- * the cookie banner. Captures JS errors for later assertion.
+ * Open the quote form fresh. Captures JS errors for later assertion.
+ *
+ * The cookie banner (js/cookie-consent.js) only gets its `.visible` class —
+ * the state in which it intercepts pointer events — 1000ms AFTER load, and it
+ * never renders at all when localStorage `ecco_cookies` already holds a value.
+ * A post-load click on "Decline" raced that 1s timer and flaked under parallel
+ * load (the banner would turn visible mid-flow and swallow clicks). So instead
+ * we pre-seed `ecco_cookies` via addInitScript — runs before every page script,
+ * so the banner is suppressed deterministically. Same script clears any saved
+ * draft up front so the wizard always inits on a clean Welcome screen.
  */
 async function freshOpen(page) {
   const errors = [];
@@ -32,13 +46,24 @@ async function freshOpen(page) {
     if (msg.type() === 'error') errors.push(`console.error: ${msg.text()}`);
   });
 
-  await page.goto('/quote.html');
-  await page.evaluate(() => {
-    try { localStorage.removeItem('ecco_quote_draft_v1'); } catch (_) {}
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('ecco_cookies', 'declined');
+      localStorage.removeItem('ecco_quote_draft_v1');
+    } catch (_) {}
   });
-  await page.reload();
+
+  // Keep the suite hermetic: block the lazy-loaded Cloudflare Turnstile widget.
+  // It can't issue a token on localhost, so on the submit path awaitTurnstile()
+  // would otherwise poll the full 8s before giving up. With the script blocked,
+  // `window.turnstile` stays undefined and awaitTurnstile() resolves null
+  // immediately (prod's graceful-degradation path) — the fetch fires at once.
+  // The resulting "failed to load" console noise is in expectNoJsErrors' benign
+  // list. The few submit tests stub /api/submit-quote with page.route().
+  await page.route('**/challenges.cloudflare.com/**', (route) => route.abort());
+
+  await page.goto('/quote.html');
   await page.waitForSelector('.qf-screen.is-active');
-  await dismissCookieBanner(page);
   page._jsErrors = errors;
   return errors;
 }

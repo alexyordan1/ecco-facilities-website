@@ -2,6 +2,16 @@
 const { test, expect } = require('@playwright/test');
 const h = require('./helpers');
 
+/**
+ * Welcome screen E2E.
+ *
+ * NOTE 2026-06-26 — two tests were removed because the UI they exercised no
+ * longer exists in production (verified against eccofacilities.com/quote.html):
+ *   • "Alina hero pill expands on tap" — the .qf2-alina-hero pill was removed.
+ *   • "Not sure quiz reveals chips" — the #qf2QuizToggle mini-quiz was removed.
+ * They were testing dead markup, so they're dropped rather than rewritten.
+ */
+
 test.describe('Welcome screen', () => {
   test.beforeEach(async ({ page }) => {
     await h.freshOpen(page);
@@ -17,26 +27,5 @@ test.describe('Welcome screen', () => {
     await page.keyboard.press('1');
     await h.expectActive(page, 'qfScreen_space');
     h.expectNoJsErrors(page);
-  });
-
-  test('Alina hero pill expands on tap', async ({ page }) => {
-    const pill = page.locator('.qf2-alina-hero[role="button"]').first();
-    const before = (await pill.locator('.qf2-alina-hero-text').textContent()) || '';
-    await pill.click();
-    await expect(pill).toHaveAttribute('aria-expanded', 'true');
-    const after = (await pill.locator('.qf2-alina-hero-text').textContent()) || '';
-    expect(after).not.toBe(before);
-    // D127 — service rename: "Janitorial" → "Night cleaning" as the user-
-    // facing card label, with "janitorial" kept lowercase in the help text
-    // as an SEO keyword (also surfaces in the quiz blurbs). Test now asserts
-    // case-insensitive presence so future copy tweaks don't churn it.
-    expect(after.toLowerCase()).toContain('janitorial');
-  });
-
-  test('Not sure quiz reveals chips and recommends', async ({ page }) => {
-    await page.click('#qf2QuizToggle');
-    await expect(page.locator('.qf2-quiz-chips')).toBeVisible();
-    await page.click('.qf2-quiz-chip[data-quiz-pick="dayporter"]');
-    await expect(page.locator('#qf2QuizResult')).toBeVisible();
   });
 });

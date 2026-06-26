@@ -6,6 +6,11 @@ const h = require('./helpers');
 /**
  * D62 — WCAG 2.1 AA accessibility audit on every step of every flow.
  * Uses axe-core to detect violations programmatically.
+ *
+ * Real flow order (mirrors FLOWS in js/quote-flow.js). The `info`/"You" step
+ * moved to the END of every flow on 2026-06-20:
+ *   janitorial: Welcome → Space → Size → Days → Location → Info → Contact
+ *   dayporter:  Welcome → Space → Schedule → Location → Info → Contact
  */
 
 const wcag = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
@@ -48,22 +53,10 @@ test.describe('A11y · Day Porter flow', () => {
     expect(r.violations).toBe(0);
   });
 
-  test('Info', async ({ page }) => {
-    await page.click('.qf2-card[data-service="dayporter"]');
-    await h.expectActive(page, 'qfScreen_space');
-    await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    const r = await audit(page, 'qfScreen_info');
-    if (r.violations) console.log('Info violations:', JSON.stringify(r, null, 2));
-    expect(r.violations).toBe(0);
-  });
-
   test('Schedule (DP)', async ({ page }) => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
     const r = await audit(page, 'qfScreen_schedule');
     if (r.violations) console.log('Schedule violations:', JSON.stringify(r, null, 2));
@@ -74,8 +67,6 @@ test.describe('A11y · Day Porter flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
     await page.click('.qf-dp-porter-header');
     await page.waitForTimeout(400);
@@ -84,16 +75,30 @@ test.describe('A11y · Day Porter flow', () => {
     expect(r.violations).toBe(0);
   });
 
-  test('Snapshot', async ({ page }) => {
+  test('Info', async ({ page }) => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
     await page.click('#qfDpScheduleContinue');
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+    const r = await audit(page, 'qfScreen_info');
+    if (r.violations) console.log('Info violations:', JSON.stringify(r, null, 2));
+    expect(r.violations).toBe(0);
+  });
+
+  test('Snapshot', async ({ page }) => {
+    await page.click('.qf2-card[data-service="dayporter"]');
+    await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue');
+    await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
     const r = await audit(page, 'qfScreen_contact');
     if (r.violations) console.log('Snapshot violations:', JSON.stringify(r, null, 2));
@@ -110,8 +115,6 @@ test.describe('A11y · Janitorial flow', () => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '1k-3k');
     await h.expectActive(page, 'qfScreen_days');
@@ -124,8 +127,6 @@ test.describe('A11y · Janitorial flow', () => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '1k-3k');
     await h.expectActive(page, 'qfScreen_days');

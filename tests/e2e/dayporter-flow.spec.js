@@ -4,12 +4,15 @@ const h = require('./helpers');
 
 /**
  * D55 — Day Porter flow E2E.
- * Real flow: Welcome → Space → Info → Schedule → Location → Contact → Success.
+ * Real flow (mirrors FLOWS in js/quote-flow.js):
+ *   Welcome → Space → Schedule → Location → Info → Contact → Success.
+ * NOTE 2026-06-20 — the `info`/"You" step was moved to the END (after
+ * Location, before Contact); these tests assert that order.
  *
  * Schedule screen handles 1–6 porters, each with their own days and either
  * "Same hours" (single start/end) or "Per day" (per-day start/end).
  *
- * NOTE: every transition has a 850ms `_qfTransitioning` guard + a CSS
+ * NOTE: every transition has a 400ms `_qfTransitioning` guard + a CSS
  * crossfade. Tests must `expectActive` after EVERY click that triggers a
  * navigation, otherwise the next click fires while the guard is still
  * locked and silently no-ops.
@@ -25,9 +28,6 @@ test.describe('Day Porter — full flow', () => {
     await h.expectActive(page, 'qfScreen_space');
 
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
     // Schedule defaults: 1 porter, Mon–Fri 9–5 (Office defaults).
@@ -36,6 +36,9 @@ test.describe('Day Porter — full flow', () => {
     await h.expectActive(page, 'qfScreen_location');
 
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     // Snapshot should show porter info.
@@ -50,8 +53,6 @@ test.describe('Day Porter — full flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
     await h.pickPorterSchedule(page, {
@@ -62,6 +63,8 @@ test.describe('Day Porter — full flow', () => {
     });
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     const whenRow = page.locator('#qf2SumWhen');
@@ -75,8 +78,6 @@ test.describe('Day Porter — full flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
     await h.pickPorterSchedule(page, {
@@ -91,6 +92,8 @@ test.describe('Day Porter — full flow', () => {
     });
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     // D105 (2026-05-01) — summary now shows the ACTUAL custom per-day hours
@@ -109,8 +112,6 @@ test.describe('Day Porter — full flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
     // Open the porter card, then click "Clear" preset.
@@ -132,8 +133,6 @@ test.describe('Day Porter — full flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
     // Open card and set end <= start.
@@ -155,8 +154,6 @@ test.describe('Day Porter — full flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
 
     // Click the "+ Add another porter" button.
@@ -184,12 +181,12 @@ test.describe('Day Porter — full flow', () => {
     await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_schedule');
     await page.click('#qfDpScheduleContinue');
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
+    await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
     // Stub the submit endpoint so we don't actually submit a real lead.

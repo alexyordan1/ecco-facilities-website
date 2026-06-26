@@ -2,6 +2,14 @@
 const { test, expect } = require('@playwright/test');
 const h = require('./helpers');
 
+/**
+ * Real flow order (mirrors FLOWS in js/quote-flow.js). The `info`/"You" step
+ * moved to the END of every flow on 2026-06-20, so it now sits just before
+ * Contact rather than right after Space.
+ *   janitorial: Welcome → Space → Size → Days → Location → Info → Contact
+ *   dayporter:  Welcome → Space → Schedule → Location → Info → Contact
+ */
+
 test.describe('Keyboard nav', () => {
   test.beforeEach(async ({ page }) => {
     await h.freshOpen(page);
@@ -14,24 +22,27 @@ test.describe('Keyboard nav', () => {
     await h.expectActive(page, 'qfScreen_welcome');
   });
 
-  test('Enter on email field advances from Info to Size', async ({ page }) => {
-    await page.click('.qf2-card[data-service="janitorial"]');
+  test('Enter on email field advances from Info to Contact', async ({ page }) => {
+    // Info is now the last data step. Walk the (shortest) Day Porter flow to it.
+    await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue');
+    await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
     await page.fill('#qfUserFirstName', 'A');
     await page.fill('#qfUserLastName', 'B');
     await page.fill('#qfUserEmail', 'a@b.com');
     await page.locator('#qfUserEmail').press('Enter');
-    await h.expectActive(page, 'qfScreen_size');
+    await h.expectActive(page, 'qfScreen_contact');
   });
 
   test('Arrow keys navigate between day chips', async ({ page }) => {
     await page.click('.qf2-card[data-service="janitorial"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
-    await h.expectActive(page, 'qfScreen_info');
-    await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '1k-3k');
     await h.expectActive(page, 'qfScreen_days');
@@ -57,9 +68,14 @@ test.describe('Keyboard nav', () => {
 test.describe('Email validation', () => {
   test.beforeEach(async ({ page }) => {
     await h.freshOpen(page);
-    await page.click('.qf2-card[data-service="janitorial"]');
+    // Walk the Day Porter flow to the Info step (now after Location).
+    await page.click('.qf2-card[data-service="dayporter"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
+    await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue');
+    await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
   });
 

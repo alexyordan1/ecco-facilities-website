@@ -2569,11 +2569,15 @@
       // 2026-04-27 — "Per day" → "Custom". Same hours stays. Custom is more
       // honest: when you switch off the "same" pattern you're customizing
       // per day. "Per day" was technical, "Custom" is the user's mental model.
-      return dpEl('div', { class: 'qf-dp-hours-mode', role: 'tablist' }, [
+      // 2026-06-26 — a11y: this was a role="tablist" of role="tab" labels, each
+      // WRAPPING an <input type="radio">. That nests one interactive control
+      // (the radio) inside another (the tab) → axe "nested-interactive" (serious,
+      // WCAG 2.1 AA). The radios already form a native, keyboard-navigable group
+      // (shared name), so we drop the redundant ARIA tab layer and keep the
+      // plain radio group. Visual (.is-active) + click (onclick) are unchanged.
+      return dpEl('div', { class: 'qf-dp-hours-mode', role: 'radiogroup', 'aria-label': 'Hours mode' }, [
         dpEl('label', {
           class: 'qf-dp-hours-mode-opt' + (p.hoursMode === 'same' ? ' is-active' : ''),
-          role: 'tab',
-          'aria-selected': p.hoursMode === 'same' ? 'true' : 'false',
           onclick: function () { dpSetMode(porterIdx, 'same'); }
         }, [
           dpEl('input', { type: 'radio', name: 'qf-dp-mode-' + p.id, checked: p.hoursMode === 'same' || null }),
@@ -2581,8 +2585,6 @@
         ]),
         dpEl('label', {
           class: 'qf-dp-hours-mode-opt' + (p.hoursMode === 'custom' ? ' is-active' : ''),
-          role: 'tab',
-          'aria-selected': p.hoursMode === 'custom' ? 'true' : 'false',
           onclick: function () { dpSetMode(porterIdx, 'custom'); }
         }, [
           dpEl('input', { type: 'radio', name: 'qf-dp-mode-' + p.id, checked: p.hoursMode === 'custom' || null }),
