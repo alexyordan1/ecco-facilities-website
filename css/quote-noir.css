@@ -485,16 +485,6 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    móvil + desktop (antes solo space/size/days y solo dentro del @media desktop).
    Welcome conserva su diseño hero (marquee) aparte. */
 .qf-screen:not(.is-welcome) .qf2-prompt{ text-align:center; }
-/* Service cue — sits above the prompt title so the user always knows WHICH service
-   this step configures: green = cleaning (you give days, WE decide the time from
-   size); blue = day porter (YOU decide the hours). The "· N of 2" step only shows
-   in the Combined flow (JS un-hides it). 2026-06-26. */
-.qf-svc-cue{ display:inline-flex; align-items:center; gap:7px; margin:0 0 .7rem; padding:6px 13px; border-radius:99px; font-size:.72rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; }
-.qf-svc-cue-clean{ color:var(--accent-soft); background:rgba(var(--accent-rgb),.13); border:1px solid rgba(var(--accent-rgb),.42); }
-.qf-svc-cue-porter{ color:var(--accent-porter-soft); background:rgba(var(--accent-porter-rgb),.13); border:1px solid rgba(var(--accent-porter-rgb),.42); }
-.qf-svc-cue-step{ opacity:.75; font-weight:500; }
-.qf-svc-cue-step[hidden]{ display:none; }
-.qf-svc-cue-who{ display:block; font-size:.82rem; font-weight:300; color:var(--ink-dim); margin:-.35rem 0 .15rem; text-shadow:0 1px 10px rgba(0,0,0,.55); }
 /* ESTANDARIZACIÓN 2026-06-26: la regla global de .qf2-prompt solo centraba el
    título + subtítulo. Estos otros textos editoriales del lienzo se quedaban a la
    izquierda en móvil/desktop — centrarlos también. (.qf2-atypical-heads-up-text
