@@ -3087,6 +3087,7 @@
         var youSubs = [];
         if (STATE.userEmail) youSubs.push(STATE.userEmail);
         if (STATE.userPosition) youSubs.push(STATE.userPosition);
+        if (STATE.userPhone) youSubs.push(STATE.userPhone);
         return { primary: fullName.trim(), subs: youSubs };
       }
 
@@ -3393,7 +3394,34 @@
     // validated, never submitted). Mirror its value into STATE on input.
     (function () {
       var phEl = document.getElementById('qfUserPhone');
-      if (phEl) phEl.addEventListener('input', function () { STATE.userPhone = this.value.trim(); });
+      if (!phEl) return;
+      var t;
+      phEl.addEventListener('input', function () {
+        STATE.userPhone = this.value.trim();
+        // Live re-render so the phone sub-line surfaces in "Your details" the
+        // instant it's added (else the user distrusts the summary).
+        clearTimeout(t);
+        t = setTimeout(function () { if (typeof qf2PopulateSummary === 'function') qf2PopulateSummary(); }, 250);
+      });
+    })();
+
+    // Dev-only fidelity guard — warn (PREVIEW HOSTS ONLY) if a payload-shipped
+    // STATE key has no review section that shows it. Turns the recurring
+    // "field sent but never shown" bug class into a loud signal instead of a
+    // post-launch audit. console.warn (not log) + host-gated → prod-safe.
+    (function () {
+      try {
+        var host = location.hostname;
+        if (!(host === 'localhost' || host === '127.0.0.1' || host.indexOf('.pages.dev') > -1)) return;
+        var SENT = ['service','space','spaceOther','size','sizeExact','days','timeOfDay','dpDays','dpPorters','situation','timeline','companyName','userAddress','userSuite','userName','userLastName','userEmail','userPosition','userPhone','specialInstructions','needsSiteWalk','serviceCertainty','porterCount','porterHours','scheduleAtypical','source'];
+        var REVIEWED = ['service','serviceCertainty','space','spaceOther','size','needsSiteWalk','companyName','userAddress','userSuite','days','timeOfDay','dpPorters','userName','userLastName','userEmail','userPosition','userPhone','situation','timeline'];
+        var HIDDEN = ['source','porterCount','porterHours','scheduleAtypical','sizeExact','dpDays','specialInstructions'];
+        SENT.forEach(function (k) {
+          if (HIDDEN.indexOf(k) === -1 && REVIEWED.indexOf(k) === -1) {
+            console.warn('[review-fidelity] STATE.' + k + ' is sent in the payload but no review section shows it.');
+          }
+        });
+      } catch (e) {}
     })();
 
     var qf2NotesArea = document.getElementById('qfSpecialInstructions');

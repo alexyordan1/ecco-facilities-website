@@ -176,4 +176,31 @@ test.describe('Janitorial — full flow', () => {
     await expect(page.locator('#qfScreen_contact .qf2-sum-row[data-section="porters"]')).toBeHidden();
     h.expectNoJsErrors(page);
   });
+
+  test('Review surfaces the phone the instant it is added via the opt-in', async ({ page }) => {
+    await page.click('.qf2-card[data-service="janitorial"]'); await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_size');
+    await h.pickSize(page, '1k-3k'); await h.expectActive(page, 'qfScreen_days');
+    await h.pickSchedule(page, 'Monday', 'morning'); await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page); await h.expectActive(page, 'qfScreen_contact');
+    await page.click('#qf2PhoneOptinToggle');
+    await page.fill('#qfUserPhone', '5551234567');
+    // Live re-render surfaces the phone in "Your details".
+    await expect(page.locator('#qf2SumYou')).toContainText(/555/, { timeout: 2500 });
+    h.expectNoJsErrors(page);
+  });
+
+  test('Review shows the in-person-visit treatment for a visit_required size', async ({ page }) => {
+    await page.click('.qf2-card[data-service="janitorial"]'); await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_size');
+    await h.pickSize(page, 'visit_required'); await h.expectActive(page, 'qfScreen_days');
+    await h.pickSchedule(page, 'Monday', 'morning'); await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page); await h.expectActive(page, 'qfScreen_contact');
+    await expect(page.locator('#qf2SumSpace')).toContainText('size to be measured');
+    await expect(page.locator('#qf2SumSpace')).toContainText("We'll see it in person");
+    await expect(page.locator('#qfContactSubmit')).toContainText('book visit');
+    h.expectNoJsErrors(page);
+  });
 });
