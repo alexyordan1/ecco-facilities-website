@@ -236,6 +236,11 @@ async function pickPorterSchedule(page, opts = {}) {
   await page.click('#qfDpScheduleContinue');
 }
 
+/** Read the review summary as normalized whitespace text (for parity snapshots). */
+async function readSummaryText(page) {
+  return (await page.locator('#qfScreen_contact .qf2-summary').innerText()).replace(/\s+/g, ' ').trim();
+}
+
 module.exports = {
   freshOpen,
   dismissCookieBanner,
@@ -248,4 +253,5 @@ module.exports = {
   pickSchedule,
   pickPorterSchedule,
   fillLocation,
+  readSummaryText,
 };

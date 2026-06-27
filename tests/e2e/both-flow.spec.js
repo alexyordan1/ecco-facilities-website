@@ -192,4 +192,24 @@ test.describe('Combined — full flow', () => {
 
     h.expectNoJsErrors(page);
   });
+
+  test('PARITY — Combined review summary (snapshot of current output)', async ({ page }) => {
+    await page.click('.qf2-card[data-service="both"]'); await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_size');
+    await h.pickSize(page, '1k-3k'); await h.expectActive(page, 'qfScreen_days');
+    await h.pickSchedule(page, 'Monday', 'morning'); await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue'); await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
+    const txt = await h.readSummaryText(page);
+    expect(txt).toContain('Combined');
+    expect(txt).toContain('Day porter plus janitorial');
+    expect(txt).toContain('Office');
+    expect(txt).toContain('Cleaning · Monday');
+    expect(txt).toContain('Porter 1 ·');
+    expect(txt).toContain('Test User');
+    expect(txt).toContain('test+e2e@example.com');
+    expect(txt).toContain('Facilities Manager');
+    h.expectNoJsErrors(page);
+  });
 });

@@ -214,4 +214,22 @@ test.describe('Day Porter — full flow', () => {
     const dayValidationToast = toasts.find((t) => /service day/i.test(t));
     expect(dayValidationToast).toBeUndefined();
   });
+
+  test('PARITY — Day Porter review summary (snapshot of current output)', async ({ page }) => {
+    await page.click('.qf2-card[data-service="dayporter"]'); await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_schedule');
+    await page.click('#qfDpScheduleContinue'); await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
+    const txt = await h.readSummaryText(page);
+    expect(txt).toContain('Day Porter');
+    expect(txt).toContain('On-site during business hours');
+    expect(txt).toContain('Office');
+    expect(txt).toContain('Porter 1 ·');
+    expect(txt).toContain('Weekdays');
+    expect(txt).toContain('Test User');
+    expect(txt).toContain('test+e2e@example.com');
+    expect(txt).toContain('Facilities Manager');
+    h.expectNoJsErrors(page);
+  });
 });

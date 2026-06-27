@@ -154,4 +154,24 @@ test.describe('Janitorial — full flow', () => {
     await page.click('#qfDaysContinue');
     await h.expectActive(page, 'qfScreen_location');
   });
+
+  test('PARITY — Janitorial review summary (snapshot of current output)', async ({ page }) => {
+    await page.click('.qf2-card[data-service="janitorial"]'); await h.expectActive(page, 'qfScreen_space');
+    await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_size');
+    await h.pickSize(page, '1k-3k'); await h.expectActive(page, 'qfScreen_days');
+    await h.pickSchedule(page, 'Monday', 'morning'); await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
+    const txt = await h.readSummaryText(page);
+    expect(txt).toContain('Commercial Cleaning');
+    expect(txt).toContain('Recurring after-hours cleaning');
+    expect(txt).toContain('Office');
+    expect(txt).toContain('1,000–3,000 sq ft');
+    expect(txt).toContain('Monday');
+    expect(txt).toContain('Mornings (loosely 6 am–noon)');
+    expect(txt).toContain('Test User');
+    expect(txt).toContain('test+e2e@example.com');
+    expect(txt).toContain('Facilities Manager');
+    h.expectNoJsErrors(page);
+  });
 });
