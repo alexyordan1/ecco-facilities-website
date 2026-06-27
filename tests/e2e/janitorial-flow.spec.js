@@ -199,7 +199,7 @@ test.describe('Janitorial — full flow', () => {
     await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
     await h.fillInfo(page); await h.expectActive(page, 'qfScreen_contact');
     await expect(page.locator('#qf2SumSpace')).toContainText('size to be measured');
-    await expect(page.locator('#qf2SumSpace')).toContainText("We'll see it in person");
+    await expect(page.locator('#qf2SumSpace')).toContainText('measure on-site');
     await expect(page.locator('#qfContactSubmit')).toContainText('book visit');
     h.expectNoJsErrors(page);
   });

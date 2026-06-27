@@ -300,6 +300,12 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-rv-porter-d{color:var(--ink-dim);font-weight:300}
 .qf2-rv-affirm{font-family:'Inter',sans-serif;font-size:.86rem;font-weight:300;font-style:italic;color:var(--ink-dim);text-align:center;max-width:34rem;margin:.2rem auto 1.1rem;line-height:1.5}
 .qf2-rv-affirm[hidden]{display:none}
+/* What-happens-next timeline — reassurance at the decision point (before Send). */
+.qf2-rv-next{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1.5rem 0 .2rem;padding:0}
+.qf2-rv-next-step{padding-top:.65rem;border-top:2px solid rgba(var(--accent-rgb),.35)}
+.qf2-rv-next-when{display:block;font-family:'Inter',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-soft)}
+.qf2-rv-next-what{display:block;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:300;color:var(--ink-dim);margin-top:.2rem;line-height:1.35}
+@media (max-width:520px){.qf2-rv-next{gap:.5rem}.qf2-rv-next-what{font-size:.72rem}}
 @media (max-width:879px){.qf2-rv-editorial .qf2-sum-row-value{font-size:1.08rem}}
 @media (min-width:880px){.qf2-rv-editorial .qf2-sum-row-value{font-size:1.18rem}}
 .qf2-edit-btn{font-size:.78rem;color:var(--accent);background:none;border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;cursor:pointer;flex:none}

@@ -3113,7 +3113,7 @@
         if (spaceEl && STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
-          visitInd.textContent = "We'll see it in person.";
+          visitInd.textContent = "We’ll measure on-site so your quote is exact — free, no obligation.";
           spaceEl.appendChild(visitInd);
         }
       }
@@ -3142,6 +3142,12 @@
         ctaLbl.textContent = STATE.needsSiteWalk ? 'Send my request + book visit' : 'Send my request';
       }
 
+      // What-happens-next: pre-frame the site-walk so the CTA swap isn't a surprise.
+      var nextLast = document.getElementById('qf2RvNextLast');
+      if (nextLast) nextLast.textContent = STATE.needsSiteWalk
+        ? 'We schedule a free on-site walk'
+        : 'A quick call — only if you want one';
+
       // V2 — CTA subtext (site walk variant)
       var ctaWrap = ctaBtn?.parentElement;
       var existingSubtext = ctaWrap?.querySelector('.qf2-cta-subtext');
@@ -3149,7 +3155,7 @@
       if (STATE.needsSiteWalk && ctaBtn) {
         var subtext = document.createElement('p');
         subtext.className = 'qf2-cta-subtext';
-        subtext.textContent = "We'll reach out to schedule the visit.";
+        subtext.textContent = "A free on-site measure makes your quote exact — we’ll set it up, no obligation.";
         ctaBtn.insertAdjacentElement('afterend', subtext);
       }
 
@@ -3369,6 +3375,33 @@
         var head = rvScope.querySelector('.qf2-rv-group[data-group="' + g + '"]');
         if (head) head.hidden = !QF2_REVIEW_SECTIONS.some(function (s) { return s.group === g && s.when(); });
       });
+
+      // Affirmation — ties the data back to value ("here's what we'll tailor")
+      // so the proposal feels about THEM, not a templated PDF. XSS-safe (textContent).
+      (function () {
+        var affEl = document.getElementById('qf2RvAffirm');
+        if (!affEl) return;
+        var clauses = [];
+        var sz = STATE.needsSiteWalk ? null : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
+        if (STATE.service === 'janitorial' || STATE.service === 'both') {
+          var days = _fmtDayList(STATE.days);
+          if (sz && days) clauses.push('size a crew from your ' + sz + ' and your ' + days + ' window');
+          else if (sz) clauses.push('size a crew from your ' + sz);
+          else if (days) clauses.push('size a crew for your ' + days + ' window');
+          else if (STATE.needsSiteWalk) clauses.push('size your crew once we’ve measured your space');
+        }
+        if (STATE.service === 'dayporter' || STATE.service === 'both') {
+          var n = (STATE.dpPorters || []).length;
+          if (n) clauses.push('plan ' + n + ' porter' + (n > 1 ? 's' : '') + ' through your on-site hours');
+        }
+        if (clauses.length) {
+          affEl.textContent = 'We’ll ' + clauses.join(', and ') + '.';
+          affEl.hidden = false;
+        } else {
+          affEl.textContent = '';
+          affEl.hidden = true;
+        }
+      })();
     }
 
     // V2 — wire phone opt-in toggle, textarea counter, edit buttons,
