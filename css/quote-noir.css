@@ -518,6 +518,13 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    móvil + desktop (antes solo space/size/days y solo dentro del @media desktop).
    Welcome conserva su diseño hero (marquee) aparte. */
 .qf-screen:not(.is-welcome) .qf2-prompt{ text-align:center; }
+/* Educational note — a tenue ℹ line under the prompt subtitle teaching what a
+   step means + why (we size crew/hours from your space, you pick the days, etc.).
+   Static; no JS. Reuses the .qf2-prompt-sub-desktop/-mobile responsive spans. 2026-06-27. */
+.qf-edu-note{display:block;max-width:33rem;margin:.15rem auto .4rem;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:300;line-height:1.5;color:var(--ink-dim);text-align:center;text-shadow:0 1px 10px rgba(0,0,0,.5)}
+.qf-edu-note svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px;opacity:.7;stroke:currentColor;fill:none}
+@media (max-width:879px){.qf-edu-note{font-size:.76rem;max-width:92%}}
+@media (min-width:880px){.qf-edu-note{font-size:.82rem}}
 /* ESTANDARIZACIÓN 2026-06-26: la regla global de .qf2-prompt solo centraba el
    título + subtítulo. Estos otros textos editoriales del lienzo se quedaban a la
    izquierda en móvil/desktop — centrarlos también. (.qf2-atypical-heads-up-text
