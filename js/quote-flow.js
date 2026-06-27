@@ -3402,6 +3402,10 @@
           affEl.hidden = true;
         }
       })();
+
+      // aria-live: announce that the summary refreshed (WCAG 4.1.3 Status Messages).
+      var rvStatusEl = document.getElementById('qf2SumStatus');
+      if (rvStatusEl) rvStatusEl.textContent = 'Review updated.';
     }
 
     // V2 — wire phone opt-in toggle, textarea counter, edit buttons,
@@ -3499,6 +3503,8 @@
           existingPanel.remove();
           row.classList.remove('is-editing');
           btn.textContent = 'Edit';
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
           return;
         }
 
@@ -3512,6 +3518,7 @@
 
         row.classList.add('is-editing');
         btn.textContent = 'Cancel';
+        btn.setAttribute('aria-expanded', 'true');
 
         // Build the edit panel
         var panel = document.createElement('div');
@@ -3603,6 +3610,8 @@
           panel.remove();
           row.classList.remove('is-editing');
           btn.textContent = 'Edit';
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
         });
         saveBtn.addEventListener('click', function () {
           if (routeBack) {
@@ -3615,6 +3624,7 @@
             panel.remove();
             row.classList.remove('is-editing');
             btn.textContent = 'Edit';
+            btn.setAttribute('aria-expanded', 'false');
             // Flag return-to-review for schedule-ish edits so Continue snaps back
             // here. NOT for 'service' (can change the whole flow) or 'space'.
             STATE.returnToReview = (section === 'days' || section === 'schedule' || section === 'extras') ? step : null;
@@ -3643,6 +3653,8 @@
           panel.remove();
           row.classList.remove('is-editing');
           btn.textContent = 'Edit';
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
         });
         actions.appendChild(cancelBtn);
         actions.appendChild(saveBtn);
