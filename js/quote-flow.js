@@ -3073,19 +3073,22 @@
         both:       'Day porter plus janitorial',
         unsure:     "We'll help you choose"
       };
-      setStackedValue('qf2SumService',
-        SERVICE_NAMES[STATE.service] || (STATE.service || ''),
-        [SERVICE_CAPTIONS[STATE.service]]);
+      function buildService() {
+        return { primary: SERVICE_NAMES[STATE.service] || (STATE.service || ''),
+                 subs: [SERVICE_CAPTIONS[STATE.service]] };
+      }
 
       // YOU row: primary = full name; subs = email, then role (if filled).
       // Was "Marina García · Facilities Manager" with email on a separate
       // line. The `·` mixed identity (name) with metadata (role). Now each
       // fact lives on its own line and the role is optional, not a peer.
-      var fullName = (STATE.userName || '') + (STATE.userLastName ? ' ' + STATE.userLastName : '');
-      var youSubs = [];
-      if (STATE.userEmail) youSubs.push(STATE.userEmail);
-      if (STATE.userPosition) youSubs.push(STATE.userPosition);
-      setStackedValue('qf2SumYou', fullName.trim(), youSubs);
+      function buildYou() {
+        var fullName = (STATE.userName || '') + (STATE.userLastName ? ' ' + STATE.userLastName : '');
+        var youSubs = [];
+        if (STATE.userEmail) youSubs.push(STATE.userEmail);
+        if (STATE.userPosition) youSubs.push(STATE.userPosition);
+        return { primary: fullName.trim(), subs: youSubs };
+      }
 
       // SPACE row: primary = company NAME (the user's identity for this
       // space). Sub-line 1 = "Office, 4,500 sq ft" (type + size). Sub-line 2
@@ -3093,26 +3096,20 @@
       // sibling .qf2-sum-row-subvalue (#qf2SumWhere) so it stays separate
       // from this primary value.
       // Fallback when no company is given: use space type + size as primary.
-      var spaceLabel = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : (STATE.space || '');
-      var sizeLabel = STATE.needsSiteWalk
-        ? 'size to be measured'
-        : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
-      var typeAndSize = [spaceLabel, sizeLabel].filter(Boolean).join(', ');
-      var spacePrimary = STATE.companyName ? STATE.companyName : typeAndSize;
-      var spaceSubs = STATE.companyName && typeAndSize ? [typeAndSize] : [];
-      var spaceEl = document.getElementById('qf2SumSpace');
-      if (spaceEl) {
-        while (spaceEl.firstChild) spaceEl.removeChild(spaceEl.firstChild);
-        spaceEl.appendChild(document.createTextNode(spacePrimary || '—'));
-        spaceSubs.forEach(function (s) {
-          spaceEl.appendChild(document.createElement('br'));
-          var span = document.createElement('span');
-          span.className = 'qf2-sec';
-          span.textContent = s;
-          spaceEl.appendChild(span);
-        });
-        // Visit indicator (mockup section 09 demo C).
-        if (STATE.needsSiteWalk) {
+      function buildSpace() {
+        var spaceLabel = STATE.space === 'Other' && STATE.spaceOther ? STATE.spaceOther : (STATE.space || '');
+        var sizeLabel = STATE.needsSiteWalk
+          ? 'size to be measured'
+          : (typeof formatSizeLabel === 'function' ? formatSizeLabel(STATE.size) : (STATE.size || ''));
+        var typeAndSize = [spaceLabel, sizeLabel].filter(Boolean).join(', ');
+        var spacePrimary = STATE.companyName ? STATE.companyName : typeAndSize;
+        var spaceSubs = STATE.companyName && typeAndSize ? [typeAndSize] : [];
+        return { primary: spacePrimary, subs: spaceSubs };
+      }
+      // Visit indicator — appended to the space value AFTER the loop writes it.
+      function decorateSpace() {
+        var spaceEl = document.getElementById('qf2SumSpace');
+        if (spaceEl && STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
           visitInd.textContent = "We'll see it in person.";
@@ -3251,6 +3248,7 @@
         return label + _porterHoursStr(porter);
       }
 
+      function buildSchedule() {
       var daysSummary = '';
       var timeSubs = [];
       if (STATE.service === 'dayporter' && Array.isArray(STATE.dpPorters) && STATE.dpPorters.length) {
@@ -3280,7 +3278,8 @@
         };
         timeSubs = (STATE.timeOfDay || []).map(function(t){ return TIME_DETAIL[t] || t; });
       }
-      setStackedValue('qf2SumWhen', daysSummary, timeSubs);
+      return { primary: daysSummary, subs: timeSubs };
+      }
 
       // WHERE sub-line below The space row: address + optional suite.
       // D31 — company name moved to the row's primary, so the address
@@ -3293,6 +3292,21 @@
         if (STATE.userSuite) addrParts.push('Suite ' + STATE.userSuite);
         whereEl.textContent = addrParts.join(' · ') || '—';
       }
+
+      // ── Data-driven render: each descriptor's build() → setStackedValue.
+      // Makes "every section gets rendered" structural; Phase 2 adds the
+      // flow-adaptive when()/group gates and splits Cleaning/Porters. ──
+      var QF2_REVIEW_SECTIONS = [
+        { id: 'qf2SumService', build: buildService },
+        { id: 'qf2SumYou',     build: buildYou },
+        { id: 'qf2SumSpace',   build: buildSpace },
+        { id: 'qf2SumWhen',    build: buildSchedule }
+      ];
+      QF2_REVIEW_SECTIONS.forEach(function (s) {
+        var b = s.build();
+        setStackedValue(s.id, b.primary, b.subs);
+      });
+      decorateSpace();
     }
 
     // V2 — wire phone opt-in toggle, textarea counter, edit buttons,
