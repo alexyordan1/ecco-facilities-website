@@ -56,7 +56,7 @@
      is still arriving. <noscript> mirror keeps fonts working with JS off. -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/noir.css?v=19">
-<link rel="stylesheet" href="css/quote-noir.css?v=60">
+<link rel="stylesheet" href="css/quote-noir.css?v=61">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -763,57 +763,53 @@
             <span class="qf2-prompt-sub-mobile">Tap a section to tweak it.</span>
           </p>
         </div>
-        <div class="qf2-summary" role="region" aria-label="Quote summary">
+        <p class="qf2-rv-affirm" id="qf2RvAffirm" hidden></p>
+        <div class="qf2-summary qf2-rv-editorial" role="region" aria-label="Quote summary">
+          <div id="qf2SumStatus" role="status" aria-live="polite" class="sr-only"></div>
           <div class="qf2-sum-row" data-section="service">
-            <div class="qf2-sum-row-ico" aria-hidden="true">
-              <!-- D123 (2026-05-01) — was a checkmark SVG, but checkmarks
-                   read as "confirmed/done" status, not as a category icon.
-                   The trust strip below already uses a checkmark for
-                   "Licensed & insured" — three different meanings for one
-                   glyph (status / category / confirmation) felt sloppy.
-                   Swapped to a sparkle/clean icon that semantically maps
-                   to "the service" without overloading the check glyph. -->
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.5L18 9l-4.2 1.5L12 15l-1.8-4.5L6 9l4.2-1.5z"/><path d="M19 14l.7 1.8L21.5 16.5l-1.8.7L19 19l-.7-1.8L16.5 16.5l1.8-.7z"/></svg>
-            </div>
             <div class="qf2-sum-row-main">
               <div class="qf2-sum-row-label">The service</div>
               <div class="qf2-sum-row-value" id="qf2SumService">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="service" aria-label="Edit service">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="service" aria-label="Edit service" aria-expanded="false">Edit</button>
           </div>
-          <div class="qf2-sum-row" data-section="info">
-            <div class="qf2-sum-row-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0116 0"/></svg>
-            </div>
-            <div class="qf2-sum-row-main">
-              <div class="qf2-sum-row-label">You</div>
-              <div class="qf2-sum-row-value" id="qf2SumYou">&mdash;</div>
-            </div>
-            <button type="button" class="qf2-edit-btn" data-edit="info" aria-label="Edit your information">Edit</button>
-          </div>
-          <!-- D28 — merged rows. Was 2 separate rows ("Your space" + "Where")
-               which the user found redundant. Now one row showing space type
-               on line 1 and address on line 2. Edit opens the combined panel. -->
           <div class="qf2-sum-row" data-section="space-location">
-            <div class="qf2-sum-row-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 00-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-            </div>
             <div class="qf2-sum-row-main">
               <div class="qf2-sum-row-label">The space</div>
               <div class="qf2-sum-row-value" id="qf2SumSpace">&mdash;</div>
               <div class="qf2-sum-row-subvalue" id="qf2SumWhere">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="space-location" aria-label="Edit space and address">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="space-location" aria-label="Edit space and address" aria-expanded="false">Edit</button>
           </div>
-          <div class="qf2-sum-row" data-section="schedule">
-            <div class="qf2-sum-row-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            </div>
+          <h3 class="qf2-rv-group" data-group="schedule">Schedule</h3>
+          <div class="qf2-sum-row" data-section="cleaning">
             <div class="qf2-sum-row-main">
-              <div class="qf2-sum-row-label">When</div>
-              <div class="qf2-sum-row-value" id="qf2SumWhen">&mdash;</div>
+              <div class="qf2-sum-row-label">Cleaning</div>
+              <div class="qf2-sum-row-value" id="qf2SumCleaning">&mdash;</div>
             </div>
-            <button type="button" class="qf2-edit-btn" data-edit="days" aria-label="Edit schedule">Edit</button>
+            <button type="button" class="qf2-edit-btn" data-edit="days" aria-label="Edit cleaning schedule" aria-expanded="false">Edit</button>
+          </div>
+          <div class="qf2-sum-row" data-section="porters">
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">Porter coverage</div>
+              <div class="qf2-sum-row-value" id="qf2SumPorters">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="schedule" aria-label="Edit porter coverage" aria-expanded="false">Edit</button>
+          </div>
+          <h3 class="qf2-rv-group" data-group="you">You</h3>
+          <div class="qf2-sum-row" data-section="info">
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">Your details</div>
+              <div class="qf2-sum-row-value" id="qf2SumYou">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="info" aria-label="Edit your information" aria-expanded="false">Edit</button>
+          </div>
+          <div class="qf2-sum-row" data-section="extras">
+            <div class="qf2-sum-row-main">
+              <div class="qf2-sum-row-label">Anything else</div>
+              <div class="qf2-sum-row-value" id="qf2SumExtras">&mdash;</div>
+            </div>
+            <button type="button" class="qf2-edit-btn" data-edit="extras" aria-label="Edit additional details" aria-expanded="false">Edit</button>
           </div>
         </div>
         <button type="button" class="qf2-phone-optin-link" id="qf2PhoneOptinToggle" aria-expanded="false" aria-controls="qf2PhoneOptinExpanded">+ add your phone number</button>
@@ -1008,7 +1004,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=39.19"></script>
+<script defer src="js/quote-flow.js?v=39.20"></script>
 <script src="js/cookie-consent.js?v=1.5"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

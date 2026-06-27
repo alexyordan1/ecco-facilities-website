@@ -42,10 +42,9 @@ test.describe('Combined — full flow', () => {
     await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
-    // Snapshot should show both: cleaning days + porter row(s).
-    const whenRow = page.locator('#qf2SumWhen');
-    await expect(whenRow).toContainText(/Cleaning/);
-    await expect(whenRow).toContainText(/Porter/);
+    // Editorial split: separate Cleaning + Porter coverage rows.
+    await expect(page.locator('#qf2SumCleaning')).toContainText('Monday');
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Porter\s*1/);
 
     h.expectNoJsErrors(page);
   });
@@ -80,15 +79,14 @@ test.describe('Combined — full flow', () => {
     await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
-    const whenRow = page.locator('#qf2SumWhen');
-    await expect(whenRow).toContainText(/Cleaning.*Weekends/);
-    await expect(whenRow).toContainText(/Porter\s*1/);
-    await expect(whenRow).toContainText(/Porter\s*2/);
+    await expect(page.locator('#qf2SumCleaning')).toContainText('Weekends');
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Porter\s*1/);
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Porter\s*2/);
 
     h.expectNoJsErrors(page);
   });
 
-  test('3 — Snapshot Edit on When row routes to schedule (not days)', async ({ page }) => {
+  test('3 — Snapshot Edit on Porter coverage row routes to schedule', async ({ page }) => {
     await page.click('.qf2-card[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
@@ -104,8 +102,8 @@ test.describe('Combined — full flow', () => {
     await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
-    // Click Edit on the When row → Hop back → should go to Schedule (not Days).
-    await page.click('.qf2-sum-row[data-section="schedule"] .qf2-edit-btn[data-edit="days"]');
+    // Editorial split: Porter coverage Edit (data-edit="schedule") → Schedule.
+    await page.click('.qf2-sum-row[data-section="porters"] .qf2-edit-btn[data-edit="schedule"]');
     await page.waitForTimeout(200);
     await page.click('.qf2-sum-edit-save');
     await h.expectActive(page, 'qfScreen_schedule');
@@ -205,11 +203,14 @@ test.describe('Combined — full flow', () => {
     expect(txt).toContain('Combined');
     expect(txt).toContain('Day porter plus janitorial');
     expect(txt).toContain('Office');
-    expect(txt).toContain('Cleaning · Monday');
-    expect(txt).toContain('Porter 1 ·');
+    expect(txt).toContain('Monday');                        // cleaning days
+    expect(txt).toContain('Mornings (loosely 6 am–noon)');  // windows now shown in Combined (was the bug)
+    expect(txt).toContain('Porter 1');                      // porter coverage row
     expect(txt).toContain('Test User');
     expect(txt).toContain('test+e2e@example.com');
     expect(txt).toContain('Facilities Manager');
+    // Extras row hidden when no situation/timeline provided.
+    await expect(page.locator('#qfScreen_contact .qf2-sum-row[data-section="extras"]')).toBeHidden();
     h.expectNoJsErrors(page);
   });
 });

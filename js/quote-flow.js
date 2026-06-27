@@ -3281,6 +3281,54 @@
       return { primary: daysSummary, subs: timeSubs };
       }
 
+      // ── Phase 2: split the legacy "When" row into Cleaning (days + windows)
+      // and Porter coverage (one <li> per porter). buildCleaning ALWAYS reads
+      // timeOfDay — including the 'both' flow — which fixes the dropped-windows
+      // bug. (buildSchedule above is now unused; removed in the Phase-5 purge.) ──
+      var QF2_TIME_DETAIL = {
+        morning:   'Mornings (loosely 6 am–noon)',
+        afternoon: 'Afternoons (loosely noon–5 pm)',
+        evening:   'Evenings (loosely 5–10 pm)',
+        flexible:  'Anytime, we’ll coordinate'
+      };
+      function buildCleaning() {
+        var subs = (STATE.timeOfDay || []).map(function (t) { return QF2_TIME_DETAIL[t] || t; });
+        return { primary: _fmtDayList(STATE.days), subs: subs };
+      }
+      function _porterParts(porter) {
+        var detail = _porterIsUniform(porter)
+          ? _fmtDayList(porter.days) + ' · ' + _porterHoursStr(porter)
+          : _porterHoursStr(porter);
+        return { n: 'Porter ' + porter.id, d: detail };
+      }
+      function buildPorters() {
+        return { porters: (STATE.dpPorters || []).map(_porterParts) };
+      }
+      function buildExtras() {
+        var SIT = { 'new': 'New space', 'switching': 'Switching providers' };
+        var TL  = { asap: 'As soon as possible', weeks: 'In a few weeks', exploring: 'Just exploring' };
+        var parts = [];
+        if (STATE.situation && SIT[STATE.situation]) parts.push(SIT[STATE.situation]);
+        if (STATE.timeline && TL[STATE.timeline]) parts.push(TL[STATE.timeline]);
+        return { primary: parts.join(' · '), subs: [] };
+      }
+      function renderPorterList(id, porters) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        while (el.firstChild) el.removeChild(el.firstChild);
+        var ul = document.createElement('ul');
+        ul.className = 'qf2-rv-porters';
+        (porters || []).forEach(function (p) {
+          var li = document.createElement('li');
+          li.className = 'qf2-rv-porter';
+          li.setAttribute('aria-label', p.n + ', ' + p.d);
+          var nEl = document.createElement('span'); nEl.className = 'qf2-rv-porter-n'; nEl.textContent = p.n;
+          var dEl = document.createElement('span'); dEl.className = 'qf2-rv-porter-d'; dEl.textContent = p.d;
+          li.appendChild(nEl); li.appendChild(dEl); ul.appendChild(li);
+        });
+        el.appendChild(ul);
+      }
+
       // WHERE sub-line below The space row: address + optional suite.
       // D31 — company name moved to the row's primary, so the address
       // sub-line is purely location info (no "at" prefix needed now).
@@ -3297,16 +3345,29 @@
       // Makes "every section gets rendered" structural; Phase 2 adds the
       // flow-adaptive when()/group gates and splits Cleaning/Porters. ──
       var QF2_REVIEW_SECTIONS = [
-        { id: 'qf2SumService', build: buildService },
-        { id: 'qf2SumYou',     build: buildYou },
-        { id: 'qf2SumSpace',   build: buildSpace },
-        { id: 'qf2SumWhen',    build: buildSchedule }
+        { section: 'service',        group: null,       id: 'qf2SumService',  when: function () { return true; }, build: buildService },
+        { section: 'space-location', group: null,       id: 'qf2SumSpace',    when: function () { return true; }, build: buildSpace, decorate: decorateSpace },
+        { section: 'cleaning',       group: 'schedule', id: 'qf2SumCleaning', when: function () { return STATE.service === 'janitorial' || STATE.service === 'both'; }, build: buildCleaning },
+        { section: 'porters',        group: 'schedule', id: 'qf2SumPorters',  when: function () { return STATE.service === 'dayporter' || STATE.service === 'both'; }, build: buildPorters, isPorterList: true },
+        { section: 'info',           group: 'you',      id: 'qf2SumYou',      when: function () { return true; }, build: buildYou },
+        { section: 'extras',         group: 'you',      id: 'qf2SumExtras',   when: function () { return !!(STATE.situation || STATE.timeline); }, build: buildExtras }
       ];
+      var rvScope = document.getElementById('qfScreen_contact') || document;
       QF2_REVIEW_SECTIONS.forEach(function (s) {
+        var row = rvScope.querySelector('.qf2-sum-row[data-section="' + s.section + '"]');
+        var visible = s.when();
+        if (row) row.hidden = !visible;
+        if (!visible) return;
         var b = s.build();
-        setStackedValue(s.id, b.primary, b.subs);
+        if (s.isPorterList) { renderPorterList(s.id, b.porters); }
+        else { setStackedValue(s.id, b.primary, b.subs); }
+        if (s.decorate) s.decorate();
       });
-      decorateSpace();
+      // Group headings hide when no section in their group is visible.
+      ['schedule', 'you'].forEach(function (g) {
+        var head = rvScope.querySelector('.qf2-rv-group[data-group="' + g + '"]');
+        if (head) head.hidden = !QF2_REVIEW_SECTIONS.some(function (s) { return s.group === g && s.when(); });
+      });
     }
 
     // V2 — wire phone opt-in toggle, textarea counter, edit buttons,
@@ -3474,7 +3535,7 @@
         saveBtn.className = 'qf2-sum-edit-save';
         // For sections without inline-editable fields, the Save button instead
         // routes back to that step.
-        var routeBack = (section === 'space' || section === 'service' || section === 'days' || section === 'size');
+        var routeBack = (section === 'space' || section === 'service' || section === 'days' || section === 'schedule' || section === 'size' || section === 'extras');
         saveBtn.textContent = routeBack ? 'Hop back' : 'Save changes';
 
         cancelBtn.addEventListener('click', function () {
@@ -3484,21 +3545,18 @@
         });
         saveBtn.addEventListener('click', function () {
           if (routeBack) {
-            // D55 — for dayporter, the 'days' edit goes to the new Schedule
-            // screen (porters + days + hours); for janitorial it stays on
-            // the cleaning-days screen. 'both' opens Schedule because that's
-            // where porter config lives; cleaning days have their own edit
-            // path implicitly via the same Schedule landing then back-arrow.
-            var daysTarget = (STATE.service === 'dayporter' || STATE.service === 'both') ? 'schedule' : 'days';
-            var TARGET = { service: 'welcome', space: 'space', days: daysTarget, size: 'size' };
+            // Phase 2 split — Cleaning (data-edit=days) → cleaning-days screen;
+            // Porter coverage (data-edit=schedule) → Schedule screen; extras →
+            // info (situation lives there; Phase-4 splits situation→info /
+            // timeline→location). No more flow-conditional days/schedule conflation.
+            var TARGET = { service: 'welcome', space: 'space', days: 'days', schedule: 'schedule', size: 'size', extras: 'info' };
             var step = TARGET[section];
             panel.remove();
             row.classList.remove('is-editing');
             btn.textContent = 'Edit';
-            // AYS Ola 4 HI-6 — flag a return-to-review for schedule edits so
-            // Continue snaps back here. NOT for 'service': changing the service
-            // can change the whole flow, so that path must re-walk normally.
-            STATE.returnToReview = (section === 'days') ? step : null;
+            // Flag return-to-review for schedule-ish edits so Continue snaps back
+            // here. NOT for 'service' (can change the whole flow) or 'space'.
+            STATE.returnToReview = (section === 'days' || section === 'schedule' || section === 'extras') ? step : null;
             if (step && typeof goToScreen === 'function') {
               try { goToScreen(step, 'back'); } catch(e){}
             }
@@ -4374,9 +4432,9 @@
             return;
           }
           var FIELD_TO_SECTION = {
-            email: 'info', name: 'info',
+            email: 'info', name: 'info', phone: 'info',
             address: 'space-location', company: 'space-location', space: 'space-location', size: 'space-location',
-            days: 'schedule', dpDays: 'schedule', porters: 'schedule'
+            days: 'cleaning', dpDays: 'porters', porters: 'porters'
           };
           var sectionKey = FIELD_TO_SECTION[first.field] || first.field;
           var editBtn = document.querySelector('.qf2-sum-row[data-section="' + sectionKey + '"] .qf2-edit-btn[data-edit]')

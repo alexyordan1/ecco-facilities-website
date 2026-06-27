@@ -41,10 +41,10 @@ test.describe('Day Porter — full flow', () => {
     await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
-    // Snapshot should show porter info.
-    const whenRow = page.locator('#qf2SumWhen');
-    await expect(whenRow).toContainText(/Porter\s*1/);
-    await expect(whenRow).toContainText(/Weekdays/);
+    // Editorial: Porter coverage row. Cleaning row hidden (no janitorial here).
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Porter\s*1/);
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Weekdays/);
+    await expect(page.locator('#qfScreen_contact .qf2-sum-row[data-section="cleaning"]')).toBeHidden();
 
     h.expectNoJsErrors(page);
   });
@@ -67,9 +67,8 @@ test.describe('Day Porter — full flow', () => {
     await h.fillInfo(page);
     await h.expectActive(page, 'qfScreen_contact');
 
-    const whenRow = page.locator('#qf2SumWhen');
-    await expect(whenRow).toContainText(/Porter\s*1/);
-    await expect(whenRow).toContainText(/Porter\s*2/);
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Porter\s*1/);
+    await expect(page.locator('#qf2SumPorters')).toContainText(/Porter\s*2/);
 
     h.expectNoJsErrors(page);
   });
@@ -100,10 +99,10 @@ test.describe('Day Porter — full flow', () => {
     // instead of the literal "(custom)" placeholder. Each unique start/end
     // pair gets its own day list. With 3 different schedules across 3 days,
     // we expect 3 separate entries.
-    const whenRow = page.locator('#qf2SumWhen');
-    await expect(whenRow).toContainText('Monday 8 AM - 12 PM');
-    await expect(whenRow).toContainText('Wednesday 1 PM - 5 PM');
-    await expect(whenRow).toContainText('Friday 9 AM - 1 PM');
+    const porters = page.locator('#qf2SumPorters');
+    await expect(porters).toContainText('Monday 8 AM - 12 PM');
+    await expect(porters).toContainText('Wednesday 1 PM - 5 PM');
+    await expect(porters).toContainText('Friday 9 AM - 1 PM');
 
     h.expectNoJsErrors(page);
   });
@@ -225,7 +224,7 @@ test.describe('Day Porter — full flow', () => {
     expect(txt).toContain('Day Porter');
     expect(txt).toContain('On-site during business hours');
     expect(txt).toContain('Office');
-    expect(txt).toContain('Porter 1 ·');
+    expect(txt).toContain('Porter 1');
     expect(txt).toContain('Weekdays');
     expect(txt).toContain('Test User');
     expect(txt).toContain('test+e2e@example.com');

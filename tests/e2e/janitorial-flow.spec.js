@@ -172,6 +172,8 @@ test.describe('Janitorial — full flow', () => {
     expect(txt).toContain('Test User');
     expect(txt).toContain('test+e2e@example.com');
     expect(txt).toContain('Facilities Manager');
+    // Porter coverage row hidden (no porters in janitorial).
+    await expect(page.locator('#qfScreen_contact .qf2-sum-row[data-section="porters"]')).toBeHidden();
     h.expectNoJsErrors(page);
   });
 });
