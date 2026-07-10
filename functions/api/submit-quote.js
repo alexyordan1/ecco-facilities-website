@@ -100,6 +100,200 @@ function fetchWithTimeout(input, init = {}, timeoutMs = 8000) {
     .finally(() => clearTimeout(id));
 }
 
+// 2026-07-10 — the quote emails moved off Postmark templates onto raw /email
+// (subject + HTML are now versioned here). Because HtmlBody is not auto-escaped
+// like Mustachio template vars were, EVERY user-supplied value interpolated into
+// the markup below MUST pass through escapeHtml first, or a name/company/notes
+// field could break the HTML or inject markup.
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const EMAIL_LOGO_DARK = 'https://eccofacilities.com/images/logo-horizontal.png';
+
+// Client-facing quote confirmation — "Framed Stationery" design (approved
+// 2026-07-10). Email-client-safe: table layout + inline styles + web-safe
+// serif. Returns { subject, html, text }.
+export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
+  const name = String(firstName || '').replace(/\s+/g, ' ').trim();
+  const subject = name
+    ? `Thanks, ${name} — we've received your request`
+    : `We've received your request — Ecco Facilities`;
+  const greetHtml = name
+    ? `Thanks, ${escapeHtml(name)} &mdash; we&rsquo;ve got everything we need.`
+    : `Thanks &mdash; we&rsquo;ve got everything we need.`;
+  const greetText = name
+    ? `Thanks, ${name} — we've got everything we need.`
+    : `Thanks — we've got everything we need.`;
+  const ref = escapeHtml(refNumber);
+  const svc = escapeHtml(serviceLabel);
+
+  const step = (numeral, text, last) => `
+                <tr><td style="padding:13px 0;border-top:1px solid #EEE8D6;${last ? 'border-bottom:1px solid #EEE8D6;' : ''}font-family:Georgia,'Times New Roman',serif;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                    <td valign="top" style="width:34px;font-size:18px;color:#B58A2E;font-weight:bold;font-family:Georgia,serif;">${numeral}</td>
+                    <td style="font-size:14.5px;line-height:1.55;color:#3D3E30;font-family:Georgia,serif;">${text}</td>
+                  </tr></table>
+                </td></tr>`;
+
+  const html = `<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>${escapeHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#EAE7DE;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">We&rsquo;ve received your request &mdash; here&rsquo;s what happens next.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EAE7DE;">
+  <tr><td align="center" style="padding:30px 12px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#FFFDF8;border:1px solid #C9C1AC;">
+      <tr><td style="padding:10px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E4DDC9;">
+          <tr><td style="padding:38px 44px 32px;">
+            <div style="text-align:center;">
+              <img src="${EMAIL_LOGO_DARK}" alt="Ecco Facilities" width="170" style="width:170px;max-width:170px;height:auto;border:0;display:inline-block;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#8A8467;margin-top:12px;">Commercial Cleaning &middot; New York</div>
+            </div>
+            <div style="height:1px;background:#E4DDC9;line-height:1px;font-size:0;margin:26px 0 28px;">&nbsp;</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:25px;line-height:1.3;color:#191A12;font-weight:bold;">${greetHtml}</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.72;color:#3D3E30;margin-top:16px;">Thank you for sharing the details of your space. Our team is already reviewing them, and we&rsquo;ll follow up within one business day with a proposal built around exactly what you asked for.</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#6E6A4F;margin-top:28px;">Re:&nbsp; Proposal <span style="color:#191A12;font-weight:bold;">${ref}</span> &middot; ${svc}</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#8A8467;margin-top:30px;">What happens next</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${step('I', 'We review the details you shared &mdash; nothing more needed from you.', false)}${step('II', 'We prepare your proposal, tailored to your space, schedule, and priorities.', false)}${step('III', 'A specialist reaches out to walk you through it and answer any questions.', true)}
+            </table>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:14px;line-height:1.65;color:#3D3E30;margin-top:26px;">Have a question in the meantime? Email us anytime at <a href="mailto:info@eccofacilities.com" style="color:#5A6E22;text-decoration:none;">info@eccofacilities.com</a>.</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#191A12;margin-top:24px;">Warm regards,</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;color:#6E6A4F;margin-top:2px;">The Ecco Facilities team</div>
+            <div style="border-top:1px solid #E4DDC9;margin-top:28px;padding-top:20px;text-align:center;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:10.5px;line-height:1.7;color:#9A9578;">Ecco Facilities LLC &middot; 54 State St #804, Albany, NY 12207</div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:10.5px;line-height:1.7;color:#9A9578;">Eco-certified products &middot; Commercial cleaning &amp; day porter &middot; Serving New York City</div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:10.5px;line-height:1.7;color:#9A9578;">eccofacilities.com</div>
+            </div>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+  const text = `${greetText}
+
+Thank you for sharing the details of your space. Our team is already reviewing them, and we'll follow up within one business day with a proposal built around exactly what you asked for.
+
+Re: Proposal ${refNumber} · ${serviceLabel}
+
+What happens next
+  I.   We review the details you shared — nothing more needed from you.
+  II.  We prepare your proposal, tailored to your space, schedule, and priorities.
+  III. A specialist reaches out to walk you through it and answer any questions.
+
+Have a question in the meantime? Email us anytime at info@eccofacilities.com.
+
+Warm regards,
+The Ecco Facilities team
+
+Ecco Facilities LLC · 54 State St #804, Albany, NY 12207
+Eco-certified products · Commercial cleaning & day porter · Serving New York City
+eccofacilities.com`;
+
+  return { subject, html, text };
+}
+
+// Internal lead notification (approved 2026-07-10). Renders every submitted
+// field directly in HTML so nothing drops out (the old Postmark template failed
+// to draw the fields array). Returns { subject, html, text }.
+export function buildOwnerEmail({ firstName, lastName, email, phone, company, serviceLabel, refNumber, urgencyLabel, fields }) {
+  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'New lead';
+  const isRush = /asap/i.test(String(urgencyLabel || ''));
+  const phoneDigits = String(phone || '').replace(/[^\d+]/g, '');
+  const urgencyPillStyle = isRush
+    ? 'background:#F7E0D6;color:#993C1D;'
+    : 'background:#EAF3DE;color:#3B6D11;';
+
+  const rows = (fields || []).map(f => `
+              <tr>
+                <td style="padding:11px 16px 11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8A8F79;vertical-align:top;white-space:nowrap;">${escapeHtml(f.label)}</td>
+                <td style="padding:11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#23261F;vertical-align:top;">${escapeHtml(f.value)}</td>
+              </tr>`).join('');
+
+  const callBtn = phoneDigits
+    ? `<a href="tel:${phoneDigits}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:10px 16px;border-radius:8px;background:#F1F5EA;color:#3B6D11;border:1px solid #DDE4CF;margin:0 8px 8px 0;">Call ${escapeHtml(phone)}</a>`
+    : '';
+
+  const orgLine = company
+    ? `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5B6B4A;margin-top:3px;">${escapeHtml(company)}</div>`
+    : '';
+
+  const subject = `${isRush ? '[RUSH] ' : ''}New quote lead — ${fullName} · ${serviceLabel} · ${refNumber}`;
+
+  const html = `<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>${escapeHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#EAE7DE;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EAE7DE;">
+  <tr><td align="center" style="padding:26px 12px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#FFFFFF;border:1px solid #E7E4DB;border-radius:12px;overflow:hidden;">
+      <tr><td style="text-align:center;padding:20px 24px 16px;background:#FBFAF5;border-bottom:1px solid #EEEADF;">
+        <img src="${EMAIL_LOGO_DARK}" alt="Ecco Facilities" width="150" style="width:150px;max-width:150px;height:auto;border:0;display:inline-block;">
+      </td></tr>
+      <tr><td style="padding:28px 36px 8px;">
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#5B6B4A;margin-bottom:8px;">New quote lead</div>
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#14150F;font-weight:bold;">${escapeHtml(fullName)}</div>
+        ${orgLine}
+        <div style="margin-top:16px;">
+          <span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;padding:5px 12px;border-radius:20px;background:#10210B;color:#EAF5DC;margin:0 8px 8px 0;">${escapeHtml(serviceLabel)}</span>
+          <span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;padding:5px 12px;border-radius:20px;${urgencyPillStyle}margin:0 8px 8px 0;">${escapeHtml(urgencyLabel)}</span>
+        </div>
+        <div style="margin-top:8px;">
+          <a href="mailto:${escapeHtml(email)}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:10px 16px;border-radius:8px;background:#10210B;color:#EAF5DC;margin:0 8px 8px 0;">Reply to ${escapeHtml(firstName || 'lead')}</a>
+          ${callBtn}
+        </div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
+          <tr>
+            <td style="padding:11px 16px 11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8A8F79;vertical-align:top;white-space:nowrap;">Email</td>
+            <td style="padding:11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#23261F;vertical-align:top;"><a href="mailto:${escapeHtml(email)}" style="color:#3B6D11;text-decoration:none;">${escapeHtml(email)}</a></td>
+          </tr>${phone ? `
+          <tr>
+            <td style="padding:11px 16px 11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8A8F79;vertical-align:top;white-space:nowrap;">Phone</td>
+            <td style="padding:11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#23261F;vertical-align:top;">${escapeHtml(phone)}</td>
+          </tr>` : ''}${rows}
+        </table>
+      </td></tr>
+      <tr><td style="padding:18px 36px 24px;background:#FBFAF5;border-top:1px solid #EEEADF;">
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#9AA08F;">Reference ${escapeHtml(refNumber)} &middot; also saved to the CRM</div>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+  const textLines = (fields || []).map(f => `  ${f.label}: ${f.value}`).join('\n');
+  const text = `NEW QUOTE LEAD${isRush ? ' [RUSH]' : ''}
+
+${fullName}${company ? '\n' + company : ''}
+
+Service: ${serviceLabel}
+Timing: ${urgencyLabel}
+Email: ${email}${phone ? '\nPhone: ' + phone : ''}
+
+${textLines}
+
+Reference ${refNumber} · also saved to the CRM`;
+
+  return { subject, html, text };
+}
+
 export async function onRequestPost(context) {
   const origin = context.request.headers.get('Origin');
   const env = context.env;
@@ -574,26 +768,35 @@ export async function onRequestPost(context) {
       }
     }
 
-    // 7. Postmark: confirmation email to client
+    // 7. Postmark: confirmation email to client + notification to owner.
+    // 2026-07-10 — moved OFF Postmark templates onto raw /email so the subject
+    // and HTML are versioned here and fully in our control (templates rendered
+    // the subject + owner fields array unreliably). Still sent via Postmark, so
+    // deliverability is unchanged. HTML built by buildClientEmail/buildOwnerEmail.
     if (env.POSTMARK_API_KEY) {
+      const serviceLabel = formType === 'dayporter' ? 'Day Porter'
+        : formType === 'both' ? 'Commercial Cleaning & Day Porter'
+        : 'Commercial Cleaning';
+      const pmHeaders = {
+        'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
+
+      // Client confirmation
       integrations.postmark = false;
       try {
-        const pmRes = await fetchWithTimeout('https://api.postmarkapp.com/email/withTemplate', {
+        const msg = buildClientEmail({ firstName, refNumber, serviceLabel });
+        const pmRes = await fetchWithTimeout('https://api.postmarkapp.com/email', {
           method: 'POST',
-          headers: {
-            'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: pmHeaders,
           body: JSON.stringify({
-            From: 'info@eccofacilities.com',
+            From: 'Ecco Facilities <info@eccofacilities.com>',
             To: email,
-            TemplateAlias: 'quote-confirmation',
-            TemplateModel: {
-              firstName: firstName || 'there',
-              refNumber,
-              service: service === 'dayporter' ? 'Day Porter Services' : 'Janitorial Services'
-            }
+            ReplyTo: 'info@eccofacilities.com',
+            Subject: msg.subject,
+            HtmlBody: msg.html,
+            TextBody: msg.text
           })
         });
         if (pmRes.ok) integrations.postmark = true;
@@ -607,36 +810,33 @@ export async function onRequestPost(context) {
         console.error('[submit-quote] Postmark client email error:', redactPII(e.message));
       }
 
-      // 7. Postmark: notification email to owner
+      // Owner / team notification
       integrations.postmark_owner = false;
       try {
-        const ownerRes = await fetchWithTimeout('https://api.postmarkapp.com/email/withTemplate', {
+        const urgencyLabel = formData.urgency || 'Standard';
+        // Fields for the detail table — everything the prospect submitted except
+        // the values already surfaced in the header/pills above.
+        const SHOWN_KEYS = ['first_name', 'last_name', 'email', 'phone', 'company', 'form_type', 'urgency'];
+        const fields = Object.entries(formData)
+          .filter(([k, v]) => v != null && v !== '' && !SHOWN_KEYS.includes(k))
+          .map(([key, value]) => ({
+            label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            value: Array.isArray(value) ? value.join(', ') : String(value)
+          }));
+        const msg = buildOwnerEmail({
+          firstName, lastName, email, phone, company,
+          serviceLabel, refNumber, urgencyLabel, fields
+        });
+        const ownerRes = await fetchWithTimeout('https://api.postmarkapp.com/email', {
           method: 'POST',
-          headers: {
-            'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: pmHeaders,
           body: JSON.stringify({
-            From: 'info@eccofacilities.com',
+            From: 'Ecco Facilities Leads <info@eccofacilities.com>',
             To: 'info@eccofacilities.com',
-            TemplateAlias: 'owner-notification',
-            TemplateModel: {
-              firstName: firstName || '',
-              lastName: lastName || '',
-              email,
-              phone: phone || 'N/A',
-              company: company || 'N/A',
-              service: service === 'dayporter' ? 'Day Porter Services' : 'Janitorial Services',
-              refNumber,
-              urgency: formData.urgency || 'Standard',
-              fields: Object.entries(formData)
-                .filter(([_, v]) => v != null && v !== '')
-                .map(([key, value]) => ({
-                  label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-                  value: Array.isArray(value) ? value.join(', ') : String(value)
-                }))
-            }
+            ReplyTo: email,
+            Subject: msg.subject,
+            HtmlBody: msg.html,
+            TextBody: msg.text
           })
         });
         if (ownerRes.ok) {
