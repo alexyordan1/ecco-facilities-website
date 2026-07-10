@@ -206,6 +206,183 @@ eccofacilities.com`;
   return { subject, html, text };
 }
 
+// ---------------------------------------------------------------------------
+// Lead field formatting (2026-07-10). The internal email must render EVERY
+// field a prospect can submit, human-readable, with NO "[object Object]" and no
+// lost data — so the team never needs to open the CRM. The quote form
+// (js/quote-flow.js) sends several complex shapes: porter_schedule (dpPorters)
+// is an array of { id, days[], hoursMode, sameStart, sameEnd, customHours{} }
+// objects, porter_hours (porterHours) is an array of { start, end }. Naive
+// String()/join dropped these to "[object Object]". These helpers mirror the
+// form's own dpFmtTime / dpFmtDays so the email reads exactly like the wizard.
+// ---------------------------------------------------------------------------
+const DP_DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DP_DAY_SHORT = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
+
+// "16:00" -> "4 PM", "09:30" -> "9:30 AM"
+function fmtTime12(hhmm) {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm == null ? '' : hhmm).trim());
+  if (!m) return String(hhmm == null ? '' : hhmm);
+  let h = parseInt(m[1], 10);
+  const min = parseInt(m[2], 10);
+  const period = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return min === 0 ? `${h} ${period}` : `${h}:${String(min).padStart(2, '0')} ${period}`;
+}
+
+// ['Monday','Wednesday','Friday'] -> "Mon, Wed, Fri" (with Mon–Fri / Weekends / Every day shorthands)
+function fmtDays(days) {
+  if (!Array.isArray(days) || !days.length) return '';
+  const sorted = days.slice().sort((a, b) => DP_DAY_ORDER.indexOf(a) - DP_DAY_ORDER.indexOf(b));
+  if (sorted.length === 7) return 'Every day';
+  const weekdays = DP_DAY_ORDER.slice(0, 5);
+  if (sorted.length === 5 && weekdays.every(d => sorted.indexOf(d) >= 0)) return 'Mon–Fri';
+  if (sorted.length === 2 && sorted.indexOf('Saturday') >= 0 && sorted.indexOf('Sunday') >= 0) return 'Weekends';
+  return sorted.map(d => DP_DAY_SHORT[d] || d).join(', ');
+}
+
+// dpPorters -> multi-line "Porter 1 — Mon–Fri · 8 AM–4 PM" (one line per porter)
+function fmtPorterSchedule(porters) {
+  if (!Array.isArray(porters) || !porters.length) return '';
+  return porters.map((p, i) => {
+    if (!p || typeof p !== 'object') return '';
+    const label = 'Porter ' + (p.id || (i + 1));
+    if (p.hoursMode === 'custom' && p.customHours && typeof p.customHours === 'object') {
+      const parts = DP_DAY_ORDER.filter(d => p.customHours[d] && p.customHours[d].start && p.customHours[d].end)
+        .map(d => DP_DAY_SHORT[d] + ' ' + fmtTime12(p.customHours[d].start) + '–' + fmtTime12(p.customHours[d].end));
+      const body = parts.length ? parts.join(', ') : fmtDays(p.days);
+      return label + ' — ' + body;
+    }
+    const days = fmtDays(p.days);
+    const hours = (p.sameStart && p.sameEnd) ? (fmtTime12(p.sameStart) + '–' + fmtTime12(p.sameEnd)) : '';
+    const body = [days, hours].filter(Boolean).join(' · ');
+    return label + (body ? ' — ' + body : '');
+  }).filter(Boolean).join('\n');
+}
+
+// porterHours -> "Porter 1: 8 AM–4 PM" per entry (legacy flat; suppressed when porter_schedule exists)
+function fmtPorterHours(arr) {
+  if (!Array.isArray(arr) || !arr.length) return '';
+  return arr.map((p, i) => (p && p.start && p.end) ? ('Porter ' + (i + 1) + ': ' + fmtTime12(p.start) + '–' + fmtTime12(p.end)) : '')
+    .filter(Boolean).join('\n');
+}
+
+// custom_hours -> "Mon 9 AM–1 PM, Wed 9 AM–1 PM" (latent legacy key: object of day->{start,end})
+function fmtCustomHours(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return formatGeneric(obj);
+  const parts = DP_DAY_ORDER.filter(d => obj[d] && obj[d].start && obj[d].end)
+    .map(d => DP_DAY_SHORT[d] + ' ' + fmtTime12(obj[d].start) + '–' + fmtTime12(obj[d].end));
+  return parts.length ? parts.join(', ') : formatGeneric(obj);
+}
+
+// "8500" / "8,500 sq ft" -> "8,500 sq ft"
+function fmtSqft(raw) {
+  const n = parseInt(String(raw == null ? '' : raw).replace(/[^\d]/g, ''), 10);
+  return (!isNaN(n) && n > 0) ? n.toLocaleString('en-US') + ' sq ft' : formatGeneric(raw);
+}
+
+// "09:00-16:00" -> "9 AM–4 PM"
+function fmtHourRange(raw) {
+  const p = String(raw == null ? '' : raw).split('-');
+  return p.length === 2 ? (fmtTime12(p[0].trim()) + '–' + fmtTime12(p[1].trim())) : formatGeneric(raw);
+}
+
+// Machine code -> human label, reused from the wizard's own vocabularies.
+const LEAD_SIZE_LABELS = {
+  'under1k': 'Under 1,000 sq ft', '1k-3k': '1,000–3,000 sq ft', '3k-6k': '3,000–6,000 sq ft',
+  '6k-12k': '6,000–12,000 sq ft', '12k-plus': '12,000+ sq ft', 'visit_required': 'In-person visit',
+  'notsure': 'In-person visit', 'under3k': 'Under 3,000 sq ft', '6k-9k': '6,000–9,000 sq ft',
+  '9k-12k': '9,000–12,000 sq ft', '12k-15k': '12,000–15,000 sq ft'
+};
+const LEAD_TIME_LABELS = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', flexible: 'Flexible' };
+const LEAD_CERTAINTY_LABELS = { guided_via_quiz: 'Guided via quiz', browsed: 'Chose directly' };
+
+// Nice display labels + display order (CSS upper-cases them in the email).
+const LEAD_FIELD_ORDER = [
+  'space_type', 'space_type_custom', 'space_size', 'exact_sqft', 'cleaning_days', 'time_of_day',
+  'porter_schedule', 'coverage_days', 'num_porters', 'porter_count_custom', 'hours_per_day',
+  'start_time', 'porter_hours', 'current_situation', 'desired_start', 'service_certainty',
+  'needs_site_walk', 'schedule_atypical', 'address', 'suite', 'job_title', 'how_heard', 'notes', 'lead_source'
+];
+const LEAD_FIELD_LABELS = {
+  space_type: 'Space type', space_type_custom: 'Space (other)', space_size: 'Approx. size',
+  exact_sqft: 'Exact size', cleaning_days: 'Cleaning days', time_of_day: 'Preferred time',
+  porter_schedule: 'Porter schedule', coverage_days: 'Coverage days', num_porters: 'Porters',
+  porter_count_custom: 'Porter count', hours_per_day: 'Hours per day', start_time: 'Start time',
+  porter_hours: 'Porter hours', custom_hours: 'Custom hours', current_situation: 'Current situation', desired_start: 'Desired start',
+  service_certainty: 'How they chose', needs_site_walk: 'Needs site walk', schedule_atypical: 'Atypical schedule',
+  address: 'Address', suite: 'Suite / floor', job_title: 'Job title', how_heard: 'How they heard',
+  notes: 'Notes', lead_source: 'Lead source'
+};
+// Shown in the email header/pills already — don't repeat in the table.
+const LEAD_HIDDEN_KEYS = ['first_name', 'last_name', 'email', 'phone', 'company', 'form_type', 'urgency'];
+
+function humanizeToken(s) {
+  return String(s).replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Generic fallback — turns ANY value (string, number, bool, array, nested
+// object, array-of-objects) into readable text. NEVER yields "[object Object]".
+function formatGeneric(v) {
+  if (v == null) return '';
+  if (Array.isArray(v)) return v.map(formatGeneric).filter(s => s !== '').join(', ');
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (typeof v === 'object') {
+    return Object.entries(v)
+      .filter(([, x]) => x != null && x !== '')
+      .map(([k, x]) => humanizeToken(k) + ': ' + formatGeneric(x))
+      .join('; ');
+  }
+  return String(v);
+}
+
+function formatLeadValue(key, value) {
+  const arr = Array.isArray(value) ? value : [value];
+  switch (key) {
+    case 'porter_schedule': return fmtPorterSchedule(value);
+    case 'porter_hours': return fmtPorterHours(value);
+    case 'custom_hours': return fmtCustomHours(value);
+    case 'num_porters': return value === 'notsure' ? 'Not sure yet' : formatGeneric(value);
+    case 'space_size': return LEAD_SIZE_LABELS[value] || formatGeneric(value);
+    case 'exact_sqft': return fmtSqft(value);
+    case 'hours_per_day': return fmtHourRange(value);
+    case 'start_time': return fmtTime12(value);
+    case 'time_of_day': return arr.map(v => LEAD_TIME_LABELS[v] || humanizeToken(v)).join(', ');
+    case 'cleaning_days':
+    case 'coverage_days': return fmtDays(arr) || arr.join(', ');
+    case 'service_certainty': return LEAD_CERTAINTY_LABELS[value] || humanizeToken(value);
+    case 'needs_site_walk':
+    case 'schedule_atypical': return (value === true || value === 'true') ? 'Yes' : formatGeneric(value);
+    default: return formatGeneric(value);
+  }
+}
+
+// Build the ordered, fully-formatted [{label, value}] list for the internal
+// email. Suppresses fields already shown elsewhere and legacy porter fields
+// made redundant by the rich porter_schedule. Exported for tests.
+export function formatLeadFields(formData) {
+  const data = formData || {};
+  const hasSchedule = Array.isArray(data.porter_schedule) && data.porter_schedule.length > 0;
+  const REDUNDANT_WHEN_SCHEDULE = ['porter_hours', 'hours_per_day', 'start_time'];
+  const out = [];
+  const seen = new Set();
+  const consider = (key) => {
+    if (seen.has(key)) return;
+    seen.add(key);
+    if (LEAD_HIDDEN_KEYS.indexOf(key) >= 0) return;
+    if (hasSchedule && REDUNDANT_WHEN_SCHEDULE.indexOf(key) >= 0) return;
+    if (!Object.prototype.hasOwnProperty.call(data, key)) return;
+    const raw = data[key];
+    if (raw == null || raw === '' || (Array.isArray(raw) && raw.length === 0)) return;
+    const value = formatLeadValue(key, raw);
+    if (!value) return;
+    out.push({ label: LEAD_FIELD_LABELS[key] || humanizeToken(key), value });
+  };
+  LEAD_FIELD_ORDER.forEach(consider);
+  Object.keys(data).forEach(consider); // any keys not in the curated order, appended
+  return out;
+}
+
 // Internal lead notification (approved 2026-07-10). Renders every submitted
 // field directly in HTML so nothing drops out (the old Postmark template failed
 // to draw the fields array). Returns { subject, html, text }.
@@ -220,7 +397,7 @@ export function buildOwnerEmail({ firstName, lastName, email, phone, company, se
   const rows = (fields || []).map(f => `
               <tr>
                 <td style="padding:11px 16px 11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8A8F79;vertical-align:top;white-space:nowrap;">${escapeHtml(f.label)}</td>
-                <td style="padding:11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#23261F;vertical-align:top;">${escapeHtml(f.value)}</td>
+                <td style="padding:11px 0;border-top:1px solid #EEEAE0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#23261F;vertical-align:top;">${escapeHtml(f.value).replace(/\n/g, '<br>')}</td>
               </tr>`).join('');
 
   const callBtn = phoneDigits
@@ -278,7 +455,7 @@ export function buildOwnerEmail({ firstName, lastName, email, phone, company, se
 </table>
 </body></html>`;
 
-  const textLines = (fields || []).map(f => `  ${f.label}: ${f.value}`).join('\n');
+  const textLines = (fields || []).map(f => `  ${f.label}: ${String(f.value).replace(/\n/g, '\n     ')}`).join('\n');
   const text = `NEW QUOTE LEAD${isRush ? ' [RUSH]' : ''}
 
 ${fullName}${company ? '\n' + company : ''}
@@ -536,7 +713,9 @@ export async function onRequestPost(context) {
       hrs: 'hours_per_day', customHrs: 'custom_hours',
       startTime: 'start_time', dpDays: 'coverage_days',
       porterHours: 'porter_hours',
-      // D55 2026-04-26 — dpPorters serialized as JSON for human-readable email/CRM display
+      // D55 — dpPorters = array of per-porter objects. Persisted as JSON to
+      // D1/HubSpot/Supabase; formatted human-readable for the lead email by
+      // formatLeadFields/fmtPorterSchedule (2026-07-10).
       dpPorters: 'porter_schedule',
       porters: 'num_porters', porterCount: 'porter_count_custom',
       dpAreas: 'areas_covered', areaOther: 'area_custom',
@@ -814,15 +993,10 @@ export async function onRequestPost(context) {
       integrations.postmark_owner = false;
       try {
         const urgencyLabel = formData.urgency || 'Standard';
-        // Fields for the detail table — everything the prospect submitted except
-        // the values already surfaced in the header/pills above.
-        const SHOWN_KEYS = ['first_name', 'last_name', 'email', 'phone', 'company', 'form_type', 'urgency'];
-        const fields = Object.entries(formData)
-          .filter(([k, v]) => v != null && v !== '' && !SHOWN_KEYS.includes(k))
-          .map(([key, value]) => ({
-            label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-            value: Array.isArray(value) ? value.join(', ') : String(value)
-          }));
+        // Fully-formatted, ordered field list — porter schedules, coded values,
+        // arrays and nested objects all rendered human-readable (no
+        // "[object Object]"), nothing lost, so the team needn't open the CRM.
+        const fields = formatLeadFields(formData);
         const msg = buildOwnerEmail({
           firstName, lastName, email, phone, company,
           serviceLabel, refNumber, urgencyLabel, fields
