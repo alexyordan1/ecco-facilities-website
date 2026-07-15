@@ -13,3 +13,15 @@
 /quote-janitorial       /quote.html?service=janitorial  301
 /quote-dayporter.html   /quote.html?service=dayporter   301
 /quote-dayporter        /quote.html?service=dayporter   301
+
+# Retired legacy services overview (deleted 2026-07-11) → home services section
+/services.html          /#services                      301
+/services               /#services                      301
+
+# Retired legacy SEO landings (deleted 2026-07-11) → Noir equivalents
+/day-porter-nyc.html                          /day-porter.html      301
+/day-porter-nyc                               /day-porter.html      301
+/manhattan-office-cleaning.html               /janitorial.html      301
+/manhattan-office-cleaning                    /janitorial.html      301
+/eco-friendly-commercial-cleaning-nyc.html    /sustainability.html  301
+/eco-friendly-commercial-cleaning-nyc         /sustainability.html  301

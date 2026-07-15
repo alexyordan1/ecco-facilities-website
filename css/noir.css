@@ -221,7 +221,7 @@
     transition:color .25s ease,transform .25s ease;
   }
   .mm-link:hover,.mm-link:focus-visible{color:var(--accent);transform:translateX(5px)}
-  .mm-sub .mm-link{font-size:clamp(1.25rem,5.5vw,1.6rem);color:var(--ink-dim);min-height:44px;display:flex;align-items:center}
+  .mm-sub .mm-link{font-size:clamp(1.25rem,5.5vw,1.6rem);color:var(--ink);min-height:44px;display:flex;align-items:center}
   .mm-cta{
     margin-top:1.8rem;display:flex;align-items:center;justify-content:center;gap:.5em;
     background:var(--accent);color:var(--accent-ink);font-weight:500;
@@ -596,10 +596,6 @@
       var(--surface-2);
     border-color:rgba(var(--accent-rgb),.28);
   }
-  .cmp-ecco::before{
-    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-    background:linear-gradient(180deg,var(--accent),transparent);
-  }
   .cmp-tag{
     font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;
     display:inline-flex;align-items:center;gap:.6em;margin-bottom:1.5rem;
@@ -845,11 +841,11 @@
       min-height:46px;padding:.65rem 1.1rem;
       background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:.9rem;
       border-radius:46px;box-shadow:0 12px 30px -10px rgba(0,0,0,.7);
-      transform:translateY(200%);opacity:0;pointer-events:none;
-      transition:transform .4s cubic-bezier(.2,.7,.2,1),opacity .4s ease;
+      transform:translateY(200%);opacity:0;pointer-events:none;visibility:hidden;
+      transition:transform .4s cubic-bezier(.2,.7,.2,1),opacity .4s ease,visibility .4s;
     }
-    .mcta.show{transform:translateY(0);opacity:1;pointer-events:auto}
-    body:has(.cookie.show) .mcta{transform:translateY(200%);opacity:0;pointer-events:none}
+    .mcta.show{transform:translateY(0);opacity:1;pointer-events:auto;visibility:visible}
+    body:has(.cookie.show) .mcta{transform:translateY(200%);opacity:0;pointer-events:none;visibility:hidden}
     .mcta .arr{transition:transform .35s ease}
     .mcta:active .arr{transform:translateX(3px)}
   }
@@ -865,9 +861,10 @@
     padding:1.1rem 1.3rem;
     display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
     box-shadow:0 24px 60px -20px rgba(0,0,0,.9);
-    transition:transform .55s cubic-bezier(.2,.7,.2,1);
+    visibility:hidden;
+    transition:transform .55s cubic-bezier(.2,.7,.2,1),visibility .55s;
   }
-  .cookie.show{transform:translateX(-50%) translateY(0)}
+  .cookie.show{transform:translateX(-50%) translateY(0);visibility:visible}
   .cookie p{flex:1;min-width:200px;font-size:.84rem;color:var(--ink-dim);font-weight:300;line-height:1.5}
   .cookie p a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
   .cookie-btns{display:flex;gap:.6rem;flex:none}
@@ -898,10 +895,9 @@
     .svc{min-height:clamp(300px,82vw,360px)}
     .svc-chip{font-size:.72rem}
 
-    /* comparison: condense + accent hairline on the Ecco card */
+    /* comparison: condense */
     .cmp{padding:1.35rem 1.25rem}
     .cmp h3{font-size:1.15rem}
-    .cmp-ecco{border-top:2px solid var(--accent)}
 
     /* eco: cap the proof photo, tighten gap */
     .eco-layout{gap:1.9rem}

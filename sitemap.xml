@@ -9,12 +9,6 @@
 
   <!-- Core service pages -->
   <url>
-    <loc>https://eccofacilities.com/services.html</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://eccofacilities.com/janitorial.html</loc>
     <lastmod>2026-05-19</lastmod>
     <changefreq>monthly</changefreq>
@@ -34,24 +28,6 @@
   </url>
 
   <!-- SEO landing pages (D167-D169) -->
-  <url>
-    <loc>https://eccofacilities.com/manhattan-office-cleaning.html</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://eccofacilities.com/day-porter-nyc.html</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://eccofacilities.com/eco-friendly-commercial-cleaning-nyc.html</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
 
   <!-- About / company -->
   <url>
