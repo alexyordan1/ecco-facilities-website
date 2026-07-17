@@ -498,7 +498,7 @@
   .rv.in{opacity:1;transform:none}
   /* No-JS safety: if scripts are disabled, reveal content JS would otherwise unhide
      (project rule — no reveal-gated content invisible on load). */
-  @media (scripting: none){ .rv,.rv-light,.rv-child{opacity:1!important;transform:none!important} .hero-rotate .sizer{visibility:visible} }
+  @media (scripting: none){ .rv,.rv-light,.rv-child{opacity:1!important;transform:none!important} .hero-rotate .sizer{visibility:visible} .cmp-usual,.cmp-ecco{display:block!important} }
 
   /* ════════════ SERVICES ════════════ */
   .services .sec-head{margin-bottom:clamp(2.5rem,5vw,4rem)}
