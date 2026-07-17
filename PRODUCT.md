@@ -1,82 +1,90 @@
 # Product
 
+> Reescrito 2026-07-17 tras el lanzamiento del rediseño **Noir** (2026-06-25, `6276a67`). La versión anterior describía el sistema pre-Noir (crema/sage, Cormorant, persona "Alina") que ya no existe en producción. Sistema visual: ver `DESIGN.md`.
+
 ## Register
 
-product
-
-> Nota: el sitio tiene dos registros mezclados. El **marketing** (`/`, `/services`, landings) es *brand* — el diseño ES el producto. El **quote form** (`/quote`) es *product* — el diseño sirve a la tarea. La voz de marca (Editorial · Warm · Adult) es común a ambos.
+El sitio tiene dos registros mezclados. El **marketing** (`/`, servicios, industrias, blog) es *brand*: el diseño ES el producto. El **quote wizard** (`/quote`) es *product*: el diseño sirve a la tarea. La voz (Editorial · Directa · Adulta) es común a ambos.
 
 ## Users
 
-**Primary:** Facility Managers at mid-market commercial properties (offices, medical clinics, retail stores, schools, restaurants, fitness studios) in NYC + 5 boroughs. They're vendor-shopping under time pressure — comparing 3 quotes in 20 minutes between meetings.
+**Primary:** Facility Managers de propiedades comerciales mid-market (oficinas, clínicas, retail, escuelas, restaurantes, gimnasios) en NYC + los 5 boroughs. Comparan 3 cotizaciones en 20 minutos entre reuniones.
 
-**Secondary:** Small-business owner-operators (single restaurant, boutique, clinic) who don't speak facilities-industry jargon but need recurring cleaning. They hand-write their schedule on a whiteboard, not in software.
+**Secondary:** Dueños-operadores de negocio pequeño (un restaurante, una boutique, una clínica) que no hablan jerga de facilities pero necesitan limpieza recurrente.
 
-**Tertiary:** Property managers of multi-tenant buildings looking for one vendor across portfolios.
+**Tertiary:** Property managers de edificios multi-tenant buscando un solo proveedor para el portafolio.
 
-**Context when using:** Mostly desktop at office during business hours, sometimes mobile in transit between sites. Mid-attention — not a leisure browse, but not on-the-clock urgent either. They've already typed "commercial cleaning NYC" into Google and clicked through to compare. Their bar isn't "wow me" — it's "earn my 5 minutes by not wasting them."
+**Contexto de uso:** mayormente desktop en horario de oficina; a veces móvil en tránsito. Atención media. Ya googlearon "commercial cleaning NYC" y están comparando. Su vara no es "sorpréndeme": es "gánate mis 5 minutos sin desperdiciarlos".
 
 ## Product Purpose
 
-eccofacilities.com is a **commercial cleaning + day-porter service company**. The site's job is twofold:
+1. **Quote wizard (`/quote`)** — convertir leads calificados. El usuario describe espacio + horario; el wizard captura contacto y produce un resumen cotizable para ventas. La calidad del lead importa más que la tasa de completado; datos malos queman llamadas de ventas.
+2. **Superficie de marketing** — establecer confianza, responder "¿son la gente correcta?", y enrutar al wizard. CTA único en todo el sitio: **"Get your free proposal"**.
 
-1. **Quote form (`/quote`)** — convert qualified leads. Users describe their space + schedule, the form captures contact info early and serves a precise quote-able summary to the sales team. Lead-quality matters more than form-completion-rate; bad data wastes sales calls.
-2. **Marketing surface (`/`, `/services`, etc.)** — establish trust, answer "are these the right people?", route users to the quote form.
+Éxito = un Facility Manager pensando "esto lo maneja gente adulta" en 30 segundos, y entregando datos honestos de su espacio sin rebotar.
 
-Success = a Facility Manager saying "this feels run by adults" within 30 seconds, then giving us their honest space details without bouncing at the schedule step.
+## Servicios (nomenclatura canónica)
+
+- **Commercial Cleaning** (ex-"Nightly Cleaning", renombrado en el rediseño Noir): el reset completo del facility en el horario que el cliente fija. Página: `janitorial.html`.
+- **Day Porter**: presencia dedicada on-site durante horas de operación. Página: `day-porter.html`.
+- **Both / Combined**: los dos con un solo proveedor; tercer card del wizard ("One team: a porter by day, a crew deep-cleans after you close.").
 
 ## Brand Personality
 
-**Three words:** Editorial · Warm · Adult.
+**Tres palabras: Editorial · Directa · Adulta.**
 
-- **Editorial** — italic-serif accents (Cormorant Garamond), magazine-like headlines, hand-curated feel. The site reads like a postcard, not a SaaS funnel.
-- **Warm** — Alina (the persistent helper persona with a real headshot, not a chatbot avatar) frames the quote experience and the site chat. Copy is conversational ("Let's get acquainted.", "Here's your snapshot.") without being twee.
-- **Adult** — no over-promising microcopy, no urgency timers, no fake scarcity, no impossible absolutes ("0 missed services", "no exceptions"). The voice respects that the user is busy and competent. We avoid dramatic transitions, gradient text, and "we'll change your life" energy.
+- **Editorial** — serif display (Fraunces) sobre negro cálido, fotografía real con tratamiento cinematográfico, composición de revista. Páginas interiores ricas en imagen (svc-hero + svc-figure + img-band + ind-grid), nunca texto sobre negro plano.
+- **Directa** — copy corto, sin relleno. Nada de "seamless"/"elevate" en el sitio (permitidos solo en cartas de propuesta). Se dice qué se hace y cómo verificarlo.
+- **Adulta** — sin urgency timers, sin scarcity falsa, sin absolutos imposibles. Claims verificables únicamente (ver Reglas de claims).
 
-**Voice rules:**
-- Use sentence case in copy, not Title Case. Title Case feels corporate. (Sitewide cleanup is a Fase 4 task.)
-- Italic-serif accents on key nouns ("how big is the *space*?"). Reserved for headlines. Italics are synthetic on marketing (real italic axes not loaded, by decision).
-- Caveat script (a sage handwritten font): hard-locked to a SINGLE use — Alina's signature on the quote form. Never elsewhere, never for actions.
-- No em-dashes. Use periods or commas. (Sitewide: ~240 em dashes still pending Fase 4 cleanup.)
-- One primary CTA label sitewide: **"Get your free proposal"** (replaces 10+ variants — Fase 2/4 rollout).
-- No phone number anywhere on the site (decision). Contact = info@eccofacilities.com.
+## Voice rules (vigentes, aplicadas al 100% del copy visible)
+
+- **Cero em dashes (—) en copy visible.** Títulos/metas → separador "·"; enumeraciones → dos puntos; apartes → coma; cierres fuertes → punto. (Barrido completado 2026-07-17. Excepciones documentadas: comentarios de código, placeholders de valor-vacío en wizard/admin, y el correo de confirmación al cliente aprobado por Alex 2026-07-10.)
+- Sentence case, no Title Case.
+- CTA único: "Get your free proposal".
+- Sin teléfono visible en el sitio (el JSON-LD sí lleva `telephone` +19296856757, el número del GBP). Dudas → info@eccofacilities.com. El canónico de propuestas/contratos es (929) 280-9374 — no confundirlos.
+- Tiempos de respuesta siempre "within 24 hours **on business days**" / "same-day on business days".
+
+## Reglas de claims (confirmadas por Alex, no negociables)
+
+- "Every **cleaning** product we use is eco-certified" (Green Seal / EPA Safer Choice). Nunca "every product" a secas: los desinfectantes no son Safer Choice.
+- "Where disinfection is required, we use **EPA-registered** disinfectants." (Confirmado: sí los tienen.)
+- "Safe for **use around** staff/visitors/children/pets" — nunca "non-toxic", "no toxins", "fragrance-free", "genuinely safe".
+- $5M umbrella = VERDADERO (más GL, workers' comp, commercial auto). COI disponible; additional insured on request.
+- Garantía re-clean por escrito = VERDADERA (existe en los templates de contrato).
+- 12+ años = experiencia de los fundadores, no de la empresa. Sin "200+ clients", sin ratings inventados, sin "Bonded/Licensed", sin reviews falsas ("No invented reviews" es un pilar de la página de Trust).
+- Consumibles (papel/jabón/liners) SIEMPRE facturados aparte; química/productos/equipo sí incluidos (turnkey).
+- Alt-text honesto: sin ubicaciones falsas (no "NYC" en fotos que no lo son), sin certificaciones invisibles, sin atribuir stock a Ecco.
 
 ## Anti-references
 
-What this is NOT, with concrete callouts:
+Lo que esto NO es:
 
-- **Not Servpro / Stratus / ABM corporate sites** — generic blue-and-white stock-photo cleaning industry. The trap: "facilities cleaning → green and clean and bubbles." We do NOT use category-reflex green + spray bottles + smiling-employee stock photos.
-- **Not a SaaS landing page** — no hero with gradient text, no "trusted by 1000+ teams" logo strip, no big-number metric heroes (`98% retention`), no 3-tier pricing card grid.
-- **Not a TaskRabbit-style consumer marketplace** — no urgency pricing, no "book in 30 seconds" claims, no celebratory checkmark animations on every step.
-- **Not Lemonade Insurance** — though we share the conversational framing, we are NOT trying to be cute or playful. Lemonade can afford "your pet is super cute"; we cannot afford "your floors are super dirty." Adult tone wins.
+- **No Servpro / ABM corporate** — azul-y-blanco genérico con stock de burbujas y empleados sonriendo. Nada de reflejo de categoría "limpieza = verde + spray + sonrisa".
+- **No landing SaaS** — sin gradient text, sin "trusted by 1000+ teams", sin heroes de métricas, sin grid de pricing 3-tier.
+- **No marketplace estilo TaskRabbit** — sin urgency pricing, sin "book in 30 seconds", sin animaciones de celebración.
+- **No Lemonade** — compartimos el framing conversacional del wizard, pero tono adulto, no juguetón.
 
 ## Design Principles
 
-1. **Lead capture before completion.** The Info step (name, email, role, optional phone) is at position 3 of 7, not at position 7. We'd rather have an incomplete lead than no lead from someone who abandoned at Schedule. Every flow change preserves this rule.
+1. **Lead capture before completion.** El paso Info (nombre, email, rol, teléfono opcional) va temprano en el flujo, no al final. Mejor un lead incompleto que ninguno. Todo cambio de flujo preserva esta regla.
+2. **Editorial confidence, not whimsy.** Cada acento serif/itálico debe ganarse su lugar. No somos un RSVP de boda.
+3. **Una decisión por pantalla.** Sin pantallas de 14 campos. Si un paso se ve amontonado, se refactoriza el paso, no se "pule".
+4. **Un solo acento.** `--accent #9FCB7B` es el único color saturado del sitio (CTAs, links, focus, eyebrows). Única excepción: el rotador de 6 colores del hero del home (veto de Alex: no se toca).
+5. **El form sirve al equipo de ventas, no a la vanidad del usuario.** Sin confetti, sin "great job!". El premio es la propuesta.
 
-2. **Editorial confidence, not editorial whimsy.** Every italic accent and Caveat flourish must serve a purpose: signal a transition, soften an ask, or warm a long step. If a script-font helper doesn't earn its place, cut it. We are not a wedding RSVP.
+## Accessibility
 
-3. **Show one decision at a time.** No "fill in 14 fields" screens. Each step asks one thing (with one optional second thing). When a step looks crowded (Schedule has 14 selectable items), that's a signal to refactor the step, not to "polish" it.
+- **Target WCAG 2.1 AA.** Touch targets mínimo 44px (`display:inline-flex` + `min-height:44px`).
+- iOS zoom: inputs a `font-size:1rem`; nunca `maximum-scale=1.0` (viola 1.4.4 Reflow).
+- ARIA viewport-aware vía `matchMedia`; nunca `aria-hidden` hardcodeado en elementos visibles en desktop.
+- Wizard: pantallas inactivas con `inert` + `aria-hidden` (cubierto por e2e).
+- Headings semánticos en orden (h1→h2→h3, sin saltos).
+- `prefers-reduced-motion` respetado (bloque dedicado en noir.css); fallback `@media (scripting:none)` para contenido revelado por JS.
+- **El sitio Noir es dark-only por diseño** (`color-scheme:dark` en `html`): no hay modo claro ni toggle. Los forms llevan hardening de chrome nativo (autofill overrides) para no romper en dark.
 
-4. **Sage on cream, never green-on-green.** Our palette is sage (`#2D7A32`) as the single accent on warm-cream neutrals (`#FAF7F2`/`#F5F1EA`); blue was removed entirely. When an element activates, it swaps to sage-fill + white-text, not "lighter green on green." Contrast is non-negotiable and verified computed (see DESIGN.md), not estimated.
+## Infraestructura de conversión (referencia rápida)
 
-5. **The form serves the sales team, not the user's vanity.** We do NOT congratulate the user for filling out a form. No confetti, no "great job!" copy, no progress dopamine. The reward is a quote, not a moment of delight.
-
-## Accessibility & Inclusion
-
-- **Target: WCAG 2.1 AA** across all form interactions.
-- **Touch targets minimum 44px** (existing rule, audited per Sprint 1).
-- **iOS Safari zoom prevention via 1rem font-size only** — never use `maximum-scale=1.0` (blocks pinch zoom, violates 1.4.4 Reflow). Per existing project lesson.
-- **ARIA viewport-aware** — `aria-hidden` toggles via `matchMedia('(max-width: 900px)')` for elements that change visibility responsively.
-- **Inert pattern** — staged screens use `[hidden]` + JS-toggled `inert` + `aria-hidden="true"` so screen readers don't traverse 7 form sections at once. (Hardened in Sprint 1.)
-- **Semantic headings only** — h1 → h2 → h3 in order, no skips.
-- **Reduced motion** — honor `prefers-reduced-motion`; crossfade instead of slide, and the hero rotator pauses.
-- **Color contrast** — 4.5:1 for body, 3:1 for large/non-text. Verified computed both modes (DESIGN.md): sage `#2D7A32` on cream `#F5F1EA` = 4.73:1 (AA), muted `#4F5C6E` = 6.04:1. The old "6.8:1" claim was false and was corrected.
-- **Dark mode is automatic** (`prefers-color-scheme`, sitewide, no toggle) — every component verified AA in both modes.
-- **No required fields that gate non-FM users.** "Your role" should be optional or chip-based, not free-text required.
-
-## Decisiones de estandarización (Alex, 2026-06-12)
-
-Las 14 decisiones que rigen la reforma del sitio están en la memoria del proyecto (`project_site_standardization_2026_06`) y resumidas en `DESIGN.md`. Las que tocan producto/voz: teléfono ninguno · CTA único "Get your free proposal" · dark automático sitewide · testimonios anónimos coherentes (sin nombres reales; fuera aggregateRating) · consentimiento real (Consent Mode default-denied) · solo claims confirmados (hoja de datos pendiente de Alex) · dirección solo área de servicio · iconos SVG sage · chat Alina reconstruido (fuera HubSpot chat).
-
-**Gate de la Fase 4 (reescritura de copy):** Alex debe responder `docs/audits/2026-06-10-hoja-de-datos-claims.md` (KEEP/ADJUST/REMOVE por claim) antes de tocar el copy de las páginas.
+- Submit: `functions/api/submit-quote.js` (Cloudflare Pages Function) → D1 `ecco-leads` + Supabase + HubSpot + Postmark (correo de confirmación al cliente "Framed Stationery" + aviso interno). Turnstile en producción, fail-loud.
+- CRM interno: `admin.html` + `/api/crm-*` (token). Fallback histórico: HubSpot propiedad `ecco_form_data`.
+- Suite e2e: `tests/e2e/` (Playwright, 47 specs × 2 proyectos: desktop-chrome y mobile-safari, server hermético en 8080). Correr antes de cualquier commit que toque el wizard.

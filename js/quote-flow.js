@@ -1326,6 +1326,39 @@
             });
           } catch(e){}
         }
+        // F (adversarial sweep 2026-06-26; fixed 2026-07-17) — an in-session
+        // service switch used to carry the previous flow's answers into the
+        // new flow's payload (buildSubmitPayload ships janitorial STATE.days
+        // as dpDays for 'dayporter', and stale dpPorters ship for
+        // 'janitorial'). The V1 cleanup that handled this was bound to the
+        // retired #qfEditService panel, so it never ran in V2. Policy: clear
+        // ONLY the fields whose screens don't exist in the new flow — shared
+        // screens are re-walked, so their answers stay and pre-fill.
+        if (STATE.service && pickedService !== STATE.service) {
+          if (pickedService === 'dayporter') {
+            // Janitorial-only screens (size, days) are not in this flow.
+            STATE.size = null;
+            STATE.sizeExact = null;
+            STATE.needsSiteWalk = false;
+            STATE.days = [];
+            STATE.timeOfDay = [];
+            STATE.scheduleAtypical = false;
+          }
+          if (pickedService === 'janitorial') {
+            // The porter schedule screen is not in this flow.
+            STATE.dpPorterCount = 0;
+            STATE.dpPorters = [];
+            STATE.porterCount = null;
+            STATE.timeStart = null;
+            STATE.timeEnd = null;
+            STATE.porterHours = [];
+          }
+          if (pickedService !== 'both') {
+            // dpDays + its customized flag only have meaning in Combined.
+            STATE.dpDays = [];
+            STATE.dpDaysCustomized = false;
+          }
+        }
         STATE.service = pickedService;
         STATE.currentStepName = 'welcome';
         buildRail(STATE.service);

@@ -33,6 +33,9 @@ mockups.html
 
 # Pre-minify source (regenerated from quote-flow.css when needed)
 css/*.source.css
+# ...except the Noir master: noir.css is minified FROM this file, so the
+# source is NOT regenerable and must be tracked (edit source -> minify -> bump).
+!css/noir.source.css
 
 # AYS capture artifacts (local reference, not in repo)
 docs/superpowers/plans/before/
