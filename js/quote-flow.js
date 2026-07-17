@@ -1828,7 +1828,7 @@
       bubble.className = 'qf2-atypical-heads-up';
       var text = document.createElement('div');
       text.className = 'qf2-atypical-heads-up-text';
-      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. We'll double-check with you when we prepare the proposal — no worries.";
+      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. We'll double-check with you when we prepare the proposal, no worries.";
       bubble.appendChild(text);
       // Insert after the prompt
       var prompt = body.querySelector('.qf2-prompt');
@@ -3113,7 +3113,7 @@
         if (spaceEl && STATE.needsSiteWalk) {
           var visitInd = document.createElement('div');
           visitInd.className = 'qf2-visit-indicator';
-          visitInd.textContent = "We’ll measure on-site so your quote is exact — free, no obligation.";
+          visitInd.textContent = "We’ll measure on-site so your quote is exact: free, no obligation.";
           spaceEl.appendChild(visitInd);
         }
       }
@@ -3146,7 +3146,7 @@
       var nextLast = document.getElementById('qf2RvNextLast');
       if (nextLast) nextLast.textContent = STATE.needsSiteWalk
         ? 'We schedule a free on-site walk'
-        : 'A quick call — only if you want one';
+        : 'A quick call, only if you want one';
 
       // V2 — CTA subtext (site walk variant)
       var ctaWrap = ctaBtn?.parentElement;
@@ -3155,7 +3155,7 @@
       if (STATE.needsSiteWalk && ctaBtn) {
         var subtext = document.createElement('p');
         subtext.className = 'qf2-cta-subtext';
-        subtext.textContent = "A free on-site measure makes your quote exact — we’ll set it up, no obligation.";
+        subtext.textContent = "A free on-site measure makes your quote exact. We’ll set it up, no obligation.";
         ctaBtn.insertAdjacentElement('afterend', subtext);
       }
 

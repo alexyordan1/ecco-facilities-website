@@ -1060,7 +1060,7 @@ export async function onRequestPost(context) {
     const anySucceeded = configuredOnes.some(([, v]) => v === true);
     if (anyConfigured && configuredOnes.length > 0 && !anySucceeded) {
       console.error('[submit-quote] All integrations failed', integrations);
-      return new Response(JSON.stringify({ ok: false, error: 'Lead services unavailable — please try again or email info@eccofacilities.com.' }), { status: 502, headers: corsHeaders });
+      return new Response(JSON.stringify({ ok: false, error: 'Lead services unavailable, please try again or email info@eccofacilities.com.' }), { status: 502, headers: corsHeaders });
     }
 
     // AYS Ola 4 Commit N ME-10 — structured JSON-line observability log. One
