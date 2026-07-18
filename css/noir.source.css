@@ -541,13 +541,6 @@
     margin-bottom:.7rem;
   }
   .svc-body p{color:var(--ink-dim);font-weight:300;font-size:1rem;max-width:40ch}
-  .svc-tags{margin-top:1.3rem;display:flex;flex-wrap:wrap;gap:.5rem}
-  .svc-chip{
-    font-size:.7rem;letter-spacing:.06em;color:var(--ink-dim);
-    border:1px solid var(--line-strong);border-radius:30px;
-    padding:.4em .9em;transition:border-color .3s ease,color .3s ease;
-  }
-  .svc:hover .svc-chip{border-color:rgba(var(--accent-rgb),.4)}
   .svc-link{
     margin-top:1.5rem;display:inline-flex;align-items:center;min-height:44px;gap:.5em;
     font-size:.86rem;color:var(--accent);letter-spacing:.02em;
@@ -893,7 +886,6 @@
 
     /* services: shorter cards */
     .svc{min-height:clamp(300px,82vw,360px)}
-    .svc-chip{font-size:.72rem}
 
     /* comparison: condense */
     .cmp{padding:1.35rem 1.25rem}
@@ -1027,7 +1019,6 @@
   .svc-detail p{color:var(--ink-dim);font-weight:300;line-height:1.6}
   .svc-detail .lead + p,.svc-detail p + p{margin-top:1.1rem}
   .svc-detail h4,.svc-detail .svc-label{font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:1.7rem 0 .9rem;font-weight:500}
-  .svc-detail .svc-tags{margin-top:1.4rem}
   .svc-detail .svc-link{margin-top:1.6rem}
   .svc-aside{background:var(--surface-1);border:1px solid var(--line);border-radius:20px;padding:clamp(1.5rem,3vw,2.3rem)}
 
