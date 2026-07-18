@@ -117,19 +117,20 @@ function escapeHtml(s) {
 const EMAIL_LOGO_DARK = 'https://eccofacilities.com/images/logo-horizontal.png';
 
 // Client-facing quote confirmation — "Framed Stationery" design (approved
-// 2026-07-10). Email-client-safe: table layout + inline styles + web-safe
-// serif. Returns { subject, html, text }.
+// 2026-07-10; copy aligned to the site's no-em-dash voice on 2026-07-17 per
+// Alex, so the dashes are gone on purpose — don't restore them). Email-client-
+// safe: table layout + inline styles + web-safe serif. Returns { subject, html, text }.
 export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
   const name = String(firstName || '').replace(/\s+/g, ' ').trim();
   const subject = name
-    ? `Thanks, ${name} — we've received your request`
-    : `We've received your request — Ecco Facilities`;
+    ? `Thanks, ${name}. We've received your request`
+    : `We've received your request · Ecco Facilities`;
   const greetHtml = name
-    ? `Thanks, ${escapeHtml(name)} &mdash; we&rsquo;ve got everything we need.`
-    : `Thanks &mdash; we&rsquo;ve got everything we need.`;
+    ? `Thanks, ${escapeHtml(name)}. We&rsquo;ve got everything we need.`
+    : `Thanks. We&rsquo;ve got everything we need.`;
   const greetText = name
-    ? `Thanks, ${name} — we've got everything we need.`
-    : `Thanks — we've got everything we need.`;
+    ? `Thanks, ${name}. We've got everything we need.`
+    : `Thanks. We've got everything we need.`;
   const ref = escapeHtml(refNumber);
   const svc = escapeHtml(serviceLabel);
 
@@ -149,7 +150,7 @@ export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
 <title>${escapeHtml(subject)}</title>
 </head>
 <body style="margin:0;padding:0;background:#EAE7DE;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">We&rsquo;ve received your request &mdash; here&rsquo;s what happens next.</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">We&rsquo;ve received your request. Here&rsquo;s what happens next.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EAE7DE;">
   <tr><td align="center" style="padding:30px 12px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#FFFDF8;border:1px solid #C9C1AC;">
@@ -165,7 +166,7 @@ export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.72;color:#3D3E30;margin-top:16px;">Thank you for sharing the details of your space. Our team is already reviewing them, and we&rsquo;ll follow up within one business day with a proposal built around exactly what you asked for.</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#6E6A4F;margin-top:28px;">Re:&nbsp; Proposal <span style="color:#191A12;font-weight:bold;">${ref}</span> &middot; ${svc}</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#8A8467;margin-top:30px;">What happens next</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${step('I', 'We review the details you shared &mdash; nothing more needed from you.', false)}${step('II', 'We prepare your proposal, tailored to your space, schedule, and priorities.', false)}${step('III', 'A specialist reaches out to walk you through it and answer any questions.', true)}
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${step('I', 'We review the details you shared, nothing more needed from you.', false)}${step('II', 'We prepare your proposal, tailored to your space, schedule, and priorities.', false)}${step('III', 'A specialist reaches out to walk you through it and answer any questions.', true)}
             </table>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:14px;line-height:1.65;color:#3D3E30;margin-top:26px;">Have a question in the meantime? Email us anytime at <a href="mailto:info@eccofacilities.com" style="color:#5A6E22;text-decoration:none;">info@eccofacilities.com</a>.</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#191A12;margin-top:24px;">Warm regards,</div>
@@ -190,7 +191,7 @@ Thank you for sharing the details of your space. Our team is already reviewing t
 Re: Proposal ${refNumber} · ${serviceLabel}
 
 What happens next
-  I.   We review the details you shared — nothing more needed from you.
+  I.   We review the details you shared, nothing more needed from you.
   II.  We prepare your proposal, tailored to your space, schedule, and priorities.
   III. A specialist reaches out to walk you through it and answer any questions.
 
