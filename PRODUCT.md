@@ -23,11 +23,15 @@ El sitio tiene dos registros mezclados. El **marketing** (`/`, servicios, indust
 
 Éxito = un Facility Manager pensando "esto lo maneja gente adulta" en 30 segundos, y entregando datos honestos de su espacio sin rebotar.
 
-## Servicios (nomenclatura canónica)
+## Servicios (nomenclatura canónica + glosa obligatoria)
 
-- **Commercial Cleaning** (ex-"Nightly Cleaning", renombrado en el rediseño Noir): el reset completo del facility en el horario que el cliente fija. Página: `janitorial.html`.
-- **Day Porter**: presencia dedicada on-site durante horas de operación. Página: `day-porter.html`.
-- **Both / Combined**: los dos con un solo proveedor; tercer card del wizard ("One team: a porter by day, a crew deep-cleans after you close.").
+Decisión de Alex 2026-07-18 (opción A del análisis de naming, respaldada por investigación de ~15 competidores + volumen de búsqueda): **los nombres se quedan y la glosa de horario es obligatoria** en todo lugar donde los dos servicios aparezcan lado a lado (cards del home, wizard, y cualquier superficie futura de elección). Par fijo:
+
+- **Commercial Cleaning** — *"a full reset of your facility, after you close"* (ex-"Nightly Cleaning"; página `janitorial.html`; "janitorial" se teje en body copy/metadata para el keyword paralelo, nunca en el nav).
+- **Day Porter** — *"a dedicated pro on site, while you're open"* (página `day-porter.html`).
+- **Both / Combined**: "One team: a porter by day, a crew deep-cleans after you close."
+
+Por qué: "commercial cleaning" es el keyword dominante (165K/mes vs 40.5K "janitorial"); toda la industria usa estos nombres y resuelve la ambigüedad paraguas-vs-subservicio con la glosa pegada, no renombrando. En NYC "porter" evoca staff residencial (32BJ) para no-expertos: la glosa hace el trabajo de desambiguar. Las cards de servicio llevan máximo 3 capas: nombre + glosa (h3) + una frase de valor + link. **Sin chips de industrias en las cards** (duplican la sección Industries).
 
 ## Brand Personality
 
