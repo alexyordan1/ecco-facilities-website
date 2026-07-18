@@ -1,6 +1,8 @@
 # ECCO FACILITIES LLC — WEBSITE PROJECT HANDOFF
 ## For Claude Code Implementation
 
+> **⚠️ Historical document (original pre-Noir build brief).** The live site is the **Noir** system launched 2026-06-25, which fully replaced the design and file layout described in the page-by-page sections below (old palette, Cormorant, `styles.css`, `main.js`, `quote-engine.js` — all gone). Only the TECH STACK & STRUCTURE section below reflects current reality (updated 2026-07-18). For the live architecture see `PROJECT-DOCS.md`; for the design system see `DESIGN.md`.
+
 ---
 
 ## PROJECT OVERVIEW
@@ -15,38 +17,39 @@ Build a multi-page website for Ecco Facilities LLC, a janitorial and facility se
 
 ---
 
-## TECH STACK & STRUCTURE
+## TECH STACK & STRUCTURE (current — Noir, updated 2026-07-18)
 
 ```
 ecco-site/
-├── index.html          (Home)
-├── services.html       (Services overview)
-├── janitorial.html     (Janitorial detail page)
-├── day-porter.html     (Day Porter detail page)
-├── about.html          (About Us)
-├── why-ecco.html       (Why Choose Us)
-├── sustainability.html (Sustainability)
-├── testimonials.html   (Testimonials)
-├── careers.html        (Join Our Team)
-├── quote.html          (Contact / Smart Forms)
+├── index.html            Home (Noir)
+├── janitorial.html       Commercial Cleaning detail
+├── day-porter.html       Day Porter detail
+├── about.html / why-ecco.html / sustainability.html / testimonials.html / careers.html
+├── quote.html            Quote wizard (single page, two flows)
+├── blog.html + blog/     7 posts
+├── privacy.html / terms.html / accessibility.html / sitemap.html / 404.html
+├── partials/             header.html + footer.html (shared chrome)
+├── crm/                  CRM app (login, index, leads, lead, pipeline, reports, settings, reset-password, sw.js)
 ├── css/
-│   └── styles.css      (Shared design system)
+│   ├── noir.source.css   MASTER editable (edit source → minify → bump ?v=)
+│   ├── noir.css          minified from source (v=26) — loaded by every public page
+│   ├── quote-noir.css    quote wizard skin (v=63)
+│   └── crm.css           CRM styles (v=4.3)
 ├── js/
-│   └── main.js         (Shared: nav, scroll reveal, mobile menu)
-│   └── quote-engine.js (Form wizard logic)
+│   ├── site.js           shared nav/menu/reveal (v=4)
+│   ├── quote-flow.js     quote wizard engine (v=39.22)
+│   ├── cookie-consent.js cookie banner + GPC + HubSpot loader (v=1.5)
+│   ├── crm-*.js          CRM modules (core, auth, dashboard, leads, detail, pipeline, reports, settings, ai)
+│   └── chart.min.js / sortable.min.js   vendored libs (CRM only)
+├── functions/api/        Cloudflare Pages Functions (submit-quote, capture-partial, leads, auth, crm-*)
 └── images/
-    ├── logo-horizontal.png       (with transparent background)
-    ├── logo-horizontal-white.png (white version for dark backgrounds)
-    ├── logo-vertical.png         (with transparent background)
-    └── (any other assets)
 ```
 
-**Design System:**
-- Fonts: Cormorant Garamond (display) + DM Sans (body) from Google Fonts
-- Palette: Navy #0B1D38, Blue #3068AD, Green #2D7A32, Background #FAFBFC, Cream #F3F5F8
-- Border radius: 10px standard, 16px large
-- Shadows: sm/md/lg/xl scale
-- Animations: CSS scroll reveal with staggered delays, cubic-bezier(.4,0,.2,1) easing
+**Design System (Noir — see `DESIGN.md` for the full spec):**
+- Fonts: Fraunces (display) + Inter (body) from Google Fonts
+- Palette: near-black surfaces `#0C0E0D`/`#101312`/`#161A18`, ink `#F4F2EC`, accent green `#9FCB7B` (swap-only accent block at the top of `noir.source.css`)
+- Dark-only (`color-scheme: dark`); token source of truth is `:root{}` in `css/noir.source.css`
+- Removed 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components.css`, `css/quote-flow.css`, `js/chat-widget.js` (and `js/main.js` earlier the same day)
 
 ---
 

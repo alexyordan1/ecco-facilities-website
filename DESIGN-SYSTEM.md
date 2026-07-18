@@ -1,8 +1,10 @@
 # Design System — Technical Reference
 
+> **⚠️ OBSOLETE (2026-07-18).** This document describes the PRE-Noir system (`styles.css` / `components.css`), whose files have been **deleted from the repo** — they no longer exist. The live system is Noir: `css/noir.source.css` (editable master) → `css/noir.css` (minified, cache-busted). See `DESIGN.md` for the current spec. Kept for migration history only.
+
 > Companion to `DESIGN.md` (brand voice & visual theme). This document covers the **technical implementation**: tokens, component library, file structure, migration history, and how to extend.
 
-**Last updated:** D156–D163 design-system reset (2026-05-19)
+**Last updated:** D156–D163 design-system reset (2026-05-19); obsolescence banner added 2026-07-18
 
 ---
 

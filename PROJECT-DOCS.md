@@ -3,8 +3,8 @@
 **Domain:** eccofacilities.com
 **Hosting:** Cloudflare Pages (auto-deploy from GitHub)
 **Repository:** github.com/alexyordan1/ecco-facilities-website (branch: main)
-**Stack:** Static HTML/CSS/JS (vanilla, no framework)
-**Last Updated:** April 4, 2026
+**Stack:** Static HTML/CSS/JS (vanilla, no framework) + Cloudflare Pages Functions (`functions/api/`)
+**Last Updated:** July 18, 2026 — structure/version sections rewritten to the live **Noir** architecture (launched 2026-06-25)
 
 ---
 
@@ -15,7 +15,7 @@
 3. [External Services & IDs](#3-external-services--ids)
 4. [How Everything Connects](#4-how-everything-connects)
 5. [Form Submission Flow](#5-form-submission-flow)
-6. [Chat Widget Architecture](#6-chat-widget-architecture)
+6. [Chat Widget Architecture (removed)](#6-chat-widget-architecture-removed)
 7. [SEO Setup](#7-seo-setup)
 8. [Security & Privacy](#8-security--privacy)
 9. [CMS (Decap)](#9-cms-decap)
@@ -41,105 +41,104 @@
                                   │
         ┌─────────┬───────────┬───┴────┬──────────┬────────────┐
         ▼         ▼           ▼        ▼          ▼            ▼
-   23 HTML    CSS/JS      Images    Config     Server       Admin
-    pages    (vanilla)    (WebP)   files      (chat)       (CMS)
+   HTML pages  CSS/JS      Images    Config    Functions     CRM
+  (Noir + CRM) (vanilla)   (WebP)    files    (Pages API)   (app)
 ```
 
 **Data Flow:**
 ```
 User visits site
   ├─→ GTM loads → fires GA4 + Clarity tags
-  ├─→ HubSpot tracking script loads → identifies returning visitors
-  ├─→ Cookie consent banner → respects GPC signal
+  ├─→ Cookie consent banner (js/cookie-consent.js) → respects GPC signal,
+  │    gates the HubSpot tracking script
   │
-User fills quote form
-  ├─→ FormSubmit.co → email to info@eccofacilities.com (primary delivery)
-  ├─→ EmailJS → confirmation email to the user
-  ├─→ HubSpot _hsq → identifies contact in CRM
-  └─→ GA4 dataLayer → tracks quote_submitted event
-  │
-User opens chat
-  └─→ chat-widget.js → POST to ecco-chat-backend.vercel.app → Claude API → response
+User fills quote form (quote.html + js/quote-flow.js)
+  ├─→ /api/capture-partial → partial progress saved server-side
+  └─→ POST /api/submit-quote (Cloudflare Pages Function)
+        ├─ Turnstile verification (fail-loud in production)
+        ├─ Lead stored in Cloudflare D1 (env.DB)
+        ├─ HubSpot CRM v3 → contact search/create + deal + association
+        └─ Postmark → client confirmation + internal notification
+             (HTML built in code: buildClientEmail / buildOwnerEmail)
 ```
 
 ---
 
 ## 2. File Inventory
 
-### Pages (23 total)
+### Pages — public site (Noir)
 
-| File | Purpose | Priority |
-|------|---------|----------|
-| `index.html` | Homepage: hero, services, stats, testimonials, FAQ | 1.0 |
-| `services.html` | Services overview with tabbed comparison | 0.9 |
-| `janitorial.html` | Janitorial service detail page | 0.9 |
-| `day-porter.html` | Day Porter service detail page | 0.9 |
-| `quote.html` | Quote landing — links to specific forms | 0.9 |
-| `quote-janitorial.html` | Multi-step janitorial quote wizard (8 steps) | 0.8 |
-| `quote-dayporter.html` | Multi-step day porter quote wizard (10 steps) | 0.8 |
-| `about.html` | Company story, team values | 0.8 |
-| `why-ecco.html` | Value proposition, differentiators | 0.7 |
-| `sustainability.html` | Eco-certified products, green initiatives | 0.7 |
-| `testimonials.html` | Customer testimonials, case studies | 0.7 |
-| `careers.html` | Job listings + application form | 0.6 |
-| `blog.html` | Blog index/listing page | 0.7 |
-| `blog/5-signs-cleaning-company.html` | Blog post | 0.5 |
-| `blog/eco-certified-cleaning-matters.html` | Blog post | 0.5 |
-| `blog/janitorial-vs-day-porter.html` | Blog post | 0.5 |
-| `blog/commercial-cleaning-checklist-nyc.html` | Blog post (Apr 2026) | 0.5 |
-| `blog/dirty-office-costs-productivity.html` | Blog post (Apr 2026) | 0.5 |
-| `privacy.html` | Privacy policy (CCPA 2026 compliant) | 0.3 |
-| `terms.html` | Terms of service | 0.3 |
-| `accessibility.html` | WCAG 2.1 AA accessibility statement | 0.3 |
-| `sitemap.html` | HTML sitemap for users | 0.4 |
-| `404.html` | Custom error page | — |
+| File | Purpose |
+|------|---------|
+| `index.html` | Homepage: hero, services (Commercial Cleaning + Day Porter), proof, FAQ |
+| `janitorial.html` | Commercial Cleaning detail page |
+| `day-porter.html` | Day Porter detail page |
+| `quote.html` | Quote wizard — single page, both flows (`js/quote-flow.js`) |
+| `about.html` | Company story, team values |
+| `why-ecco.html` | Value proposition, differentiators |
+| `sustainability.html` | Eco-certified products, green initiatives |
+| `testimonials.html` | Customer testimonials |
+| `careers.html` | Job listings + application form |
+| `blog.html` + 7 posts in `blog/` | Blog index + articles |
+| `privacy.html` / `terms.html` / `accessibility.html` | Legal & compliance |
+| `sitemap.html` / `404.html` | Utility pages |
+| `partials/header.html` / `partials/footer.html` | Shared chrome partials |
+
+The old `services.html`, the split quote pages (`quote-janitorial.html` / `quote-dayporter.html`) and the 4 pre-Noir SEO pages no longer exist; removed with 301s in `_redirects`.
+
+### Pages — CRM (`crm/`)
+
+`login.html`, `index.html` (dashboard), `leads.html`, `lead.html` (detail), `pipeline.html`, `reports.html`, `settings.html`, `reset-password.html`, plus `sw.js` (service worker).
 
 ### CSS
 
 | File | Size | Notes |
 |------|------|-------|
-| `css/styles.css` | 104 KB | Minified production (v5.1) |
-| `css/styles.original.css` | 130 KB | Unminified source |
+| `css/noir.source.css` | ~80 KB | **Editable master** — edit here, then minify (tracked; exception in `.gitignore`) |
+| `css/noir.css` | ~69 KB | Minified from source (`?v=26`) — loaded by every public page |
+| `css/quote-noir.css` | — | Quote wizard skin (`?v=63`) |
+| `css/crm.css` | — | CRM styles (`?v=4.3`) |
 
 ### JavaScript
 
-| File | Size | Notes |
-|------|------|-------|
-| `js/main.js` | 16 KB | Core site functionality (v2.2) |
-| `js/main.original.js` | 4.8 KB | Original source |
-| `js/chat-widget.js` | 19 KB | AI chat widget (self-contained) |
-| `js/chat-widget.original.js` | 22 KB | Original source |
-| `js/cookie-consent.js` | 1.3 KB | Cookie banner + GPC |
+| File | Notes |
+|------|-------|
+| `js/site.js` | Shared nav/menu/reveal (`?v=4`) |
+| `js/quote-flow.js` | Quote wizard engine (`?v=39.22`) |
+| `js/cookie-consent.js` | Cookie banner + GPC + HubSpot loader (`?v=1.5`) |
+| `js/crm-core.js`, `crm-auth.js`, `crm-dashboard.js`, `crm-leads.js`, `crm-detail.js`, `crm-pipeline.js`, `crm-reports.js`, `crm-settings.js`, `crm-ai.js` | CRM modules (`?v=4.1`–`4.2`) |
+| `js/chart.min.js`, `js/sortable.min.js` | Vendored libraries (CRM only) |
+
+Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components.css`, `css/quote-flow.css`, `js/chat-widget.js` — plus `js/main.js` earlier the same day.
 
 ### Configuration
 
 | File | Purpose |
 |------|---------|
-| `sitemap.xml` | XML sitemap (23 URLs) |
-| `robots.txt` | Crawl rules, blocks /admin/ |
+| `sitemap.xml` | XML sitemap |
+| `robots.txt` | Crawl rules — blocks /admin/, /crm/, /functions/ and other internal areas |
 | `_headers` | Cloudflare security headers + cache |
-| `_redirects` | /contact → /quote redirect |
+| `_redirects` | 301s: /contact → /quote, retired pre-Noir pages |
 | `admin/config.yml` | Decap CMS configuration |
-| `.claude/launch.json` | Local dev server config |
 
 ### Server / Backend
 
 | File | Purpose |
 |------|---------|
-| `chat-backend/api/chat.js` | Vercel serverless — Claude API proxy |
-| `chat-backend/vercel.json` | Vercel deployment config |
-| `server/server.js` | Express.js chat server (alternative) |
-| `serve.js` | Local Node.js dev server |
-| `serve.py` | Local Python dev server |
+| `functions/api/submit-quote.js` | Quote submission: Turnstile → D1 → HubSpot → Postmark |
+| `functions/api/capture-partial.js` | Partial-progress capture |
+| `functions/api/crm-*.js`, `leads.js`, `auth.js`, `callback.js`, `_middleware.js` | CRM + leads API (Cloudflare Pages Functions, D1 `ecco-leads`) |
+| `serve.js` / `serve.py` | Local dev servers |
+| `chat-backend/`, `server/` | **Legacy** — backends for the removed chat widget (future purge candidates) |
 
-### Other
+### Docs
 
 | File | Purpose |
 |------|---------|
-| `HANDOFF.md` | Original project brief |
-| `emailjs-template.html` | EmailJS template reference |
-| `mobile-test.html` | Mobile responsiveness test |
-| `index-reference.html` | Backup/reference homepage |
+| `HANDOFF.md` | Original pre-Noir build brief (historical; structure section updated) |
+| `DESIGN.md` / `PRODUCT.md` | Current Noir design & product docs (rewritten 2026-07-17) |
+| `DESIGN-SYSTEM.md` | Pre-Noir technical reference (**obsolete**, banner added) |
+| `docs/` | Audits, plans, specs, proposal design references |
 
 ---
 
@@ -192,6 +191,8 @@ User opens chat
 
 ## 4. How Everything Connects
 
+> **⚠️ Diagram partially legacy (2026-07-18).** Still accurate: Cloudflare Pages serving, GTM/GA4/Clarity/HubSpot scripts, deployment pipeline, Decap CMS. Outdated: the FORM SUBMISSIONS box (see the current flow in the §5 note — `/api/submit-quote`) and the CHAT WIDGET box (widget removed).
+
 ### Connection Map
 
 ```
@@ -223,9 +224,7 @@ User opens chat
        │      ├─ _hsq.trackPageView → Page visit history
        │      └─ _hsq.trackCustomBehavioralEvent → Form events
        │
-       ├──→ Google Fonts → DM Sans + Cormorant Garamond
-       │
-       └──→ EmailJS CDN → Client-side email library
+       └──→ Google Fonts → Fraunces + Inter
 
 ┌──────────────────────────────────────────────────────────┐
 │  FORM SUBMISSIONS (3 destinations per quote)             │
@@ -287,6 +286,8 @@ User opens chat
 ---
 
 ## 5. Form Submission Flow
+
+> **⚠️ Legacy section (pre-Noir).** The FormSubmit/EmailJS flow below no longer exists. Today `quote.html` + `js/quote-flow.js` POST to `/api/submit-quote`: Turnstile verification (fail-loud in production) → lead stored in Cloudflare D1 → HubSpot CRM v3 (contact search/create + deal + association) → Postmark client confirmation + internal notification, both built in code (`buildClientEmail` / `buildOwnerEmail` in `functions/api/submit-quote.js`). Partial progress goes to `/api/capture-partial`. The description below is kept for history only.
 
 ### Quote Forms (Janitorial & Day Porter)
 
@@ -389,31 +390,9 @@ Present on all pages in the footer.
 
 ---
 
-## 6. Chat Widget Architecture
+## 6. Chat Widget Architecture (removed)
 
-**File:** `js/chat-widget.js` (self-contained: JS + injected CSS)
-
-**API Endpoint:** `https://ecco-chat-backend.vercel.app/api/chat`
-
-**Backend:** Vercel serverless function (`chat-backend/api/chat.js`)
-- Proxies requests to Claude API (Anthropic)
-- Environment variable: `ANTHROPIC_API_KEY`
-
-**Features:**
-- Conversation history (array of `{role, content}`)
-- Rate limiting: 20 messages per session
-- Keyboard shortcuts: `Ctrl+K` toggle, `Escape` close
-- Auto-resize textarea
-- Typing indicator animation
-- 50+ fallback Q&A pairs if API is down
-- Mobile-responsive (full width on small screens)
-
-**UI Position:**
-- Toggle button: bottom-right corner (z-index 999)
-- Chat panel: 400px x 580px max (z-index 998)
-- Floating CTA "Free Quote" button: bottom-left corner
-
-**Analytics:** Fires `chat_open` GA4 event when toggled.
+**Removed 2026-07-18.** The AI chat widget (`js/chat-widget.js`, 58 KB self-contained JS + injected CSS, Claude API proxy on Vercel) was pre-Noir: no live page has loaded it since the Noir launch (2026-06-25), and the file was deleted in the legacy purge. Its backends — `chat-backend/` (Vercel serverless) and `server/` (Express alternative) — are still in the repo as **legacy code with zero consumers** and are candidates for a future cleanup. The original architecture is preserved in git history.
 
 ---
 
@@ -514,26 +493,31 @@ collections:
 
 ## 10. CSS/JS Conventions
 
-### Design System
+### Design System (Noir — full spec in `DESIGN.md`)
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--navy` | `#0B1D38` | Primary dark color |
-| `--blue` | `#3068AD` | Primary brand blue |
-| `--green` | `#2D7A32` | Eco/sustainability accent |
-| `--wh` | `#FFFFFF` | White |
-| Font heading | Cormorant Garamond | Serif for headings |
-| Font body | DM Sans | Sans-serif for body text |
+| `--accent` | `#9FCB7B` | Brand green (swap-only accent block at top of source) |
+| `--black` | `#0C0E0D` | Page background |
+| `--surface-1/2/3` | `#101312` / `#161A18` / `#1D2220` | Raised surfaces |
+| `--ink` | `#F4F2EC` | Primary text |
+| `--ink-dim` | `#A8A89F` | Secondary text |
+| Font display | Fraunces | Serif for headings |
+| Font body | Inter | Sans-serif for body text |
 
-### Versions
-- CSS: `styles.css?v=5.1`
-- JS: `main.js?v=2.2`
-- **Rule:** Bump `?v=` in the same commit as CSS/JS changes
+Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site is dark-only (`color-scheme: dark`).
+
+### Versions (live)
+- CSS: `noir.css?v=26` · `quote-noir.css?v=63` · `crm.css?v=4.3`
+- JS: `site.js?v=4` · `quote-flow.js?v=39.22` · `cookie-consent.js?v=1.5` · `crm-*.js?v=4.1–4.2`
+- **Rule:** Bump `?v=` in the same commit as CSS/JS changes (busters don't apply to deleted files)
+- Known drift: the 7 `blog/` posts still load `site.js?v=3` (pending fix)
 
 ### Minification
-- **Always use:** `npx clean-css-cli` for CSS
-- **Never use:** Python regex for minification
-- Original files kept as `*.original.css` / `*.original.js`
+- Workflow: edit `css/noir.source.css` (tracked master) → minify to `css/noir.css` → bump `?v=` in the same commit
+- **Always use:** `bunx clean-css-cli` (fallback: `npx clean-css-cli`)
+- **Never use:** Python or Perl regex for minification
+- **Inspect the output:** clean-css has silently dropped a leading `@layer …; :root{}` line before — verify tokens survived after every minify
 
 ### Code Rules
 - Zero inline styles — all styling through CSS classes
@@ -591,6 +575,11 @@ collections:
 ---
 
 ## 13. Change Log
+
+### July 18, 2026
+- Legacy pre-Noir purge: deleted `css/styles.css`, `css/components.css`, `css/quote-flow.css`, `js/chat-widget.js` — all verified zero consumers across every tracked HTML/JS (`js/main.js` removed earlier the same day)
+- Rewrote structure/version sections of this doc and `HANDOFF.md` to the live Noir architecture; obsolescence banner added to `DESIGN-SYSTEM.md`
+- (Noir launch 2026-06-25 and the quote/CRM backend work of June–July are documented in `DESIGN.md`, `PRODUCT.md`, and git history; this changelog was dormant April→July)
 
 ### April 4, 2026
 - HubSpot Forms API integrated: quote-janitorial.html + quote-dayporter.html

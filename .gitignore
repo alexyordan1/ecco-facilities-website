@@ -31,7 +31,7 @@ mockups.html
 .superpowers/
 .mcp.json
 
-# Pre-minify source (regenerated from quote-flow.css when needed)
+# Pre-minify sources are generated artifacts (not tracked)...
 css/*.source.css
 # ...except the Noir master: noir.css is minified FROM this file, so the
 # source is NOT regenerable and must be tracked (edit source -> minify -> bump).
