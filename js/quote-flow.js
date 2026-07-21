@@ -4813,6 +4813,21 @@
             tl[2].textContent = 'Week of ' + fmt(7);
           }
           setRailValue('contact', '\u2713');
+          // Enhanced Conversions — hand the Google Ads conversion tag the
+          // customer identifiers so it can match this lead back to the ad
+          // click. Pushed on a dedicated `user_data` key (NOT event params)
+          // so the GA4 event tags never receive PII. Google's tag normalizes
+          // and SHA-256-hashes these in the browser before sending; the raw
+          // value never leaves the device. Only fires with ad-consent granted.
+          try {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+              user_data: {
+                email_address: STATE.userEmail || undefined,
+                phone_number:  STATE.userPhone || undefined
+              }
+            });
+          } catch (_) { /* telemetry must never break the form */ }
           // D53 — telemetry: a successful submit fires here, with the ref so
           // the funnel report can join to the CRM lead.
           qfTrack('quote_submit_success', {
