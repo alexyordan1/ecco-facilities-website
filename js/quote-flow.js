@@ -1861,7 +1861,7 @@
       bubble.className = 'qf2-atypical-heads-up';
       var text = document.createElement('div');
       text.className = 'qf2-atypical-heads-up-text';
-      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. We'll double-check with you when we prepare the proposal, no worries.";
+      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. We'll double-check with you when we prepare the proposal.";
       bubble.appendChild(text);
       // Insert after the prompt
       var prompt = body.querySelector('.qf2-prompt');
@@ -2719,9 +2719,9 @@
           '<em>' + dur.toFixed(0) + '</em> hours per day · <em>' +
           totalForPorter.toFixed(0) + '</em> hours per week' }),
         dur > 0 && p.days.length > 0 && dpEl('div', { class: 'qf-dp-team-preview', html:
-          '<span class="qf-dp-team-preview-tag">I’ll send the team:</span> Porter ' + p.id +
+          '<span class="qf-dp-team-preview-tag">We’ll send the team:</span> <span class="qf-dp-team-preview-line">Porter ' + p.id +
           ' works <strong>' + dpFmtDays(p.days) + '</strong>, <strong>' +
-          dpFmtTime(p.sameStart) + ' to ' + dpFmtTime(p.sameEnd) + '</strong>.' })
+          dpFmtTime(p.sameStart) + ' to ' + dpFmtTime(p.sameEnd) + '</strong>.</span>' })
       ]);
     }
 
@@ -3103,7 +3103,7 @@
       var SERVICE_CAPTIONS = {
         janitorial: 'Recurring after-hours cleaning',
         dayporter:  'On-site during business hours',
-        both:       'Day porter plus janitorial',
+        both:       'Day Porter plus Commercial Cleaning',
         unsure:     "We'll help you choose"
       };
       function buildService() {

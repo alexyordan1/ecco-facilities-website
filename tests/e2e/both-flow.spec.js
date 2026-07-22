@@ -201,7 +201,7 @@ test.describe('Combined — full flow', () => {
     await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
     const txt = await h.readSummaryText(page);
     expect(txt).toContain('Combined');
-    expect(txt).toContain('Day porter plus janitorial');
+    expect(txt).toContain('Day Porter plus Commercial Cleaning');
     expect(txt).toContain('Office');
     expect(txt).toContain('Monday');                        // cleaning days
     expect(txt).toContain('Mornings (loosely 6 am–noon)');  // windows now shown in Combined (was the bug)
