@@ -20,7 +20,7 @@ test.describe('Combined — full flow', () => {
   });
 
   test('1 — Happy path: cleaning Mon-Fri morning + 1 porter Mon-Fri 8-4', async ({ page }) => {
-    await page.click('.qf2-card[data-service="both"]');
+    await page.click('[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
 
     await h.pickSpace(page, 'Office');
@@ -50,7 +50,7 @@ test.describe('Combined — full flow', () => {
   });
 
   test('2 — Cleaning weekends + 2 porters with different days', async ({ page }) => {
-    await page.click('.qf2-card[data-service="both"]');
+    await page.click('[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Retail');
     await h.expectActive(page, 'qfScreen_size');
@@ -87,7 +87,7 @@ test.describe('Combined — full flow', () => {
   });
 
   test('3 — Snapshot Edit on Porter coverage row routes to schedule', async ({ page }) => {
-    await page.click('.qf2-card[data-service="both"]');
+    await page.click('[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_size');
@@ -142,7 +142,7 @@ test.describe('Combined — full flow', () => {
       await h.expectActive(page, 'qfScreen_days');
     };
 
-    await page.click('.qf2-card[data-service="both"]');
+    await page.click('[data-service="both"]');
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_size');
@@ -192,7 +192,7 @@ test.describe('Combined — full flow', () => {
   });
 
   test('PARITY — Combined review summary (snapshot of current output)', async ({ page }) => {
-    await page.click('.qf2-card[data-service="both"]'); await h.expectActive(page, 'qfScreen_space');
+    await page.click('[data-service="both"]'); await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '1k-3k'); await h.expectActive(page, 'qfScreen_days');
     await h.pickSchedule(page, 'Monday', 'morning'); await h.expectActive(page, 'qfScreen_schedule');

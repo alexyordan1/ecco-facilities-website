@@ -22,6 +22,14 @@ test.describe('Keyboard nav', () => {
     await h.expectActive(page, 'qfScreen_welcome');
   });
 
+  test('key 3 on Welcome selects the "Need both?" link (Combined flow)', async ({ page }) => {
+    // 2026-08-10 situation-first welcome: cards are keys 1-2, the Combined
+    // link is key 3 via the extended position-pick selector.
+    await page.keyboard.press('3');
+    await h.expectActive(page, 'qfScreen_space');
+    h.expectNoJsErrors(page);
+  });
+
   test('Enter on email field advances from Info to Contact', async ({ page }) => {
     // Info is now the last data step. Walk the (shortest) Day Porter flow to it.
     await page.click('.qf2-card[data-service="dayporter"]');

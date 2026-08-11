@@ -17,10 +17,17 @@ test.describe('Welcome screen', () => {
     await h.freshOpen(page);
   });
 
-  test('three service cards visible', async ({ page }) => {
+  test('situation-first welcome: question, 2 tagged cards, Need-both link', async ({ page }) => {
+    // 2026-08-10 situation-first redesign: descriptions are the headlines,
+    // the service term is a small tag, Combined is a quiet link below.
+    // Scope to the welcome screen — every screen has a .qf2-prompt-title in
+    // the DOM (hidden sections included), so the bare locator is ambiguous.
+    await expect(page.locator('#qfScreen_welcome .qf2-prompt-title')).toContainText('Which best describes');
     await expect(page.locator('.qf2-card[data-service="janitorial"]')).toBeVisible();
+    await expect(page.locator('.qf2-card[data-service="janitorial"] .qf2-card-tag')).toHaveText('Commercial Cleaning');
     await expect(page.locator('.qf2-card[data-service="dayporter"]')).toBeVisible();
-    await expect(page.locator('.qf2-card[data-service="both"]')).toBeVisible();
+    await expect(page.locator('.qf2-card[data-service="dayporter"] .qf2-card-tag')).toHaveText('Day Porter');
+    await expect(page.locator('.qf2-both-link[data-service="both"]')).toBeVisible();
   });
 
   test('keyboard shortcut: 1 picks first service (advances to Space)', async ({ page }) => {

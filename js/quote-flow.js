@@ -5512,6 +5512,7 @@
       if (!active2) return;
       var cards = active2.querySelectorAll(
         '.qf2-grid-3 .qf2-card[data-service], ' +
+        '.qf2-both-link[data-service], ' +   // 2026-08-10 — key 3 = Combined link
         '.qf2-grid-6 .qf2-card[data-space], ' +
         '.qf2-size-grid .qf2-size-card[data-size]'
       );

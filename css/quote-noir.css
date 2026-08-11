@@ -578,33 +578,54 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 }
 .qf-screen.is-welcome .qf2-card-icon{ width:40px; height:40px; }
 
+/* 2026-08-10 situation-first welcome — term tag + Combined link */
+.qf2-card-tag{
+  display:inline-block; margin-top:9px;
+  font-size:.66rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--accent);
+}
+.qf2-both-link{
+  /* block-level flex + max-content + auto margins = centered at EVERY
+     viewport (.qf2-body is a plain block, so align-self never applied;
+     caught at 600-879px by the AYS verify pass 2026-08-10) */
+  display:flex; align-items:center; width:max-content; max-width:100%;
+  min-height:44px; padding:0 6px; margin:10px auto 0;
+  background:none; border:none; cursor:pointer; font-family:inherit;
+  font-size:.92rem; font-weight:300; color:var(--ink-dim);
+  text-decoration:underline; text-underline-offset:4px;
+  text-shadow:0 1px 12px rgba(0,0,0,.55);
+  transition:color .25s;
+}
+/* single flex item: the arrow flows with the text and wraps after "night"
+   instead of detaching as its own flex item on narrow screens */
+.qf2-both-link-text{ text-align:center; }
+.qf2-both-link:hover,.qf2-both-link:focus-visible{ color:var(--ink); }
+
 @media (min-width:880px){
-  /* bottom-anchored content + bottom-weighted scrim; skyline fills the top */
+  /* 2026-08-10 — centered like the other screens (was bottom-left). The
+     background stays with the base welcome rule above: its id-in-:has
+     specificity beats any background set here (the old skyline declaration
+     in this block was already dead for that same reason). */
   .qf-stage:has(.qf-screen.is-welcome.is-active){
-    align-items:flex-start;
-    justify-content:flex-end;
-    padding:clamp(40px,6vh,72px) clamp(48px,7vw,110px);
-    background:
-      linear-gradient(180deg, rgba(12,14,13,.26) 0%, rgba(12,14,13,.06) 24%, rgba(12,14,13,.50) 62%, rgba(12,14,13,.90) 90%, var(--black) 100%),
-      linear-gradient(90deg, rgba(12,14,13,.50) 0%, rgba(12,14,13,.10) 46%, transparent 74%),
-      url(../images/stock/ecco-nyc-dusk.webp);
-    background-size:cover;
-    background-position:center 26%;
-    background-repeat:no-repeat;
+    align-items:center;
+    justify-content:center;
+    padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
   }
-  /* content spans wide across the bottom — NOT a 600px side column */
-  .qf-stage .qf-screen.is-welcome.is-active{ max-width:920px; margin:0; }
-  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(3rem,5.4vw,4.6rem); line-height:.98; }
-  .qf-screen.is-welcome .qf2-prompt-sub{ font-size:1.12rem; max-width:48ch; }
-  /* the 3 tiles in a horizontal row */
+  .qf-stage .qf-screen.is-welcome.is-active{ max-width:920px; margin:0 auto; width:100%; }
+  /* longer question than the old greeting — one notch smaller so it breathes */
+  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(2.4rem,4vw,3.4rem); line-height:1.04; }
+  /* the 2 tiles in a horizontal row, full block width (space-screen parity:
+     grid-6 there is max-width:none, so title/cards/trust share both edges) */
   .qf-screen.is-welcome .qf2-grid-3{ flex-direction:row; gap:14px; }
   .qf-screen.is-welcome .qf2-grid-3 .qf2-card{ flex:1 1 0; min-width:0; padding:20px; }
   .qf-screen.is-welcome .qf2-card-label{ font-size:1.18rem; }
+  /* a touch more air under the desktop row */
+  .qf-screen.is-welcome .qf2-both-link{ margin-top:14px; }
 }
 
 /* ---- REDUCED MOTION ---------------------------------------- */
 @media (prefers-reduced-motion:reduce){
-  .qf2-card,.qf2-cta,.qf2-size-card,.qf2-chip{ transition:none; }
+  .qf2-card,.qf2-cta,.qf2-size-card,.qf2-chip,.qf2-both-link{ transition:none; }
 }
 
 /* ============================================================
