@@ -164,7 +164,9 @@ test.describe('Janitorial — full flow', () => {
     await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
     const txt = await h.readSummaryText(page);
     expect(txt).toContain('Commercial Cleaning');
-    expect(txt).toContain('Recurring after-hours cleaning');
+    // 2026-08-18 — Commercial Cleaning is never bound to a time window.
+    expect(txt).toContain('Recurring cleaning on your schedule');
+    expect(txt).not.toContain('after-hours');
     expect(txt).toContain('Office');
     expect(txt).toContain('1,000–3,000 sq ft');
     expect(txt).toContain('Monday');

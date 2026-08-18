@@ -327,21 +327,13 @@
     return idx >= 0 ? idx : -1;
   }
 
-  /** V2 2026-04-25 — pure heuristic: returns true if the picked space + time
-   * combo is unusual enough to warrant a heads-up on the site visit. Pure
-   * function (no DOM, no STATE references) so any handler can call it.
-   * Office cleans evenings normally, so morning-only is unusual.
-   * Restaurants clean off-hours (eve/night), so morning-only is unusual.
-   * Medical clinics typically clean evenings — but evening-ONLY is too
-   * narrow for a medical schedule, hence the flag. */
-  function computeScheduleAtypical(space, timeOfDay) {
-    var times = Array.isArray(timeOfDay) ? timeOfDay : [];
-    var morningOnly = times.length === 1 && times[0] === 'morning';
-    var eveningOnly = times.length === 1 && times[0] === 'evening';
-    var sp = String(space || '').toLowerCase();
-    if (sp === 'office' && morningOnly) return true;
-    if (sp === 'restaurant' && morningOnly) return true;
-    if (sp === 'medical' && eveningOnly) return true;
+  /** Retired 2026-08-18. The old heuristic assumed offices/restaurants clean
+   * mornings-only = unusual and medical evenings-only = unusual, i.e. that
+   * cleaning belongs after hours. That is not Ecco's model: Commercial
+   * Cleaning runs before, during or after business hours, and no window the
+   * client picks is abnormal. Kept as a stub (always false) so every caller
+   * and the CRM payload field `schedule_atypical` keep working unchanged. */
+  function computeScheduleAtypical() {
     return false;
   }
 
@@ -1834,40 +1826,11 @@
       });
     });
 
-    // V2 — Atypical schedule heads-up (mockup G demo G). When the user
-    // reaches the Location step and STATE.scheduleAtypical is set, inject
-    // a mini-bubble at the top of the body warning them that we'll
-    // double-check the schedule. Idempotent — only injects once per visit.
-    var locObserver = registerObserver(new MutationObserver(function (muts) {
-      muts.forEach(function (m) {
-        if (m.target === SCREENS.location && SCREENS.location.classList.contains('is-active')) {
-          renderAtypicalHeadsUp();
-        }
-      });
-    }));
-    locObserver.observe(SCREENS.location, { attributes: true, attributeFilter: ['class'] });
-
-    function renderAtypicalHeadsUp() {
-      var body = SCREENS.location.querySelector('.qf2-body');
-      if (!body) return;
-      var existing = body.querySelector('.qf2-atypical-heads-up');
-      if (existing) existing.remove();
-      if (!STATE.scheduleAtypical) return;
-      var SPACE_LABEL = { Office: 'Office', Medical: 'Medical', Restaurant: 'Restaurant' };
-      var TIME_LABEL = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', flexible: 'Flexible' };
-      var sp = SPACE_LABEL[STATE.space] || (STATE.space || 'this space');
-      var t = (STATE.timeOfDay && STATE.timeOfDay.length === 1) ? TIME_LABEL[STATE.timeOfDay[0]] : 'this schedule';
-      var bubble = document.createElement('div');
-      bubble.className = 'qf2-atypical-heads-up';
-      var text = document.createElement('div');
-      text.className = 'qf2-atypical-heads-up-text';
-      text.textContent = sp + ' + ' + t + " is a bit unusual. Most " + sp.toLowerCase() + "s clean evenings or after hours. We'll double-check with you when we prepare the proposal.";
-      bubble.appendChild(text);
-      // Insert after the prompt
-      var prompt = body.querySelector('.qf2-prompt');
-      if (prompt) prompt.insertAdjacentElement('afterend', bubble);
-      else body.insertBefore(bubble, body.firstChild);
-    }
+    // 2026-08-18 — the "atypical schedule" heads-up bubble was removed with
+    // the heuristic that fed it: cleaning runs before, during or after business
+    // hours, so a daytime window is never "unusual" and telling the prospect it
+    // is only manufactured doubt. STATE.scheduleAtypical stays in STATE and in
+    // the payload (CRM column schedule_atypical) but is now always false.
 
     // V2 — Out-of-area warning (mockup G demo F). On address blur, detect
     // non-NYC inputs (NJ/CT/PA/etc) and show a warning bubble with
@@ -2830,11 +2793,110 @@
       return card;
     }
 
+    /* 2026-08-18 — every interaction inside a porter card called dpRenderPorters,
+       and wiping the host destroyed the focused node, so keyboard focus fell to
+       <body> and the user was thrown back to the top after EVERY toggle.
+
+       The fingerprint must be IDENTITY-based, not positional: a collapsed card
+       exposes [Edit, ×, chevron] while an open one exposes [×, chevron, 7 day
+       chips, 3 presets, 2 radios, 2 time inputs], so an index captured before an
+       expand resolves to a completely different control after it (measured: the
+       chevron's index landed on the Monday chip, and a second Enter silently
+       deselected the day). We record WHAT the control is and find it again. */
+    var dpLastPointerTarget = null;
+    if (qfDpPortersHost) {
+      qfDpPortersHost.addEventListener('pointerdown', function (e) {
+        // A click on the hours-mode <label> leaves activeElement on <body> while
+        // the re-render runs, so remember what was pressed and use its control.
+        var t = e.target && e.target.closest ? e.target.closest('button, input, label.qf-dp-hours-mode-opt') : null;
+        dpLastPointerTarget = t || null;
+      }, true);
+    }
+
+    function dpDescribeControl(el, card) {
+      if (!el) return null;
+      if (el.hasAttribute && el.hasAttribute('data-day')) return { k: 'day', v: el.getAttribute('data-day') };
+      if (el.classList) {
+        if (el.classList.contains('qf-dp-preset')) return { k: 'preset', v: (el.textContent || '').trim() };
+        if (el.classList.contains('qf-dp-porter-chevron')) return { k: 'chevron' };
+        if (el.classList.contains('qf-dp-porter-edit')) return { k: 'edit' };
+        if (el.classList.contains('qf-dp-porter-remove')) return { k: 'remove' };
+        if (el.classList.contains('qf-dp-hours-mode-opt')) {
+          var inp = el.querySelector('input[type="radio"]');
+          return { k: 'mode', v: inp && inp.checked ? 'checked' : 'other', i: Array.prototype.indexOf.call(card.querySelectorAll('.qf-dp-hours-mode-opt'), el) };
+        }
+      }
+      var modeLabel = el.closest ? el.closest('.qf-dp-hours-mode-opt') : null;
+      if (modeLabel) return { k: 'mode', i: Array.prototype.indexOf.call(card.querySelectorAll('.qf-dp-hours-mode-opt'), modeLabel) };
+      if (el.id) return { k: 'id', v: el.id };
+      return null;
+    }
+
+    function dpFocusFingerprint() {
+      var el = document.activeElement;
+      if (!el || !qfDpPortersHost.contains(el)) el = dpLastPointerTarget;
+      if (!el || !qfDpPortersHost.contains(el)) return null;
+      var card = el.closest('.qf-dp-porter');
+      if (!card) return null;
+      var cardIdx = Array.prototype.indexOf.call(qfDpPortersHost.children, card);
+      if (cardIdx < 0) return null;
+      var what = dpDescribeControl(el, card);
+      if (!what) return null;
+      return { cardIdx: cardIdx, what: what };
+    }
+
+    function dpFindControl(card, what) {
+      if (!card || !what) return null;
+      switch (what.k) {
+        case 'day':     return card.querySelector('.qf-day-card[data-day="' + what.v + '"]');
+        case 'chevron': return card.querySelector('.qf-dp-porter-chevron');
+        case 'edit':    return card.querySelector('.qf-dp-porter-edit') || card.querySelector('.qf-dp-porter-chevron');
+        case 'remove':  return card.querySelector('.qf-dp-porter-remove');
+        case 'id':      return card.querySelector('#' + (window.CSS && CSS.escape ? CSS.escape(what.v) : what.v));
+        case 'preset':
+          return Array.prototype.filter.call(card.querySelectorAll('.qf-dp-preset'), function (b) {
+            return (b.textContent || '').trim() === what.v;
+          })[0] || null;
+        case 'mode':
+          var opts = card.querySelectorAll('.qf-dp-hours-mode-opt');
+          var opt = opts[what.i >= 0 ? what.i : 0];
+          return opt ? (opt.querySelector('input[type="radio"]') || opt) : null;
+      }
+      return null;
+    }
+
+    function dpRestoreFocus(fp) {
+      if (!fp) return;
+      var cards = qfDpPortersHost.children;
+      if (!cards.length) {
+        // The card was removed (e.g. "Remove porter 2") — don't strand focus on
+        // <body>; hand it to the Add-porter affordance that outlives the host.
+        if (qfDpAddPorterBtn && !qfDpAddPorterBtn.disabled) {
+          try { qfDpAddPorterBtn.focus({ preventScroll: true }); } catch (_) { qfDpAddPorterBtn.focus(); }
+        }
+        return;
+      }
+      var card = cards[fp.cardIdx];
+      var removed = !card;
+      if (removed) card = cards[cards.length - 1];
+      // If the card the user acted on is gone, the control they pressed is gone
+      // too — land on that card's header control instead of nothing.
+      var target = removed
+        ? (card.querySelector('.qf-dp-porter-chevron') || card.querySelector('.qf-dp-porter-edit'))
+        : (dpFindControl(card, fp.what) || card.querySelector('.qf-dp-porter-chevron'));
+      if (target && typeof target.focus === 'function') {
+        try { target.focus({ preventScroll: true }); } catch (_) { target.focus(); }
+      }
+    }
+
     function dpRenderPorters() {
+      var fp = dpFocusFingerprint();
       qfDpPortersHost.innerHTML = '';
       (STATE.dpPorters || []).forEach(function (_, idx) {
         qfDpPortersHost.appendChild(dpRenderPorterCard(idx));
       });
+      dpRestoreFocus(fp);
+      dpLastPointerTarget = null;
     }
 
     function dpRenderAddBtn() {
@@ -3097,13 +3159,14 @@
       }
 
       // SERVICE row: primary = service name, sub = descriptive caption.
-      // Was "Janitorial · recurring" (redundant for Janitorial, mixes label
-      // and qualifier with `·`). Now: "Janitorial" / "Recurring after-hours…"
+      // Was "Janitorial · recurring" (redundant, mixes label and qualifier
+      // with `·`). 2026-08-18: the janitorial caption no longer names a time
+      // window — cleaning runs before, during or after business hours.
       var SERVICE_NAMES = { janitorial: 'Commercial Cleaning', dayporter: 'Day Porter', both: 'Combined', unsure: 'Help me decide' };
       var SERVICE_CAPTIONS = {
-        janitorial: 'Recurring after-hours cleaning',
+        janitorial: 'Recurring cleaning on your schedule',
         dayporter:  'On-site during business hours',
-        both:       'Day Porter plus Commercial Cleaning',
+        both:       "Day Porter on site while you're open, plus recurring Commercial Cleaning of the whole space",
         unsure:     "We'll help you choose"
       };
       function buildService() {
@@ -5194,6 +5257,12 @@
        ['qfUserEmail', 'userEmail'], ['qfUserPosition', 'userPosition'],
        ['qfCompanyName', 'companyName'], ['qfAddress', 'userAddress'],
        ['qfSuite', 'userSuite'], ['qfUserPhone', 'userPhone'],
+       // 2026-08-18 — qf2SpaceOther was missing here. It didn't show while the
+       // Space CTA was painted regardless of [hidden]; now that progressive
+       // disclosure works, resuming an "Other" draft left an empty field AND no
+       // Continue button, i.e. a dead end. The synthetic 'input' below re-runs
+       // the handler that unhides the CTA.
+       ['qf2SpaceOther', 'spaceOther'],
        ['qfSpecialInstructions', 'specialInstructions']].forEach(function (pair) {
         var el = document.getElementById(pair[0]);
         if (el && STATE[pair[1]] != null && STATE[pair[1]] !== '') {

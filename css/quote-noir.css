@@ -144,6 +144,11 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ── info / You step ── */
 .qf2-fields{display:flex;flex-direction:column;gap:11px;margin-top:clamp(1.1rem,3vw,1.5rem)}
 .qf2-field-block{display:flex;flex-direction:column}
+/* 2026-08-18 — data-use note under the submit CTA. Same quiet register as
+   .qf2-cta-hint; the link is inline-flex with min-height:44px (repo rule). */
+.qf2-legal-note{font-size:.78rem;color:var(--ink-dim);text-align:center;margin-top:.5rem;line-height:1.5;text-shadow:0 1px 12px rgba(0,0,0,.55)}
+.qf2-legal-note a{color:var(--accent-soft);text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 4px}
+.qf2-legal-note a:hover{color:var(--ink)}
 .qf2-cta-hint{text-align:center;font-size:.78rem;color:var(--ink-faint);margin-top:10px;font-weight:300}
 
 /* ── chips (situation / timeline / days — reusable pills) ── */
@@ -427,7 +432,13 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 #qfScreen_schedule .qf2-section-label,
 #qfScreen_schedule .qf-dp-time-summary,
 #qfScreen_schedule .qf-dp-custom-day,
-#qfScreen_schedule .qf-dp-time-field label{text-align:center}
+/* 2026-08-18 — START/END used to be centered over a left-aligned value, so the
+   label floated ~150px from what it labels. Centering the value instead can't
+   be made exact: ::-webkit-calendar-picker-indicator sits inside the content
+   box and pushes the glyphs ~15px left, and compensating with padding is a
+   per-browser magic number. Deterministic fix: align the label to the value's
+   text origin (input padding-left + border), so both start at the same x. */
+#qfScreen_schedule .qf-dp-time-field label{text-align:left;padding-left:13px}
 #qfScreen_schedule .qf-dp-day-row,
 #qfScreen_schedule .qf-dp-presets,
 #qfScreen_schedule .qf-dp-team-preview{justify-content:center}
@@ -520,18 +531,28 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-screen:not(.is-welcome) .qf2-prompt{ text-align:center; }
 /* ESTANDARIZACIÓN 2026-06-26: la regla global de .qf2-prompt solo centraba el
    título + subtítulo. Estos otros textos editoriales del lienzo se quedaban a la
-   izquierda en móvil/desktop — centrarlos también. (.qf2-atypical-heads-up-text
-   se inyecta solo en location, tras el prompt; los helpers viven en space/size/
-   info/contact; el numeric-label solo en size.) NO toca la tarjeta del Day Porter
+   izquierda en móvil/desktop — centrarlos también. (Los helpers viven en
+   space/size/info/contact; el numeric-label solo en size; los .qf2-field-err
+   en space-other, location e info.) NO toca la tarjeta del Day Porter
    (.qf-dp-*), que es un panel de config deliberadamente alineado a la izquierda. */
 .qf-screen:not(.is-welcome) .qf2-numeric-label,
 .qf-screen:not(.is-welcome) .qf2-field-helper,
-.qf-screen:not(.is-welcome) .qf2-atypical-heads-up-text{ text-align:center; }
+/* 2026-08-18 — validation errors were the ONLY left-aligned text on these
+   centered screens; on Info an error sat right above a centered helper. */
+.qf-screen:not(.is-welcome) .qf2-field-err{ text-align:center; }
 .qf2-success-title{ text-shadow:0 2px 26px rgba(0,0,0,.5); }
 /* light secondary text needs a shadow to stay legible over the photo */
-.qf2-prompt-sub,.qf2-success-subtitle,.qf2-cta-hint{
+.qf2-prompt-sub,.qf2-success-subtitle,.qf2-cta-hint,
+.qf2-time-helper,.qf2-numeric-label{
   text-shadow:0 1px 12px rgba(0,0,0,.55);
 }
+/* 2026-08-18 — WCAG AA: --ink-faint (#8B8F88) measured 4.25:1 over the photo
+   backdrop on the size/days screens (AA needs 4.5:1 for body text). The step
+   screens sit on imagery, so their supporting copy uses --ink-dim (#A8A89F).
+   Welcome is excluded — its own scrim/---sizes were measured separately. */
+.qf-screen:not(.is-welcome) .qf2-prompt-sub,
+.qf-screen:not(.is-welcome) .qf2-time-helper,
+.qf-screen:not(.is-welcome) .qf2-numeric-label{ color:var(--ink-dim); }
 /* AYS Ola 4 HI-7 — the small secondary labels sit over the photo too. The
    same soft shadow keeps the flowbar text, trust strip, card blurbs and chips
    clear of bright patches (WCAG AA). Harmless over the dark frosted chips. */
@@ -561,24 +582,30 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   /* the 7-station rail (~820px) can't fit the column — use the compact bar */
   .qf2-flowbar{ display:none; }
   .qf2-flowbar-mobile{ display:flex; }
-  /* welcome = the marquee hero: oversized headline */
-  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(2.8rem,4.4vw,4rem); line-height:1; }
 }
 
 /* ============================================================
-   WELCOME = the Marquee HERO — exactly like the approved mockup #2:
-   full-bleed dusk skyline, content fills the lower canvas (not a side
-   column), oversized headline, the 3 service tiles in a horizontal row
-   (icon on top). Scoped to .is-welcome so the other screens are
-   unaffected (those get their own per-screen photo + layout next).
+   WELCOME — situation-first (2026-08-10): centered stage, oversized
+   question, 2 description-first tiles in a row (no icons) + centered
+   "Need both?" link. Scoped to .is-welcome so the other screens are
+   unaffected.
    ============================================================ */
-/* tiles are icon-on-top on every viewport (mobile = stacked tiles) */
+/* mobile + tablet (<880px): question centered like the link and trust strip
+   below it (desktop keeps it flush with the card row's left edge) */
+.qf-screen.is-welcome .qf2-prompt{ text-align:center; }
+/* 2026-08-18 — cap the tablet size at the desktop floor (2.2rem). The shared
+   base clamp tops out at 2.6rem, so at 860px the question rendered 41.6px and
+   then SHRANK to 35.2px at 880px when the desktop rule took over — a title
+   that gets smaller as the window grows. Same value on both sides = no jump.
+   text-wrap:balance (base rule) keeps the two lines even. */
+.qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(1.85rem,5.2vw,2.2rem); }
+
+/* description-first tiles: text column, stacked on mobile */
 .qf-screen.is-welcome .qf2-grid-3 .qf2-card{
   flex-direction:column; align-items:flex-start; gap:12px; padding:17px;
 }
-.qf-screen.is-welcome .qf2-card-icon{ width:40px; height:40px; }
-
-/* 2026-08-10 situation-first welcome — term tag + Combined link */
+/* 2026-08-10 situation-first welcome — term tag + Combined link.
+   (Card icons removed same date: description-first, no pictogram chrome.) */
 .qf2-card-tag{
   display:inline-block; margin-top:9px;
   font-size:.66rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase;
@@ -596,8 +623,8 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   text-shadow:0 1px 12px rgba(0,0,0,.55);
   transition:color .25s;
 }
-/* single flex item: the arrow flows with the text and wraps after "night"
-   instead of detaching as its own flex item on narrow screens */
+/* single flex item: the arrow flows with the text (nbsp-bound to the last
+   word) instead of detaching as its own flex item on narrow screens */
 .qf2-both-link-text{ text-align:center; }
 .qf2-both-link:hover,.qf2-both-link:focus-visible{ color:var(--ink); }
 
@@ -612,8 +639,12 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
     padding:clamp(2.5rem,6vh,4.5rem) clamp(40px,6vw,90px);
   }
   .qf-stage .qf-screen.is-welcome.is-active{ max-width:920px; margin:0 auto; width:100%; }
-  /* longer question than the old greeting — one notch smaller so it breathes */
-  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(2.4rem,4vw,3.4rem); line-height:1.04; }
+  /* sized to fit the question on ONE line inside the 920px block: measured
+     natural widths are 682px @2.2rem / 832px @2.72rem / 858px @2.8rem, and the
+     narrowest desktop block (880px viewport) is 774px — so 2.2rem is the floor
+     and 2.8rem the ceiling. Left-aligned here, flush with the card row. */
+  .qf-screen.is-welcome .qf2-prompt{ text-align:left; }
+  .qf-screen.is-welcome .qf2-prompt-title{ font-size:clamp(2.2rem,3.4vw,2.8rem); line-height:1.04; }
   /* the 2 tiles in a horizontal row, full block width (space-screen parity:
      grid-6 there is max-width:none, so title/cards/trust share both edges) */
   .qf-screen.is-welcome .qf2-grid-3{ flex-direction:row; gap:14px; }
@@ -802,6 +833,11 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* capped CTAs must be block-level (flex) so margin:auto centers them
    (the base .qf2-cta is inline-flex, which margin:auto can't center) */
 #qfScreen_space .qf2-cta, #qfScreen_size .qf2-cta{ display:flex; }
+/* 2026-08-18 — ...but that ID rule (1,1,0) also beat `.qf2-cta[hidden]`
+   (0,2,0), so the Space screen's Continue was painted on arrival even though
+   the JS keeps it hidden until the "Other" field has 3+ chars. Progressive
+   disclosure was dead and the button scolded users for an unasked field. */
+#qfScreen_space .qf2-cta[hidden], #qfScreen_size .qf2-cta[hidden]{ display:none; }
 
 
 /* ---- DAYS — window-cleaning in action (B&W); "the work / schedule" ---- */
@@ -1097,8 +1133,13 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* M18/M20 — first-visit hint pill on the welcome screen. */
 .qf2-first-visit-hint{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 8px 6px 14px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);font-size:.8rem;color:var(--ink-dim);transition:opacity .25s ease,transform .25s ease}
 .qf2-first-visit-hint.is-leaving{opacity:0;transform:translateY(-4px)}
-.qf2-first-visit-dismiss{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink-faint);font-size:1rem;line-height:1;cursor:pointer}
-.qf2-first-visit-dismiss:hover{color:var(--ink);border-color:var(--line-strong)}
+/* 2026-08-18 — 44px hit area (repo minimum) while keeping the 30px painted
+   circle: the border/background stay on the ::before, the button itself is a
+   transparent 44px target. */
+.qf2-first-visit-dismiss{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-width:44px;border-radius:50%;border:0;background:none;color:var(--ink-faint);font-size:1rem;line-height:1;cursor:pointer}
+.qf2-first-visit-dismiss::before{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;transform:translate(-50%,-50%);border-radius:50%;border:1px solid var(--line)}
+.qf2-first-visit-dismiss:hover{color:var(--ink)}
+.qf2-first-visit-dismiss:hover::before{border-color:var(--line-strong)}
 
 /* M20 — gentle shake when a gated time chip is tapped before picking days. */
 @keyframes qf2-cluster-shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
