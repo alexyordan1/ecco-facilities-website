@@ -273,7 +273,6 @@
     userSuite:      '',
     userPhone:      '',
     specialInstructions: '',
-    serviceCertainty: null,
     needsSiteWalk:  false,
     scheduleAtypical: false,
     // Modernization signals — situation (info-screen chips: new vs switching),
@@ -734,7 +733,7 @@
   var SERVICE_LABELS = {
     janitorial: 'Commercial Cleaning',
     dayporter:  'Day Porter',
-    both:       'Both Services',
+    both:       'Combined', // 2026-08-18 — unified: welcome button, review and toasts now all say 'Combined'
     unsure:     'Help me decide'
   };
 
@@ -1150,7 +1149,8 @@
 
 
     // Re-trigger stagger animations on new screen
-    to.querySelectorAll('.qf-service-card, .qf-screen-inner > *, .qf-meta-chip, .qf-day-card').forEach(function (c) {
+    // 2026-08-18 — pruned extinct selectors (.qf-service-card/.qf-screen-inner/.qf-meta-chip: 0 matches in quote.html)
+    to.querySelectorAll('.qf-day-card').forEach(function (c) {
       c.style.animation = 'none';
       void c.offsetWidth;
       c.style.animation = '';
@@ -1245,6 +1245,10 @@
     var flow = getFlow();
     var idx = getStepIndex(STATE.currentStepName);
     if (idx <= 0) return;
+    // 2026-08-18 — the flow is FINISHED on success: stepping back reopened a
+    // live review whose Send button re-POSTed after the cooldown (duplicate
+    // lead with a second ref). Back is inert once the request was sent.
+    if (STATE.currentStepName === 'success') return;
     var prevName = flow[idx - 1];
     var prevScreen = SCREENS[prevName];
     if (prevScreen) {
@@ -1358,71 +1362,10 @@
       });
     });
 
-    // V2 2026-04-25 — "Not sure?" mini-quiz. The toggle expands a panel with
-    // 3 chips; each chip recommends a service, sets serviceCertainty so CRM
-    // knows the lead was guided, and routes after a brief confirmation pause.
-    var qf2QuizToggle = document.getElementById('qf2QuizToggle');
-    var qf2QuizPanel  = document.getElementById('qf2QuizPanel');
-    var qf2QuizResult = document.getElementById('qf2QuizResult');
-    var qf2QuizResultName = document.getElementById('qf2QuizResultName');
-    var qf2QuizResultBlurb = document.getElementById('qf2QuizResultBlurb');
-    var qf2QuizChips = qf2QuizPanel ? qf2QuizPanel.querySelectorAll('.qf2-quiz-chip') : [];
-
-    if (qf2QuizToggle && qf2QuizPanel) {
-      qf2QuizToggle.addEventListener('click', function () {
-        var open = !qf2QuizPanel.hidden;
-        qf2QuizPanel.hidden = open;
-        qf2QuizToggle.setAttribute('aria-expanded', String(!open));
-        if (!open) {
-          var first = qf2QuizPanel.querySelector('.qf2-quiz-chip');
-          if (first) first.focus();
-        }
-      });
-    }
-
-    if (qf2QuizChips.length) {
-      // D127 — labels match the welcome card copy. "Janitorial" → "Night cleaning"
-      // surfaces user-facing; "Janitorial" stays in the blurb as SEO keyword.
-      var QF2_QUIZ_LABELS = {
-        janitorial: { name: 'Commercial Cleaning', blurb: '· after-hours, evenings + weekends.' },
-        dayporter:  { name: 'Day Porter',     blurb: '· on-site during your business hours.' },
-        both:       { name: 'Combined',       blurb: '· janitorial + porter, one team.' }
-      };
-      qf2QuizChips.forEach(function (chip) {
-        chip.addEventListener('click', function () {
-          var pick = chip.getAttribute('data-quiz-pick');
-          if (!pick) return;
-          // Visually mark the picked chip + clear siblings.
-          qf2QuizChips.forEach(function (c) { c.classList.toggle('is-selected', c === chip); });
-
-          // Same defensive flow as the service-card handler: a stale resume
-          // banner means STATE.currentStepName still points at a late step
-          // from the prior draft, so goNext() would no-op. Treat the quiz
-          // pick as a fresh start when the banner is up.
-          var resumeBanner = document.querySelector('.qf-resume-banner');
-          if (resumeBanner) {
-            try { clearDraft(); } catch(e){}
-            resumeBanner.remove();
-          }
-
-          STATE.service = pick;
-          STATE.serviceCertainty = 'guided_via_quiz';
-          STATE.currentStepName = 'welcome';
-
-          // Show the recommendation via textContent (XSS-safe).
-          if (qf2QuizResult && qf2QuizResultName && qf2QuizResultBlurb) {
-            var meta = QF2_QUIZ_LABELS[pick] || { name: pick, blurb: '' };
-            qf2QuizResultName.textContent = meta.name;
-            qf2QuizResultBlurb.textContent = meta.blurb;
-            qf2QuizResult.hidden = false;
-          }
-
-          buildRail(STATE.service);
-          // Brief pause so the user reads the recommendation before transition.
-          setTimeout(function () { goNext(); }, 600);
-        });
-      });
-    }
+    // 2026-08-18 — the retired "Not sure?" mini-quiz block (toggle + 3 chips +
+    // result banner) was deleted: its panel left the HTML on 2026-06-20, so the
+    // handlers could never bind, and its labels carried retired after-hours
+    // copy. serviceCertainty (its only output) left STATE/payload with it.
   }
 
   /* =======================================================================
@@ -1703,6 +1646,13 @@
     });
     SCREENS.info.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        // 2026-08-18 — typed fields only reached STATE inside Continue, so
+        // "Save for later" flashed Saved ✓ while dropping this screen's text.
+        var _v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        if (_v('qfUserFirstName')) STATE.userName = _v('qfUserFirstName');
+        if (_v('qfUserLastName')) STATE.userLastName = _v('qfUserLastName');
+        if (_v('qfUserEmail')) STATE.userEmail = _v('qfUserEmail');
+        if (_v('qfUserPosition')) STATE.userPosition = _v('qfUserPosition');
         saveDraft();
         try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
@@ -1821,6 +1771,11 @@
     });
     SCREENS.location.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        // 2026-08-18 — same silent-drop fix as the Info skip handler.
+        var _v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        if (_v('qfCompanyName')) STATE.companyName = _v('qfCompanyName');
+        if (_v('qfAddress')) STATE.userAddress = _v('qfAddress');
+        if (_v('qfSuite')) STATE.userSuite = _v('qfSuite');
         saveDraft();
         try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
@@ -2271,6 +2226,15 @@
       });
     }
 
+    // 2026-08-18 — say WHY Continue is disabled (it used to be silent).
+    var daysStatus = document.getElementById('qfDaysStatus');
+    if (daysStatus) {
+      var timeSel = SCREENS.days ? SCREENS.days.querySelectorAll('.qf2-chip-time.is-selected').length : 0;
+      if (!STATE.days.length) { daysStatus.textContent = 'Pick at least one day to continue.'; daysStatus.hidden = false; }
+      else if (!timeSel) { daysStatus.textContent = 'Now pick a time window so we know when we\u2019re welcome.'; daysStatus.hidden = false; }
+      else { daysStatus.hidden = true; }
+    }
+
     // Preset highlight
     presetBtns.forEach(function (p) { p.classList.remove('is-active'); });
     if (STATE.days.length === 7) {
@@ -2323,6 +2287,7 @@
         var idx = STATE.days.indexOf(day);
         if (idx === -1) { STATE.days.push(day); } else { STATE.days.splice(idx, 1); }
         syncDaysUI();
+        try { saveDraft(); } catch (_) {} // 2026-08-18 — survive a mid-screen reload
       });
     });
 
@@ -2333,6 +2298,7 @@
         else if (p === 'everyday' || p === 'every') STATE.days = ALL_DAYS.slice();
         else if (p === 'clear') STATE.days = [];
         syncDaysUI();
+        try { saveDraft(); } catch (_) {} // 2026-08-18 — survive a mid-screen reload
       });
     });
 
@@ -2432,6 +2398,11 @@
         // After every chip toggle, refresh the disabled state of Continue
         // (which gates on time-cluster having ≥1 selection).
         if (typeof syncDaysUI === 'function') syncDaysUI();
+        // 2026-08-18 — timeOfDay used to reach STATE only inside Continue, so a
+        // reload (or Save for later) from this screen dropped the time window
+        // even though the chips looked selected. Mirror on every toggle.
+        STATE.timeOfDay = Array.from(qf2TimeChips).filter(function (c) { return c.classList.contains('is-selected'); }).map(function (c) { return c.getAttribute('data-time'); });
+        try { saveDraft(); } catch (_) {}
       });
     });
 
@@ -2946,11 +2917,15 @@
 
     function dpRemovePorter(idx) {
       if (idx === 0) return;
+      // 2026-08-18 — capture whether ANY card was open before mutating: the old
+      // clamp force-expanded Porter 1 (a card the user never touched) when a
+      // porter was removed while everything was collapsed.
+      var wasAllCollapsed = dpUI.openIdx < 0;
       STATE.dpPorters.splice(idx, 1);
       STATE.dpPorters.forEach(function (p, i) { p.id = i + 1; });
       STATE.dpPorterCount = STATE.dpPorters.length;
-      if (dpUI.openIdx >= STATE.dpPorters.length) dpUI.openIdx = STATE.dpPorters.length - 1;
-      if (dpUI.openIdx < 0) dpUI.openIdx = 0;
+      if (wasAllCollapsed) { dpUI.openIdx = -1; }
+      else if (dpUI.openIdx >= STATE.dpPorters.length) { dpUI.openIdx = STATE.dpPorters.length - 1; }
       dpRender();
       qfTrack('quote_porter_removed', { count: STATE.dpPorters.length, removed_index: idx, service: STATE.service, space: STATE.space });
     }
@@ -3063,9 +3038,26 @@
         STATE.dpPorters.forEach(function (p) { p.days.forEach(function (d) { union[d] = 1; }); });
         return Object.keys(union).sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
       })();
-      STATE.porterHours = STATE.dpPorters.map(function (p) { return { start: p.sameStart, end: p.sameEnd }; });
-      STATE.timeStart = STATE.dpPorters[0].sameStart;
-      STATE.timeEnd   = STATE.dpPorters[0].sameEnd;
+      // 2026-08-18 — a custom-hours porter used to be mirrored flat as its
+      // untouched sameStart/sameEnd defaults, so porter_hours/start_time in
+      // the CRM asserted a schedule the porter doesn't have. Custom porters
+      // mirror their per-day envelope (earliest start, latest end); the flat
+      // timeStart/timeEnd shorthand is only meaningful when every porter runs
+      // the same fixed window.
+      STATE.porterHours = STATE.dpPorters.map(function (p) {
+        if (p.hoursMode !== 'custom' || !p.customHours) return { start: p.sameStart, end: p.sameEnd };
+        var starts = [], ends = [];
+        Object.keys(p.customHours).forEach(function (d) {
+          var h = p.customHours[d];
+          if (h && h.start) starts.push(h.start);
+          if (h && h.end) ends.push(h.end);
+        });
+        if (!starts.length) return { start: p.sameStart, end: p.sameEnd };
+        return { start: starts.sort()[0], end: ends.sort().slice(-1)[0], custom: true };
+      });
+      var allSameMode = STATE.dpPorters.every(function (p) { return p.hoursMode !== 'custom'; });
+      STATE.timeStart = allSameMode ? STATE.dpPorters[0].sameStart : null;
+      STATE.timeEnd   = allSameMode ? STATE.dpPorters[0].sameEnd : null;
 
       var n = STATE.dpPorters.length;
       var hrs = dpTotalWeeklyHours();
@@ -3214,19 +3206,7 @@
         }
       }
 
-      // V2 — Service certainty badge (when guided_via_quiz)
-      var svcEl = document.getElementById('qf2SumService');
-      if (svcEl) {
-        // Remove any existing badge
-        var existingBadge = svcEl.parentElement.querySelector('.qf2-confirm-badge');
-        if (existingBadge) existingBadge.remove();
-        if (STATE.serviceCertainty === 'guided_via_quiz') {
-          var badge = document.createElement('div');
-          badge.className = 'qf2-confirm-badge';
-          badge.textContent = "We'll confirm the details.";
-          svcEl.parentElement.appendChild(badge);
-        }
-      }
+      // 2026-08-18 — the guided_via_quiz certainty badge left with the quiz.
 
       // V2 — CTA dynamic copy swap based on needsSiteWalk
       var ctaBtn = document.getElementById('qfContactSubmit');
@@ -3546,9 +3526,9 @@
       try {
         var host = location.hostname;
         if (!(host === 'localhost' || host === '127.0.0.1' || host.indexOf('.pages.dev') > -1)) return;
-        var SENT = ['service','space','spaceOther','size','sizeExact','days','timeOfDay','dpDays','dpPorters','situation','timeline','companyName','userAddress','userSuite','userName','userLastName','userEmail','userPosition','userPhone','specialInstructions','needsSiteWalk','serviceCertainty','porterCount','porterHours','scheduleAtypical','source'];
-        var REVIEWED = ['service','serviceCertainty','space','spaceOther','size','needsSiteWalk','companyName','userAddress','userSuite','days','timeOfDay','dpPorters','userName','userLastName','userEmail','userPosition','userPhone','situation','timeline'];
-        var HIDDEN = ['source','porterCount','porterHours','scheduleAtypical','sizeExact','dpDays','specialInstructions'];
+        var SENT = ['service','space','spaceOther','size','sizeExact','days','timeOfDay','dpDays','dpPorters','situation','timeline','companyName','userAddress','userSuite','userName','userLastName','userEmail','userPosition','userPhone','specialInstructions','needsSiteWalk','porterCount','porterHours','scheduleAtypical','source','urg','outOfArea'];
+        var REVIEWED = ['service','space','spaceOther','size','needsSiteWalk','companyName','userAddress','userSuite','days','timeOfDay','dpPorters','userName','userLastName','userEmail','userPosition','userPhone','situation','timeline'];
+        var HIDDEN = ['source','porterCount','porterHours','scheduleAtypical','sizeExact','dpDays','specialInstructions','urg','outOfArea'];
         SENT.forEach(function (k) {
           if (HIDDEN.indexOf(k) === -1 && REVIEWED.indexOf(k) === -1) {
             console.warn('[review-fidelity] STATE.' + k + ' is sent in the payload but no review section shows it.');
@@ -3678,13 +3658,30 @@
         } else if (section === 'days') {
           var n3 = document.createElement('p');
           n3.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
-          n3.textContent = "Hop back to the Schedule step to adjust days/times.";
+          // 2026-08-18 — this note said 'the Schedule step', but in the Combined
+          // flow 'Schedule' names the PORTER screen; this row edits cleaning.
+          n3.textContent = "Hop back to the cleaning days step to adjust days and time windows.";
           fieldsWrap.appendChild(n3);
+        } else if (section === 'schedule') {
+          var n3b = document.createElement('p');
+          n3b.className = 'qf2-edit-note';
+          // 2026-08-18 — the porter-coverage panel had an EMPTY body: just
+          // Cancel / Hop back with no explanation of where Hop back goes.
+          n3b.textContent = "Hop back to the porter schedule to adjust staffing, days, and hours.";
+          fieldsWrap.appendChild(n3b);
         } else if (section === 'size') {
           var n4 = document.createElement('p');
           n4.className = 'qf2-edit-note'; // D113 — was 5× inline cssText, extracted to CSS class
           n4.textContent = "Hop back to the Size step to adjust.";
           fieldsWrap.appendChild(n4);
+        } else if (section === 'extras') {
+          // 2026-08-18 — extras was the only route-back panel with NO note, so
+          // 'Hop back' jumped blind into a screen titled 'where do we send your
+          // proposal?'. Say where it goes and why.
+          var n5 = document.createElement('p');
+          n5.className = 'qf2-edit-note';
+          n5.textContent = "Hop back to the final step to change your situation or timing (the chips under your contact details).";
+          fieldsWrap.appendChild(n5);
         }
 
         // Action buttons
@@ -3734,7 +3731,21 @@
             var ln = document.getElementById('qf2EditLn').value.trim().slice(0,60);
             var em = document.getElementById('qf2EditEm').value.trim();
             var pos = document.getElementById('qf2EditPos').value.trim().slice(0,80);
+            // 2026-08-18 — inline email validation: the info STEP rejects a bad
+            // email on Continue but this editor accepted anything silently; the
+            // typo then only surfaced at submit. Same regex, same standard.
+            if (em && typeof EMAIL_RE !== 'undefined' && !EMAIL_RE.test(em)) {
+              try { qfToast({ type: 'error', title: 'Email looks off', message: "That email doesn't look right. Double-check?", duration: 4000 }); } catch (_) {}
+              var emField = document.getElementById('qf2EditEm');
+              if (emField) emField.focus();
+              return;
+            }
             STATE.userName = fn; STATE.userLastName = ln; STATE.userEmail = em; STATE.userPosition = pos;
+            // 2026-08-18 — mirror into the step-screen inputs. They kept the
+            // stale pre-edit text, so any later pass through the Info screen
+            // overwrote STATE from them and silently reverted this correction.
+            var SYNC_I = { qfUserFirstName: fn, qfUserLastName: ln, qfUserEmail: em, qfUserPosition: pos };
+            Object.keys(SYNC_I).forEach(function (id) { var el = document.getElementById(id); if (el) el.value = SYNC_I[id]; });
           } else if (section === 'location' || section === 'space-location') {
             // D28 — space-location merged row uses the same field set as the
             // legacy location row. Space TYPE is non-editable here (locked
@@ -3743,6 +3754,9 @@
             var addr = document.getElementById('qf2EditAddr').value.trim().slice(0,200);
             var suite = document.getElementById('qf2EditSuite').value.trim().slice(0,60);
             STATE.companyName = co; STATE.userAddress = addr; STATE.userSuite = suite;
+            // 2026-08-18 — same stale-input mirror as the info section above.
+            var SYNC_L = { qfCompanyName: co, qfAddress: addr, qfSuite: suite };
+            Object.keys(SYNC_L).forEach(function (id) { var el = document.getElementById(id); if (el) el.value = SYNC_L[id]; });
           }
           // Re-populate summary + close
           if (typeof qf2PopulateSummary === 'function') qf2PopulateSummary();
@@ -4421,11 +4435,24 @@
        // porter) so email templates and CRM can render them distinctly. The
        // 'dayporter' flow writes STATE.days to dpDays (single list). The
        // 'janitorial'/'unsure' flows write STATE.days to janDays.
+      // 2026-08-18 — dpDays now derives from STATE.dpPorters (the source of
+      // truth) at submit time. Two bugs shipped before this: pure-dayporter
+      // read STATE.days (always empty in that flow → 'Coverage days' never
+      // reached the CRM), and combined shipped a stale union when the user
+      // edited cleaning days from the review after customizing porter days.
+      var dpUnion = (function () {
+        if (!Array.isArray(STATE.dpPorters) || !STATE.dpPorters.length) return null;
+        var u = {};
+        STATE.dpPorters.forEach(function (p) { (p.days || []).forEach(function (d) { u[d] = 1; }); });
+        var days = Object.keys(u);
+        return days.length ? days.sort(function (a, b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); }) : null;
+      })();
       if (formType === 'dayporter') {
-        if (STATE.days && STATE.days.length) payload.dpDays = STATE.days;
+        var dpd = dpUnion || (Array.isArray(STATE.dpDays) && STATE.dpDays.length ? STATE.dpDays : STATE.days);
+        if (dpd && dpd.length) payload.dpDays = dpd;
       } else if (formType === 'both') {
         if (STATE.days && STATE.days.length) payload.janDays = STATE.days;
-        var dpDaysArr = (Array.isArray(STATE.dpDays) && STATE.dpDays.length) ? STATE.dpDays : STATE.days;
+        var dpDaysArr = dpUnion || ((Array.isArray(STATE.dpDays) && STATE.dpDays.length) ? STATE.dpDays : STATE.days);
         if (dpDaysArr && dpDaysArr.length) payload.dpDays = dpDaysArr;
       } else {
         if (STATE.days && STATE.days.length) payload.janDays = STATE.days;
@@ -4440,7 +4467,6 @@
       // free-text when they picked "Something else". Backend ALLOWED_KEYS already
       // accepts all of these (see functions/api/submit-quote.js).
       if (Array.isArray(STATE.timeOfDay) && STATE.timeOfDay.length) payload.timeOfDay = STATE.timeOfDay.slice();
-      if (STATE.serviceCertainty) payload.serviceCertainty = STATE.serviceCertainty;
       if (STATE.needsSiteWalk) payload.needsSiteWalk = true;
       if (STATE.scheduleAtypical) payload.scheduleAtypical = true;
       if (STATE.sizeExact) payload.exactSize = STATE.sizeExact;
@@ -4494,6 +4520,13 @@
       // the user skips them. Backend ALLOWED_KEYS + value maps gate these.
       if (STATE.situation) payload.situation = STATE.situation;
       if (STATE.timeline) payload.timeline = STATE.timeline;
+      // 2026-08-18 — the internal email's [RUSH] subject flag keys off `urg`
+      // (server: /asap/i on urgency), but the client never sent it, so every
+      // lead arrived 'Standard' even when the prospect picked ASAP.
+      if (STATE.timeline === 'asap') payload.urg = 'ASAP';
+      // 2026-08-18 — the out-of-area answer (waitlist vs continue) was captured
+      // into STATE but never shipped, so Ecco couldn't tell them apart.
+      if (STATE.outOfArea) payload.outOfArea = STATE.outOfArea;
       // Modernization #6 — lead source attribution. STATE.source is a small
       // {utm_*, referrer, landing} object stashed at boot. Ship only the
       // non-empty fields so the lead email stays clean.
@@ -4746,7 +4779,12 @@
             signal: _ctrl ? _ctrl.signal : undefined
           }).finally(function () { if (_to) clearTimeout(_to); });
         }).then(function (res) {
-          return res.json().then(function (data) { return { ok: res.ok, status: res.status, data: data }; });
+          // 2026-08-18 — an invalid-JSON body used to reject into the network
+          // .catch ('Check your connection…'), the wrong message for a server
+          // that DID answer. Parse defensively and keep the real status.
+          return res.json()
+            .then(function (data) { return { ok: res.ok, status: res.status, data: data }; })
+            .catch(function () { return { ok: false, status: res.status, data: null, badBody: true }; });
         }).then(function (result) {
           if (!result.ok || !result.data || !result.data.ok) {
             resetTurnstile();
@@ -4755,6 +4793,12 @@
             var title = 'Submission failed';
             var msg;
             var serverMsg = result.data && result.data.error;
+            // 2026-08-18 — a 200 whose body wasn't JSON is a server/proxy
+            // fault, not the user's input; don't blame their answers.
+            if (result.badBody) {
+              title = 'Something went wrong on our end';
+              msg = 'Please try again in a moment, or email info@eccofacilities.com and we\u2019ll take it from there.';
+            } else 
             if (result.status === 429) {
               title = 'Too many attempts';
               msg = 'You\u2019ve submitted a few times in the last hour. Please wait a bit or email info@eccofacilities.com and we\u2019ll take it from there.';
@@ -5190,7 +5234,7 @@
 
     // (Pre-highlighting the prior card was removed — the green ring read as
     // "selected" to users. The resume banner above is enough context.)
-    var SERVICE_NAMES = { janitorial:'Commercial Cleaning', dayporter:'Day Porter', both:'Both Services', unsure:'that plan' };
+    var SERVICE_NAMES = { janitorial:'Commercial Cleaning', dayporter:'Day Porter', both:'Combined', unsure:'that plan' };
     var niceName = SERVICE_NAMES[draft.service] || 'your plan';
 
     // AYS Ola 3 #1+#25 — XSS fix. The previous version inlined `draft.userName`
@@ -5271,6 +5315,24 @@
         }
       });
       banner.remove();
+      // 2026-08-18 — resume restored STATE + text inputs + rail labels, but
+      // never re-applied selection classes: stepping Back after a resume
+      // showed the Space/Size screens with nothing visibly selected while the
+      // rail claimed an answer. Mirror STATE onto the cards.
+      if (STATE.space) {
+        SCREENS.space && SCREENS.space.querySelectorAll('.qf2-card[data-space]').forEach(function (c) {
+          var on = c.getAttribute('data-space') === STATE.space;
+          c.classList.toggle('is-selected', on);
+          c.setAttribute('aria-pressed', String(on));
+        });
+      }
+      if (STATE.size && SCREENS.size) {
+        SCREENS.size.querySelectorAll('.qf2-size-card[data-size]').forEach(function (c) {
+          var on = c.getAttribute('data-size') === STATE.size;
+          c.classList.toggle('is-selected', on);
+          c.setAttribute('aria-pressed', String(on));
+        });
+      }
       goToScreen(STATE.currentStepName);
     });
 
@@ -5542,6 +5604,21 @@
     // that screen. Avoids users having to Tab to the button. Excludes textarea
     // (newline is intentional there) and email field if format is invalid.
     if (e.key === 'Enter' && t && t.tagName === 'INPUT' && t.type !== 'submit') {
+      // 2026-08-18 — two collisions found by the deep-analysis pass:
+      // (a) local Enter handlers (space-other, exact sqft) preventDefault and
+      //     advance the screen themselves; this document-level handler then
+      //     fired AGAIN against the NEW active screen and clicked its CTA,
+      //     skipping the porter Schedule screen entirely. Respect them.
+      if (e.defaultPrevented) return;
+      // (b) inside a review inline-edit panel, Enter used to click the
+      //     screen's primary CTA — the SUBMIT button — shipping the stale
+      //     pre-edit values. Enter there means "Save changes".
+      var editPanel = t.closest('.qf2-sum-edit-panel');
+      if (editPanel) {
+        var panelSave = editPanel.querySelector('.qf2-sum-edit-save');
+        if (panelSave) { e.preventDefault(); panelSave.click(); }
+        return;
+      }
       var active = document.querySelector('.qf-screen.is-active');
       if (active) {
         var primaryCta = active.querySelector('.qf2-cta:not([hidden]):not([disabled])');

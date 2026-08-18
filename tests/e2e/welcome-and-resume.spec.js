@@ -95,7 +95,12 @@ test.describe('Welcome screen', () => {
     // Janitorial leftovers must NOT ship: Monday/morning + 1k-3k were cleared.
     // (null values are stripped from the wire payload, so a clean switch
     // means these keys are absent; the stale bug shipped real values.)
-    expect(postedPayload.dpDays).toBeUndefined();
+    // 2026-08-18 — dpDays now derives from the porter config at submit time
+    // (pure-dayporter used to ship NO coverage days at all — that was the bug
+    // this assertion accidentally enshrined). The porter card seeds Mon-Fri by
+    // default, so a clean switch ships exactly those — NOT the janitorial
+    // leftovers, whose absence the janDays/timeOfDay/size checks still prove.
+    expect(postedPayload.dpDays).toEqual(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
     expect(postedPayload.janDays).toBeUndefined();
     expect(postedPayload.timeOfDay).toBeUndefined();
     expect(postedPayload.size).toBeUndefined();

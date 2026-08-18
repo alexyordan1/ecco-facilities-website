@@ -57,7 +57,7 @@
      is still arriving. <noscript> mirror keeps fonts working with JS off. -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/noir.css?v=26">
-<link rel="stylesheet" href="css/quote-noir.css?v=67">
+<link rel="stylesheet" href="css/quote-noir.css?v=68">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","telephone":"+19296856757","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -678,6 +678,7 @@
           <p class="qf2-time-toast" id="qf2TimeToast" hidden role="status" aria-live="polite"></p>
         </div>
         <button type="button" class="qf2-cta" id="qfDaysContinue">Continue <span aria-hidden="true">&rarr;</span></button>
+        <p class="qf2-days-status" id="qfDaysStatus" aria-live="polite" hidden></p>
       </div>    </section>
 
     <!-- D55 — Day Porter SCHEDULE screen. Replaces the legacy V1 trio
@@ -874,7 +875,9 @@
       <div class="qf2-body qf2-success-body">
         <h2 class="qf2-success-title">Thanks, <em id="qf2SuccessName">there</em>!</h2>
         <p class="qf2-success-subtitle">
-          <span class="qf2-prompt-sub-desktop">Your request is in. We&rsquo;ll reach out within 24 hours on business days.</span>
+          <!-- 2026-08-18 — desktop and mobile made two different promises
+               (24 hours on business days vs one business day); one promise now. -->
+          <span class="qf2-prompt-sub-desktop">Your request is in. We&rsquo;ll reach out within one business day.</span>
           <span class="qf2-prompt-sub-mobile">We&rsquo;ll reach out within one business day.</span>
         </p>
         <div class="qf2-timeline">
@@ -1008,8 +1011,8 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.26"></script>
-<script src="js/cookie-consent.js?v=1.5"></script>
+<script defer src="js/quote-flow.js?v=40.27"></script>
+<script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
 (function(){

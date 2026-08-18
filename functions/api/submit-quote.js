@@ -65,7 +65,7 @@ async function enforceRateLimit(request, env) {
   const after = parseInt(await kv.get(key) || '0', 10);
   // Ola 1 #5 — tightened overshoot threshold +2→+1 for earlier alerting.
   if (after > limit + 1) {
-    console.error('[submit-quote] rate-limit overshoot', { bucket, limit, after });
+    console.error('[submit-quote] rate-limit overshoot', { bucket: bucket === 'unknown' ? 'unknown' : 'ip:' + bucket.slice(0, 6) + '…', limit, after }); // 2026-08-18 — truncated, not raw (PII policy)
   }
   return { ok: true };
 }
@@ -303,7 +303,7 @@ const LEAD_FIELD_ORDER = [
   'space_type', 'space_type_custom', 'space_size', 'exact_sqft', 'cleaning_days', 'time_of_day',
   'porter_schedule', 'coverage_days', 'num_porters', 'porter_count_custom', 'hours_per_day',
   'start_time', 'porter_hours', 'current_situation', 'desired_start', 'service_certainty',
-  'needs_site_walk', 'schedule_atypical', 'address', 'suite', 'job_title', 'how_heard', 'notes', 'lead_source'
+  'needs_site_walk', 'schedule_atypical', 'out_of_area', 'address', 'suite', 'job_title', 'how_heard', 'notes', 'lead_source'
 ];
 const LEAD_FIELD_LABELS = {
   space_type: 'Space type', space_type_custom: 'Space (other)', space_size: 'Approx. size',
@@ -312,6 +312,7 @@ const LEAD_FIELD_LABELS = {
   porter_count_custom: 'Porter count', hours_per_day: 'Hours per day', start_time: 'Start time',
   porter_hours: 'Porter hours', custom_hours: 'Custom hours', current_situation: 'Current situation', desired_start: 'Desired start',
   service_certainty: 'How they chose', needs_site_walk: 'Needs site walk', schedule_atypical: 'Atypical schedule',
+  out_of_area: 'Outside NYC', // 2026-08-18 — 'waitlist' = add me to the waitlist · 'continue' = wants service anyway
   address: 'Address', suite: 'Suite / floor', job_title: 'Job title', how_heard: 'How they heard',
   notes: 'Notes', lead_source: 'Lead source'
 };
@@ -565,7 +566,7 @@ export async function onRequestPost(context) {
       'hrs','customHrs','startTime','porterHours','dpDays','dpPorters','porters','porterCount','dpAreas','areaOther',
       'timeOfDay','serviceCertainty','needsSiteWalk','scheduleAtypical',
       // 2026-06-20 — modernization signals: situation + timeline chips, lead source.
-      'situation','timeline','source',
+      'situation','timeline','source','outOfArea',
       'turnstileToken'
     ]);
     for (const k of Object.keys(body)) {
@@ -622,6 +623,10 @@ export async function onRequestPost(context) {
     const TIMELINE_VALUES = new Set(['asap', 'weeks', 'exploring']);
     if (body.timeline && !TIMELINE_VALUES.has(body.timeline)) {
       delete body.timeline;
+    }
+    // 2026-08-18 — out-of-area answer from the address bubble: 'waitlist' | 'continue'.
+    if (body.outOfArea && !['waitlist', 'continue'].includes(body.outOfArea)) {
+      delete body.outOfArea;
     }
     // 2026-06-20 — source attribution object: keep only known string fields,
     // each trimmed + capped. Drop the whole key if malformed or empty.
@@ -727,7 +732,7 @@ export async function onRequestPost(context) {
       scheduleAtypical: 'schedule_atypical',
       // 2026-06-20 — modernization signals
       situation: 'current_situation',
-      timeline: 'desired_start',
+      timeline: 'desired_start', outOfArea: 'out_of_area',
       source: 'lead_source',
     };
     const URGENCY_MAP = {
@@ -752,7 +757,10 @@ export async function onRequestPost(context) {
       formData[label] = value;
     }
 
-    const service = formType === 'dayporter' ? 'dayporter' : 'janitorial';
+    // 2026-08-18 — 'both' used to collapse to 'janitorial' here, so a combined
+    // submission overwrote a prior janitorial lead row for the same email (and
+    // vice versa) and the CRM/deal name lost the real service. Preserve it.
+    const service = formType === 'dayporter' ? 'dayporter' : formType === 'both' ? 'both' : 'janitorial';
 
     // AYS Ola 2 #8 — track integration success so a total-failure (network blip,
     // all services down) returns 502 to the client instead of a false-positive
@@ -766,7 +774,8 @@ export async function onRequestPost(context) {
       || !!env.DB
       || !!(env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY)
       || !!env.HUBSPOT_ACCESS_TOKEN
-      || !!env.POSTMARK_API_KEY;
+      || !!env.POSTMARK_API_KEY
+      || !!env.LEAD_WEBHOOK_URL; // 2026-08-18 — a webhook-only deploy used to return 200 on webhook failure (lead lost with confetti)
 
     // 4. UPSERT into Supabase (via REST API — no npm package needed)
     if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
@@ -921,7 +930,7 @@ export async function onRequestPost(context) {
 
         // Create a deal for pipeline tracking
         if (hsContactId) {
-          const dealName = `${company || firstName} - ${service === 'dayporter' ? 'Day Porter' : 'Janitorial'} (${refNumber})`;
+          const dealName = `${company || firstName} - ${service === 'dayporter' ? 'Day Porter' : service === 'both' ? 'Combined' : 'Janitorial'} (${refNumber})`;
           const dealRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/deals', {
             method: 'POST', headers: hsHeaders,
             body: JSON.stringify({
@@ -1058,7 +1067,14 @@ export async function onRequestPost(context) {
     // while the submission evaporated. When none are configured (local dev),
     // skip the check and return ok — matches the "guest mode" behaviour.
     const configuredOnes = Object.entries(integrations).filter(([, v]) => v !== null);
-    const anySucceeded = configuredOnes.some(([, v]) => v === true);
+    // 2026-08-18 — the client CONFIRMATION email (integrations.postmark) used to
+    // count as "success", so the worst case — every lead-capturing integration
+    // down but the courtesy email sent — returned 200 and the lead evaporated.
+    // Only lead-CAPTURING integrations count.
+    const CAPTURING = ['supabase', 'd1', 'hubspot', 'activecampaign', 'postmark_owner', 'webhook'];
+    const capturingOnes = configuredOnes.filter(([k]) => CAPTURING.includes(k));
+    const anySucceeded = capturingOnes.length ? capturingOnes.some(([, v]) => v === true)
+                                              : configuredOnes.some(([, v]) => v === true);
     if (anyConfigured && configuredOnes.length > 0 && !anySucceeded) {
       console.error('[submit-quote] All integrations failed', integrations);
       return new Response(JSON.stringify({ ok: false, error: 'Lead services unavailable, please try again or email info@eccofacilities.com.' }), { status: 502, headers: corsHeaders });

@@ -1,4 +1,12 @@
 (function(){
+  // 2026-08-18 — storage-blocked contexts (privacy modes, some embedded
+  // webviews) made the first bare localStorage.getItem THROW, killing this
+  // whole IIFE: no banner, no consent, and an uncaught error in console.
+  // Safe wrappers degrade to "no stored consent" instead.
+  var LS = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+  };
   // Consent gating (Fase 3). The Consent Mode v2 DEFAULT state (analytics/ad
   // storage denied) is set inline in each page <head> BEFORE GTM loads, so GA4
   // stays cookieless until the user accepts. This file owns: the banner, the
@@ -27,16 +35,16 @@
 
   // Respect Global Privacy Control (GPC): auto-decline, load nothing.
   if(navigator.globalPrivacyControl===true){
-    localStorage.setItem('ecco_cookies','declined');
-    localStorage.setItem('ecco_consent','declined');
+    LS.set('ecco_cookies','declined');
+    LS.set('ecco_consent','declined');
     window.dispatchEvent(new CustomEvent('ecco:consent-declined'));
     return;
   }
 
   // Returning visitor who already accepted: load gated trackers now.
-  if(localStorage.getItem('ecco_cookies')==='accepted'){ grant(); return; }
+  if(LS.get('ecco_cookies')==='accepted'){ grant(); return; }
   // Returning visitor who declined: do nothing.
-  if(localStorage.getItem('ecco_cookies')) return;
+  if(LS.get('ecco_cookies')) return;
 
   // First visit: show the banner.
   var b=document.createElement('div');
@@ -46,16 +54,16 @@
   setTimeout(function(){b.classList.add('visible')},1000);
 
   window.acceptCookies=function(){
-    localStorage.setItem('ecco_cookies','accepted');
-    localStorage.setItem('ecco_consent','accepted');
+    LS.set('ecco_cookies','accepted');
+    LS.set('ecco_consent','accepted');
     b.classList.remove('visible');
     setTimeout(function(){b.remove()},400);
     grant();
     window.dispatchEvent(new CustomEvent('ecco:consent-accepted'));
   };
   window.declineCookies=function(){
-    localStorage.setItem('ecco_cookies','declined');
-    localStorage.setItem('ecco_consent','declined');
+    LS.set('ecco_cookies','declined');
+    LS.set('ecco_consent','declined');
     b.classList.remove('visible');
     setTimeout(function(){b.remove()},400);
     window.dispatchEvent(new CustomEvent('ecco:consent-declined'));
