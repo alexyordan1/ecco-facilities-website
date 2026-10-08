@@ -999,6 +999,83 @@
      SCREEN NAVIGATION
      ======================================================================= */
 
+  /* -----------------------------------------------------------------------
+     2026-10-08 — Next-screen photo warm-up (audit IMG-1 / PERF-7).
+     Every screen's photo is a CSS background chosen by
+     `.qf-stage:has(#qfScreen_X.is-active)` (css/quote-noir.css, "SPACE"
+     through "SUCCESS" blocks, mobile variants in the @media (max-width:879px)
+     block at the end), and inactive screens are display:none, so the browser
+     only discovered each photo at the moment its screen activated: 0.3-0.7 s
+     of black-then-photo on Fast 4G and up to 2.7 s on Slow 4G (Space alone
+     pulls 7 files). On every screen enter we fetch the NEXT screen's photos
+     during an idle moment, so the later CSS request is a cache hit
+     (/images/* is immutable for a year). Skipped when the user asked for
+     data saving. The CSSOM can't be read for this (the gradient layers end
+     in var(--black), which blanks the longhands), so the list lives here:
+     KEEP IN SYNC with the url() of those rules when a photo changes.
+     ----------------------------------------------------------------------- */
+  var QF_SCREEN_PHOTOS = {
+    space:    ['ecco-cc-hero-lobby', 'ecco-v-corporate-800', 'ecco-v-medical-800', 'ecco-v-retail-800',
+               'ecco-v-restaurant-800', 'ecco-v-gym-800', 'ecco-v-school-800'],
+    size:     ['hero-office'],
+    days:     ['ecco-clean-squeegee-bw'],
+    schedule: ['ecco-clean-mopping-bw'],
+    location: ['int-terracotta'],
+    info:     ['ecco-trust-hero'],
+    contact:  ['bw-window-pole'],
+    success:  ['bw-spray-noir']
+  };
+  var qfWarmedPhotos = {}; // url -> Image, kept so the in-flight fetch isn't collected
+
+  function qfPhotoUrls(screen) {
+    var names = QF_SCREEN_PHOTOS[screen] || [];
+    var phone = false;
+    try { phone = matchMedia('(max-width:879px)').matches; } catch (_) {}
+    return names.map(function (name) {
+      // Stage photos have a -800 variant for phones (same breakpoint as the CSS); card photos are -800 everywhere.
+      var variant = (phone && name.indexOf('-800') === -1) ? name + '-800' : name;
+      return 'images/stock/' + variant + '.webp';
+    });
+  }
+
+  // Fetch one screen's photos in an idle moment. No-op without :has() support
+  // (those browsers only ever paint the nyc-dusk fallback) or with Save-Data on.
+  function qfWarmScreenPhotos(screen) {
+    try {
+      if (navigator.connection && navigator.connection.saveData) return;
+      if (window.CSS && CSS.supports && !CSS.supports('selector(:has(*))')) return;
+      var run = function () {
+        qfPhotoUrls(screen).forEach(function (url) {
+          if (qfWarmedPhotos[url]) return;
+          var img = new Image();
+          img.src = url;
+          qfWarmedPhotos[url] = img;
+        });
+      };
+      if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 1500 });
+      else setTimeout(run, 250);
+    } catch (_) {}
+  }
+
+  function qfWarmNextPhotos(current) {
+    var flow = getFlow();
+    var next = flow[flow.indexOf(current) + 1];
+    if (next) qfWarmScreenPhotos(next);
+  }
+
+  // First screen: nothing calls goToScreen for the welcome that the HTML
+  // already marks active. A visitor with a resumable draft will jump straight
+  // to its saved step on "Resume", so warm THAT screen instead of Space.
+  function qfWarmFirstPhotos() {
+    var draft = null;
+    try { draft = loadDraft(); } catch (_) {}
+    var step = draft && draft.service ? draft.currentStepName : null;
+    if (step && step !== 'welcome' && step !== 'success' && QF_SCREEN_PHOTOS[step]) qfWarmScreenPhotos(step);
+    else qfWarmNextPhotos('welcome');
+  }
+  if (document.readyState === 'complete') qfWarmFirstPhotos();
+  else window.addEventListener('load', qfWarmFirstPhotos);
+
   // Dynamic reveal navigation — screens born on demand, scroll to the prompt
   function goToScreen(name, direction) {
     var to = SCREENS[name];
@@ -1091,6 +1168,8 @@
       has_resume_draft: !!document.querySelector('.qf-resume-banner'),
       direction: direction === 'back' ? 'back' : 'fwd'
     });
+
+    qfWarmNextPhotos(name);
 
     // Sprint 2 — celebratory haptic pulse on success.
     if (name === 'success') qfHaptic(QF_HAPTIC.success);
