@@ -764,7 +764,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-stage:has(#qfScreen_space.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.93) 0%, rgba(12,14,13,.86) 22%, rgba(12,14,13,.83) 50%, rgba(12,14,13,.9) 78%, rgba(12,14,13,.98) 94%, var(--black) 100%),
-    url(../images/stock/ecco-cc-hero-lobby.webp);
+    url(../images/stock/ecco-cc-hero-lobby-1440-q60.webp);
   background-size:cover; background-position:center 42%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -859,7 +859,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-stage:has(#qfScreen_days.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.86) 0%, rgba(12,14,13,.76) 24%, rgba(12,14,13,.72) 52%, rgba(12,14,13,.85) 80%, rgba(12,14,13,.96) 95%, var(--black) 100%),
-    url(../images/stock/ecco-clean-squeegee-bw.webp);
+    url(../images/stock/ecco-clean-squeegee-bw-1440-q60.webp);
   background-size:cover; background-position:center 35%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -891,7 +891,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   background:
     radial-gradient(130% 110% at 50% 44%, rgba(12,14,13,.68) 0%, rgba(12,14,13,.6) 50%, rgba(12,14,13,.84) 100%),
     linear-gradient(180deg, rgba(12,14,13,.6) 0%, rgba(12,14,13,.54) 38%, rgba(12,14,13,.84) 100%),
-    url(../images/stock/ecco-clean-mopping-bw.webp);
+    url(../images/stock/ecco-clean-mopping-bw-1440-q60.webp);
   background-size:cover; background-position:center 38%; background-repeat:no-repeat;
 }
 @media (min-width:880px){
@@ -927,7 +927,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-stage:has(#qfScreen_info.is-active){
   background:
     linear-gradient(180deg, rgba(12,14,13,.8) 0%, rgba(12,14,13,.66) 26%, rgba(12,14,13,.62) 54%, rgba(12,14,13,.8) 80%, rgba(12,14,13,.95) 95%, var(--black) 100%),
-    url(../images/stock/ecco-trust-hero.webp);
+    url(../images/stock/ecco-trust-hero-1440-q60.webp);
   background-size:cover; background-position:center 40%; background-repeat:no-repeat;
 }
 @media (min-width:880px){

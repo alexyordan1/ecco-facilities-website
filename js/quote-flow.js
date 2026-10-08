@@ -1015,26 +1015,26 @@
      KEEP IN SYNC with the url() of those rules when a photo changes.
      ----------------------------------------------------------------------- */
   var QF_SCREEN_PHOTOS = {
-    space:    ['ecco-cc-hero-lobby', 'ecco-v-corporate-800', 'ecco-v-medical-800', 'ecco-v-retail-800',
+    // Stage photos: d = desktop file, m = phone file (the @media (max-width:879px) block); cards are the same everywhere.
+    space:    [{ d: 'ecco-cc-hero-lobby-1440-q60', m: 'ecco-cc-hero-lobby-800' },
+               'ecco-v-corporate-800', 'ecco-v-medical-800', 'ecco-v-retail-800',
                'ecco-v-restaurant-800', 'ecco-v-gym-800', 'ecco-v-school-800'],
-    size:     ['hero-office'],
-    days:     ['ecco-clean-squeegee-bw'],
-    schedule: ['ecco-clean-mopping-bw'],
-    location: ['int-terracotta'],
-    info:     ['ecco-trust-hero'],
-    contact:  ['bw-window-pole'],
-    success:  ['bw-spray-noir']
+    size:     [{ d: 'hero-office', m: 'hero-office-800' }],
+    days:     [{ d: 'ecco-clean-squeegee-bw-1440-q60', m: 'ecco-clean-squeegee-bw-800' }],
+    schedule: [{ d: 'ecco-clean-mopping-bw-1440-q60', m: 'ecco-clean-mopping-bw-800' }],
+    location: [{ d: 'int-terracotta', m: 'int-terracotta-800' }],
+    info:     [{ d: 'ecco-trust-hero-1440-q60', m: 'ecco-trust-hero-800' }],
+    contact:  [{ d: 'bw-window-pole', m: 'bw-window-pole-800' }],
+    success:  [{ d: 'bw-spray-noir', m: 'bw-spray-noir-800' }]
   };
   var qfWarmedPhotos = {}; // url -> Image, kept so the in-flight fetch isn't collected
 
   function qfPhotoUrls(screen) {
-    var names = QF_SCREEN_PHOTOS[screen] || [];
     var phone = false;
     try { phone = matchMedia('(max-width:879px)').matches; } catch (_) {}
-    return names.map(function (name) {
-      // Stage photos have a -800 variant for phones (same breakpoint as the CSS); card photos are -800 everywhere.
-      var variant = (phone && name.indexOf('-800') === -1) ? name + '-800' : name;
-      return 'images/stock/' + variant + '.webp';
+    return (QF_SCREEN_PHOTOS[screen] || []).map(function (entry) {
+      var name = typeof entry === 'string' ? entry : (phone ? entry.m : entry.d);
+      return 'images/stock/' + name + '.webp';
     });
   }
 
