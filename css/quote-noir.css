@@ -1181,3 +1181,39 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    (full-width centered green button); just resets the <a> underline. Shown only
    when window.QF_BOOKING_URL is set in quote.html. */
 .qf-book-cta{text-decoration:none}
+
+
+/* ════════════════════════════════════════════════════════════════
+   OUT-OF-AREA NOTICE (Location) · 2026-10-08
+   The bubble's classes only existed in the dead quote-flow.source.css
+   (audit UX-2): it rendered as unstyled 16px native buttons. Noir skin,
+   44px targets, stacks on phones.
+   ════════════════════════════════════════════════════════════════ */
+.qf2-out-of-area{
+  display:flex; flex-direction:column; gap:12px;
+  width:100%; margin:14px 0 0; padding:14px 16px;
+  background:var(--surface-2); border:1px solid var(--line-strong); border-radius:14px;
+  overflow:hidden;
+}
+.qf2-out-of-area-text{ font-size:.9rem; line-height:1.5; color:var(--ink); }
+.qf2-out-of-area-text .qf2-hand{
+  font-family:var(--font-display); font-style:italic; font-size:1.05rem; color:var(--accent); margin-right:4px;
+}
+.qf2-out-of-area-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+.qf2-out-of-area-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:44px; padding:0 18px; border-radius:999px;
+  border:1px solid var(--line-strong); background:transparent; color:var(--ink);
+  font:inherit; font-size:.88rem; font-weight:500; cursor:pointer;
+}
+.qf2-out-of-area-btn:hover{ border-color:var(--accent); color:var(--accent); }
+.qf2-out-of-area-btn--primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.qf2-out-of-area-btn--primary:hover{ background:var(--accent-soft); border-color:var(--accent-soft); color:var(--accent-ink); }
+@media (max-width:520px){
+  .qf2-out-of-area-actions{ flex-direction:column; }
+  .qf2-out-of-area-btn{ width:100%; }
+}
+@media (min-width:880px){
+  .qf2-out-of-area{ flex-direction:row; align-items:center; justify-content:space-between; gap:16px; }
+  .qf2-out-of-area-actions{ flex-wrap:nowrap; flex-shrink:0; }
+}

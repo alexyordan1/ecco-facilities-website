@@ -580,6 +580,8 @@
       if (s.dpDays && !Array.isArray(s.dpDays)) s.dpDays = [];
       // V2 2026-04-25 — type-guard new array fields too.
       if (s.timeOfDay && !Array.isArray(s.timeOfDay)) s.timeOfDay = [];
+      if (s.placeMeta && typeof s.placeMeta !== 'object') s.placeMeta = null;
+      if (s.outOfAreaAddr && typeof s.outOfAreaAddr !== 'string') s.outOfAreaAddr = null;
       // FIX 2026-06-24 (M11): dpPorters was NOT type-guarded — a malformed
       // (non-array, or array of non-objects) blob crashed the schedule screen
       // on resume. Coerce to an array of plain porter objects.
@@ -1774,6 +1776,49 @@
     addr.addEventListener('input', loadPlaces, { once: true });
   })();
 
+  /* -----------------------------------------------------------------------
+     2026-10-08 (audit MOD-2 / LOGA-5 / LOGB-5) — "outside NYC" check.
+     The old check matched loose words ("nassau", "pennsylvania", "long
+     island", "ct") and only ZIPs 110xx-114xx, so 1 Pennsylvania Plaza, 55
+     Nassau St, Long Island City and the Rockaways were told they were outside
+     NYC. Now a picked Google suggestion decides by state/borough/county; free
+     text only by a 5-digit ZIP or an explicit ", NJ / , CT / , PA"; anything
+     else is left alone (sales sees the address anyway). Hoisted to the IIFE
+     scope so the review's edit panel can reuse it.
+     ----------------------------------------------------------------------- */
+  var QF_NYC_BOROUGHS = ['manhattan', 'brooklyn', 'queens', 'bronx', 'the bronx', 'staten island'];
+  var QF_NYC_COUNTIES = ['new york county', 'kings county', 'queens county', 'bronx county', 'richmond county'];
+  function qfZipInNYC(zip) {
+    var n = parseInt(zip, 10);
+    if (n >= 10001 && n <= 10499) return true;   // Manhattan 100-102, Staten Island 103, Bronx 104
+    if (n === 11004 || n === 11005) return true; // Glen Oaks / Floral Park, Queens side
+    if (n >= 11101 && n <= 11499) return true;   // Queens 111, 113, 114; Brooklyn 112
+    if (n >= 11690 && n <= 11697) return true;   // the Rockaways (Queens)
+    return false;
+  }
+  function isOutOfNYC(addr, meta) {
+    var str = function (v) { return typeof v === 'string' ? v : ''; };
+    if (meta && typeof meta === 'object') {
+      var state = str(meta.state), borough = str(meta.borough).toLowerCase(), county = str(meta.county).toLowerCase(), mzip = str(meta.zip);
+      if (state && state !== 'NY') return true;
+      if (borough && QF_NYC_BOROUGHS.indexOf(borough) !== -1) return false;
+      if (county) return QF_NYC_COUNTIES.indexOf(county) === -1;
+      if (mzip) return !qfZipInNYC(mzip);
+    }
+    var text = str(addr).toLowerCase();
+    // The LAST 5-digit group: "13347 Sanford Ave, Flushing, NY 11355" starts with a house number.
+    var zips = text.match(/\b\d{5}(?:-\d{4})?\b/g);
+    if (zips) return !qfZipInNYC(zips[zips.length - 1].slice(0, 5));
+    return /,\s*(nj|ct|pa)\b|\bnew jersey\b|\bconnecticut\b/.test(text);
+  }
+  // Keeps the saved answer honest when the address changes outside the Location
+  // screen (the review's edit panel): a NYC address drops a stale "waitlist", an
+  // unanswered out-of-area address is sent as "continue".
+  function qfSyncOutOfArea() {
+    if (!isOutOfNYC(STATE.userAddress, STATE.placeMeta)) { STATE.outOfArea = null; STATE.outOfAreaAddr = null; return; }
+    if (STATE.outOfAreaAddr !== STATE.userAddress) { STATE.outOfArea = 'continue'; STATE.outOfAreaAddr = STATE.userAddress; }
+  }
+
   if (SCREENS.location) {
     var locationContinueBtn = document.getElementById('qfLocationContinue');
     if (locationContinueBtn) {
@@ -1836,6 +1881,7 @@
         clearLocErr();
         STATE.companyName = companyVal;
         STATE.userAddress = addr;
+        qfSyncOutOfArea();
         // V2 — capture optional suite/floor
         var suiteInput = document.getElementById('qfSuite');
         STATE.userSuite = suiteInput ? suiteInput.value.trim().slice(0, 60) : '';
@@ -1853,7 +1899,7 @@
         // 2026-08-18 — same silent-drop fix as the Info skip handler.
         var _v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
         if (_v('qfCompanyName')) STATE.companyName = _v('qfCompanyName');
-        if (_v('qfAddress')) STATE.userAddress = _v('qfAddress');
+        if (_v('qfAddress')) { STATE.userAddress = _v('qfAddress'); qfSyncOutOfArea(); }
         if (_v('qfSuite')) STATE.userSuite = _v('qfSuite');
         saveDraft();
         try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
@@ -1871,30 +1917,24 @@
     // "Yes, waitlist me" and "Continue anyway" actions.
     var addrField = document.getElementById('qfAddress');
     var fieldsWrap = SCREENS.location.querySelector('.qf2-fields');
-    function isOutOfNYC(addr) {
-      if (!addr) return false;
-      var lower = addr.toLowerCase();
-      // Detect explicit non-NY state mentions or borough/city outside NYC
-      var outStates = /\b(nj|new jersey|ct|connecticut|pa|pennsylvania|jersey city|hoboken|newark|stamford|yonkers|white plains|long island|nassau|suffolk)\b/i;
-      if (outStates.test(lower)) return true;
-      // ZIP detection: NYC ZIPs are 100xx-104xx + 11xxx (Brooklyn/Queens/SI). Outside = different.
-      var zipMatch = lower.match(/\b(\d{5})(?:-\d{4})?\b/);
-      if (zipMatch) {
-        var zip = parseInt(zipMatch[1], 10);
-        // NYC-area ZIPs: 10000-10499 (Manhattan/Bronx), 11000-11499 (Brooklyn/Queens/SI)
-        if (zip >= 10000 && zip <= 10499) return false;
-        if (zip >= 11000 && zip <= 11499) return false;
-        return true;
-      }
-      return false;
-    }
     function renderOutOfArea() {
-      if (!fieldsWrap) return;
+      if (!fieldsWrap || !addrField) return;
+      var addr = addrField.value.trim();
       var existing = SCREENS.location.querySelector('.qf2-out-of-area');
+      if (!isOutOfNYC(addr, STATE.placeMeta)) {
+        if (existing) existing.remove();
+        STATE.outOfArea = null; STATE.outOfAreaAddr = null; // a corrected address clears the stale answer
+        return;
+      }
+      if (STATE.outOfAreaAddr !== addr) STATE.outOfArea = null; // new address, new question
+      if (STATE.outOfArea) return;                               // already answered for this address
+      if (existing && existing.getAttribute('data-addr') === addr) return; // still showing: no flicker on every blur
       if (existing) existing.remove();
-      if (!addrField || !isOutOfNYC(addrField.value)) return;
       var bubble = document.createElement('div');
       bubble.className = 'qf2-out-of-area';
+      bubble.setAttribute('role', 'group');   // the announcement goes through #qfStepAnnouncer below:
+      bubble.setAttribute('aria-label', 'Outside NYC'); // a live region that is BORN with text is often not read
+      bubble.setAttribute('data-addr', addr);
       var text = document.createElement('div');
       text.className = 'qf2-out-of-area-text';
       var hand = document.createElement('span');
@@ -1906,27 +1946,37 @@
       actions.className = 'qf2-out-of-area-actions';
       var yesBtn = document.createElement('button');
       yesBtn.type = 'button';
-      yesBtn.className = 'qf2-primary';
+      yesBtn.className = 'qf2-out-of-area-btn qf2-out-of-area-btn--primary';
       yesBtn.textContent = 'Yes, waitlist me';
       var noBtn = document.createElement('button');
       noBtn.type = 'button';
+      noBtn.className = 'qf2-out-of-area-btn';
       noBtn.textContent = 'Continue anyway';
-      yesBtn.addEventListener('click', function () {
-        STATE.outOfArea = 'waitlist';
+      var answer = function (value) {
+        STATE.outOfArea = value; STATE.outOfAreaAddr = addr;
         bubble.remove();
-      });
-      noBtn.addEventListener('click', function () {
-        STATE.outOfArea = 'continue';
-        bubble.remove();
-      });
+        saveDraft();
+        var ann2 = document.getElementById('qfStepAnnouncer');
+        if (ann2) ann2.textContent = value === 'waitlist' ? 'Added to the waitlist.' : 'Okay, continuing.';
+        var cont = document.getElementById('qfLocationContinue'); // the removed button had the focus
+        if (cont) cont.focus();
+      };
+      yesBtn.addEventListener('click', function () { answer('waitlist'); });
+      noBtn.addEventListener('click', function () { answer('continue'); });
       actions.appendChild(yesBtn);
       actions.appendChild(noBtn);
-      text.appendChild(actions);
       bubble.appendChild(text);
+      bubble.appendChild(actions);
       fieldsWrap.insertAdjacentElement('afterend', bubble);
+      var ann = document.getElementById('qfStepAnnouncer');
+      if (ann) ann.textContent = "That's outside NYC. Two options follow the address field: Yes, waitlist me, or Continue anyway.";
     }
     if (addrField) {
       addrField.addEventListener('blur', renderOutOfArea);
+      // Structured pieces of a picked Google suggestion (dispatched by the Places init in quote.html).
+      addrField.addEventListener('qf:place', function (e) { STATE.placeMeta = e.detail || null; });
+      // Typing again means the picked suggestion no longer describes the field.
+      addrField.addEventListener('input', function (e) { if (e.isTrusted) STATE.placeMeta = null; });
     }
   }
 
@@ -3832,7 +3882,9 @@
             var co = document.getElementById('qf2EditCo').value.trim().slice(0,120);
             var addr = document.getElementById('qf2EditAddr').value.trim().slice(0,200);
             var suite = document.getElementById('qf2EditSuite').value.trim().slice(0,60);
+            if (addr !== STATE.userAddress) STATE.placeMeta = null; // typed by hand: the picked suggestion no longer applies
             STATE.companyName = co; STATE.userAddress = addr; STATE.userSuite = suite;
+            qfSyncOutOfArea();
             // 2026-08-18 — same stale-input mirror as the info section above.
             var SYNC_L = { qfCompanyName: co, qfAddress: addr, qfSuite: suite };
             Object.keys(SYNC_L).forEach(function (id) { var el = document.getElementById(id); if (el) el.value = SYNC_L[id]; });
@@ -5362,6 +5414,10 @@
     resumeBtn.addEventListener('click', function () {
       // Merge saved state in
       Object.keys(draft).forEach(function (k) { STATE[k] = draft[k]; });
+      // 2026-10-08 — a draft saved before the address was corrected could still carry
+      // outOfArea='waitlist' (audit LOGB-5); re-check it against the restored address.
+      if (!isOutOfNYC(STATE.userAddress, STATE.placeMeta)) { STATE.outOfArea = null; STATE.outOfAreaAddr = null; }
+      else if (STATE.outOfArea && !STATE.outOfAreaAddr) STATE.outOfAreaAddr = STATE.userAddress;
       buildRail(STATE.service);
       setRailValue('welcome', SERVICE_LABELS[STATE.service] || 'Service');
       if (STATE.userName) setRailValue('info', STATE.userName);

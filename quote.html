@@ -67,7 +67,7 @@
      so no media attribute is needed. -->
 <link rel="preload" as="image" href="images/stock/welcome-team-conference.webp" fetchpriority="high">
 <link rel="stylesheet" href="css/noir.css?v=26">
-<link rel="stylesheet" href="css/quote-noir.css?v=69">
+<link rel="stylesheet" href="css/quote-noir.css?v=70">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","telephone":"+19296856757","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -134,6 +134,18 @@
         if (place && place.formatted_address) {
           input.value = place.formatted_address;
           input.dispatchEvent(new Event('input', { bubbles: true }));
+          // 2026-10-08 (audit MOD-2) — hand the structured pieces to quote-flow.js so
+          // the "outside NYC" check can use borough/county instead of guessing from
+          // street names ("Nassau St", "Pennsylvania Plaza" used to trip it).
+          var meta = { county: '', borough: '', state: '', zip: '' };
+          (place.address_components || []).forEach(function (c) {
+            var t = c.types || [];
+            if (t.indexOf('administrative_area_level_2') !== -1) meta.county = c.long_name;
+            if (t.indexOf('sublocality_level_1') !== -1) meta.borough = c.long_name;
+            if (t.indexOf('administrative_area_level_1') !== -1) meta.state = c.short_name;
+            if (t.indexOf('postal_code') !== -1) meta.zip = c.long_name;
+          });
+          input.dispatchEvent(new CustomEvent('qf:place', { detail: meta }));
         }
         // Aggressively hide the dropdown for 1s so Google's re-render can't
         // flash it back; blur after to release any residual focus.
@@ -1021,7 +1033,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.29"></script>
+<script defer src="js/quote-flow.js?v=40.30"></script>
 <script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

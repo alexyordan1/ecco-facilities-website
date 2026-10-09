@@ -61,6 +61,12 @@ async function freshOpen(page) {
   // The resulting "failed to load" console noise is in expectNoJsErrors' benign
   // list. The few submit tests stub /api/submit-quote with page.route().
   await page.route('**/challenges.cloudflare.com/**', (route) => route.abort());
+  // 2026-10-08 — same hermetic rule for Google Maps/Places: the key's Cloud
+  // project reports BillingNotEnabled, which Google logs as console.error on
+  // every screen after the address field is focused and tripped
+  // expectNoJsErrors once a spec lingered on Location. The form's manual
+  // address path (the script's onerror fallback) is what gets exercised.
+  await page.route('**/maps.googleapis.com/**', (route) => route.abort());
 
   await page.goto('/quote.html');
   await page.waitForSelector('.qf-screen.is-active');
