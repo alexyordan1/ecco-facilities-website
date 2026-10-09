@@ -1109,10 +1109,17 @@
     var dir = direction === 'back' ? 'back' : 'fwd';
     to.classList.remove('qf-screen--entering-fwd', 'qf-screen--entering-back');
     to.classList.add('qf-screen--entering-' + dir);
-    // Cleanup the class after the enter animation settles so it doesn't block re-entries.
+    // 2026-10-08 (audit LOGA-1) — while the class is on, the screen ignores
+    // pointer events (css/quote-noir.css): the second half of a double click
+    // or double tap used to land on whatever card sat at the same spot on the
+    // NEXT screen (a space, a size, the "In a few weeks" chip) and the lead
+    // carried answers the user never saw. 500 ms is the OS double-click
+    // window on macOS and Windows (accessibility settings go higher, but
+    // nobody reads a new screen and decides in half a second); the old
+    // 800 ms matched an animation that no longer exists.
     setTimeout(function () {
       to.classList.remove('qf-screen--entering-fwd', 'qf-screen--entering-back');
-    }, 800);
+    }, 500);
 
     // Mark ALL previous screens as done + make them `inert` so the tab order,
     // form autofill, and screen readers ignore them (Fix #10). Keyboard users
@@ -1276,7 +1283,7 @@
   // duration). 850ms was over-cautious, made back-navigation feel laggy
   // and required users to double-click to actually advance/retreat.
   var _qfTransitioning = false;
-  var _qfPendingNav = null; // {fn, args} of a nav request that arrived while locked
+  var _qfPendingNav = null; // {fn, from} of a nav request that arrived while locked
   function _qfGuardTransition() {
     if (_qfTransitioning) return false;
     _qfTransitioning = true;
@@ -1287,7 +1294,11 @@
       if (_qfPendingNav) {
         var p = _qfPendingNav;
         _qfPendingNav = null;
-        try { p.fn(); } catch (_) {}
+        // 2026-10-08 (audit LOGA-1) — extra guard: replay only if the user is
+        // still on the screen where the click was queued. A goNext replayed
+        // after the screen moved on would skip a step with no validation;
+        // dropping a goBack just costs one more click.
+        if (p.from === STATE.currentStepName) { try { p.fn(); } catch (_) {} }
       }
     }, 400);
     return true;
@@ -1296,7 +1307,7 @@
   function goNext() {
     if (!_qfGuardTransition()) {
       // D26 — queue. The guard releases in ≤400ms and will replay this call.
-      _qfPendingNav = { fn: goNext };
+      _qfPendingNav = { fn: goNext, from: STATE.currentStepName };
       return;
     }
     // AYS Ola 4 HI-6 — if the user hopped back from the review screen to fix
@@ -1320,7 +1331,7 @@
     if (!_qfGuardTransition()) {
       // D26 — queue. The guard releases in ≤400ms and will replay this call.
       // Fixes the "have to click back twice" symptom on quick navigation.
-      _qfPendingNav = { fn: goBack };
+      _qfPendingNav = { fn: goBack, from: STATE.currentStepName };
       return;
     }
     var flow = getFlow();
@@ -5810,7 +5821,12 @@
     }
 
     // Number keys 1-9 → click the Nth card on the active screen (skip when typing)
-    if (!isTyping && /^[1-9]$/.test(e.key)) {
+    // 2026-10-08 (audit LOGA-3) — not with a modifier (Ctrl/Cmd/Alt+digit are
+    // browser or OS shortcuts), and not while the "Welcome back" banner is up:
+    // a digit there picked a service AND discarded the saved draft unasked.
+    // !e.repeat: the shortcut clicks programmatically (no pointer-events guard), so a held key
+    // would otherwise march through welcome → space → size picking the first option each time.
+    if (!isTyping && !e.repeat && /^[1-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !document.querySelector('.qf-resume-banner')) {
       var idx2 = parseInt(e.key, 10) - 1;
       var active2 = document.querySelector('.qf-screen.is-active');
       if (!active2) return;

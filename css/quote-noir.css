@@ -1217,3 +1217,12 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   .qf2-out-of-area{ flex-direction:row; align-items:center; justify-content:space-between; gap:16px; }
   .qf2-out-of-area-actions{ flex-wrap:nowrap; flex-shrink:0; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   SCREEN ENTRY GUARD · 2026-10-08 (audit LOGA-1)
+   goToScreen keeps this class on the incoming screen for 500 ms. Without
+   it, the second click of a double click (or the second tap) landed on the
+   card that sat at the same spot on the next screen.
+   ════════════════════════════════════════════════════════════════ */
+.qf-screen--entering-fwd,
+.qf-screen--entering-back{ pointer-events:none; }
