@@ -1526,27 +1526,47 @@
   // normalizePhone silently dropped it, so the extension vanished without the
   // user knowing. Now `555-1234 x123` fails validation loudly with a clear
   // "digits only" hint, prompting the user to put extensions in the notes field.
-  var PHONE_ALLOWED_RE = /^[\d\s\-\+\(\)\.]{10,25}$/;
+  // 2026-10-08 (audit LOGA-7) — extensions and international numbers.
+  // The progressive US formatter used to eat the "x" of "… x12" and glue the
+  // extension to the number ("(929) 280-937412" reached sales), and mangled
+  // "+44 20 7946 0958" into "(442) 079-460958" while it was being typed.
+  // Now: a "+" prefix other than +1 is left alone and validated by digit
+  // count; a trailing marker ("x", "ext.", "extension") plus digits is kept
+  // apart from the number; anything else with letters fails loudly.
+  var PHONE_EXT_RE = /^(.*?)\s*([a-z]{1,9}\.?)(\s*)(\d{0,6})\s*$/i;
+  function splitPhoneExt(v) {
+    var m = PHONE_EXT_RE.exec(v || '');
+    return m ? { base: m[1], marker: m[2], sep: m[3], ext: m[4], hasExt: true } : { base: v || '', marker: '', sep: '', ext: '', hasExt: false };
+  }
+  // Every +1 number is NANP (no other code starts with 1), so "+19292809374" from autofill is ours.
+  function isInternationalPhone(v) { return /^\s*\+(?!1)/.test(v || ''); }
+  var PHONE_ALLOWED_RE = /^[\d\s\-\+\(\)\.]{9,25}$/;
   function normalizePhone(v) { return (v || '').replace(/[^\d]/g, ''); }
   function isValidPhone(v) {
     if (!v) return true; // optional
-    if (!PHONE_ALLOWED_RE.test(v)) return false;
-    var digits = normalizePhone(v);
-    return digits.length >= 10 && digits.length <= 15;
+    var p = splitPhoneExt(v);
+    if (p.hasExt && !(/^(x|ext\.?|extension)$/i.test(p.marker) && p.ext)) return false;
+    if (!PHONE_ALLOWED_RE.test(p.base)) return false;
+    var digits = normalizePhone(p.base);
+    if (isInternationalPhone(p.base)) return digits.length >= 8 && digits.length <= 15;
+    if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
+    return digits.length === 10;
   }
   // D63 — progressive US phone formatter "(XXX) XXX-XXXX". Reduces typo
   // rate at the contact step + reads more professional in the snapshot.
-  // Non-US digits or pasted formats: leaves the user's input alone (the
-  // validator above accepts any 10–15 digit string).
   function formatUSPhone(input) {
-    var digits = normalizePhone(input);
-    if (!digits) return '';
+    if (isInternationalPhone(input)) return input; // not ours to format
+    var p = splitPhoneExt(input);
+    var digits = normalizePhone(p.base);
+    if (!digits) return p.hasExt ? input : '';
     // Strip leading 1 country code so the format reads as local.
     if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
     if (digits.length > 10) return input; // probably not a US number — leave alone
-    if (digits.length < 4)  return digits;
-    if (digits.length < 7)  return '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
-    return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6, 10);
+    var out;
+    if (digits.length < 4)      out = digits;
+    else if (digits.length < 7) out = '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+    else                        out = '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6, 10);
+    return p.hasExt ? out + ' ' + p.marker + p.sep + p.ext : out;
   }
   function attachPhoneAutoFormat(el) {
     if (!el || el._qfPhoneFormatWired) return;
@@ -1590,7 +1610,10 @@
       qfUserLastName:  'qf2InfoErr_lastName',
       qfUserEmail:     'qf2InfoErr_email'
     };
-    function qf2ShowInfoErr(msg, focusEl) {
+    // keepFocus: the blur validation must not pull the focus back into the
+    // field (audit LOGA-6: Tab/Shift+Tab/clicks could not leave an email with a
+    // typo, and what the user typed next landed inside the email).
+    function qf2ShowInfoErr(msg, focusEl, keepFocus) {
       qf2ClearInfoErr();
       var errId = focusEl && INFO_ERR_MAP[focusEl.id];
       var errEl = errId ? document.getElementById(errId) : null;
@@ -1606,7 +1629,7 @@
       // message until that field gets its own error slot.
       if (focusEl) {
         try {
-          focusEl.focus();
+          if (!keepFocus) focusEl.focus();
           focusEl.classList.add('qf-input-invalid');
           // D112 (2026-05-01) — link the error region to the input via
           // aria-describedby + aria-invalid so screen readers announce
@@ -1662,16 +1685,16 @@
         // Format → typo suggestion → disposable inbox. All run before Continue
         // click so users get inline feedback as they leave the field.
         if (!EMAIL_RE.test(val)) {
-          qf2ShowInfoErr("Hmm, that email doesn't look right. Double-check?", emailField);
+          qf2ShowInfoErr("Hmm, that email doesn't look right. Double-check?", emailField, true);
           return;
         }
         var typo = (typeof suggestEmailCorrection === 'function') ? suggestEmailCorrection(val) : null;
         if (typo) {
-          qf2ShowInfoErr('Did you mean ' + typo + '?', emailField);
+          qf2ShowInfoErr('Did you mean ' + typo + '?', emailField, true);
           return;
         }
         if (typeof isDisposableEmail === 'function' && isDisposableEmail(val)) {
-          qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", emailField);
+          qf2ShowInfoErr("Need a real inbox so I can deliver your proposal.", emailField, true);
           return;
         }
         qf2ClearInfoErr();

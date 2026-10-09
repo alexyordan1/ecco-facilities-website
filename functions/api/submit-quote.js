@@ -385,13 +385,33 @@ export function formatLeadFields(formData) {
   return out;
 }
 
+// 2026-10-08 (audit LOGA-7) — tel: link for the "Call" button. The old
+// digits-only strip glued an extension to the number ("(929) 280-9374 x12"
+// dialed 929280937412). RFC 3966: +1 for 10/11-digit US numbers, a "+"
+// prefix kept as typed for international, ";ext=" for a trailing extension.
+export function telHref(phone) {
+  const raw = String(phone || '').trim();
+  if (!raw) return '';
+  const m = /^(.*?)\s*(?:x|ext\.?|extension)\s*(\d{1,6})\s*$/i.exec(raw);
+  const base = m ? m[1] : raw;
+  const ext = m ? m[2] : '';
+  let digits = base.replace(/[^\d]/g, '');
+  if (!digits) return '';
+  let href;
+  if (/^\s*\+(?!1)/.test(base)) href = '+' + digits;
+  else if (digits.length === 10) href = '+1' + digits;
+  else if (digits.length === 11 && digits[0] === '1') href = '+' + digits;
+  else href = digits;
+  return 'tel:' + href + (ext ? ';ext=' + ext : '');
+}
+
 // Internal lead notification (approved 2026-07-10). Renders every submitted
 // field directly in HTML so nothing drops out (the old Postmark template failed
 // to draw the fields array). Returns { subject, html, text }.
 export function buildOwnerEmail({ firstName, lastName, email, phone, company, serviceLabel, refNumber, urgencyLabel, fields }) {
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'New lead';
   const isRush = /asap/i.test(String(urgencyLabel || ''));
-  const phoneDigits = String(phone || '').replace(/[^\d+]/g, '');
+  const phoneDigits = telHref(phone);
   const urgencyPillStyle = isRush
     ? 'background:#F7E0D6;color:#993C1D;'
     : 'background:#EAF3DE;color:#3B6D11;';
@@ -403,7 +423,7 @@ export function buildOwnerEmail({ firstName, lastName, email, phone, company, se
               </tr>`).join('');
 
   const callBtn = phoneDigits
-    ? `<a href="tel:${phoneDigits}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:10px 16px;border-radius:8px;background:#F1F5EA;color:#3B6D11;border:1px solid #DDE4CF;margin:0 8px 8px 0;">Call ${escapeHtml(phone)}</a>`
+    ? `<a href="${phoneDigits}" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:10px 16px;border-radius:8px;background:#F1F5EA;color:#3B6D11;border:1px solid #DDE4CF;margin:0 8px 8px 0;">Call ${escapeHtml(phone)}</a>`
     : '';
 
   const orgLine = company
