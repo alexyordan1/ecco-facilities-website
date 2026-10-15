@@ -3,6 +3,8 @@
 // Escenarios: el PATCH de HubSpot no blanquea campos; correo al cliente solo si el lead se guardó
 // (y aun así HTTP 200 cuando solo llega el correo al dueño, regla 2026-08-18 ítem 13); contacto nuevo con props completas.
 import { onRequestPost } from '../functions/api/submit-quote.js';
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
 const calls = [];
 function makeFetch(opts) {
   return async (url, init = {}) => {
@@ -18,7 +20,10 @@ function makeFetch(opts) {
 }
 async function run(name, opts, body) {
   calls.length = 0; globalThis.fetch = makeFetch(opts);
-  const env = { HUBSPOT_ACCESS_TOKEN: 'tok', POSTMARK_API_KEY: 'pm', DB: { prepare() { return { bind() { return { run: async () => { if (opts.dbDown) throw new Error('D1 down'); return { success: true }; } }; } }; } } };
+  const DB = opts.sqlite
+    ? { prepare(sql) { const st = opts.sqlite.prepare(sql); return { bind(...args) { return { run: async () => st.run(...args) }; } }; } }
+    : { prepare() { return { bind() { return { run: async () => { if (opts.dbDown) throw new Error('D1 down'); return { success: true }; } }; } }; } };
+  const env = { HUBSPOT_ACCESS_TOKEN: 'tok', POSTMARK_API_KEY: 'pm', DB };
   const req = new Request('http://localhost:8080/api/submit-quote', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost:8080' }, body: JSON.stringify(body) });
   const res = await onRequestPost({ request: req, env, waitUntil() {} });
   const patch = calls.find(c => c.method === 'PATCH' && c.url.includes('/contacts/555'));
@@ -38,4 +43,13 @@ const b = await run('B everything down (D1 + HubSpot)', { dbDown: true, hubspotD
 if (b.pm.includes('ana@example.com') || b.status !== 200) { bad++; console.log('  FAIL: client email sent although nothing stored, or status != 200'); }
 const c = await run('C new contact, D1 ok', { existingContact: false }, base);
 if (!c.pm.includes('ana@example.com') || c.status !== 200) { bad++; console.log('  FAIL: client email missing or status != 200'); }
+// D — real SQLite behind the D1 binding: a re-submission without phone/company keeps the stored ones.
+const db = new DatabaseSync(':memory:');
+db.exec(readFileSync(new URL('../schema/leads.sql', import.meta.url), 'utf8'));
+await run('D1 first submit with phone+company', { existingContact: false, sqlite: db }, { ...base, ph: '(212) 555-0101', co: 'Acme Corp' });
+await run('D2 re-submit without phone/company', { existingContact: true, sqlite: db }, base);
+const row = db.prepare('SELECT phone, company, first_name, status FROM leads WHERE email = ?').get('ana@example.com');
+console.log('  D1 row after re-submit:', JSON.stringify(row));
+if (!row || row.phone !== '(212) 555-0101' || row.company !== 'Acme Corp') { bad++; console.log('  FAIL: D1 upsert blanked phone/company'); }
+if (db.prepare('SELECT COUNT(*) AS n FROM leads').get().n !== 1) { bad++; console.log('  FAIL: upsert created a second row'); }
 console.log(bad ? `\n${bad} FAIL` : '\nharness OK');

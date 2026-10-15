@@ -813,18 +813,18 @@ export async function onRequestPost(context) {
             'Content-Type': 'application/json',
             'Prefer': 'resolution=merge-duplicates'
           },
-          body: JSON.stringify({
+          // 2026-10-15 (audit LOGB-12) — a re-submission without phone/company must not
+          // blank what the row already has: PostgREST only updates the keys sent, so
+          // empty optional fields are omitted instead of sent as null.
+          body: JSON.stringify(Object.assign({
             email,
-            first_name: firstName || null,
-            last_name: lastName || null,
-            phone: phone || null,
-            company: company || null,
             service,
             status: 'completed',
             form_data: formData,
             ref_number: refNumber,
             completed_at: new Date().toISOString()
-          })
+          }, firstName ? { first_name: firstName } : {}, lastName ? { last_name: lastName } : {},
+             phone ? { phone } : {}, company ? { company } : {}))
         });
         if (sbRes.ok) {
           integrations.supabase = true;
@@ -850,8 +850,13 @@ export async function onRequestPost(context) {
           'INSERT INTO leads (ref_number, email, first_name, last_name, phone, company, service, status, form_data, completed_at) ' +
           'VALUES (?,?,?,?,?,?,?,?,?,?) ' +
           'ON CONFLICT(email, service) DO UPDATE SET ' +
-          'first_name=excluded.first_name, last_name=excluded.last_name, phone=excluded.phone, ' +
-          'company=excluded.company, status=excluded.status, form_data=excluded.form_data, ' +
+          // 2026-10-15 (audit LOGB-12) — COALESCE keeps the stored name/phone/company when
+          // the re-submission left the optional field empty (bound as NULL).
+          'first_name=COALESCE(excluded.first_name, leads.first_name), ' +
+          'last_name=COALESCE(excluded.last_name, leads.last_name), ' +
+          'phone=COALESCE(excluded.phone, leads.phone), ' +
+          'company=COALESCE(excluded.company, leads.company), ' +
+          'status=excluded.status, form_data=excluded.form_data, ' +
           'ref_number=excluded.ref_number, completed_at=excluded.completed_at'
         ).bind(
           refNumber, email, firstName || null, lastName || null, phone || null,
