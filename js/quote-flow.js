@@ -972,9 +972,8 @@
   /* -----------------------------------------------------------------------
      syncFlowBar — show/hide flow bar (hidden on welcome)
      ----------------------------------------------------------------------- */
-  // Hide site nav, show flow bar on ALL steps (including welcome)
-  var siteNav = document.getElementById('nav');
-  if (siteNav) siteNav.style.display = 'none';
+  // The site nav is hidden by CSS (.nav[hidden], quote-noir.css) since 2026-10-15; the
+  // inline style that used to hide it here ran after first paint and caused the CLS.
 
   // Force scroll-behavior auto permanently (CSS smooth fights programmatic scroll)
   document.documentElement.style.scrollBehavior = 'auto';

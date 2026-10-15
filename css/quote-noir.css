@@ -13,6 +13,10 @@
 }
 
 /* keyboard-shortcuts affordance — subtle, desktop only */
+/* 2026-10-15 (audit PERF-1) — the site nav is `hidden` in the markup but noir.css gives
+   .nav display:flex, so it stood 74px tall until quote-flow.js hid it: a 62-74px layout
+   shift (CLS 0.077) on every load. CSS hides it before first paint. */
+.nav[hidden]{display:none}
 .qf-kbd-help{position:absolute;top:calc(var(--nav-h) + .4rem);right:1rem;z-index:5}
 .qf-kbd-help-trigger{list-style:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);color:var(--ink-faint);display:grid;place-items:center;cursor:pointer;font-size:.85rem}
 .qf-kbd-help-trigger::-webkit-details-marker{display:none}

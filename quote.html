@@ -67,7 +67,7 @@
      so no media attribute is needed. -->
 <link rel="preload" as="image" href="images/stock/welcome-team-conference.webp" fetchpriority="high">
 <link rel="stylesheet" href="css/noir.css?v=26">
-<link rel="stylesheet" href="css/quote-noir.css?v=73">
+<link rel="stylesheet" href="css/quote-noir.css?v=74">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","telephone":"+19296856757","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -194,13 +194,14 @@
   </div>
 </noscript>
 <a href="#main" class="skip-link">Skip to main content</a>
-<!-- AYS Ola 3 Commit H — nav hidden per user feedback ("molesta"). The
-     `body:has(main.q-flow) .nav:not(.nav-mini) { display: none !important }`
-     rule hides the full nav. Markup kept for noscript fallback + a11y parity. -->
+<!-- AYS Ola 3 Commit H — nav hidden per user feedback ("molesta"). Hidden by
+     `.nav[hidden]{display:none}` in quote-noir.css (2026-10-15, audit PERF-1: the old
+     JS-side hide ran after first paint and shifted the page 62-74px). Markup kept for
+     noscript fallback + a11y parity; its logos load lazily (never painted here). -->
 <nav class="nav" id="nav" hidden>
-  <a href="index.html" class="nav-logo"><img src="images/logo-horizontal.png" alt="Ecco Facilities LLC" width="180" height="40" fetchpriority="high"></a>
+  <a href="index.html" class="nav-logo"><img src="images/logo-horizontal.png" alt="Ecco Facilities LLC" width="180" height="40" loading="lazy"></a>
     <div class="nm" id="navMenu">
-    <div class="nm-header"><img src="images/logo-horizontal.png" alt="Ecco Facilities" width="120" height="27"><span>Menu</span></div>
+    <div class="nm-header"><img src="images/logo-horizontal.png" alt="Ecco Facilities" width="120" height="27" loading="lazy"><span>Menu</span></div>
     <div class="ndd"><a class="nl"><span class="nl-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span>Services <span aria-hidden="true">▼</span></a><div class="ddp"><a href="janitorial.html" class="ddi"><span aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><path d="M9 22v-4h6v4"/></svg></span><div><strong>Commercial Cleaning Services</strong><div class="ddsc">Recurring cleaning for your facility</div></div></a><a href="day-porter.html" class="ddi"><span aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><strong>Day Porter Services</strong><div class="ddsc">On-site daytime maintenance</div></div></a></div></div>
     <div class="nm-sep"></div>
     <span class="nm-label" aria-hidden="true">Company</span>
@@ -1033,7 +1034,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.34"></script>
+<script defer src="js/quote-flow.js?v=40.35"></script>
 <script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
