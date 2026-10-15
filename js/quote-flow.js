@@ -1327,7 +1327,17 @@
     saveDraft();
   }
 
+  // 2026-10-08 (audit LOGB-1 / LOGB-2 / LOGB-V1) — one source of truth for
+  // "a submit is in flight": the button's aria-busy, set and cleared by the
+  // submit pipeline. While it is on, nothing may step away from the review or
+  // edit it: the lead may already exist on the server.
+  function qfIsSubmitting() {
+    var b = document.getElementById('qfContactSubmit');
+    return !!(b && b.getAttribute('aria-busy') === 'true');
+  }
+
   function goBack() {
+    if (qfIsSubmitting()) return; // Esc, the Back arrow and the browser's Back all land here
     if (!_qfGuardTransition()) {
       // D26 — queue. The guard releases in ≤400ms and will replay this call.
       // Fixes the "have to click back twice" symptom on quick navigation.
@@ -3732,6 +3742,7 @@
 
     SCREENS.contact.querySelectorAll('.qf2-edit-btn[data-edit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        if (qfIsSubmitting()) return; // the POST already carries the values as they were
         var section = btn.getAttribute('data-edit');
         var row = btn.closest('.qf2-sum-row');
         if (!row) return;
@@ -3870,6 +3881,7 @@
           btn.focus();
         });
         saveBtn.addEventListener('click', function () {
+          if (qfIsSubmitting()) return; // the POST already left with the review as it was
           if (routeBack) {
             // Phase 2 split — Cleaning (data-edit=days) → cleaning-days screen;
             // Porter coverage (data-edit=schedule) → Schedule screen; extras →
@@ -4870,6 +4882,7 @@
         var originalHTML = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.setAttribute('aria-busy', 'true');
+        SCREENS.contact.setAttribute('aria-busy', 'true');
         submitBtn.classList.add('is-loading');
         submitBtn.textContent = 'Sending\u2026';
 
@@ -4887,16 +4900,6 @@
         function awaitTurnstile() {
           return new Promise(function (resolve) {
             if (window.qfTurnstileToken) return resolve(window.qfTurnstileToken);
-            if (!window.turnstile) return resolve(null);
-            // Reset before execute so rapid Submit clicks don't trigger
-            // Cloudflare's "Call to execute() on a widget that is already
-            // executing" warning, which can leave a stale challenge in flight.
-            try {
-              if (typeof window.turnstile.reset === 'function') {
-                window.turnstile.reset('#qfTurnstile');
-              }
-              window.turnstile.execute('#qfTurnstile');
-            } catch (_) {}
             var start = Date.now();
             var timerId = null;
             var settled = false;
@@ -4906,11 +4909,36 @@
               if (timerId) { clearTimeout(timerId); timerId = null; }
               resolve(v);
             }
-            (function check() {
+            function execute() {
+              start = Date.now(); // the challenge gets its own 8 s once the script is here
+              // Reset before execute so rapid Submit clicks don't trigger
+              // Cloudflare's "Call to execute() on a widget that is already
+              // executing" warning, which can leave a stale challenge in flight.
+              try {
+                if (typeof window.turnstile.reset === 'function') {
+                  window.turnstile.reset('#qfTurnstile');
+                }
+                window.turnstile.execute('#qfTurnstile');
+              } catch (_) {}
+              (function check() {
+                if (settled) return;
+                if (window.qfTurnstileToken) return done(window.qfTurnstileToken);
+                if (Date.now() - start > 8000) return done(null);
+                timerId = setTimeout(check, 120);
+              })();
+            }
+            if (window.turnstile) return execute();
+            // 2026-10-08 (audit LOGB-7) — the script is lazy-loaded when the review
+            // opens; a click before it landed used to post without a token and get
+            // a 403. While it is still loading, wait for it (same 8 s budget); give
+            // up at once only if it failed or was never requested.
+            if (window.qfTurnstileState !== 'loading') return done(null);
+            (function waitScript() {
               if (settled) return;
-              if (window.qfTurnstileToken) return done(window.qfTurnstileToken);
+              if (window.turnstile) return execute();
+              if (window.qfTurnstileState !== 'loading') return done(null); // onerror fired meanwhile
               if (Date.now() - start > 8000) return done(null);
-              timerId = setTimeout(check, 120);
+              timerId = setTimeout(waitScript, 120);
             })();
           });
         }
@@ -4928,8 +4956,10 @@
           } catch (_) {}
         }
 
+        // 2026-10-08 (audit LOGB-V1) — freeze the payload at the click: the Turnstile
+        // wait can take seconds and the phone field stayed editable meanwhile.
+        var payload = buildSubmitPayload();
         awaitTurnstile().then(function (token) {
-          var payload = buildSubmitPayload();
           if (token) payload.turnstileToken = token;
           // FIX 2026-06-24 (H): bound the client→worker request. Without this,
           // a stalled connection (flaky mobile, captive portal, cold-start hang)
@@ -4942,14 +4972,19 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
             signal: _ctrl ? _ctrl.signal : undefined
+          }).then(function (res) {
+            // 2026-08-18 — an invalid-JSON body used to reject into the network
+            // .catch ('Check your connection…'), the wrong message for a server
+            // that DID answer. Parse defensively and keep the real status.
+            // 2026-10-08 — the 20 s abort now also covers reading the body: a
+            // stalled body left aria-busy on forever, and busy now locks Esc/Back.
+            return res.json()
+              .then(function (data) { return { ok: res.ok, status: res.status, data: data }; })
+              .catch(function (e) {
+                if (e && e.name === 'AbortError') throw e;
+                return { ok: false, status: res.status, data: null, badBody: true };
+              });
           }).finally(function () { if (_to) clearTimeout(_to); });
-        }).then(function (res) {
-          // 2026-08-18 — an invalid-JSON body used to reject into the network
-          // .catch ('Check your connection…'), the wrong message for a server
-          // that DID answer. Parse defensively and keep the real status.
-          return res.json()
-            .then(function (data) { return { ok: res.ok, status: res.status, data: data }; })
-            .catch(function () { return { ok: false, status: res.status, data: null, badBody: true }; });
         }).then(function (result) {
           if (!result.ok || !result.data || !result.data.ok) {
             resetTurnstile();
@@ -4984,7 +5019,7 @@
               reason: serverMsg || ('http_' + (result.status || 0))
             });
             submitBtn.disabled = false;
-            submitBtn.removeAttribute('aria-busy');
+            submitBtn.removeAttribute('aria-busy'); SCREENS.contact.removeAttribute('aria-busy');
             submitBtn.classList.remove('is-loading');
             submitBtn.innerHTML = originalHTML;
             return;
@@ -5110,7 +5145,7 @@
             needs_site_walk: !!STATE.needsSiteWalk
           });
           submitBtn.disabled = false;
-          submitBtn.removeAttribute('aria-busy');
+          submitBtn.removeAttribute('aria-busy'); SCREENS.contact.removeAttribute('aria-busy');
           submitBtn.classList.remove('is-loading');
           submitBtn.innerHTML = originalHTML;
           clearDraft();
@@ -5133,7 +5168,9 @@
               }
             });
           }
-          goNext();
+          // 2026-10-08 (audit LOGB-1) — explicit target: a relative goNext() from a
+          // screen the user reached mid-flight re-opened the review with Send alive.
+          goToScreen('success', 'fwd');
         }).catch(function (err) {
           // AYS Ola 3 Commit G #40 + Ola 4 Commit L CR-1 — differentiate captcha
           // failures from network errors AND reset the stale token so retry works.
@@ -5149,7 +5186,7 @@
             reason: (err && /captcha|turnstile/i.test(err.message || '')) ? 'captcha' : 'network'
           });
           submitBtn.disabled = false;
-          submitBtn.removeAttribute('aria-busy');
+          submitBtn.removeAttribute('aria-busy'); SCREENS.contact.removeAttribute('aria-busy');
           submitBtn.classList.remove('is-loading');
           submitBtn.innerHTML = originalHTML;
         });
@@ -5626,6 +5663,10 @@
         s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
         s.async = true;
         s.defer = true;
+        // 2026-10-08 (audit LOGB-7) — awaitTurnstile waits while this is 'loading'.
+        window.qfTurnstileState = 'loading';
+        s.onload = function () { window.qfTurnstileState = 'ready'; };
+        s.onerror = function () { window.qfTurnstileState = 'failed'; };
         document.head.appendChild(s);
       }
       var stage = document.getElementById('qfStage');
@@ -5692,7 +5733,9 @@
         document.body.appendChild(liveBanner);
         // Disable any visible Submit button.
         var sub = document.getElementById('qfContactSubmit');
-        if (sub) { sub.disabled = true; sub.setAttribute('data-net-disabled', '1'); }
+        // 2026-10-08 (audit LOGB-2) — a button that is already disabled is busy sending:
+        // marking it here let the 'online' event re-enable it mid-POST (duplicate lead).
+        if (sub && !sub.disabled) { sub.disabled = true; sub.setAttribute('data-net-disabled', '1'); }
       }
       function hideOfflineBanner() {
         if (liveBanner) { liveBanner.remove(); liveBanner = null; }
@@ -5732,7 +5775,7 @@
       obs.observe(stage, { subtree: true, attributes: true, attributeFilter: ['class'] });
       window.addEventListener('popstate', function (e) {
         // Browser back: try to traverse our own goBack rather than leaving the page.
-        if (typeof goBack === 'function') {
+        if (typeof goBack === 'function' && !qfIsSubmitting()) {
           inPopstate = true;
           try { goBack(); } catch (_) {}
         }
