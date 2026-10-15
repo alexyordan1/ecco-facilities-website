@@ -14,9 +14,9 @@
 
 /* keyboard-shortcuts affordance — subtle, desktop only */
 .qf-kbd-help{position:absolute;top:calc(var(--nav-h) + .4rem);right:1rem;z-index:5}
-.qf-kbd-help-trigger{list-style:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);color:var(--ink-faint);display:grid;place-items:center;cursor:pointer;font-size:.85rem}
+.qf-kbd-help-trigger{list-style:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);color:var(--ink-faint);display:grid;place-items:center;cursor:pointer;font-size:.85rem}
 .qf-kbd-help-trigger::-webkit-details-marker{display:none}
-.qf-kbd-help-panel{position:absolute;right:0;top:38px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:14px 16px;width:230px}
+.qf-kbd-help-panel{position:absolute;right:0;top:50px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:14px 16px;width:230px}
 .qf-kbd-help-title{font-size:.78rem;color:var(--ink);font-weight:500;margin-bottom:.5rem}
 .qf-kbd-help-list{display:grid;grid-template-columns:auto 1fr;gap:.4rem .8rem;font-size:.76rem;color:var(--ink-dim)}
 .qf-kbd-help-list kbd{background:var(--surface-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.72rem;color:var(--ink)}
@@ -29,7 +29,7 @@
 .qf2-prompt{margin-bottom:.2rem}
 .qf2-prompt-title{font-family:var(--font-display);font-weight:300;font-size:clamp(1.55rem,4.6vw,2.05rem);line-height:1.1;letter-spacing:-.01em;color:var(--ink);text-wrap:balance}
 .qf2-prompt-title em{font-style:italic;color:var(--accent-soft)}
-.qf2-prompt-sub{color:var(--ink-faint);font-size:.86rem;font-weight:300;margin-top:8px;line-height:1.5}
+.qf2-prompt-sub{color:var(--ink);font-size:.86rem;font-weight:400;margin-top:8px;line-height:1.5} /* 2026-10-15 (audit UX-10): was --ink-faint/300, 2.9:1 over the photo */
 .qf2-prompt-sub-time{color:var(--ink-dim)}
 
 /* service cards */
@@ -105,7 +105,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-flowbar-station.is-done{color:var(--ink-dim)} .qf2-flowbar-station.is-done .qf2-flowbar-dot{background:var(--accent);border-color:var(--accent)}
 .qf2-flowbar-station.is-active{color:var(--accent)} .qf2-flowbar-station.is-active .qf2-flowbar-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.2)}
 .qf2-flowbar-step-count{font-size:.72rem;color:var(--ink-faint);flex:none}
-.qf2-flowbar-skip{font-size:.78rem;color:var(--ink-faint);background:none;border:none;font-family:inherit;cursor:pointer;flex:none;min-height:44px;padding:0 .2rem}
+.qf2-flowbar-skip{font-size:.78rem;color:var(--ink-dim);background:none;border:none;font-family:inherit;cursor:pointer;flex:none;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 .2rem} /* 2026-10-15 (audit UX-17): 44px target, readable colour */
 .qf2-flowbar-skip:hover{color:var(--accent)}
 .qf2-flowbar-mobile-progress{flex:1;min-width:0}
 .qf2-flowbar-mobile-track{height:4px;border-radius:99px;background:rgba(244,242,236,.1);overflow:hidden}
@@ -116,7 +116,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-grid-6{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:clamp(1.1rem,3vw,1.5rem)}
 @media(min-width:520px){.qf2-grid-6{grid-template-columns:repeat(3,1fr)}}
 .qf2-grid-6 .qf2-card{flex-direction:column;align-items:flex-start;gap:9px}
-.qf2-card-hint{font-size:.76rem;color:var(--ink-dim);font-weight:300;line-height:1.4;margin-top:2px}
+.qf2-card-hint{font-size:.76rem;color:var(--ink);font-weight:400;line-height:1.4;margin-top:2px} /* 2026-10-15 (audit UX-10): 3.4:1 before over the card photo */
 .qf2-space-other-wrap{margin-top:14px}
 .qf2-space-other-prompt{font-size:.82rem;color:var(--ink-faint);font-weight:300;margin-bottom:.6rem}
 .qf2-space-other-prompt span{color:var(--ink-dim)}
@@ -129,7 +129,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-field input{flex:1;width:100%;background:none;border:none;color:var(--ink);font-family:inherit;font-size:16px;font-weight:300;padding:14px 0;min-height:44px}
 .qf2-field input::placeholder{color:var(--ink-faint)}
 .qf2-field input:focus{outline:none}
-.qf2-field-helper{font-size:.78rem;color:var(--accent-soft);margin-top:.45rem;font-weight:300}
+.qf2-field-helper{font-size:.78rem;color:var(--accent-soft);margin-top:.45rem;font-weight:400}
 .qf2-field-helper[hidden]{display:none}
 .qf2-field-err{font-size:.8rem;color:#E8A0A0;margin-top:.45rem}
 .qf2-field-err[hidden]{display:none}
@@ -165,7 +165,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-cta-hint{text-align:center;font-size:.78rem;color:var(--ink-faint);margin-top:10px;font-weight:300}
 
 /* ── chips (situation / timeline / days — reusable pills) ── */
-.qf2-chip-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-top:1.5rem;display:block}
+.qf2-chip-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);font-weight:500;margin-top:1.5rem;display:block} /* 2026-10-15 (audit UX-10): --ink-faint was 3.0:1, --ink-dim 4.1:1 */
 .qf2-chip-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:.7rem}
 .qf2-chip{font-size:.88rem;color:var(--ink-dim);background:var(--surface-1);border:1px solid var(--line);border-radius:99px;padding:11px 16px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:border-color .2s,color .2s,background .2s}
 .qf2-chip:hover{border-color:var(--line-strong)}
@@ -225,7 +225,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* ── location step ── */
 .qf2-location-hint{background:rgba(var(--accent-rgb),.05);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-top:1rem}
 .qf2-location-hint-label{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:500}
-.qf2-location-hint-body{font-size:.8rem;color:var(--ink-dim);font-weight:300;margin-top:.2rem;line-height:1.45}
+.qf2-location-hint-body{font-size:.82rem;color:var(--ink);font-weight:400;margin-top:.2rem;line-height:1.45} /* 2026-10-15 (audit UX-10): 2.8:1 before */
 /* Google Places autocomplete dropdown — dark */
 .pac-container{background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;margin-top:4px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-family:var(--font-body);z-index:9999}
 .pac-container::after{display:none!important}
@@ -252,7 +252,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 /* FIX 2026-06-25: el toast no tenía estado oculto ni regla .is-visible, así que
    .is-visible era inerte → cada toast quedaba pegado en pantalla para siempre,
    tapando el área de envío. Estado oculto en reposo + .is-visible lo revela. */
-.qf-toast{position:fixed;left:50%;bottom:24px;z-index:1000;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;max-width:min(92vw,420px);box-shadow:0 14px 40px rgba(0,0,0,.6);opacity:0;transform:translateX(-50%) translateY(140%);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+.qf-toast{position:fixed;left:50%;bottom:24px;z-index:1000;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;width:max-content;max-width:min(92vw,420px);box-shadow:0 14px 40px rgba(0,0,0,.6);opacity:0;transform:translateX(-50%) translateY(140%);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
 .qf-toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 @media(prefers-reduced-motion:reduce){.qf-toast,.qf-toast.is-visible{transform:translateX(-50%)}}
 .qf-toast-ico{flex:none;color:var(--accent);display:grid;place-items:center}
@@ -262,7 +262,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    inline with no separator, so they ran together ("Starting freshNew proposal").
    Block the title onto its own line above the message. */
 .qf-toast-body b,.qf-toast-body strong{color:var(--ink);font-weight:500;display:block;margin-bottom:1px}
-.qf-toast-close{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px}
+.qf-toast-close{flex:none;background:none;border:none;color:var(--ink-dim);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;margin:-8px -10px -8px 0} /* 2026-10-15 (audit UX-17): was 19x26 */
 .qf-toast-error .qf-toast-ico{color:#E8A0A0}
 .qf-toast-warn .qf-toast-ico{color:var(--accent-soft)}
 
@@ -401,7 +401,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-dp-custom-day{font-size:.8rem;color:var(--ink-dim);min-width:48px;flex:none}
 .qf-dp-time-field{flex:1}
 .qf-dp-time-input{background:var(--surface-1);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:inherit;font-size:16px;padding:10px 12px;min-height:46px;width:100%}
-.qf-dp-time-input:focus{outline:none;border-color:var(--accent)}
+.qf-dp-time-input:focus{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent)} /* 2026-10-15 (audit A11Y-8): the 1px border change alone was not a visible focus */
 .qf-dp-time-summary,.qf-dp-custom-empty{font-size:.8rem;color:var(--ink-faint);font-weight:300}
 .qf-dp-custom-rows{display:flex;flex-direction:column;gap:8px}
 /* Custom: los time-inputs son hijos DIRECTOS del flex (sin el wrapper .qf-dp-time-field
@@ -567,7 +567,10 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    Welcome is excluded — its own scrim/---sizes were measured separately. */
 .qf-screen:not(.is-welcome) .qf2-prompt-sub,
 .qf-screen:not(.is-welcome) .qf2-time-helper,
-.qf-screen:not(.is-welcome) .qf2-numeric-label{ color:var(--ink-dim); }
+.qf-screen:not(.is-welcome) .qf2-numeric-label{ color:var(--ink); }
+/* 2026-10-15 (audit UX-10 / A11Y-4) — --ink-dim still measured 2.9:1 (info) and
+   3.7:1 (days) against the brightest 10 % of the photo behind the subtitle;
+   --ink at weight 400 measures 4.9-7.7:1 on every step screen. */
 /* AYS Ola 4 HI-7 — the small secondary labels sit over the photo too. The
    same soft shadow keeps the flowbar text, trust strip, card blurbs and chips
    clear of bright patches (WCAG AA). Harmless over the dark frosted chips. */
@@ -810,7 +813,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
   border-color:rgba(var(--accent-rgb),.6);
 }
 .qf-screen.is-space .qf2-card-label{ text-shadow:0 1px 10px rgba(0,0,0,.75); }
-.qf-screen.is-space .qf2-card-hint{ color:var(--ink-dim); text-shadow:0 1px 8px rgba(0,0,0,.75); }
+.qf-screen.is-space .qf2-card-hint{ color:var(--ink); text-shadow:0 1px 8px rgba(0,0,0,.75); } /* 2026-10-15 (audit UX-10): --ink-dim was 3.4:1 on the Restaurant card */
 /* per-card photo + scrim (bottom-weighted for the label; overlay normalizes bright shots) */
 .qf-screen.is-space .qf2-card[data-space="Office"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.52) 0%,rgba(12,14,13,.34) 38%,rgba(12,14,13,.86) 100%),url(../images/stock/ecco-v-corporate-800.webp); }
 .qf-screen.is-space .qf2-card[data-space="Medical"]{ background-image:linear-gradient(180deg,rgba(12,14,13,.56) 0%,rgba(12,14,13,.44) 38%,rgba(12,14,13,.88) 100%),url(../images/stock/ecco-v-medical-800.webp); }
@@ -1226,3 +1229,18 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
    ════════════════════════════════════════════════════════════════ */
 .qf-screen--entering-fwd,
 .qf-screen--entering-back{ pointer-events:none; }
+
+/* ════════════════════════════════════════════════════════════════
+   LEGIBILITY & REACH · 2026-10-15 (audit UX-6, UX-9, A11Y-8)
+   ════════════════════════════════════════════════════════════════ */
+/* goToScreen moves the focus to the heading on every step; on Safari/iOS the global
+   :focus-visible ring then framed the title in green. A heading is not a control. */
+.qf2-prompt-title:focus,.qf2-success-title:focus{ outline:none; }
+/* Day chips over the photo: the label was --ink-dim at 3.6:1. */
+#qfScreen_days .qf-day-card{ color:var(--ink); }
+/* The review's Send sat 187 px below the fold on desktop and 1.8 screens down on
+   iPhone with no sticky CTA; on phones it now rides the bottom edge until its own
+   place scrolls into view. */
+@media (max-width:879px){
+  #qfScreen_contact .qf2-cta{ position:sticky; bottom:max(12px,env(safe-area-inset-bottom)); z-index:5; box-shadow:0 10px 30px rgba(0,0,0,.55); }
+}
