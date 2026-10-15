@@ -225,10 +225,12 @@ const CRM = {
   },
 
   escapeHtml(str) {
-    if (!str) return '';
-    var d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
+    if (str == null || str === '') return '';
+    // 2026-10-15 (audit BACK-6) — textContent→innerHTML left quotes unescaped, so a
+    // lead field rendered inside an attribute could break out of it.
+    return String(str).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
   },
 
   formatDate(iso) {

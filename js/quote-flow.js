@@ -151,10 +151,7 @@
   // with the "Adult, no urgency" voice rule in PRODUCT.md. The form
   // already auto-saves a draft on consent (see saveDraft + resume banner),
   // which gives returning users their progress without ambushing them on
-  // the way out. Legacy V1 handler vars below short-circuit harmlessly.
-  var exitOverlay  = null;
-  var exitClose    = null;
-  var exitForm     = null;
+  // the way out. The V1 overlay handlers were removed on 2026-10-15.
 
   /* -----------------------------------------------------------------------
      Dev-only assertion — warn loudly if a critical summary/edit ID is missing
@@ -5220,99 +5217,9 @@
   // localStorage `ecco_theme` key is left as a stale entry on existing
   // users' devices; harmless and overwritten on next OS theme change.
 
-  /* =======================================================================
-     Feature #13: Exit intent recovery
-     ======================================================================= */
-  var exitShown = false;
-
-  // Ola 2 — a11y: track the element that had focus before the modal
-  // opened so we can restore it on close.
-  var exitPrevFocus = null;
-  function qfExitClose() {
-    if (!exitOverlay || exitOverlay.hidden) return;
-    exitOverlay.hidden = true;
-    if (exitPrevFocus && typeof exitPrevFocus.focus === 'function') {
-      try { exitPrevFocus.focus(); } catch (e) { /* ignore */ }
-    }
-    exitPrevFocus = null;
-  }
-  function qfExitOpen() {
-    if (!exitOverlay || exitShown) return;
-    exitShown = true;
-    sessionStorage.setItem('qf_exit_shown', '1');
-    exitPrevFocus = document.activeElement;
-    exitOverlay.hidden = false;
-    // Focus the email input on open so keyboard users land inside the dialog.
-    var firstInput = exitOverlay.querySelector('input, button');
-    if (firstInput) setTimeout(function () { try { firstInput.focus(); } catch (e) {} }, 0);
-  }
-
-  if (exitOverlay && !sessionStorage.getItem('qf_exit_shown')) {
-    // Delay exit intent — only arm after 20 seconds on page
-    setTimeout(function () {
-      // Desktop: detect mouse leaving the top edge of the viewport
-      document.addEventListener('mouseleave', function (e) {
-        if (e.clientY > 5) return;
-        qfExitOpen();
-      });
-      // AYS Ola 3 #16 — mobile equivalent: fire when the tab becomes hidden,
-      // which covers switching apps, pulling up the URL bar, or closing the tab.
-      // Gated to touch-first devices so desktop still uses mouseleave only.
-      if (qfTouchFirst) {
-        document.addEventListener('visibilitychange', function () {
-          if (document.visibilityState === 'hidden' && STATE.currentStepName !== 'welcome' && STATE.currentStepName !== 'success') {
-            qfExitOpen();
-          }
-        });
-      }
-    }, 20000);
-  }
-  if (exitClose) {
-    exitClose.addEventListener('click', qfExitClose);
-  }
-  // Ola 2 — ESC closes the dialog; Tab is trapped inside the dialog so
-  // keyboard users can't walk into stale form controls behind it.
-  if (exitOverlay) {
-    document.addEventListener('keydown', function (e) {
-      if (exitOverlay.hidden) return;
-      if (e.key === 'Escape') { e.preventDefault(); qfExitClose(); return; }
-      if (e.key !== 'Tab') return;
-      var focusables = exitOverlay.querySelectorAll('input, button, a[href], [tabindex]:not([tabindex="-1"])');
-      if (!focusables.length) return;
-      var first = focusables[0], last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    });
-  }
-  if (exitForm) {
-    exitForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var email = exitForm.querySelector('input[type="email"]');
-      var val = email ? email.value.trim() : '';
-      if (!val || !EMAIL_RE.test(val)) {
-        if (email) { email.classList.add('qf-input-invalid'); email.focus(); }
-        qfToast({ type:'warn', title:'Valid email needed', message:'Add a valid email so we can follow up.', duration: 4500 });
-        return;
-      }
-      // Fix #27 — actually persist the partial lead so we can follow up
-      var submitBtn = exitForm.querySelector('button[type="submit"]');
-      var originalText = submitBtn ? submitBtn.textContent : '';
-      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending\u2026'; }
-      fetch('/api/capture-partial', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: val, firstName: STATE.userName || '', phone: STATE.userPhone || '' })
-      }).catch(function(){ /* silent — backend may be offline */ })
-        .finally(function () {
-          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
-          qfToast({ type:'success', title:'We\u2019ve got your spot', message:'We\u2019ll follow up with ' + val + ' so you can pick this up later.' });
-          qfExitClose();
-          // Save draft so resume banner works too
-          STATE.userEmail = STATE.userEmail || val;
-          saveDraft();
-        });
-    });
-  }
+  // 2026-10-15 (audit BACK-1 / LOGB-16) — the exit-intent modal (feature #13) was
+  // removed from the markup in D76; its handlers and the only caller of
+  // /api/capture-partial (now deleted) were dead code and are gone.
 
   // IntersectionObserver removed — screens are born on demand, no need to track scroll position
 

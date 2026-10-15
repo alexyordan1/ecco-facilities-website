@@ -968,10 +968,6 @@
     </section>
 
   </section>
-  <!-- Exit intent modal (feature #13).
-       Ola 2 · dialog semantics: role + aria-modal + labelledby so screen
-       readers announce it as a modal and ESC is expected to close it
-       (handler in js/quote-flow.js). -->
 </main>
 
 <footer class="footer q-flow-footer-hidden" id="siteFooter" hidden>
@@ -1038,7 +1034,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.35"></script>
+<script defer src="js/quote-flow.js?v=40.36"></script>
 <script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

@@ -41,7 +41,7 @@ ecco-site/
 │   ├── cookie-consent.js cookie banner + GPC + HubSpot loader (v=1.5)
 │   ├── crm-*.js          CRM modules (core, auth, dashboard, leads, detail, pipeline, reports, settings, ai)
 │   └── chart.min.js / sortable.min.js   vendored libs (CRM only)
-├── functions/api/        Cloudflare Pages Functions (submit-quote, capture-partial, leads, auth, crm-*)
+├── functions/api/        Cloudflare Pages Functions (submit-quote, leads, auth, crm-*)
 └── images/
 ```
 

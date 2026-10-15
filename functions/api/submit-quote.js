@@ -790,6 +790,7 @@ export async function onRequestPost(context) {
     // user-facing "success" decision; owner failures are logged loudly but
     // don't block the user — the CRM write is the source of truth for ops.
     const integrations = { supabase: null, d1: null, activecampaign: null, hubspot: null, postmark: null, postmark_owner: null, webhook: null };
+    let clientEmailSkipped = false; // 2026-10-15 (audit BACK-9): set when the lead reached no store
     const anyConfigured = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY)
       || !!env.DB
       || !!(env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY)
@@ -935,9 +936,13 @@ export async function onRequestPost(context) {
         };
 
         if (hsContactId) {
+          // 2026-10-15 (audit LOGB-12) — an update must not blank what the contact already
+          // has: the wizard sends '' for any optional field the user left empty.
+          const patchProps = Object.fromEntries(Object.entries(contactProps)
+            .filter(([k, v]) => k === 'email' || v !== ''));
           await fetchWithTimeout(`https://api.hubapi.com/crm/v3/objects/contacts/${hsContactId}`, {
             method: 'PATCH', headers: hsHeaders,
-            body: JSON.stringify({ properties: contactProps })
+            body: JSON.stringify({ properties: patchProps })
           });
         } else {
           const createRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/contacts', {
@@ -992,9 +997,17 @@ export async function onRequestPost(context) {
         'Accept': 'application/json'
       };
 
-      // Client confirmation
+      // Client confirmation — only once the lead is stored somewhere durable (audit
+      // BACK-9): the old order emailed "We've got everything we need" before knowing.
       integrations.postmark = false;
-      try {
+      const leadStored = !!(integrations.d1 || integrations.supabase || integrations.hubspot || integrations.activecampaign);
+      clientEmailSkipped = !leadStored;
+      if (clientEmailSkipped) {
+        // Not a Postmark failure: the lead reached no CRM/DB, so the owner email (sent
+        // below, carrying the full lead) is the only record and the client gets no
+        // "we've got everything" promise. Logged apart so postmark:false stays "failed".
+        console.error('[submit-quote] client email skipped, lead not stored:', refNumber);
+      } else try {
         const msg = buildClientEmail({ firstName, refNumber, serviceLabel });
         const pmRes = await fetchWithTimeout('https://api.postmarkapp.com/email', {
           method: 'POST',
@@ -1118,6 +1131,7 @@ export async function onRequestPost(context) {
       service,
       formType: formType || 'janitorial',
       integrations,
+      clientEmailSkipped,
       ipHash: obsIpHash,
       ts: Date.now()
     }));

@@ -53,7 +53,7 @@ User visits site
   │    gates the HubSpot tracking script
   │
 User fills quote form (quote.html + js/quote-flow.js)
-  ├─→ /api/capture-partial → partial progress saved server-side
+  │   (el endpoint /api/capture-partial se retiró el 2026-10-15: no tenía llamadores)
   └─→ POST /api/submit-quote (Cloudflare Pages Function)
         ├─ Turnstile verification (fail-loud in production)
         ├─ Lead stored in Cloudflare D1 (env.DB)
@@ -126,7 +126,6 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 | File | Purpose |
 |------|---------|
 | `functions/api/submit-quote.js` | Quote submission: Turnstile → D1 → HubSpot → Postmark |
-| `functions/api/capture-partial.js` | Partial-progress capture |
 | `functions/api/crm-*.js`, `leads.js`, `auth.js`, `callback.js`, `_middleware.js` | CRM + leads API (Cloudflare Pages Functions, D1 `ecco-leads`) |
 | `serve.js` / `serve.py` | Local dev servers |
 | `chat-backend/`, `server/` | **Legacy** — backends for the removed chat widget (future purge candidates) |
@@ -287,7 +286,7 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 
 ## 5. Form Submission Flow
 
-> **⚠️ Legacy section (pre-Noir).** The FormSubmit/EmailJS flow below no longer exists. Today `quote.html` + `js/quote-flow.js` POST to `/api/submit-quote`: Turnstile verification (fail-loud in production) → lead stored in Cloudflare D1 → HubSpot CRM v3 (contact search/create + deal + association) → Postmark client confirmation + internal notification, both built in code (`buildClientEmail` / `buildOwnerEmail` in `functions/api/submit-quote.js`). Partial progress goes to `/api/capture-partial`. The description below is kept for history only.
+> **⚠️ Legacy section (pre-Noir).** The FormSubmit/EmailJS flow below no longer exists. Today `quote.html` + `js/quote-flow.js` POST to `/api/submit-quote`: Turnstile verification (fail-loud in production) → lead stored in Cloudflare D1 → HubSpot CRM v3 (contact search/create + deal + association) → Postmark client confirmation + internal notification, both built in code (`buildClientEmail` / `buildOwnerEmail` in `functions/api/submit-quote.js`). The description below is kept for history only.
 
 ### Quote Forms (Janitorial & Day Porter)
 
