@@ -36,8 +36,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=4">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=4">
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=4">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Ola 4 — dropped the duplicate `<link rel="preload" as="style">` for the
      Google Fonts stylesheet. With `display=swap` on the main stylesheet, the
      preload was racing the stylesheet request and forcing two network round
@@ -59,7 +57,13 @@
      `onload` swaps it to `all` once it's downloaded so the fonts apply.
      `display=swap` in the URL is the FOUT fallback while the font binary
      is still arriving. <noscript> mirror keeps fonts working with JS off. -->
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- 2026-10-15 (audit PERF-2) — fonts self-hosted: the Google Fonts stylesheet was a
+     render-blocking third-party request (FCP 0.2 s -> 3.2 s when it stalled 3 s, black
+     page if it hung). css/fonts.css declares the same latin / latin-ext variable woff2
+     files from /fonts/; the two Fraunces faces of the welcome headline are preloaded. -->
+<link rel="preload" as="font" type="font/woff2" href="fonts/fraunces-normal-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/fraunces-italic-latin.woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css?v=1">
 <!-- 2026-10-08 — Welcome photo is the real LCP on 4G (audit IMG-2): as a CSS
      background it was only discovered after quote-noir.css finished parsing.
      Preloading it from the HTML (and via Cloudflare's 103 Early Hints) moved
