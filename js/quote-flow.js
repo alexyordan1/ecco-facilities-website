@@ -542,10 +542,12 @@
     return clean;
   }
 
+  var qfLastSaveOk = false; // 2026-10-08 (audit LOGA-9): "Saved" is only claimed when the write succeeded
   function saveDraft() {
+    qfLastSaveOk = false;
     try {
       // Never save submitted / success state
-      if (STATE.currentStepName === 'success') return;
+      if (STATE.currentStepName === 'success') return false;
       // FIX 2026-06-24 (H): the local draft is first-party FUNCTIONAL storage
       // (functionality_storage is 'granted' by default and never leaves the
       // device — it is not analytics). Declining analytics cookies must NOT
@@ -555,7 +557,9 @@
       // V2 2026-04-25 — stamp _v: 2 so loadDraft can migrate v1 drafts safely.
       var snap = { _v: 2, s: payload, t: Date.now(), c: hasConsent() ? 1 : 0 };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
-    } catch (_) { /* localStorage unavailable — quota/private mode */ }
+      qfLastSaveOk = true;
+      return true;
+    } catch (_) { return false; /* localStorage unavailable — quota/private mode */ }
   }
   function clearDraft() {
     try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
@@ -1779,7 +1783,7 @@
         if (_v('qfUserEmail')) STATE.userEmail = _v('qfUserEmail');
         if (_v('qfUserPosition')) STATE.userPosition = _v('qfUserPosition');
         saveDraft();
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
   }
@@ -1946,7 +1950,7 @@
         if (_v('qfAddress')) { STATE.userAddress = _v('qfAddress'); qfSyncOutOfArea(); }
         if (_v('qfSuite')) STATE.userSuite = _v('qfSuite');
         saveDraft();
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
 
@@ -2135,7 +2139,7 @@
         // Match the pattern used on every other screen: capture the original
         // label so the mobile/desktop variants ("Save" vs "Save for later")
         // both restore correctly instead of being clobbered to one string.
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
   }
@@ -2335,7 +2339,7 @@
     SCREENS.size.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         saveDraft();
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
   }
@@ -2586,7 +2590,7 @@
     SCREENS.days.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         saveDraft();
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
   }
@@ -3245,7 +3249,7 @@
     SCREENS.schedule.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         saveDraft();
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
   }
@@ -3963,7 +3967,7 @@
     SCREENS.contact.querySelectorAll('.qf2-flowbar-skip').forEach(function (btn) {
       btn.addEventListener('click', function () {
         saveDraft();
-        try { var orig = btn.textContent; btn.textContent = 'Saved ✓'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
+        try { var orig = btn.textContent; btn.textContent = qfLastSaveOk ? 'Saved ✓' : 'Couldn\u2019t save here'; setTimeout(function(){ btn.textContent = orig; }, 1800); } catch(e){}
       });
     });
 
@@ -5513,6 +5517,10 @@
        // Continue button, i.e. a dead end. The synthetic 'input' below re-runs
        // the handler that unhides the CTA.
        ['qf2SpaceOther', 'spaceOther'],
+       // 2026-10-08 (audit LOGA-8) — the exact sq ft was restored into STATE but not into
+       // its input, so Back from the resumed step showed an empty Size screen that
+       // then refused to continue.
+       ['qfSizeCustom', 'sizeExact'],
        ['qfSpecialInstructions', 'specialInstructions']].forEach(function (pair) {
         var el = document.getElementById(pair[0]);
         if (el && STATE[pair[1]] != null && STATE[pair[1]] !== '') {
@@ -5599,6 +5607,7 @@
         var alreadyExplained;
         try { alreadyExplained = !!localStorage.getItem(FIRST_SAVE_FLAG); } catch (_) { alreadyExplained = false; }
         if (alreadyExplained) return;
+        if (!qfLastSaveOk) return; // 2026-10-08 (audit LOGA-9): storage blocked, nothing was saved
         // Resume is localStorage-only (same device) — never promise an emailed link.
         var msg = "Saved on this device. Reopen this page on the same device to pick up where you left off.";
         try {
@@ -5648,6 +5657,32 @@
       });
       // Auto-dismiss after 12s if untouched.
       setTimeout(dismiss, 12000);
+    })();
+
+    // 2026-10-08 (audit LOGA-8 / LOGB-8) — typed text used to reach STATE only on
+    // Continue (or on "Save for later"), so a reload mid-screen lost the company,
+    // address, name, email and the review notes. Mirror each field into STATE as
+    // it is typed (debounced) and save the draft; Continue still validates.
+    (function mirrorTypedFields() {
+      var MAP = [['qfCompanyName', 'companyName'], ['qfAddress', 'userAddress'], ['qfSuite', 'userSuite'],
+                 ['qfUserFirstName', 'userName'], ['qfUserLastName', 'userLastName'], ['qfUserEmail', 'userEmail'],
+                 ['qfUserPosition', 'userPosition'], ['qfSpecialInstructions', 'specialInstructions'],
+                 ['qfUserPhone', 'userPhone'], ['qf2SpaceOther', 'spaceOther']];
+      var NAMES = ['userName', 'userLastName']; // same normalization as Continue, so "reviewed" never differs from "sent"
+
+      MAP.forEach(function (pair) {
+        var el = document.getElementById(pair[0]);
+        if (!el) return;
+        var timer = null;
+        el.addEventListener('input', function () {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(function () {
+            timer = null;
+            STATE[pair[1]] = NAMES.indexOf(pair[1]) !== -1 ? cleanName(el.value) : el.value.trim();
+            saveDraft();
+          }, 400);
+        });
+      });
     })();
 
     // H2 D35 — Turnstile lazy-load. Only fetch the Cloudflare challenge
