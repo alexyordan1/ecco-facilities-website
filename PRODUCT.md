@@ -71,7 +71,7 @@ Lo que esto NO es:
 
 ## Design Principles
 
-1. **Lead capture before completion.** El paso Info (nombre, email, rol, teléfono opcional) va temprano en el flujo, no al final. Mejor un lead incompleto que ninguno. Todo cambio de flujo preserva esta regla.
+1. **Situación primero, contacto al final; solo Send crea un lead.** El flujo es espacio → tamaño → horario → dirección → Info (nombre, email, teléfono opcional) → resumen con Send. Nada llega al servidor antes de Send: no hay captura parcial ni endpoint para ella. Quien abandona conserva su borrador en el navegador y lo retoma al volver (banner de resume). Decisión de Alex del 2026-10-15 (auditoría oct-2026, hallazgos BACK-4/MOD-3): un lead completo y enviado a propósito vale más que uno parcial; la regla anterior ("lead capture before completion", Info temprano) queda retirada. Todo cambio de flujo preserva esta regla.
 2. **Editorial confidence, not whimsy.** Cada acento serif/itálico debe ganarse su lugar. No somos un RSVP de boda.
 3. **Una decisión por pantalla.** Sin pantallas de 14 campos. Si un paso se ve amontonado, se refactoriza el paso, no se "pule".
 4. **Un solo acento.** `--accent #9FCB7B` es el único color saturado del sitio (CTAs, links, focus, eyebrows). Única excepción: el rotador de 6 colores del hero del home (veto de Alex: no se toca).
