@@ -548,6 +548,14 @@
           <button type="button" class="qf2-chip" data-timeline="weeks" aria-pressed="false">In a few weeks</button>
           <button type="button" class="qf2-chip" data-timeline="exploring" aria-pressed="false">Just exploring</button>
         </div>
+        <!-- 2026-10-18 (audit UX-13 / MOD-19, decided by Alex) — property managers with a
+             portfolio had no way to say so; optional single-select, same pattern as above. -->
+        <span class="qf2-chip-label">More than one location?</span>
+        <div class="qf2-chip-row" role="group" aria-label="Number of locations">
+          <button type="button" class="qf2-chip" data-locations="one" aria-pressed="false">Just this one</button>
+          <button type="button" class="qf2-chip" data-locations="2-5" aria-pressed="false">2 to 5</button>
+          <button type="button" class="qf2-chip" data-locations="6plus" aria-pressed="false">6 or more</button>
+        </div>
         <button type="button" class="qf2-cta" id="qfLocationContinue">Continue <span aria-hidden="true">&rarr;</span></button>
       </div>    </section>
 
@@ -1034,7 +1042,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.36"></script>
+<script defer src="js/quote-flow.js?v=40.37"></script>
 <script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

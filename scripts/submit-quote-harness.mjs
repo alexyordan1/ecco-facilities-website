@@ -33,7 +33,8 @@ async function run(name, opts, body) {
   if (patch) console.log('  PATCH props keys:', Object.keys(JSON.parse(patch.body).properties).join(','));
   if (post) console.log('  POST  props keys:', Object.keys(JSON.parse(post.body).properties).join(','));
   console.log('  Postmark To:', pm.join(' | ') || '(none)');
-  return { status: res.status, patch, post, pm };
+  const ownerHtml = calls.filter(c => c.url.includes('postmarkapp.com')).map(c => JSON.parse(c.body)).filter(m => m.To !== body.em).map(m => m.HtmlBody).join('\n');
+  return { status: res.status, patch, post, pm, ownerHtml };
 }
 const base = { formType: 'janitorial', em: 'ana@example.com', fn: 'Ana', ln: '', ph: '', co: '', space: 'Office', size: '1k-3k', days: ['Monday'], timeOfDay: ['morning'], addr: '350 5th Ave, New York, NY 10118' };
 let bad = 0;
@@ -43,6 +44,15 @@ const b = await run('B everything down (D1 + HubSpot)', { dbDown: true, hubspotD
 if (b.pm.includes('ana@example.com') || b.status !== 200) { bad++; console.log('  FAIL: client email sent although nothing stored, or status != 200'); }
 const c = await run('C new contact, D1 ok', { existingContact: false }, base);
 if (!c.pm.includes('ana@example.com') || c.status !== 200) { bad++; console.log('  FAIL: client email missing or status != 200'); }
+// E — number-of-locations chip (2026-10-18, audit UX-13 / MOD-19): the owner email lists it;
+// an unknown value is dropped instead of leaking into the table.
+const e = await run('E locations chip 2-5', { existingContact: false }, { ...base, locations: '2-5' });
+if (!/Locations/.test(e.ownerHtml) || !/2 to 5/.test(e.ownerHtml)) { bad++; console.log('  FAIL: owner email lacks "Locations: 2 to 5"'); }
+const e2 = await run('E2 locations tampered value', { existingContact: false }, { ...base, locations: 'xyz' });
+if (!e2.pm.length || !/Reference|ECJ-/.test(e2.ownerHtml)) { bad++; console.log('  FAIL: E2 owner email missing (assertion would be vacuous)'); }
+if (/Locations/.test(e2.ownerHtml) || /xyz/.test(e2.ownerHtml)) { bad++; console.log('  FAIL: tampered locations value leaked into the owner email'); }
+const e3 = await run('E3 locations prototype key', { existingContact: false }, { ...base, locations: 'constructor', timeline: 'constructor' });
+if (/Locations|native code|function/.test(e3.ownerHtml)) { bad++; console.log('  FAIL: prototype-key lookup leaked into the owner email'); }
 // D — real SQLite behind the D1 binding: a re-submission without phone/company keeps the stored ones.
 const db = new DatabaseSync(':memory:');
 db.exec(readFileSync(new URL('../schema/leads.sql', import.meta.url), 'utf8'));

@@ -278,6 +278,9 @@
     // non-PII, all persisted in the draft and shipped by buildSubmitPayload.
     situation:      null,
     timeline:       null,
+    // 2026-10-18 (audit UX-13 / MOD-19) — locations (location-screen chips:
+    // one / 2-5 / 6plus) so a multi-building portfolio is visible to sales.
+    locations:      null,
     source:         null
   };
 
@@ -3563,9 +3566,11 @@
       function buildExtras() {
         var SIT = { 'new': 'New space', 'switching': 'Switching providers' };
         var TL  = { asap: 'As soon as possible', weeks: 'In a few weeks', exploring: 'Just exploring' };
+        var LOC = { one: 'Just this location', '2-5': '2 to 5 locations', '6plus': '6 or more locations' };
         var parts = [];
         if (STATE.situation && SIT[STATE.situation]) parts.push(SIT[STATE.situation]);
         if (STATE.timeline && TL[STATE.timeline]) parts.push(TL[STATE.timeline]);
+        if (STATE.locations && LOC[STATE.locations]) parts.push(LOC[STATE.locations]);
         return { primary: parts.join(' · '), subs: [] };
       }
       function renderPorterList(id, porters) {
@@ -3606,7 +3611,7 @@
         { section: 'cleaning',       group: 'schedule', id: 'qf2SumCleaning', when: function () { return STATE.service === 'janitorial' || STATE.service === 'both'; }, build: buildCleaning },
         { section: 'porters',        group: 'schedule', id: 'qf2SumPorters',  when: function () { return STATE.service === 'dayporter' || STATE.service === 'both'; }, build: buildPorters, isPorterList: true },
         { section: 'info',           group: 'you',      id: 'qf2SumYou',      when: function () { return true; }, build: buildYou },
-        { section: 'extras',         group: 'you',      id: 'qf2SumExtras',   when: function () { return !!(STATE.situation || STATE.timeline); }, build: buildExtras }
+        { section: 'extras',         group: 'you',      id: 'qf2SumExtras',   when: function () { return !!(STATE.situation || STATE.timeline || STATE.locations); }, build: buildExtras }
       ];
       var rvScope = document.getElementById('qfScreen_contact') || document;
       QF2_REVIEW_SECTIONS.forEach(function (s) {
@@ -3699,8 +3704,8 @@
       try {
         var host = location.hostname;
         if (!(host === 'localhost' || host === '127.0.0.1' || host.indexOf('.pages.dev') > -1)) return;
-        var SENT = ['service','space','spaceOther','size','sizeExact','days','timeOfDay','dpDays','dpPorters','situation','timeline','companyName','userAddress','userSuite','userName','userLastName','userEmail','userPosition','userPhone','specialInstructions','needsSiteWalk','porterCount','porterHours','scheduleAtypical','source','urg','outOfArea'];
-        var REVIEWED = ['service','space','spaceOther','size','needsSiteWalk','companyName','userAddress','userSuite','days','timeOfDay','dpPorters','userName','userLastName','userEmail','userPosition','userPhone','situation','timeline'];
+        var SENT = ['service','space','spaceOther','size','sizeExact','days','timeOfDay','dpDays','dpPorters','situation','timeline','locations','companyName','userAddress','userSuite','userName','userLastName','userEmail','userPosition','userPhone','specialInstructions','needsSiteWalk','porterCount','porterHours','scheduleAtypical','source','urg','outOfArea'];
+        var REVIEWED = ['service','space','spaceOther','size','needsSiteWalk','companyName','userAddress','userSuite','days','timeOfDay','dpPorters','userName','userLastName','userEmail','userPosition','userPhone','situation','timeline','locations'];
         var HIDDEN = ['source','porterCount','porterHours','scheduleAtypical','sizeExact','dpDays','specialInstructions','urg','outOfArea'];
         SENT.forEach(function (k) {
           if (HIDDEN.indexOf(k) === -1 && REVIEWED.indexOf(k) === -1) {
@@ -3854,7 +3859,11 @@
           // proposal?'. Say where it goes and why.
           var n5 = document.createElement('p');
           n5.className = 'qf2-edit-note';
-          n5.textContent = "Hop back to the final step to change your situation or timing (the chips under your contact details).";
+          // 2026-10-18 — timing and number of locations live on the business
+          // step; situation on the contact step. Say which one Hop back opens.
+          n5.textContent = STATE.situation
+            ? "Hop back to the final step to change your situation (the chips under your contact details). Timing and locations are on the business step."
+            : "Hop back to the business step to change your timing or number of locations (the chips under the address).";
           fieldsWrap.appendChild(n5);
         }
 
@@ -3885,9 +3894,10 @@
           if (routeBack) {
             // Phase 2 split — Cleaning (data-edit=days) → cleaning-days screen;
             // Porter coverage (data-edit=schedule) → Schedule screen; extras →
-            // info (situation lives there; Phase-4 splits situation→info /
-            // timeline→location). No more flow-conditional days/schedule conflation.
-            var TARGET = { service: 'welcome', space: 'space', days: 'days', schedule: 'schedule', size: 'size', extras: 'info' };
+            // info when a situation was picked (it lives there), else → location
+            // (timing + number of locations live there; 2026-10-18).
+            // No more flow-conditional days/schedule conflation.
+            var TARGET = { service: 'welcome', space: 'space', days: 'days', schedule: 'schedule', size: 'size', extras: STATE.situation ? 'info' : 'location' };
             var step = TARGET[section];
             panel.remove();
             row.classList.remove('is-editing');
@@ -4697,6 +4707,8 @@
       // the user skips them. Backend ALLOWED_KEYS + value maps gate these.
       if (STATE.situation) payload.situation = STATE.situation;
       if (STATE.timeline) payload.timeline = STATE.timeline;
+      // 2026-10-18 (audit UX-13 / MOD-19) — number of locations chip, optional.
+      if (STATE.locations) payload.locations = STATE.locations;
       // 2026-08-18 — the internal email's [RUSH] subject flag keys off `urg`
       // (server: /asap/i on urgency), but the client never sent it, so every
       // lead arrived 'Standard' even when the prospect picked ASAP.
@@ -5453,6 +5465,16 @@
           c.setAttribute('aria-pressed', String(on));
         });
       }
+      // 2026-10-18 — same gap for the signal chips (situation / timeline /
+      // locations): a resumed draft kept the value in STATE, the review listed
+      // it, but the chip showed unpressed and re-clicking it cleared the value.
+      ['situation', 'timeline', 'locations'].forEach(function (key) {
+        document.querySelectorAll('.qf2-chip[data-' + key + ']').forEach(function (c) {
+          var on = !!STATE[key] && c.getAttribute('data-' + key) === STATE[key];
+          c.classList.toggle('is-selected', on);
+          c.setAttribute('aria-pressed', String(on));
+        });
+      });
       goToScreen(STATE.currentStepName);
     });
 
@@ -5852,9 +5874,9 @@
   })();
 
   /* -----------------------------------------------------------------------
-     Modernization #5 — situation + timeline signal chips. Two single-select
-     groups (.qf2-chip[data-situation] on the info screen, [data-timeline] on
-     the location screen). The pick mirrors to STATE (auto-persisted via
+     Modernization #5 — signal chips. Three single-select groups:
+     .qf2-chip[data-situation] on the info screen, [data-timeline] and
+     [data-locations] (2026-10-18) on the location screen. The pick mirrors to STATE (auto-persisted via
      saveDraft), updates aria-pressed for SR users, and emits telemetry.
      Re-clicking the active chip clears it. A draft restore re-glows the
      previously chosen chip.
@@ -5888,6 +5910,7 @@
     }
     wireGroup('situation', 'situation', 'quote_situation_pick');
     wireGroup('timeline', 'timeline', 'quote_timeline_pick');
+    wireGroup('locations', 'locations', 'quote_locations_pick'); // 2026-10-18 (audit UX-13 / MOD-19)
   })();
 
 })();

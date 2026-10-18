@@ -303,7 +303,7 @@ const LEAD_FIELD_ORDER = [
   'space_type', 'space_type_custom', 'space_size', 'exact_sqft', 'cleaning_days', 'time_of_day',
   'porter_schedule', 'coverage_days', 'num_porters', 'porter_count_custom', 'hours_per_day',
   'start_time', 'porter_hours', 'current_situation', 'desired_start', 'service_certainty',
-  'needs_site_walk', 'schedule_atypical', 'out_of_area', 'address', 'suite', 'job_title', 'how_heard', 'notes', 'lead_source'
+  'needs_site_walk', 'schedule_atypical', 'out_of_area', 'address', 'suite', 'locations', 'job_title', 'how_heard', 'notes', 'lead_source'
 ];
 const LEAD_FIELD_LABELS = {
   space_type: 'Space type', space_type_custom: 'Space (other)', space_size: 'Approx. size',
@@ -313,7 +313,7 @@ const LEAD_FIELD_LABELS = {
   porter_hours: 'Porter hours', custom_hours: 'Custom hours', current_situation: 'Current situation', desired_start: 'Desired start',
   service_certainty: 'How they chose', needs_site_walk: 'Needs site walk', schedule_atypical: 'Atypical schedule',
   out_of_area: 'Outside NYC', // 2026-08-18 — 'waitlist' = add me to the waitlist · 'continue' = wants service anyway
-  address: 'Address', suite: 'Suite / floor', job_title: 'Job title', how_heard: 'How they heard',
+  address: 'Address', suite: 'Suite / floor', locations: 'Locations', job_title: 'Job title', how_heard: 'How they heard',
   notes: 'Notes', lead_source: 'Lead source'
 };
 // Shown in the email header/pills already — don't repeat in the table.
@@ -587,6 +587,8 @@ export async function onRequestPost(context) {
       'timeOfDay','serviceCertainty','needsSiteWalk','scheduleAtypical',
       // 2026-06-20 — modernization signals: situation + timeline chips, lead source.
       'situation','timeline','source','outOfArea',
+      // 2026-10-18 (audit UX-13 / MOD-19) — number of locations chip.
+      'locations',
       'turnstileToken'
     ]);
     for (const k of Object.keys(body)) {
@@ -643,6 +645,11 @@ export async function onRequestPost(context) {
     const TIMELINE_VALUES = new Set(['asap', 'weeks', 'exploring']);
     if (body.timeline && !TIMELINE_VALUES.has(body.timeline)) {
       delete body.timeline;
+    }
+    // 2026-10-18 (audit UX-13 / MOD-19) — number-of-locations chip enum.
+    const LOCATIONS_VALUES = new Set(['one', '2-5', '6plus']);
+    if (body.locations !== undefined && !LOCATIONS_VALUES.has(body.locations)) {
+      delete body.locations;
     }
     // 2026-08-18 — out-of-area answer from the address bubble: 'waitlist' | 'continue'.
     if (body.outOfArea && !['waitlist', 'continue'].includes(body.outOfArea)) {
@@ -754,6 +761,7 @@ export async function onRequestPost(context) {
       situation: 'current_situation',
       timeline: 'desired_start', outOfArea: 'out_of_area',
       source: 'lead_source',
+      locations: 'locations', // 2026-10-18 (audit UX-13 / MOD-19)
     };
     const URGENCY_MAP = {
       asap: 'ASAP', '1-2w': '1–2 weeks', '1m': '1 month', flex: 'Flexible', unsure: 'Not sure'
@@ -761,14 +769,19 @@ export async function onRequestPost(context) {
     // 2026-06-20 — human-readable labels for the situation + timeline chips.
     const SITUATION_MAP = { new: 'New (no cleaner today)', switching: 'Switching providers' };
     const TIMELINE_MAP = { asap: 'As soon as possible', weeks: 'Within a few weeks', exploring: 'Just exploring' };
+    const LOCATIONS_MAP = { one: 'Just this one', '2-5': '2 to 5', '6plus': '6 or more' };
     const formData = {};
+    // 2026-10-18 — own-property lookup: a tampered value such as "constructor"
+    // used to resolve Object.prototype members and put a function in formData.
+    const own = (map, key) => (typeof key === 'string' && Object.prototype.hasOwnProperty.call(map, key)) ? map[key] : undefined;
     for (const [k, v] of Object.entries(body)) {
       if (k.startsWith('_') || k === 'turnstileToken') continue;
       const label = KEY_MAP[k] || k;
       let value = v;
-      if (k === 'urg' && URGENCY_MAP[v]) value = URGENCY_MAP[v];
-      else if (k === 'situation' && SITUATION_MAP[v]) value = SITUATION_MAP[v];
-      else if (k === 'timeline' && TIMELINE_MAP[v]) value = TIMELINE_MAP[v];
+      if (k === 'urg' && own(URGENCY_MAP, v)) value = URGENCY_MAP[v];
+      else if (k === 'situation' && own(SITUATION_MAP, v)) value = SITUATION_MAP[v];
+      else if (k === 'timeline' && own(TIMELINE_MAP, v)) value = TIMELINE_MAP[v];
+      else if (k === 'locations') value = own(LOCATIONS_MAP, v) || ''; // unknown value → dropped below as empty
       else if (k === 'source' && v && typeof v === 'object') {
         // Flatten the attribution object into a compact "key=value · key=value"
         // string so it renders cleanly in the lead email + CRM text field.
