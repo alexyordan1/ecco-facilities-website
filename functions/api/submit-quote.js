@@ -964,6 +964,12 @@ export async function onRequestPost(context) {
           'Content-Type': 'application/json'
         };
 
+        // 2026-10-19 (audit BACK-2) — every HubSpot call is checked. An expired token
+        // or a quota used to fail without a single log line, and a deal or property
+        // error after a good contact still marked hubspot=true, so a lead could reach
+        // nobody while everything looked fine. Logs carry step, status and ref only.
+        const hsFail = (step, res) => console.error('[submit-quote] HubSpot ' + step + ' non-ok:', res.status, refNumber);
+
         // Search for existing contact by email
         const searchRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/contacts/search', {
           method: 'POST', headers: hsHeaders,
@@ -971,8 +977,10 @@ export async function onRequestPost(context) {
             filterGroups: [{ filters: [{ propertyName: 'email', operator: 'EQ', value: email }] }]
           })
         });
+        if (!searchRes.ok) { hsFail('search', searchRes); throw new Error('HubSpot search ' + searchRes.status); }
         const searchData = await searchRes.json();
         let hsContactId = searchData?.results?.[0]?.id;
+        let hsContactOk = false;
 
         const contactProps = {
           email,
@@ -993,17 +1001,26 @@ export async function onRequestPost(context) {
           // has: the wizard sends '' for any optional field the user left empty.
           const patchProps = Object.fromEntries(Object.entries(contactProps)
             .filter(([k, v]) => k === 'email' || v !== ''));
-          await fetchWithTimeout(`https://api.hubapi.com/crm/v3/objects/contacts/${hsContactId}`, {
+          const patchRes = await fetchWithTimeout(`https://api.hubapi.com/crm/v3/objects/contacts/${hsContactId}`, {
             method: 'PATCH', headers: hsHeaders,
             body: JSON.stringify({ properties: patchProps })
           });
+          // The contact exists either way, so the deal still gets created; only the
+          // refreshed properties are missing, and the log says so.
+          if (patchRes.ok) hsContactOk = true; else hsFail('contact update', patchRes);
         } else {
           const createRes = await fetchWithTimeout('https://api.hubapi.com/crm/v3/objects/contacts', {
             method: 'POST', headers: hsHeaders,
             body: JSON.stringify({ properties: contactProps })
           });
-          const createData = await createRes.json();
-          hsContactId = createData?.id;
+          if (createRes.ok) {
+            const createData = await createRes.json();
+            hsContactId = createData?.id;
+            hsContactOk = !!hsContactId;
+          } else {
+            hsFail('contact create', createRes);
+            hsContactId = undefined;
+          }
         }
 
         // Create a deal for pipeline tracking
@@ -1019,16 +1036,24 @@ export async function onRequestPost(context) {
               }
             })
           });
-          const dealData = await dealRes.json();
-          const dealId = dealData?.id;
+          let dealId;
+          if (dealRes.ok) {
+            const dealData = await dealRes.json();
+            dealId = dealData?.id;
+          } else {
+            hsFail('deal create', dealRes);
+          }
 
           if (dealId) {
-            await fetchWithTimeout(
+            const assocRes = await fetchWithTimeout(
               `https://api.hubapi.com/crm/v3/objects/deals/${dealId}/associations/contacts/${hsContactId}/deal_to_contact/3`,
               { method: 'PUT', headers: hsHeaders }
             );
+            if (!assocRes.ok) hsFail('deal association', assocRes);
           }
-          integrations.hubspot = true;
+          // Recorded in HubSpot only when the contact carries this submission (create or
+          // PATCH ok) and its deal exists.
+          integrations.hubspot = !!(hsContactOk && dealId);
         }
       } catch (e) {
         console.error('[submit-quote] HubSpot error:', redactPII(e.message));

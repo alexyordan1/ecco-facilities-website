@@ -11,9 +11,11 @@ function makeFetch(opts) {
     const u = String(url); const body = init.body ? (typeof init.body === 'string' ? init.body : String(init.body)) : '';
     calls.push({ url: u, method: init.method || 'GET', body });
     const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } });
+    if (opts.hsAuth && u.includes('hubapi.com')) return json({ message: 'expired' }, 401); // a dead token fails every call
     if (u.includes('hubapi.com/crm/v3/objects/contacts/search')) return opts.hubspotDown ? json({ status: 'error' }, 500) : json({ results: opts.existingContact ? [{ id: '555' }] : [] });
     if (u.includes('hubapi.com/crm/v3/objects/contacts')) return opts.hubspotDown ? json({}, 500) : json({ id: '555' });
-    if (u.includes('hubapi.com/crm/v3/objects/deals')) return opts.hubspotDown ? json({}, 500) : json({ id: 'd1' });
+    if (u.includes('/associations/')) return opts.assocFail ? json({}, 400) : json({});
+    if (u.includes('hubapi.com/crm/v3/objects/deals')) return (opts.hubspotDown || opts.dealFail) ? json({ message: 'bad stage' }, 400) : json({ id: 'd1' });
     if (u.includes('postmarkapp.com')) return json({ MessageID: 'm1' });
     return json({}, 404);
   };
@@ -25,7 +27,12 @@ async function run(name, opts, body) {
     : { prepare() { return { bind() { return { run: async () => { if (opts.dbDown) throw new Error('D1 down'); return { success: true }; } }; } }; } };
   const env = { HUBSPOT_ACCESS_TOKEN: 'tok', POSTMARK_API_KEY: 'pm', DB };
   const req = new Request('http://localhost:8080/api/submit-quote', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost:8080' }, body: JSON.stringify(body) });
-  const res = await onRequestPost({ request: req, env, waitUntil() {} });
+  // Collect the handler's logs for assertions, and still print them so any FAIL keeps its cause.
+  const errs = []; const origErr = console.error; console.error = (...a) => { errs.push(a.map(String).join(' ')); origErr(...a); };
+  const logs = []; const origLog = console.log; console.log = (...a) => { const l = a.map(String).join(' '); if (l.startsWith('{"evt"')) logs.push(l); origLog(...a); };
+  let res;
+  try { res = await onRequestPost({ request: req, env, waitUntil() {} }); } finally { console.error = origErr; console.log = origLog; }
+  const telemetry = logs.length ? JSON.parse(logs[logs.length - 1]) : null;
   const patch = calls.find(c => c.method === 'PATCH' && c.url.includes('/contacts/555'));
   const post = calls.find(c => c.method === 'POST' && /\/contacts$/.test(c.url));
   const pm = calls.filter(c => c.url.includes('postmarkapp')).map(c => { try { return JSON.parse(c.body).To; } catch { return '?'; } });
@@ -36,7 +43,7 @@ async function run(name, opts, body) {
   const mails = calls.filter(c => c.url.includes('postmarkapp.com')).map(c => JSON.parse(c.body));
   const ownerHtml = mails.filter(m => m.To !== body.em).map(m => m.HtmlBody).join('\n');
   const clientMail = mails.find(m => m.To === body.em) || null;
-  return { status: res.status, patch, post, pm, ownerHtml, clientMail };
+  return { status: res.status, patch, post, pm, ownerHtml, clientMail, errs, telemetry };
 }
 const base = { formType: 'janitorial', em: 'ana@example.com', fn: 'Ana', ln: '', ph: '', co: '', space: 'Office', size: '1k-3k', days: ['Monday'], timeOfDay: ['morning'], addr: '350 5th Ave, New York, NY 10118' };
 let bad = 0;
@@ -73,6 +80,16 @@ else {
 // G — entry context (2026-10-19, audit MOD-6): the page that sent the visitor reaches the owner email.
 const g = await run('G source with prev_page', { existingContact: false }, { ...base, source: { landing: '/quote.html?service=dayporter', prev_page: '/day-porter.html', entry_page: '/', utm_source: 'google', bogus: 'x' } });
 if (!/prev_page=\/day-porter\.html/.test(g.ownerHtml) || !/entry_page=\//.test(g.ownerHtml) || !/utm_source=google/.test(g.ownerHtml) || !/service=dayporter/.test(g.ownerHtml) || /bogus/.test(g.ownerHtml)) { bad++; console.log('  FAIL: lead source line lacks prev_page/landing or leaks unknown keys'); }
+// H — HubSpot failures are visible (2026-10-19, audit BACK-2): no silent hubspot:true.
+const hd = await run('H deal creation 400', { existingContact: false, dealFail: true }, base);
+if (!hd.telemetry || hd.telemetry.integrations.hubspot !== false || !hd.errs.some(e => /HubSpot deal create non-ok: 400/.test(e))) { bad++; console.log('  FAIL: deal 400 still counts as HubSpot ok, or is not logged', hd.telemetry && hd.telemetry.integrations, hd.errs); }
+const ha = await run('H2 expired token (401 on every HubSpot call)', { existingContact: false, hsAuth: true }, base);
+if (!ha.telemetry || ha.telemetry.integrations.hubspot !== false || !ha.errs.some(e => /HubSpot search non-ok: 401/.test(e)) || calls.some(c => /\/contacts$/.test(c.url) && c.method === 'POST')) { bad++; console.log('  FAIL: 401 not logged, or a contact was created after a failed search'); }
+if (ha.status !== 200 || !ha.pm.includes('ana@example.com')) { bad++; console.log('  FAIL: D1 stored the lead, so the client email and HTTP 200 must still happen'); }
+const hs = await run('H3 association fails, deal exists', { existingContact: true, assocFail: true }, base);
+if (!hs.telemetry || hs.telemetry.integrations.hubspot !== true || !hs.errs.some(e => /HubSpot deal association non-ok: 400/.test(e))) { bad++; console.log('  FAIL: association failure should log but keep hubspot true (deal + contact exist)'); }
+const hok = await run('H4 all good', { existingContact: true }, base);
+if (!hok.telemetry || hok.telemetry.integrations.hubspot !== true || hok.errs.some(e => /HubSpot/.test(e))) { bad++; console.log('  FAIL: healthy HubSpot run should be true with no HubSpot errors'); }
 // D — real SQLite behind the D1 binding: a re-submission without phone/company keeps the stored ones.
 const db = new DatabaseSync(':memory:');
 db.exec(readFileSync(new URL('../schema/leads.sql', import.meta.url), 'utf8'));
