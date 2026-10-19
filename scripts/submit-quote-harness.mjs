@@ -70,6 +70,9 @@ else {
   if (!/only if you want one/.test(c.clientMail.TextBody) || /site visit on that call|size the crew/.test(c.clientMail.TextBody)) { bad++; console.log('  FAIL: regular email carries visit wording'); }
   if (/pick a time|specialist reaches out/i.test(f.clientMail.HtmlBody + c.clientMail.HtmlBody)) { bad++; console.log('  FAIL: old promise still in the client email'); }
 }
+// G — entry context (2026-10-19, audit MOD-6): the page that sent the visitor reaches the owner email.
+const g = await run('G source with prev_page', { existingContact: false }, { ...base, source: { landing: '/quote.html?service=dayporter', prev_page: '/day-porter.html', bogus: 'x' } });
+if (!/prev_page=\/day-porter\.html/.test(g.ownerHtml) || !/service=dayporter/.test(g.ownerHtml) || /bogus/.test(g.ownerHtml)) { bad++; console.log('  FAIL: lead source line lacks prev_page/landing or leaks unknown keys'); }
 // D — real SQLite behind the D1 binding: a re-submission without phone/company keeps the stored ones.
 const db = new DatabaseSync(':memory:');
 db.exec(readFileSync(new URL('../schema/leads.sql', import.meta.url), 'utf8'));

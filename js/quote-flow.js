@@ -649,13 +649,14 @@
   // invested anything) or success (already submitted). Draft is still saved
   // to localStorage regardless, so a user who dismisses the prompt and
   // returns later still resumes where they left off.
+  var qfServiceFromUrl = false; // 2026-10-19 — set by enterWithService (a ?service link is not an answer)
   window.addEventListener('beforeunload', function (e) {
     try {
       var step = STATE && STATE.currentStepName;
       if (!step || step === 'welcome' || step === 'success') return;
       // Only warn if the user has actually typed/selected something — spare
       // a prompt for a visitor who opened the page and closed it immediately.
-      var hasInput = (STATE.service && STATE.service !== null) ||
+      var hasInput = (STATE.service && !qfServiceFromUrl) ||
                      STATE.userEmail || STATE.userName || STATE.space ||
                      (Array.isArray(STATE.days) && STATE.days.length);
       if (!hasInput) return;
@@ -5885,12 +5886,52 @@
           .forEach(function (k) { var v = p.get(k); if (v) src[k] = v.slice(0, 200); });
       }
       var ref = document.referrer || '';
-      // Only external referrers matter — drop same-origin internal navigation.
-      if (ref && ref.indexOf(location.origin) !== 0) src.referrer = ref.slice(0, 300);
+      // External referrers are the acquisition source; an internal one is the
+      // page that sent the visitor here (2026-10-19, audit MOD-6/MOD-7).
+      // Compared by parsed origin, so a look-alike host never counts as internal.
+      if (ref) {
+        var refUrl = null;
+        try { refUrl = new URL(ref); } catch (e) {}
+        if (!refUrl || refUrl.origin !== location.origin) src.referrer = ref.slice(0, 300);
+        else if (refUrl.pathname !== location.pathname) src.prev_page = refUrl.pathname.slice(0, 300);
+      }
       var landing = (location.pathname || '') + (location.search || '');
       if (landing) src.landing = landing.slice(0, 300);
       if (Object.keys(src).length && typeof STATE !== 'undefined') STATE.source = src;
     } catch (e) { /* attribution is best-effort, never blocks the flow */ }
+  })();
+
+  /* -----------------------------------------------------------------------
+     2026-10-19 (audit MOD-6, decided by Alex) — entry context. A link from a
+     service page carries ?service=janitorial|dayporter|both. With no draft to
+     resume, the wizard opens on the Space step with that service set (Back
+     still leads to Welcome). Nothing is persisted until the first real answer,
+     so a click-and-bounce never produces a false "Welcome back". Anything
+     else (missing, unknown, or a resume banner on screen) changes nothing.
+     Runs after captureSource so STATE.source is already populated.
+     ----------------------------------------------------------------------- */
+  (function enterWithService() {
+    try {
+      if (!location.search) return;
+      var svc = new URLSearchParams(location.search).get('service');
+      if (!svc || !Object.prototype.hasOwnProperty.call(FLOWS, svc)) return;
+      if (document.querySelector('.qf-resume-banner')) return;
+      if (STATE.service) return;
+      STATE.service = svc;
+      STATE.currentStepName = 'welcome';
+      qfServiceFromUrl = true;
+      buildRail(STATE.service);
+      qfTrack('quote_entry_service', { value: svc });
+      goToScreen(FLOWS[svc][1], 'fwd'); // not goNext(): that would save an answer-less draft
+      // The step announcer must not be born with text (it would never be
+      // announced): empty it now and write it again once the page has loaded.
+      var ann = document.getElementById('qfStepAnnouncer');
+      if (ann && document.readyState !== 'complete') {
+        var announce = ann.textContent;
+        ann.textContent = '';
+        window.addEventListener('load', function () { setTimeout(function () { ann.textContent = announce; }, 0); });
+      }
+    } catch (e) { /* entry context is a convenience, never blocks the flow */ }
   })();
 
   /* -----------------------------------------------------------------------

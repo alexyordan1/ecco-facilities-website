@@ -39,7 +39,7 @@ async function dismissCookieBanner(page) {
  * so the banner is suppressed deterministically. Same script clears any saved
  * draft up front so the wizard always inits on a clean Welcome screen.
  */
-async function freshOpen(page) {
+async function freshOpen(page, path = '/quote.html', gotoOptions = {}) {
   const errors = [];
   page.on('pageerror', (err) => errors.push(err.message));
   page.on('console', (msg) => {
@@ -68,7 +68,7 @@ async function freshOpen(page) {
   // address path (the script's onerror fallback) is what gets exercised.
   await page.route('**/maps.googleapis.com/**', (route) => route.abort());
 
-  await page.goto('/quote.html');
+  await page.goto(path, gotoOptions);
   await page.waitForSelector('.qf-screen.is-active');
   page._jsErrors = errors;
   return errors;
