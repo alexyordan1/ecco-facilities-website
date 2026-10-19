@@ -5071,23 +5071,43 @@
           if (qf2Ref) qf2Ref.textContent = refNumber || '\u2014';
 
           // V2 \u2014 site walk variant (mockup G section 09 demo C)
+          // 2026-10-19 (audit UX-12 / MOD-8, decided by Alex): no email ever carried
+          // a visit link, so the promise is gone; the call button is the next step
+          // and the visit gets scheduled on that call. The confirmation email says
+          // the same (buildClientEmail, needsSiteWalk branch).
           if (STATE.needsSiteWalk) {
+            // The booking button only exists when quote.html sets QF_BOOKING_URL;
+            // never point at a button that is not there.
+            var bookCta = document.getElementById('qfBookCta');
+            var hasBook = !!(bookCta && !bookCta.hidden);
             var qf2Subtitle = document.querySelector('.qf2-success-subtitle');
             if (qf2Subtitle && !qf2Subtitle.querySelector('.qf2-success-extra')) {
               var extra = document.createElement('span');
               extra.className = 'qf2-success-extra';
-              extra.textContent = 'Plus a link to pick a time for your visit.';
+              extra.textContent = hasBook
+                ? 'Your space calls for a quick visit to size the crew. Book a call below and we\u2019ll schedule it.'
+                : 'Your space calls for a quick visit to size the crew. We\u2019ll set a time when we reach out.';
               qf2Subtitle.appendChild(extra);
             }
-            // Highlight the third timeline item as the site visit step
             var tlItems = document.querySelectorAll('.qf2-timeline-item');
             if (tlItems.length >= 3) {
+              // Item II: the proposal follows the visit, not the one-business-day
+              // contact (that promise stays in the subtitle).
+              var tl2When = tlItems[1].querySelector('.qf2-timeline-when');
+              if (tl2When) tl2When.textContent = 'After your visit';
+              var tl2What = tlItems[1].querySelector('.qf2-timeline-what');
+              if (tl2What) tl2What.textContent = 'Your custom proposal, by email.';
+              // Item III: the site visit step
               tlItems[2].classList.add('is-walk');
               var tlWhen = tlItems[2].querySelector('.qf2-timeline-when');
               if (tlWhen) tlWhen.textContent = 'Site visit';
               var tlWhat = tlItems[2].querySelector('.qf2-timeline-what');
-              if (tlWhat) tlWhat.textContent = 'Pick a time from the link.';
+              if (tlWhat) tlWhat.textContent = hasBook
+                ? 'We\u2019ll set a time on your call, or when we reach out.'
+                : 'We\u2019ll set a time when we reach out.';
             }
+            var bookLbl = bookCta && bookCta.querySelector('span:not([aria-hidden])');
+            if (bookLbl) bookLbl.textContent = 'Book a call to schedule your visit';
           }
           // Show reference number hero with count-up reveal (Sprint 5 cinematic).
           var refBox = document.getElementById('qfSuccessRef');

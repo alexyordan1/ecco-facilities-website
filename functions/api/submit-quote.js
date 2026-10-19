@@ -115,12 +115,16 @@ function escapeHtml(s) {
 }
 
 const EMAIL_LOGO_DARK = 'https://eccofacilities.com/images/logo-horizontal.png';
+// 2026-10-19 (audit UX-12 / MOD-8) — the booking page behind "Book a call" on the
+// Success screen. Keep in sync with window.QF_BOOKING_URL in quote.html
+// (scripts/submit-quote-harness.mjs fails if they drift). '' hides the button.
+export const BOOKING_URL = 'https://calendar.app.google/P8T1VdNBdeB2aBQy6';
 
 // Client-facing quote confirmation — "Framed Stationery" design (approved
 // 2026-07-10; copy aligned to the site's no-em-dash voice on 2026-07-17 per
 // Alex, so the dashes are gone on purpose — don't restore them). Email-client-
 // safe: table layout + inline styles + web-safe serif. Returns { subject, html, text }.
-export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
+export function buildClientEmail({ firstName, refNumber, serviceLabel, needsSiteWalk }) {
   const name = String(firstName || '').replace(/\s+/g, ' ').trim();
   const subject = name
     ? `Thanks, ${name}. We've received your request`
@@ -133,6 +137,37 @@ export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
     : `Thanks. We've got everything we need.`;
   const ref = escapeHtml(refNumber);
   const svc = escapeHtml(serviceLabel);
+  // 2026-10-19 (audit UX-12 / MOD-8, decided by Alex) — screen and email make the
+  // same offer: the call is the next step; a visit lead gets it scheduled there.
+  const bookUrl = String(BOOKING_URL || '').trim();
+  const bookLabel = needsSiteWalk ? 'Book a call to schedule your visit' : 'Book a 30-minute call with Alex';
+  const bookLeadHtml = needsSiteWalk
+    ? 'Your space calls for a quick visit to size the crew. Book a call and we&rsquo;ll schedule it, or we&rsquo;ll reach out within one business day.'
+    : 'Want to get ahead? Book a call and we&rsquo;ll walk you through it live.';
+  const bookLeadText = needsSiteWalk
+    ? "Your space calls for a quick visit to size the crew. Book a call and we'll schedule it, or we'll reach out within one business day."
+    : "Want to get ahead? Book a call and we'll walk you through it live.";
+  // Visit leads: step III and the opening promise follow the same story (visit
+  // first, proposal right after); regular leads keep the optional-call wording.
+  const stepIII = needsSiteWalk
+    ? 'We set a time for your site visit on that call, or when we reach out.'
+    : 'We walk you through it on a quick call or site walk, only if you want one.';
+  const introHtml = needsSiteWalk
+    ? 'Thank you for sharing the details of your space. A space this size calls for a quick visit before we price it, so we&rsquo;ll follow up within one business day to set it up, and your proposal follows right after.'
+    : 'Thank you for sharing the details of your space. Our team is already reviewing them, and we&rsquo;ll follow up within one business day with a proposal built around exactly what you asked for.';
+  const introText = introHtml.replace(/&rsquo;/g, '\u2019');
+  // Table-cell button (Outlook's Word engine drops padding on a bare <a>).
+  const bookHtml = bookUrl ? `
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:14.5px;line-height:1.65;color:#3D3E30;margin-top:26px;">${bookLeadHtml}</div>
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:14px auto 0;">
+              <tr><td bgcolor="#191A12" style="background:#191A12;border-radius:999px;padding:14px 26px;">
+                <a href="${escapeHtml(bookUrl)}" style="display:inline-block;color:#FFFDF8;font-family:Georgia,'Times New Roman',serif;font-size:14px;line-height:1;text-decoration:none;">${bookLabel} &rarr;</a>
+              </td></tr>
+            </table>` : '';
+  const bookText = bookUrl ? `
+${bookLeadText}
+${bookLabel}: ${bookUrl}
+` : '';
 
   const step = (numeral, text, last) => `
                 <tr><td style="padding:13px 0;border-top:1px solid #EEE8D6;${last ? 'border-bottom:1px solid #EEE8D6;' : ''}font-family:Georgia,'Times New Roman',serif;">
@@ -163,11 +198,11 @@ export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
             </div>
             <div style="height:1px;background:#E4DDC9;line-height:1px;font-size:0;margin:26px 0 28px;">&nbsp;</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:25px;line-height:1.3;color:#191A12;font-weight:bold;">${greetHtml}</div>
-            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.72;color:#3D3E30;margin-top:16px;">Thank you for sharing the details of your space. Our team is already reviewing them, and we&rsquo;ll follow up within one business day with a proposal built around exactly what you asked for.</div>
+            <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.72;color:#3D3E30;margin-top:16px;">${introHtml}</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#6E6A4F;margin-top:28px;">Re:&nbsp; Proposal <span style="color:#191A12;font-weight:bold;">${ref}</span> &middot; ${svc}</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#8A8467;margin-top:30px;">What happens next</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${step('I', 'We review the details you shared, nothing more needed from you.', false)}${step('II', 'We prepare your proposal, tailored to your space, schedule, and priorities.', false)}${step('III', 'A specialist reaches out to walk you through it and answer any questions.', true)}
-            </table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${step('I', 'We review the details you shared, nothing more needed from you.', false)}${step('II', 'We prepare your proposal, tailored to your space, schedule, and priorities.', false)}${step('III', stepIII, true)}
+            </table>${bookHtml}
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:14px;line-height:1.65;color:#3D3E30;margin-top:26px;">Have a question in the meantime? Email us anytime at <a href="mailto:info@eccofacilities.com" style="color:#5A6E22;text-decoration:none;">info@eccofacilities.com</a>.</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#191A12;margin-top:24px;">Warm regards,</div>
             <div style="text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;color:#6E6A4F;margin-top:2px;">The Ecco Facilities team</div>
@@ -186,15 +221,15 @@ export function buildClientEmail({ firstName, refNumber, serviceLabel }) {
 
   const text = `${greetText}
 
-Thank you for sharing the details of your space. Our team is already reviewing them, and we'll follow up within one business day with a proposal built around exactly what you asked for.
+${introText}
 
 Re: Proposal ${refNumber} · ${serviceLabel}
 
 What happens next
   I.   We review the details you shared, nothing more needed from you.
   II.  We prepare your proposal, tailored to your space, schedule, and priorities.
-  III. A specialist reaches out to walk you through it and answer any questions.
-
+  III. ${stepIII}
+${bookText}
 Have a question in the meantime? Email us anytime at info@eccofacilities.com.
 
 Warm regards,
@@ -1026,7 +1061,7 @@ export async function onRequestPost(context) {
         // "we've got everything" promise. Logged apart so postmark:false stays "failed".
         console.error('[submit-quote] client email skipped, lead not stored:', refNumber);
       } else try {
-        const msg = buildClientEmail({ firstName, refNumber, serviceLabel });
+        const msg = buildClientEmail({ firstName, refNumber, serviceLabel, needsSiteWalk: formData.needs_site_walk === true });
         const pmRes = await fetchWithTimeout('https://api.postmarkapp.com/email', {
           method: 'POST',
           headers: pmHeaders,

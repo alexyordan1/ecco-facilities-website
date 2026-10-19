@@ -374,6 +374,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf2-success-title em{font-style:italic;color:var(--accent-soft)}
 .qf2-success-subtitle{font-size:1rem;color:var(--ink-dim);font-weight:300;margin-top:.9rem;line-height:1.6}
 .qf2-success-extra,.qf2-success-ref{font-size:.85rem;color:var(--ink-faint);margin-top:1rem}
+.qf2-success-extra{color:var(--ink);display:block} /* 2026-10-19 (audit UX-12): it now tells visit leads what to do, so it reads at body contrast */
 .qf2-success-ref strong{color:var(--ink-dim)}
 
 /* ════════ porter cards (day-porter path) ════════ */

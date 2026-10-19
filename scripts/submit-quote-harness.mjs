@@ -2,7 +2,7 @@
 // Uso: node scripts/submit-quote-harness.mjs   (desde la raíz del repo; sin red: fetch está simulado)
 // Escenarios: el PATCH de HubSpot no blanquea campos; correo al cliente solo si el lead se guardó
 // (y aun así HTTP 200 cuando solo llega el correo al dueño, regla 2026-08-18 ítem 13); contacto nuevo con props completas.
-import { onRequestPost } from '../functions/api/submit-quote.js';
+import { onRequestPost, BOOKING_URL } from '../functions/api/submit-quote.js';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 const calls = [];
@@ -33,8 +33,10 @@ async function run(name, opts, body) {
   if (patch) console.log('  PATCH props keys:', Object.keys(JSON.parse(patch.body).properties).join(','));
   if (post) console.log('  POST  props keys:', Object.keys(JSON.parse(post.body).properties).join(','));
   console.log('  Postmark To:', pm.join(' | ') || '(none)');
-  const ownerHtml = calls.filter(c => c.url.includes('postmarkapp.com')).map(c => JSON.parse(c.body)).filter(m => m.To !== body.em).map(m => m.HtmlBody).join('\n');
-  return { status: res.status, patch, post, pm, ownerHtml };
+  const mails = calls.filter(c => c.url.includes('postmarkapp.com')).map(c => JSON.parse(c.body));
+  const ownerHtml = mails.filter(m => m.To !== body.em).map(m => m.HtmlBody).join('\n');
+  const clientMail = mails.find(m => m.To === body.em) || null;
+  return { status: res.status, patch, post, pm, ownerHtml, clientMail };
 }
 const base = { formType: 'janitorial', em: 'ana@example.com', fn: 'Ana', ln: '', ph: '', co: '', space: 'Office', size: '1k-3k', days: ['Monday'], timeOfDay: ['morning'], addr: '350 5th Ave, New York, NY 10118' };
 let bad = 0;
@@ -53,6 +55,21 @@ if (!e2.pm.length || !/Reference|ECJ-/.test(e2.ownerHtml)) { bad++; console.log(
 if (/Locations/.test(e2.ownerHtml) || /xyz/.test(e2.ownerHtml)) { bad++; console.log('  FAIL: tampered locations value leaked into the owner email'); }
 const e3 = await run('E3 locations prototype key', { existingContact: false }, { ...base, locations: 'constructor', timeline: 'constructor' });
 if (/Locations|native code|function/.test(e3.ownerHtml)) { bad++; console.log('  FAIL: prototype-key lookup leaked into the owner email'); }
+// F — booking link in the client email (2026-10-19, audit UX-12 / MOD-8): same offer as the screen.
+const pageUrl = (readFileSync(new URL('../quote.html', import.meta.url), 'utf8').match(/window\.QF_BOOKING_URL\s*=\s*'([^']*)'/) || [])[1];
+if (pageUrl !== BOOKING_URL) { bad++; console.log('  FAIL: BOOKING_URL drifted from quote.html QF_BOOKING_URL:', pageUrl, '!=', BOOKING_URL); }
+const f = await run('F visit lead (needsSiteWalk)', { existingContact: false }, { ...base, size: 'visit_required', needsSiteWalk: true });
+if (!c.clientMail || !f.clientMail) { bad++; console.log('  FAIL: client email missing in C or F'); }
+else {
+  if (BOOKING_URL) {
+    if (!c.clientMail.HtmlBody.includes(BOOKING_URL) || !c.clientMail.HtmlBody.includes('Book a 30-minute call with Alex') || !c.clientMail.TextBody.includes(BOOKING_URL)) { bad++; console.log('  FAIL: regular client email lacks the booking button/link'); }
+    if (!f.clientMail.HtmlBody.includes('Book a call to schedule your visit') || !f.clientMail.HtmlBody.includes(BOOKING_URL)) { bad++; console.log('  FAIL: visit-lead client email lacks the visit booking button'); }
+  } else if (/Book a/.test(c.clientMail.HtmlBody + f.clientMail.HtmlBody)) { bad++; console.log('  FAIL: booking button rendered although BOOKING_URL is empty'); }
+  // Visit lead: one consistent story (visit first, proposal after); regular lead keeps the optional call.
+  if (!/quick visit to size the crew/.test(f.clientMail.TextBody) || !/site visit on that call/.test(f.clientMail.TextBody) || /only if you want one/.test(f.clientMail.TextBody) || !/proposal follows right after/.test(f.clientMail.TextBody)) { bad++; console.log('  FAIL: visit-lead email story inconsistent'); }
+  if (!/only if you want one/.test(c.clientMail.TextBody) || /site visit on that call|size the crew/.test(c.clientMail.TextBody)) { bad++; console.log('  FAIL: regular email carries visit wording'); }
+  if (/pick a time|specialist reaches out/i.test(f.clientMail.HtmlBody + c.clientMail.HtmlBody)) { bad++; console.log('  FAIL: old promise still in the client email'); }
+}
 // D — real SQLite behind the D1 binding: a re-submission without phone/company keeps the stored ones.
 const db = new DatabaseSync(':memory:');
 db.exec(readFileSync(new URL('../schema/leads.sql', import.meta.url), 'utf8'));
