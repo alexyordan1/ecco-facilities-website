@@ -642,28 +642,25 @@
     } catch (_) {}
   });
 
-  // Ola 5 — abandonment safety: if the user has started answering but hasn't
-  // submitted, prompt the native browser "Leave site?" dialog. Most browsers
-  // ignore the custom message and show their own, but any prompt is enough
-  // to rescue an accidental close. Gated: no prompt at welcome (haven't
-  // invested anything) or success (already submitted). Draft is still saved
-  // to localStorage regardless, so a user who dismisses the prompt and
-  // returns later still resumes where they left off.
-  var qfServiceFromUrl = false; // 2026-10-19 — set by enterWithService (a ?service link is not an answer)
-  window.addEventListener('beforeunload', function (e) {
+  // 2026-10-19 (audit MOD-14, decided by Alex) — the native "Leave site?"
+  // prompt is gone: the draft is saved at every step and the resume banner
+  // brings the visitor back, so the alarm only added noise (and inflated the
+  // abandon metric with people who cancelled it and stayed). Exits are now
+  // measured on pagehide, which fires only when the page really goes away.
+  var qfServiceFromUrl = false; // set by enterWithService (a ?service link is not an answer)
+  window.addEventListener('pagehide', function (ev) {
     try {
       var step = STATE && STATE.currentStepName;
       if (!step || step === 'welcome' || step === 'success') return;
-      // Only warn if the user has actually typed/selected something — spare
-      // a prompt for a visitor who opened the page and closed it immediately.
+      // Only count visitors who actually typed/selected something.
       var hasInput = (STATE.service && !qfServiceFromUrl) ||
                      STATE.userEmail || STATE.userName || STATE.space ||
                      (Array.isArray(STATE.days) && STATE.days.length);
       if (!hasInput) return;
-      // D53 — telemetry: log the abandon event so we know which step lost
-      // the user. This fires synchronously before the prompt; dataLayer is
-      // queued for GTM to flush on the next page (Cloudflare Pages serves
-      // the same origin, so the queue persists across nav).
+      // D53 — telemetry: which step lost the user. Best-effort: dataLayer is a
+      // per-document array, so the push only reaches GA4 if GTM has already
+      // loaded here and its tag sends with a beacon; exits before that are not
+      // counted. bfcache marks an exit the visitor may come back from.
       qfTrack('quote_abandon', {
         current_step: step,
         step_index: qfStepIndex(step),
@@ -671,12 +668,9 @@
         has_email: !!STATE.userEmail,
         has_company: !!STATE.companyName,
         service: STATE.service || null,
-        space: STATE.space || null
+        space: STATE.space || null,
+        bfcache: !!(ev && ev.persisted)
       });
-      e.preventDefault();
-      // Legacy string (Chrome <51, Edge) — modern browsers show their own copy.
-      e.returnValue = 'Your progress is saved. You can pick up where you left off anytime.';
-      return e.returnValue;
     } catch (_) {}
   });
 

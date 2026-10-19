@@ -900,7 +900,7 @@
         <!-- 2026-08-18 — the wizard collects name, email, address and phone but
              carried no data-use disclosure anywhere; this also covers the
              enhanced-conversions notice requirement. -->
-        <p class="qf2-legal-note">By sending, you agree to our <a href="privacy.html">Privacy Policy</a>.</p>
+        <p class="qf2-legal-note">By sending, you agree to our <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</p>
         <div id="qfTurnstile" class="cf-turnstile qf-turnstile-widget" data-sitekey="0x4AAAAAAC0yqxn8GnsosDXq" data-size="flexible" data-theme="auto" data-callback="qfTurnstileCallback" data-expired-callback="qfTurnstileExpired" data-error-callback="qfTurnstileError"></div>
       </div>    </section>
     <!-- SUCCESS SCREEN -->
@@ -1042,7 +1042,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.39"></script>
+<script defer src="js/quote-flow.js?v=40.40"></script>
 <script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>
