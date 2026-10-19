@@ -32,8 +32,8 @@ test.describe('Combined — full flow', () => {
     await h.pickSchedule(page, 'Monday', 'morning');
     await h.expectActive(page, 'qfScreen_schedule');
 
-    // Porter card defaults to Mon-Fri 8-4 — just continue.
-    await page.click('#qfDpScheduleContinue');
+    // Porter card seeds from the cleaning days: keep the suggestion (LOGA-11).
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
 
     await h.fillLocation(page);
@@ -95,7 +95,7 @@ test.describe('Combined — full flow', () => {
     await h.expectActive(page, 'qfScreen_days');
     await h.pickSchedule(page, 'Monday', 'morning');
     await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue');
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
@@ -196,7 +196,7 @@ test.describe('Combined — full flow', () => {
     await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_size');
     await h.pickSize(page, '1k-3k'); await h.expectActive(page, 'qfScreen_days');
     await h.pickSchedule(page, 'Monday', 'morning'); await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue'); await h.expectActive(page, 'qfScreen_location');
+    await h.keepPorterSchedule(page); await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
     await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
     const txt = await h.readSummaryText(page);

@@ -423,6 +423,7 @@ body.qf-scrolled .qf2-flowbar-skip{color:var(--ink-dim)}
 .qf-dp-add-porter:hover{border-color:var(--accent);color:var(--accent)}
 .qf-dp-add-porter-plus{font-size:1.2rem;line-height:1;color:var(--accent)}
 .qf-dp-cta-wrap{margin-top:1.4rem}
+.qf-dp-confirm-row{display:flex;justify-content:center;margin-top:1.2rem} .qf-dp-confirm-row[hidden]{display:none} /* 2026-10-19 (audit LOGA-11): keep-the-suggestion chip; .qf2-chip gives the 44px target */
 .qf-dp-cta-status{display:block;text-align:center;font-size:.76rem;color:var(--ink-faint);margin-top:.6rem}
 .qf-dp-team-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
 .qf-dp-team-preview-tag{font-size:.72rem;color:var(--ink-dim);background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:4px 10px}

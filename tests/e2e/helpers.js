@@ -242,6 +242,15 @@ async function pickPorterSchedule(page, opts = {}) {
   await page.click('#qfDpScheduleContinue');
 }
 
+/**
+ * 2026-10-19 (audit LOGA-11) — the seeded porter schedule is a suggestion:
+ * keep it with the chip, then Continue.
+ */
+async function keepPorterSchedule(page) {
+  await page.click('#qfDpConfirm');
+  await page.click('#qfDpScheduleContinue');
+}
+
 /** Read the review summary as normalized whitespace text (for parity snapshots). */
 async function readSummaryText(page) {
   return (await page.locator('#qfScreen_contact .qf2-summary').innerText()).replace(/\s+/g, ' ').trim();
@@ -258,6 +267,7 @@ module.exports = {
   pickSizeExact,
   pickSchedule,
   pickPorterSchedule,
+  keepPorterSchedule,
   fillLocation,
   readSummaryText,
 };

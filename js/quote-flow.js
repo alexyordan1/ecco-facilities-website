@@ -250,7 +250,8 @@
     // tracks the chip-selected count (1, 2, 3); dpPorters can grow up to
     // MAX_PORTERS via the "+ Add another porter" button.
     dpPorterCount:  0,
-    dpDaysCustomized: false,  // E: true once the user hand-edits porter days in Combined
+    dpDaysCustomized: false,  // E: true once the user hand-edits porter days (any flow; 2026-10-19 LOGA-11)
+    dpScheduleConfirmed: false, // 2026-10-19 (LOGA-11): the seeded porter schedule is a suggestion until kept or adjusted
     dpPorters:      [],
     // Legacy compat (drained on Phase 3 when V1 handlers are deleted): these
     // still get written by the legacy dpDays / porter / hours handlers and
@@ -608,6 +609,17 @@
               customHours: (p.customHours && typeof p.customHours === 'object') ? p.customHours : {}
             };
           });
+      }
+      // 2026-10-19 (audit LOGA-11) — drafts saved before the porter confirmation
+      // existed: a schedule that already went through Continue (porterCount is
+      // only set there) or that differs from the untouched default was chosen
+      // under the old rules, so it counts as kept. An untouched default does not.
+      if (s.dpScheduleConfirmed === undefined && Array.isArray(s.dpPorters) && s.dpPorters.length) {
+        var dpEdited = s.dpPorters.length > 1 || s.dpPorters.some(function (p) {
+          return p.hoursMode !== 'same' || p.sameStart !== '08:00' || p.sameEnd !== '16:00' ||
+                 p.days.join() !== 'Monday,Tuesday,Wednesday,Thursday,Friday';
+        });
+        s.dpScheduleConfirmed = !!s.porterCount || dpEdited || !!s.dpDaysCustomized;
       }
       // V2 2026-04-25 — v1 → v2 migration (per `_v` stamp on snapshot):
       //   - currentStepName 'role' → 'info' (role is now a field on info)
@@ -1448,11 +1460,14 @@
             STATE.timeStart = null;
             STATE.timeEnd = null;
             STATE.porterHours = [];
+            STATE.dpDaysCustomized = false;
+            STATE.dpScheduleConfirmed = false;
           }
           if (pickedService !== 'both') {
-            // dpDays + its customized flag only have meaning in Combined.
+            // dpDays only has meaning in Combined. dpDaysCustomized now stays:
+            // porter days hand-picked in Day Porter must survive a switch to
+            // Combined instead of being overwritten by the cleaning days (LOGA-11).
             STATE.dpDays = [];
-            STATE.dpDaysCustomized = false;
           }
         }
         STATE.service = pickedService;
@@ -2512,7 +2527,20 @@
           STATE.dpDays = STATE.days.slice(); // keep the legacy mirror current
           // E-fix: porter days FOLLOW the cleaning days until the user customizes them.
           if (!STATE.dpDaysCustomized && STATE.dpPorters && STATE.dpPorters.length) {
-            STATE.dpPorters.forEach(function (p) { p.days = STATE.days.slice(); dpSyncCustomHours(p); });
+            var dpDaysMoved = false;
+            STATE.dpPorters.forEach(function (p) {
+              if (p.days.slice().sort().join() !== STATE.days.slice().sort().join()) dpDaysMoved = true;
+              p.days = STATE.days.slice(); dpSyncCustomHours(p);
+            });
+            // The suggestion moved with the cleaning days: ask again before Continue.
+            if (dpDaysMoved) {
+              STATE.dpScheduleConfirmed = false;
+              // Came from the review's Edit on Cleaning: goNext would jump straight
+              // back to the review and skip the porter screen, so the moved days
+              // would be sent unconfirmed. Route through Schedule; its Continue
+              // then returns to the review.
+              if (STATE.returnToReview === 'days') STATE.returnToReview = 'schedule';
+            }
           }
         }
 
@@ -2624,6 +2652,8 @@
     var qfDpAddPorterBtn     = document.getElementById('qfDpAddPorter');
     var qfDpScheduleContinue = document.getElementById('qfDpScheduleContinue');
     var qfDpStatus           = document.getElementById('qfDpStatus');
+    var qfDpConfirmRow       = document.getElementById('qfDpConfirmRow');
+    var qfDpConfirm          = document.getElementById('qfDpConfirm');
 
     // Local UI state — which porter card is open in the accordion.
     // Default -1 means all collapsed: the user sees the seeded porter as a
@@ -3053,10 +3083,26 @@
     }
 
     function dpRenderCTA() {
-      var allIssues = (STATE.dpPorters || []).map(dpPorterIssues).reduce(function (a,b) { return a.concat(b); }, []);
-      var valid = allIssues.length === 0 && (STATE.dpPorters || []).length > 0;
-      qfDpScheduleContinue.disabled = !valid;
-      if (valid) {
+      var porters = STATE.dpPorters || [];
+      var allIssues = porters.map(dpPorterIssues).reduce(function (a,b) { return a.concat(b); }, []);
+      var valid = allIssues.length === 0 && porters.length > 0;
+      // 2026-10-19 (audit LOGA-11, decided by Alex) — the seeded schedule is a
+      // suggestion: Continue waits until the visitor keeps it or adjusts it, so
+      // sales never receives a schedule nobody chose.
+      var needsConfirm = valid && !STATE.dpScheduleConfirmed;
+      qfDpScheduleContinue.disabled = !valid || needsConfirm;
+      if (qfDpConfirmRow) qfDpConfirmRow.hidden = !needsConfirm;
+      if (needsConfirm && qfDpConfirm) {
+        var only = porters.length === 1 && porters[0].hoursMode !== 'custom' ? porters[0] : null;
+        var sum = only ? dpPorterSummary(only) : '';
+        // Sentence case: "Keep every day", "Keep weekends"; day names stay capitalized.
+        if (/^(Every day|Weekends)/.test(sum)) sum = sum.charAt(0).toLowerCase() + sum.slice(1);
+        qfDpConfirm.textContent = only ? 'Keep ' + sum : 'Keep this schedule';
+      }
+      if (needsConfirm) {
+        qfDpStatus.textContent = 'Keep the suggested schedule or adjust it to continue.';
+        qfDpStatus.classList.remove('is-ok');
+      } else if (valid) {
         var n = STATE.dpPorters.length;
         var hours = dpTotalWeeklyHours();
         qfDpStatus.textContent = 'Looks good · ' + n + ' porter' + (n > 1 ? 's' : '') +
@@ -3080,6 +3126,7 @@
       if (STATE.dpPorters.length >= DP_MAX_PORTERS) return;
       STATE.dpPorters.push(dpMakePorter(STATE.dpPorters.length + 1));
       STATE.dpPorterCount = STATE.dpPorters.length;
+      STATE.dpScheduleConfirmed = true; // shaping the team is a choice
       // Auto-open here — user's intent is to configure the freshly added one.
       dpUI.openIdx = STATE.dpPorters.length - 1;
       dpRender();
@@ -3095,6 +3142,7 @@
       STATE.dpPorters.splice(idx, 1);
       STATE.dpPorters.forEach(function (p, i) { p.id = i + 1; });
       STATE.dpPorterCount = STATE.dpPorters.length;
+      STATE.dpScheduleConfirmed = true;
       if (wasAllCollapsed) { dpUI.openIdx = -1; }
       else if (dpUI.openIdx >= STATE.dpPorters.length) { dpUI.openIdx = STATE.dpPorters.length - 1; }
       dpRender();
@@ -3126,7 +3174,8 @@
         p.days.push(day);
         p.days.sort(function (a,b) { return DP_DAYS.indexOf(a) - DP_DAYS.indexOf(b); });
       }
-      if (STATE.service === 'both') STATE.dpDaysCustomized = true; // E: user touched porter days
+      STATE.dpDaysCustomized = true; // E: user touched porter days (any flow, LOGA-11)
+      STATE.dpScheduleConfirmed = true;
       dpSyncCustomHours(p);
       dpRender();
     }
@@ -3136,7 +3185,8 @@
       if (preset === 'weekdays') p.days = DP_WEEKDAYS.slice();
       else if (preset === 'every') p.days = DP_DAYS.slice();
       else { p.days = []; p.customHours = {}; }
-      if (STATE.service === 'both') STATE.dpDaysCustomized = true; // E: user touched porter days
+      STATE.dpDaysCustomized = true; // E: user touched porter days (any flow, LOGA-11)
+      STATE.dpScheduleConfirmed = true;
       dpSyncCustomHours(p);
       dpRender();
     }
@@ -3145,6 +3195,7 @@
       var p = STATE.dpPorters[porterIdx];
       var prev = p.hoursMode;
       p.hoursMode = mode;
+      STATE.dpScheduleConfirmed = true;
       dpSyncCustomHours(p);
       dpRender();
       // Telemetry: a switch to "Per day" is a high-signal event because it
@@ -3164,6 +3215,7 @@
         if (!p.customHours[day]) p.customHours[day] = { start: '09:00', end: '17:00' };
         p.customHours[day][kind] = value;
       }
+      STATE.dpScheduleConfirmed = true;
       dpRender();
     }
 
@@ -3193,11 +3245,24 @@
 
     // ─── Wire static buttons ───
     qfDpAddPorterBtn.addEventListener('click', dpAddPorter);
+    if (qfDpConfirm) qfDpConfirm.addEventListener('click', function () {
+      STATE.dpScheduleConfirmed = true;
+      qfTrack('quote_porter_default_kept', { service: STATE.service, space: STATE.space });
+      dpRender();
+      // The chip just hid itself: hand focus to the now-enabled Continue.
+      try { qfDpScheduleContinue.focus(); } catch (_) {}
+    });
     qfDpScheduleContinue.addEventListener('click', function () {
       var allIssues = (STATE.dpPorters || []).map(dpPorterIssues).reduce(function (a,b) { return a.concat(b); }, []);
       if (allIssues.length || !STATE.dpPorters.length) {
         if (typeof qfToast === 'function') {
           qfToast({ type: 'warn', title: 'Almost there', message: allIssues[0] || 'Pick at least one porter', duration: 3500 });
+        }
+        return;
+      }
+      if (!STATE.dpScheduleConfirmed) {
+        if (typeof qfToast === 'function') {
+          qfToast({ type: 'warn', title: 'Almost there', message: 'Keep the suggested schedule or adjust it first.', duration: 3500 });
         }
         return;
       }

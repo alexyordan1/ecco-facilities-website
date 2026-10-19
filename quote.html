@@ -71,7 +71,7 @@
      so no media attribute is needed. -->
 <link rel="preload" as="image" href="images/stock/welcome-team-conference.webp" fetchpriority="high">
 <link rel="stylesheet" href="css/noir.css?v=26">
-<link rel="stylesheet" href="css/quote-noir.css?v=75">
+<link rel="stylesheet" href="css/quote-noir.css?v=76">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ecco Facilities LLC","image":"https://eccofacilities.com/images/logo-horizontal.png","email":"info@eccofacilities.com","telephone":"+19296856757","areaServed":{"@type":"City","name":"New York"},"url":"https://eccofacilities.com"}</script>
 <!-- Google Places — address suggestions.
      Uses the legacy google.maps.places.Autocomplete API, which is deprecated
@@ -754,6 +754,12 @@
           <span class="qf-dp-add-porter-label">Add another porter</span>
         </button>
 
+        <!-- 2026-10-19 (audit LOGA-11, decided by Alex) — the seeded schedule is a
+             suggestion; Continue waits for this chip or an adjustment. Sits right
+             above Continue so a double-click lands on Continue, never on "Add porter". -->
+        <div class="qf-dp-confirm-row" id="qfDpConfirmRow" hidden>
+          <button type="button" class="qf2-chip qf-dp-confirm" id="qfDpConfirm">Keep this schedule</button>
+        </div>
         <div class="qf-dp-cta-wrap">
           <button type="button" class="qf2-cta" id="qfDpScheduleContinue">Continue <span aria-hidden="true">&rarr;</span></button>
           <span class="qf-dp-cta-status" id="qfDpStatus" aria-live="polite"></span>
@@ -1042,7 +1048,7 @@ window.qfTurnstileCallback = function(t){ window.qfTurnstileToken = t; };
 window.qfTurnstileExpired = function(){ window.qfTurnstileToken = null; try{ if(window.turnstile) window.turnstile.reset('#qfTurnstile'); }catch(e){} };
 window.qfTurnstileError = function(){ window.qfTurnstileToken = null; };
 </script>
-<script defer src="js/quote-flow.js?v=40.40"></script>
+<script defer src="js/quote-flow.js?v=40.41"></script>
 <script src="js/cookie-consent.js?v=1.6"></script>
 <!-- HubSpot — gated by cookie consent. `ecco_consent` is set by cookie-consent.js on Accept. -->
 <script>

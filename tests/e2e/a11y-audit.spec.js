@@ -80,7 +80,7 @@ test.describe('A11y · Day Porter flow', () => {
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue');
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
@@ -94,7 +94,7 @@ test.describe('A11y · Day Porter flow', () => {
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue');
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');

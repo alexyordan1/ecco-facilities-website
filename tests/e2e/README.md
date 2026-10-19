@@ -68,7 +68,7 @@ swallowed mid-transition.
 
 ## Projects
 
-Both projects run the same specs and are **fully green** (81 each, 162 total as of 2026-10-19):
+Both projects run the same specs and are **fully green** (94 each, 188 total as of 2026-10-19):
 
 ```bash
 npx playwright test                       # both projects

@@ -18,7 +18,7 @@ async function walkToContact(page, opts = {}) {
   await h.expectActive(page, 'qfScreen_space');
   await h.pickSpace(page, 'Office');
   await h.expectActive(page, 'qfScreen_schedule');
-  await page.click('#qfDpScheduleContinue');
+  await h.keepPorterSchedule(page);
   await h.expectActive(page, 'qfScreen_location');
   await h.fillLocation(page, opts.location || {});
   await h.expectActive(page, 'qfScreen_info');
@@ -98,7 +98,7 @@ test.describe('Error states · validation', () => {
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue');
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
@@ -116,7 +116,7 @@ test.describe('Error states · validation', () => {
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue');
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
     // Don't fill anything — click Continue.
     await page.click('#qfLocationContinue');

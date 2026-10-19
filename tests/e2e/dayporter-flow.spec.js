@@ -31,8 +31,8 @@ test.describe('Day Porter — full flow', () => {
     await h.expectActive(page, 'qfScreen_schedule');
 
     // Schedule defaults: 1 porter, Mon–Fri 9–5 (Office defaults).
-    // Just click Continue and verify advance.
-    await page.click('#qfDpScheduleContinue');
+    // Keep the suggested schedule (LOGA-11) and verify advance.
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
 
     await h.fillLocation(page);
@@ -121,9 +121,11 @@ test.describe('Day Porter — full flow', () => {
     await card.locator('.qf-dp-preset', { hasText: 'Clear' }).first().click();
     await page.waitForTimeout(120);
 
-    // Continue should be disabled
+    // Continue should be disabled — by validation, not by the keep-the-suggestion gate.
     const cont = page.locator('#qfDpScheduleContinue');
     await expect(cont).toBeDisabled();
+    await expect(page.locator('#qfDpConfirmRow')).toBeHidden();
+    await expect(page.locator('#qfDpStatus')).toHaveText('Pick at least one day for porter 1');
 
     h.expectNoJsErrors(page);
   });
@@ -145,6 +147,8 @@ test.describe('Day Porter — full flow', () => {
 
     const cont = page.locator('#qfDpScheduleContinue');
     await expect(cont).toBeDisabled();
+    await expect(page.locator('#qfDpConfirmRow')).toBeHidden();
+    await expect(page.locator('#qfDpStatus')).toHaveText('Porter 1: end must be after start');
 
     h.expectNoJsErrors(page);
   });
@@ -181,7 +185,7 @@ test.describe('Day Porter — full flow', () => {
     await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office');
     await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue');
+    await h.keepPorterSchedule(page);
     await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page);
     await h.expectActive(page, 'qfScreen_info');
@@ -217,7 +221,7 @@ test.describe('Day Porter — full flow', () => {
   test('PARITY — Day Porter review summary (snapshot of current output)', async ({ page }) => {
     await page.click('.qf2-card[data-service="dayporter"]'); await h.expectActive(page, 'qfScreen_space');
     await h.pickSpace(page, 'Office'); await h.expectActive(page, 'qfScreen_schedule');
-    await page.click('#qfDpScheduleContinue'); await h.expectActive(page, 'qfScreen_location');
+    await h.keepPorterSchedule(page); await h.expectActive(page, 'qfScreen_location');
     await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
     await h.fillInfo(page, { role: 'Facilities Manager' }); await h.expectActive(page, 'qfScreen_contact');
     const txt = await h.readSummaryText(page);
