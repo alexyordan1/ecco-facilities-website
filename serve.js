@@ -21,7 +21,9 @@ const MIME = {
 };
 
 http.createServer((req, res) => {
-  let filePath = path.join(DIR, req.url === '/' ? 'index.html' : req.url.split('?')[0]);
+  // 2026-10-19 — strip the query first: '/?utm_source=…' used to miss the '/' rule and 404 (Cloudflare serves it).
+  const urlPath = req.url.split('?')[0];
+  let filePath = path.join(DIR, urlPath === '/' ? 'index.html' : urlPath);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME[ext] || 'application/octet-stream';
 

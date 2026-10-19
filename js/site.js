@@ -2,6 +2,25 @@
   "use strict";
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* ── First-touch attribution (2026-10-19, audit MOD-7) ──
+     An ad click that lands on any marketing page used to lose its utm/gclid on
+     the way to /quote (the quote form only read its own URL). Keep the first
+     page of the tab session and its campaign params in sessionStorage; the
+     quote form merges them into the lead source. Non-personal data only. */
+  (function firstTouch(){
+    try{
+      var KEY='ecco_first_touch';
+      if(sessionStorage.getItem(KEY)) return;
+      var ft={}, q=new URLSearchParams(location.search);
+      ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'].forEach(function(k){var v=q.get(k);if(v)ft[k]=v.slice(0,200);});
+      var ref=document.referrer||'', refUrl=null;
+      try{ if(ref) refUrl=new URL(ref); }catch(e){}
+      if(refUrl && refUrl.origin!==location.origin) ft.referrer=ref.slice(0,300);
+      ft.entry_page=(location.pathname||'/').slice(0,300);
+      sessionStorage.setItem(KEY, JSON.stringify(ft));
+    }catch(e){ /* storage blocked: attribution is best-effort */ }
+  })();
+
   /* ── Sticky nav state ── */
   var head = document.getElementById('siteHead');
   function onScroll(){ if(head){ head.classList.toggle('scrolled', window.scrollY > 24); } }

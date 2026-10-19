@@ -693,7 +693,7 @@ export async function onRequestPost(context) {
     // 2026-06-20 — source attribution object: keep only known string fields,
     // each trimmed + capped. Drop the whole key if malformed or empty.
     if (body.source && typeof body.source === 'object' && !Array.isArray(body.source)) {
-      const SRC_FIELDS = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid','referrer','landing','prev_page']; // prev_page: 2026-10-19 (audit MOD-6)
+      const SRC_FIELDS = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid','referrer','landing','prev_page','entry_page']; // prev_page + entry_page: 2026-10-19 (audit MOD-6, MOD-7)
       const cleanSrc = {};
       for (const f of SRC_FIELDS) {
         const sv = body.source[f];

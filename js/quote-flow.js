@@ -660,10 +660,12 @@
   // abandon metric with people who cancelled it and stayed). Exits are now
   // measured on pagehide, which fires only when the page really goes away.
   var qfServiceFromUrl = false; // set by enterWithService (a ?service link is not an answer)
+  var qfPostInFlight = false;   // true from the moment the submit POST leaves until it settles
   window.addEventListener('pagehide', function (ev) {
     try {
       var step = STATE && STATE.currentStepName;
       if (!step || step === 'welcome' || step === 'success') return;
+      if (qfPostInFlight) return; // the keepalive POST is already carrying the lead
       // Only count visitors who actually typed/selected something.
       var hasInput = (STATE.service && !qfServiceFromUrl) ||
                      STATE.userEmail || STATE.userName || STATE.space ||
@@ -5039,10 +5041,16 @@
           // aborts → flows to the .catch below (re-enable button, reset token).
           var _ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
           var _to = _ctrl ? setTimeout(function () { _ctrl.abort(); }, 20000) : null;
+          var _body = JSON.stringify(payload);
+          qfPostInFlight = true;
           return fetch('/api/submit-quote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: _body,
+            // 2026-10-19 — with the "Leave site?" prompt gone, closing the tab during
+            // "Sending…" must not drop the POST: keepalive lets it finish after
+            // unload (browsers cap keepalive bodies at 64 KB; ours is a few KB).
+            keepalive: _body.length < 60000,
             signal: _ctrl ? _ctrl.signal : undefined
           }).then(function (res) {
             // 2026-08-18 — an invalid-JSON body used to reject into the network
@@ -5056,7 +5064,7 @@
                 if (e && e.name === 'AbortError') throw e;
                 return { ok: false, status: res.status, data: null, badBody: true };
               });
-          }).finally(function () { if (_to) clearTimeout(_to); });
+          }).finally(function () { if (_to) clearTimeout(_to); qfPostInFlight = false; });
         }).then(function (result) {
           if (!result.ok || !result.data || !result.data.ok) {
             resetTurnstile();
@@ -5956,6 +5964,26 @@
       }
       var landing = (location.pathname || '') + (location.search || '');
       if (landing) src.landing = landing.slice(0, 300);
+      // 2026-10-19 (audit MOD-7) — first touch of this tab session (stored by
+      // js/site.js on marketing pages, or right here when the session starts on
+      // /quote). A campaign is one set: if this visit carries its own utm/click
+      // id or an external referrer, it is used whole and nothing is borrowed;
+      // otherwise the first-touch set fills in, with the page the session began on.
+      var CAMPAIGN = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'referrer'];
+      var ownTouch = CAMPAIGN.some(function (k) { return !!src[k]; });
+      try {
+        var ft = JSON.parse(sessionStorage.getItem('ecco_first_touch') || 'null');
+        if (!ft || typeof ft !== 'object') {
+          // Session starts on /quote (site.js is not loaded here): record it, so a
+          // detour to another page and back keeps this landing's campaign.
+          ft = { entry_page: (location.pathname || '/').slice(0, 300) };
+          CAMPAIGN.forEach(function (k) { if (src[k]) ft[k] = src[k]; });
+          sessionStorage.setItem('ecco_first_touch', JSON.stringify(ft));
+        } else if (!ownTouch) {
+          CAMPAIGN.forEach(function (k) { if (typeof ft[k] === 'string' && ft[k]) src[k] = ft[k].slice(0, 300); });
+          if (typeof ft.entry_page === 'string' && ft.entry_page) src.entry_page = ft.entry_page.slice(0, 300);
+        }
+      } catch (e) { /* storage blocked */ }
       if (Object.keys(src).length && typeof STATE !== 'undefined') STATE.source = src;
     } catch (e) { /* attribution is best-effort, never blocks the flow */ }
   })();

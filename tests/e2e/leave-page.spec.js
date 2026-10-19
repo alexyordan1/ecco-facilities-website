@@ -52,6 +52,30 @@ test.describe('Leaving the page', () => {
     h.expectNoJsErrors(page);
   });
 
+  test('leaving while the POST is in flight logs no abandon', async ({ page }) => {
+    await h.freshOpen(page);
+    await startAnswering(page);
+    await h.pickSize(page, '1k-3k'); await h.expectActive(page, 'qfScreen_days');
+    await h.pickSchedule(page, 'Monday'); await h.expectActive(page, 'qfScreen_location');
+    await h.fillLocation(page); await h.expectActive(page, 'qfScreen_info');
+    await h.fillInfo(page); await h.expectActive(page, 'qfScreen_contact');
+    let release;
+    const posted = new Promise((r) => { release = r; });
+    await page.route('**/api/submit-quote', async (route) => {
+      release();
+      await new Promise((r) => setTimeout(r, 1500));
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, ref: 'ECJ-TEST123' }) });
+    });
+    await page.locator('#qfContactSubmit').scrollIntoViewIfNeeded();
+    await page.click('#qfContactSubmit');
+    await posted; // the POST has left
+    const events = await page.evaluate(() => {
+      window.dispatchEvent(new Event('pagehide'));
+      return (window.dataLayer || []).filter((e) => e && e.event === 'quote_abandon');
+    });
+    expect(events).toHaveLength(0);
+  });
+
   test('nothing answered yet: an exit logs no abandon', async ({ page }) => {
     await h.freshOpen(page, '/quote.html?service=dayporter');
     await h.expectActive(page, 'qfScreen_space');
