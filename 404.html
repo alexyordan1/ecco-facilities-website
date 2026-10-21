@@ -19,18 +19,24 @@
 <meta name="twitter:title" content="Page Not Found · Ecco Facilities">
 <meta name="twitter:description" content="The page you're looking for doesn't exist or has been moved.">
 <meta name="twitter:image" content="https://eccofacilities.com/images/og-image.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="images/favicon-mark.svg?v=4">
-<link rel="icon" type="image/png" sizes="48x48" href="images/favicon-48.png?v=4">
-<link rel="icon" type="image/png" sizes="96x96" href="images/favicon-96.png?v=4">
-<link rel="icon" type="image/png" sizes="192x192" href="images/favicon-192.png?v=4">
-<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=4">
-<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=4">
-<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=4">
-<link rel="stylesheet" href="css/noir.css?v=26">
-<script src="js/site.js?v=5" defer></script>
+<!-- 2026-10-21 (audit PERF-2) — fonts self-hosted, as on quote.html since 2026-10-15: the
+     Google Fonts stylesheet was a render-blocking third-party request (first paint 0.25 s
+     -> 3.2 s when it stalled 3 s). css/fonts.css declares the same latin / latin-ext
+     variable woff2 files from /fonts/; the two Fraunces faces of the headlines are preloaded.
+     Every URL on this page is root-absolute: Cloudflare serves 404.html at ANY missing path
+     (e.g. /blog/typo), where relative css/, js/, images/ and fonts/ would resolve under /blog/. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/fraunces-normal-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/fraunces-italic-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/css/fonts.css?v=1">
+<link rel="icon" type="image/svg+xml" href="/images/favicon-mark.svg?v=4">
+<link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48.png?v=4">
+<link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96.png?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="/images/favicon-192.png?v=4">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png?v=4">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png?v=4">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=4">
+<link rel="stylesheet" href="/css/noir.css?v=26">
+<script src="/js/site.js?v=5" defer></script>
 </head>
 <body>
 <noscript><iframe class="qf-gtm-ns" src="https://www.googletagmanager.com/ns.html?id=GTM-W2ZWXZ3T" height="0" width="0"></iframe></noscript>
@@ -39,8 +45,8 @@
 <a href="#main" class="skip-link">Skip to main content</a>
 <header class="site-head" id="siteHead">
   <nav class="nav" aria-label="Primary">
-    <a class="wordmark" href="index.html" aria-label="Ecco Facilities home">
-      <img src="images/logo-horizontal-white.png" alt="Ecco Facilities" class="logo-img" width="150" height="32">
+    <a class="wordmark" href="/" aria-label="Ecco Facilities home">
+      <img src="/images/logo-horizontal-white.png" alt="Ecco Facilities" class="logo-img" width="150" height="32">
     </a>
 
     <div class="nav-links">
@@ -49,20 +55,20 @@
           Services <span class="caret" aria-hidden="true">▾</span>
         </button>
         <div class="nav-dd" id="svcMenu" aria-label="Services">
-          <a class="dd-item" href="day-porter.html">
+          <a class="dd-item" href="/day-porter.html">
             <span class="dd-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
             <span class="dd-txt"><strong>Day Porter</strong><span>On-site daytime maintenance</span></span>
           </a>
-          <a class="dd-item" href="janitorial.html">
+          <a class="dd-item" href="/janitorial.html">
             <span class="dd-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><path d="M9 22v-4h6v4"/></svg></span>
             <span class="dd-txt"><strong>Commercial Cleaning</strong><span>Complete cleaning for your whole facility</span></span>
           </a>
         </div>
       </div>
-      <a class="nav-link" href="why-ecco.html">Why Ecco</a>
-      <a class="nav-link" href="about.html">About</a>
-      <a class="nav-link" href="blog.html">Blog</a>
-      <a class="nav-cta" href="quote.html">Get your free proposal</a>
+      <a class="nav-link" href="/why-ecco.html">Why Ecco</a>
+      <a class="nav-link" href="/about.html">About</a>
+      <a class="nav-link" href="/blog.html">Blog</a>
+      <a class="nav-cta" href="/quote.html">Get your free proposal</a>
     </div>
 
     <button class="nav-burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
@@ -76,14 +82,14 @@
 <aside class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation" aria-hidden="true">
   <span class="mm-label">Services</span>
   <div class="mm-sub">
-    <a class="mm-link" href="day-porter.html">Day Porter</a>
-    <a class="mm-link" href="janitorial.html">Commercial Cleaning</a>
+    <a class="mm-link" href="/day-porter.html">Day Porter</a>
+    <a class="mm-link" href="/janitorial.html">Commercial Cleaning</a>
   </div>
   <span class="mm-label">Company</span>
-  <a class="mm-link" href="why-ecco.html">Why Ecco</a>
-  <a class="mm-link" href="about.html">About</a>
-  <a class="mm-link" href="blog.html">Blog</a>
-  <a class="mm-cta" href="quote.html">Get your free proposal</a>
+  <a class="mm-link" href="/why-ecco.html">Why Ecco</a>
+  <a class="mm-link" href="/about.html">About</a>
+  <a class="mm-link" href="/blog.html">Blog</a>
+  <a class="mm-cta" href="/quote.html">Get your free proposal</a>
   <div class="mm-foot">
     Questions? <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a><br>
     New York City
@@ -99,16 +105,16 @@
       <h1>We looked everywhere. <em>It's not here.</em></h1>
       <p class="lead">The page you're after may have moved, or never existed. Let's get you back to a clean start.</p>
       <div class="head-actions">
-        <a class="btn-gold" href="index.html">Back to home <span class="arr" aria-hidden="true">→</span></a>
-        <a class="link-ghost" href="quote.html">Get your free proposal</a>
+        <a class="btn-gold" href="/">Back to home <span class="arr" aria-hidden="true">→</span></a>
+        <a class="link-ghost" href="/quote.html">Get your free proposal</a>
       </div>
       <nav class="err-links" aria-label="Helpful links">
-        <a href="day-porter.html">Day Porter</a>
-        <a href="janitorial.html">Commercial Cleaning</a>
-        <a href="about.html">About</a>
-        <a href="blog.html">Blog</a>
-        <a href="testimonials.html">Trust</a>
-        <a href="sitemap.html">Sitemap</a>
+        <a href="/day-porter.html">Day Porter</a>
+        <a href="/janitorial.html">Commercial Cleaning</a>
+        <a href="/about.html">About</a>
+        <a href="/blog.html">Blog</a>
+        <a href="/testimonials.html">Trust</a>
+        <a href="/sitemap.html">Sitemap</a>
       </nav>
       <p class="err-help">Still can't find it? Email <a class="link-accent" href="mailto:info@eccofacilities.com">info@eccofacilities.com</a> and we'll point you the right way.</p>
     </div>
@@ -121,8 +127,8 @@
   <div class="wrap-wide">
     <div class="foot-top">
       <div class="foot-brand">
-        <a class="wordmark" href="index.html" aria-label="Ecco Facilities home">
-          <img src="images/logo-horizontal-white.png" alt="Ecco Facilities" class="logo-img logo-img-foot" width="180" height="38">
+        <a class="wordmark" href="/" aria-label="Ecco Facilities home">
+          <img src="/images/logo-horizontal-white.png" alt="Ecco Facilities" class="logo-img logo-img-foot" width="180" height="38">
         </a>
         <p>Premium janitorial and facility services across New York City, with eco-certified products on every job.</p>
         <div class="foot-social">
@@ -133,33 +139,33 @@
 
       <div class="foot-col">
         <h3>Services</h3>
-        <a href="day-porter.html">Day Porter</a>
-        <a href="janitorial.html">Commercial Cleaning</a>
+        <a href="/day-porter.html">Day Porter</a>
+        <a href="/janitorial.html">Commercial Cleaning</a>
       </div>
 
       <div class="foot-col">
         <h3>Company</h3>
-        <a href="about.html">About</a>
-        <a href="why-ecco.html">Why Ecco</a>
-        <a href="sustainability.html">Sustainability</a>
-        <a href="testimonials.html">Trust</a>
-        <a href="careers.html">Careers</a>
-        <a href="blog.html">Blog</a>
+        <a href="/about.html">About</a>
+        <a href="/why-ecco.html">Why Ecco</a>
+        <a href="/sustainability.html">Sustainability</a>
+        <a href="/testimonials.html">Trust</a>
+        <a href="/careers.html">Careers</a>
+        <a href="/blog.html">Blog</a>
       </div>
 
       <div class="foot-col">
         <h3>Legal</h3>
-        <a href="privacy.html">Privacy</a>
-        <a href="terms.html">Terms</a>
-        <a href="accessibility.html">Accessibility</a>
-        <a href="sitemap.html">Sitemap</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/accessibility.html">Accessibility</a>
+        <a href="/sitemap.html">Sitemap</a>
       </div>
 
       <div class="foot-col">
         <h3>Contact</h3>
         <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a>
         <span>New York City</span>
-        <a href="quote.html" class="foot-cta">Get your free proposal</a>
+        <a href="/quote.html" class="foot-cta">Get your free proposal</a>
       </div>
     </div>
 
@@ -171,11 +177,11 @@
 </footer>
 
 <!-- ════════════ MOBILE STICKY CTA ════════════ -->
-<a class="mcta" id="mcta" href="quote.html">Get your free proposal</a>
+<a class="mcta" id="mcta" href="/quote.html">Get your free proposal</a>
 
 <!-- ════════════ COOKIE BAR ════════════ -->
 <div class="cookie" id="cookieBar" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <p>We use cookies to improve your experience and understand how the site is used. See our <a href="privacy.html">privacy policy</a>.</p>
+  <p>We use cookies to improve your experience and understand how the site is used. See our <a href="/privacy.html">privacy policy</a>.</p>
   <div class="cookie-btns">
     <button class="ck-accept" type="button" id="ckAccept">Accept</button>
     <button class="ck-decline" type="button" id="ckDecline">Decline</button>
