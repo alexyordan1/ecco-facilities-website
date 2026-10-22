@@ -165,6 +165,8 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 | HubSpot Form (Janitorial) | `20c9de1e-4067-4961-9cda-3af11efe7fc3` | Forms API GUID |
 | HubSpot Form (Day Porter) | `6aa21f22-e7f5-4f9f-9286-63381a497590` | Forms API GUID |
 | MailChimp | `eccofacilities.us22.list-manage.com` | Newsletter signups |
+| Postmark | `POSTMARK_API_KEY` (Cloudflare Pages secret) | Correo de confirmación al cliente + aviso interno del lead (`functions/api/submit-quote.js`) |
+| Brevo (respaldo, 2026-10-22) | `BREVO_API_KEY`, `ALERT_EMAILS` (lista separada por comas), `BREVO_SENDER` (remitente verificado en Brevo) | Reenvía el aviso interno del lead cuando Postmark no lo entrega (cuota, token, caída). Prueba real: `scripts/alert-fallback-test.mjs` |
 
 ### Infrastructure
 

@@ -242,6 +242,43 @@ eccofacilities.com`;
   return { subject, html, text };
 }
 
+// 2026-10-22 (audit BACK-2, decided by Alex) — backup sender for the internal lead
+// email. Brevo's free tier steps in only when Postmark did not deliver the owner
+// notification (not configured, quota exhausted, token revoked, outage), so a lead
+// never sits in D1 with nobody told. Recipients come from ALERT_EMAILS (comma list,
+// default info@), the sender from BREVO_SENDER (must be verified in Brevo).
+// Exported so scripts/alert-fallback-test.mjs can send a real test with the owner's key.
+export async function sendOwnerAlertViaBrevo(env, msg, replyTo, refNumber) {
+  const DEFAULT = 'info@eccofacilities.com';
+  // One malformed entry would make Brevo reject the whole alert: keep only valid
+  // addresses and fall back to the default when nothing valid is left.
+  const valid = (x) => EMAIL_RE.test(String(x || '').trim());
+  const to = String(env.ALERT_EMAILS || DEFAULT).split(',').map((x) => x.trim()).filter(valid);
+  if (!to.length) to.push(DEFAULT);
+  const sender = valid(env.BREVO_SENDER) ? String(env.BREVO_SENDER).trim() : DEFAULT;
+  // 5 s, not the 8 s default: this runs after Postmark already failed, inside the
+  // browser's 20 s budget for the whole request.
+  const res = await fetchWithTimeout('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      sender: { name: 'Ecco Facilities Leads', email: sender },
+      to: to.map((email) => ({ email })),
+      replyTo: replyTo && EMAIL_RE.test(String(replyTo)) ? { email: replyTo } : { email: sender },
+      subject: '[Backup alert] ' + msg.subject,
+      htmlContent: msg.html,
+      textContent: msg.text,
+      tags: ['quote-lead', 'postmark-fallback']
+    })
+  }, 5000);
+  if (!res.ok) {
+    let code = '';
+    try { code = String((await res.json()).code || ''); } catch (e) { /* body not JSON */ }
+    console.error('[submit-quote] Brevo owner alert non-ok:', res.status, code, refNumber); // Brevo's code names the cause (unauthorized, invalid_parameter…), no PII
+  }
+  return res.ok;
+}
+
 // ---------------------------------------------------------------------------
 // Lead field formatting (2026-07-10). The internal email must render EVERY
 // field a prospect can submit, human-readable, with NO "[object Object]" and no
@@ -443,7 +480,10 @@ export function telHref(phone) {
 // Internal lead notification (approved 2026-07-10). Renders every submitted
 // field directly in HTML so nothing drops out (the old Postmark template failed
 // to draw the fields array). Returns { subject, html, text }.
-export function buildOwnerEmail({ firstName, lastName, email, phone, company, serviceLabel, refNumber, urgencyLabel, fields }) {
+export function buildOwnerEmail({ firstName, lastName, email, phone, company, serviceLabel, refNumber, urgencyLabel, fields, storedInCrm }) {
+  // 2026-10-22 — the footer used to claim "also saved to the CRM" unconditionally; when
+  // nothing stored the lead, this email IS the only copy and must say so.
+  const whereNote = storedInCrm === false ? 'NOT in the CRM: this email is the only copy of this lead' : 'also saved to the CRM';
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'New lead';
   const isRush = /asap/i.test(String(urgencyLabel || ''));
   const phoneDigits = telHref(phone);
@@ -505,7 +545,7 @@ export function buildOwnerEmail({ firstName, lastName, email, phone, company, se
         </table>
       </td></tr>
       <tr><td style="padding:18px 36px 24px;background:#FBFAF5;border-top:1px solid #EEEADF;">
-        <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#9AA08F;">Reference ${escapeHtml(refNumber)} &middot; also saved to the CRM</div>
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#9AA08F;">Reference ${escapeHtml(refNumber)} &middot; ${whereNote}</div>
       </td></tr>
     </table>
   </td></tr>
@@ -523,7 +563,7 @@ Email: ${email}${phone ? '\nPhone: ' + phone : ''}
 
 ${textLines}
 
-Reference ${refNumber} · also saved to the CRM`;
+Reference ${refNumber} · ${whereNote}`;
 
   return { subject, html, text };
 }
@@ -837,13 +877,14 @@ export async function onRequestPost(context) {
     // owner (internal notification) tracks. Client still affects the
     // user-facing "success" decision; owner failures are logged loudly but
     // don't block the user — the CRM write is the source of truth for ops.
-    const integrations = { supabase: null, d1: null, activecampaign: null, hubspot: null, postmark: null, postmark_owner: null, webhook: null };
+    const integrations = { supabase: null, d1: null, activecampaign: null, hubspot: null, postmark: null, postmark_owner: null, brevo_owner: null, webhook: null };
     let clientEmailSkipped = false; // 2026-10-15 (audit BACK-9): set when the lead reached no store
     const anyConfigured = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY)
       || !!env.DB
       || !!(env.ACTIVECAMPAIGN_API_URL && env.ACTIVECAMPAIGN_API_KEY)
       || !!env.HUBSPOT_ACCESS_TOKEN
       || !!env.POSTMARK_API_KEY
+      || !!env.BREVO_API_KEY
       || !!env.LEAD_WEBHOOK_URL; // 2026-08-18 — a webhook-only deploy used to return 200 on webhook failure (lead lost with confetti)
 
     // 4. UPSERT into Supabase (via REST API — no npm package needed)
@@ -1065,10 +1106,25 @@ export async function onRequestPost(context) {
     // and HTML are versioned here and fully in our control (templates rendered
     // the subject + owner fields array unreliably). Still sent via Postmark, so
     // deliverability is unchanged. HTML built by buildClientEmail/buildOwnerEmail.
+    const serviceLabel = formType === 'dayporter' ? 'Day Porter'
+      : formType === 'both' ? 'Commercial Cleaning & Day Porter'
+      : 'Commercial Cleaning';
+    // The internal lead email, built once: Postmark sends it, and Brevo re-sends the
+    // same message when Postmark could not (2026-10-22, audit BACK-2).
+    let ownerMsg = null;
+    try {
+      // Fully-formatted, ordered field list — porter schedules, coded values,
+      // arrays and nested objects all rendered human-readable (no
+      // "[object Object]"), nothing lost, so the team needn't open the CRM.
+      ownerMsg = buildOwnerEmail({
+        firstName, lastName, email, phone, company,
+        serviceLabel, refNumber, urgencyLabel: formData.urgency || 'Standard', fields: formatLeadFields(formData),
+        storedInCrm: !!(integrations.d1 || integrations.supabase || integrations.hubspot || integrations.activecampaign)
+      });
+    } catch (e) {
+      console.error('[submit-quote] owner email build error:', redactPII(e.message), refNumber);
+    }
     if (env.POSTMARK_API_KEY) {
-      const serviceLabel = formType === 'dayporter' ? 'Day Porter'
-        : formType === 'both' ? 'Commercial Cleaning & Day Porter'
-        : 'Commercial Cleaning';
       const pmHeaders = {
         'X-Postmark-Server-Token': env.POSTMARK_API_KEY,
         'Content-Type': 'application/json',
@@ -1078,6 +1134,7 @@ export async function onRequestPost(context) {
       // Client confirmation — only once the lead is stored somewhere durable (audit
       // BACK-9): the old order emailed "We've got everything we need" before knowing.
       integrations.postmark = false;
+      let pmUnreachable = false; // 2026-10-22 — set when Postmark times out, so the owner attempt is skipped
       const leadStored = !!(integrations.d1 || integrations.supabase || integrations.hubspot || integrations.activecampaign);
       clientEmailSkipped = !leadStored;
       if (clientEmailSkipped) {
@@ -1108,20 +1165,17 @@ export async function onRequestPost(context) {
         }
       } catch (e) {
         console.error('[submit-quote] Postmark client email error:', redactPII(e.message));
+        if (e && e.name === 'AbortError') pmUnreachable = true;
       }
 
       // Owner / team notification
       integrations.postmark_owner = false;
       try {
-        const urgencyLabel = formData.urgency || 'Standard';
-        // Fully-formatted, ordered field list — porter schedules, coded values,
-        // arrays and nested objects all rendered human-readable (no
-        // "[object Object]"), nothing lost, so the team needn't open the CRM.
-        const fields = formatLeadFields(formData);
-        const msg = buildOwnerEmail({
-          firstName, lastName, email, phone, company,
-          serviceLabel, refNumber, urgencyLabel, fields
-        });
+        if (!ownerMsg) throw new Error('owner message not built');
+        // Postmark just timed out on the client email: another 8 s wait would push the
+        // request past the browser's 20 s abort; go straight to the Brevo backup.
+        if (pmUnreachable) throw new Error('Postmark unreachable, skipping owner email');
+        const msg = ownerMsg;
         const ownerRes = await fetchWithTimeout('https://api.postmarkapp.com/email', {
           method: 'POST',
           headers: pmHeaders,
@@ -1148,6 +1202,19 @@ export async function onRequestPost(context) {
           message: redactPII(e.message),
           refNumber
         });
+      }
+    }
+
+    // 2026-10-22 (audit BACK-2, decided by Alex) — if Postmark did not deliver the
+    // internal lead email (not configured, quota, token, outage), Brevo sends the same
+    // message to ALERT_EMAILS. Counts as lead-capturing: the email carries the full lead.
+    if (env.BREVO_API_KEY && integrations.postmark_owner !== true) {
+      integrations.brevo_owner = false;
+      try {
+        if (!ownerMsg) throw new Error('owner message not built');
+        integrations.brevo_owner = await sendOwnerAlertViaBrevo(env, ownerMsg, email, refNumber);
+      } catch (e) {
+        console.error('[submit-quote] Brevo owner alert error:', redactPII(e.message), refNumber);
       }
     }
 
@@ -1182,7 +1249,7 @@ export async function onRequestPost(context) {
     // count as "success", so the worst case — every lead-capturing integration
     // down but the courtesy email sent — returned 200 and the lead evaporated.
     // Only lead-CAPTURING integrations count.
-    const CAPTURING = ['supabase', 'd1', 'hubspot', 'activecampaign', 'postmark_owner', 'webhook'];
+    const CAPTURING = ['supabase', 'd1', 'hubspot', 'activecampaign', 'postmark_owner', 'brevo_owner', 'webhook'];
     const capturingOnes = configuredOnes.filter(([k]) => CAPTURING.includes(k));
     const anySucceeded = capturingOnes.length ? capturingOnes.some(([, v]) => v === true)
                                               : configuredOnes.some(([, v]) => v === true);

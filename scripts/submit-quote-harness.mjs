@@ -16,7 +16,14 @@ function makeFetch(opts) {
     if (u.includes('hubapi.com/crm/v3/objects/contacts')) return opts.hubspotDown ? json({}, 500) : json({ id: '555' });
     if (u.includes('/associations/')) return opts.assocFail ? json({}, 400) : json({});
     if (u.includes('hubapi.com/crm/v3/objects/deals')) return (opts.hubspotDown || opts.dealFail) ? json({ message: 'bad stage' }, 400) : json({ id: 'd1' });
-    if (u.includes('postmarkapp.com')) return json({ MessageID: 'm1' });
+    if (u.includes('postmarkapp.com')) {
+      if (opts.pmHang) return new Promise((_, reject) => { if (init.signal) init.signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
+      const to = (() => { try { return JSON.parse(body).To; } catch { return ''; } })();
+      if (opts.pmOwnerDown && to === 'info@eccofacilities.com') return json({ ErrorCode: 405, Message: 'quota' }, 422);
+      if (opts.pmAllDown) return json({ ErrorCode: 10, Message: 'bad token' }, 401);
+      return json({ MessageID: 'm1' });
+    }
+    if (u.includes('api.brevo.com')) return opts.brevoDown ? json({ code: 'unauthorized' }, 401) : json({ messageId: 'b1' });
     return json({}, 404);
   };
 }
@@ -25,14 +32,16 @@ async function run(name, opts, body) {
   const DB = opts.sqlite
     ? { prepare(sql) { const st = opts.sqlite.prepare(sql); return { bind(...args) { return { run: async () => st.run(...args) }; } }; } }
     : { prepare() { return { bind() { return { run: async () => { if (opts.dbDown) throw new Error('D1 down'); return { success: true }; } }; } }; } };
-  const env = { HUBSPOT_ACCESS_TOKEN: 'tok', POSTMARK_API_KEY: 'pm', DB };
+  const env = Object.assign({ HUBSPOT_ACCESS_TOKEN: 'tok', POSTMARK_API_KEY: 'pm', DB }, opts.env || {});
+  if (opts.noPostmark) delete env.POSTMARK_API_KEY;
   const req = new Request('http://localhost:8080/api/submit-quote', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Origin': 'http://localhost:8080' }, body: JSON.stringify(body) });
   // Collect the handler's logs for assertions, and still print them so any FAIL keeps its cause.
-  const errs = []; const origErr = console.error; console.error = (...a) => { errs.push(a.map(String).join(' ')); origErr(...a); };
+  const errs = []; const origErr = console.error; console.error = (...a) => { errs.push(a.map((x) => (x && typeof x === 'object') ? JSON.stringify(x) : String(x)).join(' ')); origErr(...a); };
   const logs = []; const origLog = console.log; console.log = (...a) => { const l = a.map(String).join(' '); if (l.startsWith('{"evt"')) logs.push(l); origLog(...a); };
   let res;
   try { res = await onRequestPost({ request: req, env, waitUntil() {} }); } finally { console.error = origErr; console.log = origLog; }
   const telemetry = logs.length ? JSON.parse(logs[logs.length - 1]) : null;
+  const brevo = calls.filter(c => c.url.includes('api.brevo.com')).map(c => JSON.parse(c.body));
   const patch = calls.find(c => c.method === 'PATCH' && c.url.includes('/contacts/555'));
   const post = calls.find(c => c.method === 'POST' && /\/contacts$/.test(c.url));
   const pm = calls.filter(c => c.url.includes('postmarkapp')).map(c => { try { return JSON.parse(c.body).To; } catch { return '?'; } });
@@ -43,7 +52,7 @@ async function run(name, opts, body) {
   const mails = calls.filter(c => c.url.includes('postmarkapp.com')).map(c => JSON.parse(c.body));
   const ownerHtml = mails.filter(m => m.To !== body.em).map(m => m.HtmlBody).join('\n');
   const clientMail = mails.find(m => m.To === body.em) || null;
-  return { status: res.status, patch, post, pm, ownerHtml, clientMail, errs, telemetry };
+  return { status: res.status, patch, post, pm, ownerHtml, clientMail, errs, telemetry, brevo };
 }
 const base = { formType: 'janitorial', em: 'ana@example.com', fn: 'Ana', ln: '', ph: '', co: '', space: 'Office', size: '1k-3k', days: ['Monday'], timeOfDay: ['morning'], addr: '350 5th Ave, New York, NY 10118' };
 let bad = 0;
@@ -90,6 +99,30 @@ const hs = await run('H3 association fails, deal exists', { existingContact: tru
 if (!hs.telemetry || hs.telemetry.integrations.hubspot !== true || !hs.errs.some(e => /HubSpot deal association non-ok: 400/.test(e))) { bad++; console.log('  FAIL: association failure should log but keep hubspot true (deal + contact exist)'); }
 const hok = await run('H4 all good', { existingContact: true }, base);
 if (!hok.telemetry || hok.telemetry.integrations.hubspot !== true || hok.errs.some(e => /HubSpot/.test(e))) { bad++; console.log('  FAIL: healthy HubSpot run should be true with no HubSpot errors'); }
+// I — Brevo backup for the internal lead email (2026-10-22, audit BACK-2, decided by Alex).
+const BREVO = { BREVO_API_KEY: 'bk', ALERT_EMAILS: 'info@eccofacilities.com, alex@example.com' };
+const i1 = await run('I Postmark owner 422 (quota) -> Brevo sends', { existingContact: false, pmOwnerDown: true, env: BREVO }, base);
+if (i1.status !== 200 || !i1.telemetry || i1.telemetry.integrations.postmark_owner !== false || i1.telemetry.integrations.brevo_owner !== true) { bad++; console.log('  FAIL: Brevo should take over when the Postmark owner email fails', i1.telemetry && i1.telemetry.integrations); }
+if (i1.brevo.length !== 1 || i1.brevo[0].to.map(t => t.email).join() !== 'info@eccofacilities.com,alex@example.com' || !/^\[Backup alert\] /.test(i1.brevo[0].subject) || !(i1.telemetry && i1.brevo[0].htmlContent.includes(i1.telemetry.ref)) || i1.brevo[0].replyTo.email !== 'ana@example.com' || !/also saved to the CRM/.test(i1.brevo[0].textContent)) { bad++; console.log('  FAIL: Brevo payload (recipients, subject prefix, ref, replyTo)', i1.brevo[0] && { to: i1.brevo[0].to, subject: i1.brevo[0].subject, replyTo: i1.brevo[0].replyTo }); }
+const i2 = await run('I2 Postmark fine -> Brevo stays quiet', { existingContact: false, env: BREVO }, base);
+if (i2.brevo.length !== 0 || !i2.telemetry || i2.telemetry.integrations.brevo_owner !== null) { bad++; console.log('  FAIL: Brevo must not send when Postmark delivered'); }
+const i3 = await run('I3 no Postmark configured -> Brevo is the sender', { existingContact: false, noPostmark: true, env: BREVO }, base);
+if (i3.brevo.length !== 1 || !i3.telemetry || i3.telemetry.integrations.brevo_owner !== true || i3.telemetry.integrations.postmark_owner !== null) { bad++; console.log('  FAIL: without Postmark, Brevo should carry the owner email'); }
+const i4 = await run('I4 everything down incl. Brevo -> 502', { existingContact: false, dbDown: true, hubspotDown: true, pmAllDown: true, brevoDown: true, env: BREVO }, base);
+if (i4.status !== 502 || !i4.errs.some(e => /Brevo owner alert non-ok: 401/.test(e))) { bad++; console.log('  FAIL: total failure must be a 502 with the Brevo error logged', i4.status); }
+const i5 = await run('I5 Brevo not configured -> behaviour unchanged', { existingContact: false, pmOwnerDown: true }, base);
+if (i5.brevo.length !== 0 || !i5.telemetry || i5.telemetry.integrations.brevo_owner !== null || i5.status !== 200) { bad++; console.log('  FAIL: no BREVO_API_KEY must mean no Brevo call and the old behaviour'); }
+const i6 = await run('I6 ALERT_EMAILS with junk entries, sender unverified format', { existingContact: false, pmOwnerDown: true, env: { BREVO_API_KEY: 'bk', ALERT_EMAILS: ' , not-an-email, alex@example.com ', BREVO_SENDER: 'Ecco <info@eccofacilities.com>' } }, base);
+if (i6.brevo.length !== 1 || i6.brevo[0].to.map(t => t.email).join() !== 'alex@example.com' || i6.brevo[0].sender.email !== 'info@eccofacilities.com') { bad++; console.log('  FAIL: bad recipient/sender entries must be dropped, not sent', i6.brevo[0] && { to: i6.brevo[0].to, sender: i6.brevo[0].sender }); }
+const i7 = await run('I7 lead stored, Postmark fully down (401) -> Brevo carries the alert', { existingContact: false, pmAllDown: true, env: BREVO }, base);
+if (i7.status !== 200 || !i7.telemetry || i7.telemetry.integrations.postmark !== false || i7.telemetry.integrations.postmark_owner !== false || i7.telemetry.integrations.brevo_owner !== true || i7.brevo.length !== 1) { bad++; console.log('  FAIL: Postmark fully down must still be a 200 with the Brevo alert', i7.telemetry && i7.telemetry.integrations); }
+const t0 = Date.now();
+const i8 = await run('I8 Postmark hangs -> client email aborts at 8 s, owner attempt skipped, Brevo sends', { existingContact: false, pmHang: true, env: BREVO }, base);
+const i8ms = Date.now() - t0;
+if (i8.status !== 200 || !i8.telemetry || i8.telemetry.integrations.brevo_owner !== true || !i8.errs.some(e => /Postmark unreachable, skipping owner email/.test(e)) || i8ms > 12000) { bad++; console.log('  FAIL: hung Postmark must cost one timeout, not two, and Brevo must still send', { ms: i8ms, integrations: i8.telemetry && i8.telemetry.integrations }); }
+console.log('  I8 wall time:', i8ms, 'ms (one 8 s Postmark timeout + Brevo)');
+const i9 = await run('I9 nothing stored (D1 + HubSpot down) -> the only copy is the email, and it says so', { existingContact: false, dbDown: true, hubspotDown: true, pmOwnerDown: true, env: BREVO }, base);
+if (i9.brevo.length !== 1 || !/NOT in the CRM: this email is the only copy/.test(i9.brevo[0].textContent)) { bad++; console.log('  FAIL: footer must say the email is the only copy when nothing stored'); }
 // D — real SQLite behind the D1 binding: a re-submission without phone/company keeps the stored ones.
 const db = new DatabaseSync(':memory:');
 db.exec(readFileSync(new URL('../schema/leads.sql', import.meta.url), 'utf8'));
