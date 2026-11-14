@@ -399,19 +399,27 @@ Present on all pages in the footer.
 
 ## 7. SEO Setup
 
-### Schema.org (JSON-LD on index.html)
+### Schema.org (JSON-LD, unified 2026-11-13)
 
-**LocalBusiness:**
-- Name: Ecco Facilities LLC
-- Email: info@eccofacilities.com
-- Address: Albany, NY 12207
-- Geo: 40.7128, -74.0060
-- Opening Hours: Mon-Fri 8am-6pm, Sat 9am-2pm
-- Service Area: Manhattan, Brooklyn, Queens, Bronx, Staten Island
-- Services: Janitorial Services, Day Porter Services
-- Payment: Cash, Check, Credit Card, Invoice
+One business entity, `@id` **`https://eccofacilities.com/#business`**, referenced from every page.
 
-**FAQPage:** 6 Q&A pairs on homepage
+**Full LocalBusiness node** (on `/`, `/about`, `/quote`, identical values):
+- name `Ecco Facilities LLC` · alternateName `Ecco Facilities` · url `https://eccofacilities.com/`
+- telephone `+19296856757` (public web/GBP number; never the documents-only line) · email `info@eccofacilities.com`
+- address: region only (`addressRegion: NY`, `addressCountry: US`). Service-area business: never a street, never the registered-agent address
+- areaServed `City: New York City` · hasMap + sameAs: GBP cid 7905665498784295341, Instagram
+- No geo, hours or priceRange: add them only when they are published visibly on the site and on GBP
+
+**Per page:**
+- `/`: `@graph` with LocalBusiness (+ OfferCatalog pointing at the two Service `@id`s), `WebSite` (`#website`, name "Ecco Facilities"), `WebPage`, and the two `Service` nodes
+- `/about` AboutPage · `/quote` ContactPage (+ full business node) · `/testimonials`, `/careers` Organization with the `#business` `@id`
+- `/janitorial` Service `#service` "Commercial Cleaning" · `/day-porter` Service `#service` "Day Porter" (names match the pages; see naming law)
+- `/blog` Blog `#blog` (items carry each post's own datePublished) · `/blog/*` BlogPosting `#blogposting`, author/publisher = `#business`, isPartOf `#blog`
+- `/privacy`, `/terms`, `/accessibility`, `/sustainability`, `/why-ecco` WebPage `#webpage`, isPartOf `#website`
+
+**Rule:** markup and visible copy change in the same commit (FAQ text, service names, post dates). Never bump `dateModified` for template-only edits.
+
+**FAQPage:** Q&A pairs on `/` (6), `/janitorial` (7), `/day-porter` (6). They no longer earn Google rich results, but they stay as extractable Q&A
 
 **Open Graph + Twitter Cards:** On all main pages
 
