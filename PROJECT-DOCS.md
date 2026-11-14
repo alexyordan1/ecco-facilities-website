@@ -423,6 +423,14 @@ One business entity, `@id` **`https://eccofacilities.com/#business`**, reference
 
 **Open Graph + Twitter Cards:** On all main pages
 
+### Internal links (convention since 2026-11-13)
+Every internal `href` is **root-relative and extensionless**, matching the canonical URL: `/`, `/janitorial`, `/quote?service=dayporter`, `/blog/janitorial-vs-day-porter`. Never `quote.html`, `../about.html` or `/blog.html`.
+
+- Cloudflare Pages 308-redirects every `.html` URL to its extensionless form. A `.html` link therefore costs one extra hop on every click and crawl, and it misleads link-graph audits (they flagged 16 false orphans).
+- Root-relative paths also keep `404.html` working. Cloudflare serves that page at arbitrary nested paths, where relative links break.
+- `serve.js` resolves `/x` → `x.html` locally, the same way Cloudflare does.
+- Out of scope: `crm/` and `admin/`. They keep their `.html` paths.
+
 ### sitemap.xml
 - 23 URLs with priorities and change frequencies
 - Submitted to Google Search Console
@@ -548,9 +556,10 @@ Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site i
 
 ### _redirects
 ```
-/contact.html    /quote.html    301
-/contact         /quote.html    301
+/contact.html    /quote    301
+/contact         /quote    301
 ```
+Redirect targets are extensionless too. A `.html` target would chain 301 → 308 (two hops).
 
 ### DNS
 - Nameservers: `howard.ns.cloudflare.com`, `paloma.ns.cloudflare.com`
