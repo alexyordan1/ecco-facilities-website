@@ -106,7 +106,12 @@
   <!-- ════════════ HERO ════════════ -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-media">
-      <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=80&auto=format&fit=crop" fetchpriority="high" alt="A modern office interior after hours, with warm reflections on glass partitions and polished surfaces.">
+      <!-- Portrait phones get a centre crop at the photo's full height (768×1536 is the most the 2301×1536 original has);
+           every other screen gets the 3:2 frame, up to the original's 2301 px. q=60 looks the same as q=80 under the hero's dark filter. -->
+      <picture>
+        <source media="(max-aspect-ratio: 2/3)" srcset="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=768&h=1536&q=60&auto=format&fit=crop">
+        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=2301&q=60&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1280&q=60&auto=format&fit=crop 1280w, https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=60&auto=format&fit=crop 1600w, https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=2301&q=60&auto=format&fit=crop 2301w" sizes="(max-aspect-ratio: 3/2) 150vh, 100vw" fetchpriority="high" alt="A modern office interior after hours, with warm reflections on glass partitions and polished surfaces.">
+      </picture>
     </div>
 
     <div class="wrap hero-inner">
