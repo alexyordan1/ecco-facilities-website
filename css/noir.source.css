@@ -286,6 +286,9 @@
     min-height:1em;overflow:visible;
   }
   .hero-rotate .sizer{visibility:hidden;display:inline-block;font-style:normal}
+  /* 2026-11-13 (auditoría SEO/IA #3): the sizer word is CSS-generated so it is not part of the H1's text.
+     Crawlers that read raw HTML used to get "…your people. health, your team…". Keep the word in data-word, not as text. */
+  .hero-rotate .sizer::before{content:attr(data-word)}
   .hero-rotate .word-layer{
     position:absolute;left:0;top:0;white-space:nowrap;font-style:normal;font-weight:300;
     will-change:transform,opacity,filter;transform-origin:center center;backface-visibility:hidden;

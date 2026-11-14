@@ -525,10 +525,10 @@ collections:
 Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site is dark-only (`color-scheme: dark`).
 
 ### Versions (live)
-- CSS: `noir.css?v=26` · `quote-noir.css?v=63` · `crm.css?v=4.3`
-- JS: `site.js?v=4` · `quote-flow.js?v=39.22` · `cookie-consent.js?v=1.5` · `crm-*.js?v=4.1–4.2`
+- CSS: `noir.css?v=27` · `quote-noir.css?v=76` · `crm.css?v=4.3`
+- JS: `site.js?v=5` (all 21 marketing pages, blog included) · `quote-flow.js?v=40.42` · `cookie-consent.js?v=1.7` · `crm-*.js?v=4.1–4.2`
 - **Rule:** Bump `?v=` in the same commit as CSS/JS changes (busters don't apply to deleted files)
-- Known drift: the 7 `blog/` posts still load `site.js?v=3` (pending fix)
+- Checked against the repo on 2026-11-13. Re-check with `grep -ho 'noir.css?v=[0-9]*' *.html blog/*.html | sort | uniq -c`; only one version should appear.
 
 ### Minification
 - Workflow: edit `css/noir.source.css` (tracked master) → minify to `css/noir.css` → bump `?v=` in the same commit
