@@ -665,7 +665,6 @@
   .feat-body p{margin-top:.9rem;font-size:.96rem;color:var(--ink-dim);font-weight:300;line-height:1.6;max-width:46ch}
   .feat-meta{margin-top:1.1rem;font-size:.76rem;letter-spacing:.04em;color:var(--ink-faint)}
   .feat-readlink{margin-top:1.5rem;font-size:.86rem;font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.45rem}
-  .feat-readlink::after{content:"";position:absolute;inset:0;z-index:3}
   .feat-readlink .arr{transition:transform .4s ease}
   .feat-post:hover .feat-readlink .arr{transform:translateX(5px)}
 
@@ -691,7 +690,9 @@
   .post-card h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.16rem,1.5vw,1.32rem);line-height:1.16;color:var(--ink);margin:.5rem 0 0;text-wrap:balance}
   .post-card p{font-size:.85rem;color:var(--ink-dim);font-weight:300;line-height:1.55;margin-top:.55rem}
   .post-readlink{margin-top:auto;padding-top:1.1rem;font-size:.8rem;font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.4rem}
-  .post-readlink::after{content:"";position:absolute;inset:0;z-index:3}
+  /* 2026-11-13 (auditoría SEO/IA #5c): the card's only link is its title (.post-link), stretched over the whole card.
+     "Read article" is now a visual cue (span, aria-hidden). The overlay used to sit on the cue, which gave every card a generic "Read article" link. */
+  .post-link::after{content:"";position:absolute;inset:0;z-index:3}
   .post-readlink .arr{transition:transform .4s ease}
   .post-card:hover .post-readlink .arr{transform:translateX(4px)}
 
