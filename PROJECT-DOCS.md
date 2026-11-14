@@ -175,7 +175,7 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 | Cloudflare Pages | `ecco-facilities-website.pages.dev` | Static hosting + CDN |
 | Cloudflare NS | `howard.ns.cloudflare.com`, `paloma.ns.cloudflare.com` | DNS |
 | GitHub | `alexyordan1/ecco-facilities-website` | Source code + CMS backend |
-| Vercel | `ecco-chat-backend.vercel.app` | RETIRED 2026-11-13: returns 410. Widget removed 2026-05-01 (D125). Pending: remove `ANTHROPIC_API_KEY` from the project or delete it |
+| Vercel | `ecco-chat-backend.vercel.app` | Being retired. Widget removed 2026-05-01 (D125). The repo code is already a 410 stub (2632412), but **production still serves the OLD build with `ANTHROPIC_API_KEY`** (answers 405 to GET): on 2026-11-13 the CLI deploys got stuck at UNKNOWN. Pending: revoke the key in Anthropic and/or delete the Vercel project |
 | Google Search Console | Domain property: eccofacilities.com | SEO monitoring |
 | Google Business Profile | Ecco Facilities LLC | Local SEO |
 
@@ -245,8 +245,9 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
-│  CHAT WIDGET: RETIRED (widget 2026-05-01, API 2026-11-13) │
-│  Historical diagram. /api/chat now answers 410 Gone.     │
+│  CHAT WIDGET: RETIRED (widget 2026-05-01)                │
+│  Historical diagram. Repo = 410 stub; prod NOT yet (see  │
+│  the Vercel row in the services table).                  │
 │  Browser ──POST──→ ecco-chat-backend.vercel.app/api/chat │
 │                         │                                │
 │                         ▼                                │
