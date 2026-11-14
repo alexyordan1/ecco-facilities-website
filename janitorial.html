@@ -19,6 +19,7 @@
 <meta name="twitter:description" content="Recurring, whole-facility cleaning on your schedule, powered by eco-certified products.">
 <meta name="twitter:image" content="https://eccofacilities.com/images/og-image.png">
 <link rel="canonical" href="https://eccofacilities.com/janitorial">
+<link rel="preconnect" href="https://images.unsplash.com">
 <!-- 2026-10-21 (audit PERF-2) — fonts self-hosted, as on quote.html since 2026-10-15: the
      Google Fonts stylesheet was a render-blocking third-party request (first paint 0.25 s
      -> 3.2 s when it stalled 3 s). css/fonts.css declares the same latin / latin-ext
@@ -105,7 +106,14 @@
   <!-- ════════════ HERO ════════════ -->
   <section class="svc-hero">
     <div class="svc-hero-media">
-      <img fetchpriority="high" src="images/stock/ecco-cc-hero-lobby.webp" srcset="images/stock/ecco-cc-hero-lobby-800.webp 800w, images/stock/ecco-cc-hero-lobby-1440.webp 1440w, images/stock/ecco-cc-hero-lobby.webp 1600w" sizes="100vw" alt="A pristine modern commercial lobby, cleaned and reset at the end of the day.">
+      <!-- 2026-11-14: the same photo, now from its 5396×3597 original (Unsplash GP7SH7RRkqo, ARTO SURAJ, Unsplash License)
+           instead of a 1600 px copy. Portrait phones get a centre crop shaped like their hero (≈390×680); every other screen
+           gets the 3:2 frame. Portrait tablets need ~1020 css px of width because the hero is at most 680 px tall.
+           q=50 looks the same as q=80 under the hero's dark filter. -->
+      <picture>
+        <source media="(max-aspect-ratio: 2/3)" srcset="https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=780&h=1360&q=50&auto=format&fit=crop 780w, https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=1170&h=2040&q=50&auto=format&fit=crop 1170w" sizes="100vw">
+        <img fetchpriority="high" src="https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=2880&q=50&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=1280&q=50&auto=format&fit=crop 1280w, https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=1920&q=50&auto=format&fit=crop 1920w, https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=2880&q=50&auto=format&fit=crop 2880w, https://images.unsplash.com/photo-1771911646904-61f0fc9033e2?w=3840&q=50&auto=format&fit=crop 3840w" sizes="(max-aspect-ratio: 1/1) 1020px, 100vw" alt="A pristine modern commercial lobby, cleaned and reset at the end of the day.">
+      </picture>
     </div>
     <div class="wrap">
       <p class="crumb"><a href="/">Home</a> &nbsp;/&nbsp; Commercial Cleaning</p>
