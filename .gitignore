@@ -48,3 +48,6 @@ playwright-report/
 bun.lock
 .dead-archive/
 _redesign/
+
+# Insurance audit documents (payroll/EIN — never commit)
+docs/insurance/
