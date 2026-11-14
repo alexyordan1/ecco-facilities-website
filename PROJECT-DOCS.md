@@ -432,9 +432,14 @@ Every internal `href` is **root-relative and extensionless**, matching the canon
 - Out of scope: `crm/` and `admin/`. They keep their `.html` paths.
 
 ### sitemap.xml
-- 23 URLs with priorities and change frequencies
-- Submitted to Google Search Console
-- Referenced in robots.txt
+- 21 canonical, extensionless URLs. `/quote?service=…` variants are left out because they canonicalize to `/quote`.
+- Submitted to Google Search Console and referenced in robots.txt.
+- **`lastmod` = the date of the page's last *significant* content change.** Google only trusts `lastmod` when it is accurate. On 2026-11-13 all 21 URLs carried the same 2026-05-19, which predates the June redesign.
+  - **Blog posts:** use the post's `BlogPosting.dateModified`.
+  - **`/terms` and `/accessibility`:** use the date shown on the page (Effective Date / last reviewed), unless the policy text itself changes.
+  - **Every other page:** use the date of the last commit that changed the text inside `<main>`.
+  - **Do not update `lastmod`** for template, head, nav/footer, link-format, schema, cache-buster or punctuation-only sweeps.
+  - **On each real content edit:** update that URL's `lastmod` in the same commit.
 
 ### robots.txt
 ```
