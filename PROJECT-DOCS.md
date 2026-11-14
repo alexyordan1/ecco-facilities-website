@@ -531,7 +531,7 @@ Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site i
 
 ### Versions (live)
 - CSS: `noir.css?v=28` · `quote-noir.css?v=76` · `crm.css?v=4.3`
-- JS: `site.js?v=5` (all 21 marketing pages, blog included) · `quote-flow.js?v=40.42` · `cookie-consent.js?v=1.7` · `crm-*.js?v=4.1–4.2`
+- JS: `site.js?v=5` (all 21 marketing pages, blog included) · `quote-flow.js?v=40.42` · `cookie-consent.js?v=1.7` · `crm-*.js?v=4.1–4.3`
 - **Rule:** Bump `?v=` in the same commit as CSS/JS changes (busters don't apply to deleted files)
 - Checked against the repo on 2026-11-13. Re-check with `grep -ho 'noir.css?v=[0-9]*' *.html blog/*.html | sort | uniq -c`; only one version should appear.
 

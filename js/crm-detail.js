@@ -105,7 +105,7 @@
     var bodies = {
       intro: 'Hi ' + name + ',\n\nThank you for reaching out to Ecco Facilities! I\'d love to learn more about your ' + svcLabel.toLowerCase() + ' needs at ' + companyText + 'and show you how we can help.\n\nWould you have 15 minutes for a quick call this week? I can walk you through our services and provide a customized quote.\n\nBest regards,\nEcco Facilities Team\neccofacilities.com',
       followup: 'Hi ' + name + ',\n\nI wanted to follow up on your recent inquiry about our ' + svcLabel.toLowerCase() + ' services' + ref + '. Have you had a chance to review our options?\n\nI\'m happy to answer any questions or schedule a site visit at your convenience. We\'re currently offering complimentary assessments for new clients.\n\nLooking forward to hearing from you!\n\nBest,\nEcco Facilities Team',
-      proposal: 'Hi ' + name + ',\n\nI\'m pleased to send you our ' + svcLabel.toLowerCase() + ' proposal for ' + companyText + ref + '. Please find the details below.\n\nOur proposal includes:\n- Customized cleaning schedule\n- Eco-certified products (safe for people, pets, and planet)\n- Dedicated team assignment\n- Quality assurance inspections\n\nI\'d love to walk you through the details. Would you be available for a brief call?\n\nBest regards,\nEcco Facilities Team',
+      proposal: 'Hi ' + name + ',\n\nI\'m pleased to send you our ' + svcLabel.toLowerCase() + ' proposal for ' + companyText + ref + '. Please find the details below.\n\nOur proposal includes:\n- Customized cleaning schedule\n- Eco-certified cleaning products (Green Seal or EPA Safer Choice)\n- Dedicated team assignment\n- Quality assurance inspections\n\nI\'d love to walk you through the details. Would you be available for a brief call?\n\nBest regards,\nEcco Facilities Team',
       thankyou: 'Hi ' + name + ',\n\nThank you for choosing Ecco Facilities for your ' + svcLabel.toLowerCase() + ' needs! We\'re excited to partner with ' + companyText + 'and committed to exceeding your expectations.\n\nYour dedicated team will begin on the agreed start date. If you have any questions, don\'t hesitate to reach out.\n\nWelcome to the Ecco family!\n\nWarm regards,\nEcco Facilities Team'
     };
     return 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subjects[template] || '') + '&body=' + encodeURIComponent(bodies[template] || '');
@@ -168,7 +168,7 @@
       '</table></div>' +
       '<h2>What\'s Included</h2>' +
       '<div class="features">' +
-        '<div class="feature">100% Eco-Certified Products</div>' +
+        '<div class="feature">Eco-Certified Cleaning Products</div>' +
         '<div class="feature">Dedicated Cleaning Team</div>' +
         '<div class="feature">Quality Assurance Inspections</div>' +
         '<div class="feature">Flexible Scheduling</div>' +
@@ -186,7 +186,7 @@
       '</div>' +
       '<div class="cta">Ready to get started? Call us at <a href="tel:2125550100">(212) 555-0100</a> or email <a href="mailto:info@eccofacilities.com">info@eccofacilities.com</a></div>' +
       '<h2>Why Ecco Facilities?</h2>' +
-      '<p>With 12+ years serving NYC businesses, Ecco Facilities delivers premium cleaning services with a commitment to sustainability. Our eco-certified products are safe for your people, your pets, and the planet.</p>' +
+      '<p>Backed by our founders\x27 12+ years of facility services experience, Ecco Facilities delivers premium cleaning services with a commitment to sustainability. Every cleaning product we use is Green Seal or EPA Safer Choice certified, and where disinfection is required, we use EPA-registered disinfectants.</p>' +
       '<div class="footer">' +
         '<strong>Ecco Facilities LLC</strong><br>' +
         'eccofacilities.com &bull; info@eccofacilities.com &bull; (212) 555-0100<br>' +
