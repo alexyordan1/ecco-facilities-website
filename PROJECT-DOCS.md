@@ -175,7 +175,7 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 | Cloudflare Pages | `ecco-facilities-website.pages.dev` | Static hosting + CDN |
 | Cloudflare NS | `howard.ns.cloudflare.com`, `paloma.ns.cloudflare.com` | DNS |
 | GitHub | `alexyordan1/ecco-facilities-website` | Source code + CMS backend |
-| Vercel | `ecco-chat-backend.vercel.app` | Chat API proxy |
+| Vercel | `ecco-chat-backend.vercel.app` | RETIRED 2026-11-13: returns 410. Widget removed 2026-05-01 (D125). Pending: remove `ANTHROPIC_API_KEY` from the project or delete it |
 | Google Search Console | Domain property: eccofacilities.com | SEO monitoring |
 | Google Business Profile | Ecco Facilities LLC | Local SEO |
 
@@ -245,8 +245,8 @@ Deleted 2026-07-18 (pre-Noir, zero consumers): `css/styles.css`, `css/components
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
-│  CHAT WIDGET                                             │
-│                                                          │
+│  CHAT WIDGET: RETIRED (widget 2026-05-01, API 2026-11-13) │
+│  Historical diagram. /api/chat now answers 410 Gone.     │
 │  Browser ──POST──→ ecco-chat-backend.vercel.app/api/chat │
 │                         │                                │
 │                         ▼                                │
