@@ -550,6 +550,16 @@ Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site i
 - Container elements need `overflow: hidden`
 - All new CSS components need base + mobile + desktop styles
 
+### Stock photos at full resolution (since 2026-11-18)
+- **Sources:** `scripts/photo-originals/manifest.json` lists every photo whose free-licence original was found and pixel-verified against the file the site already used: source page, author, licence, original size and match score. It also lists the photos that cannot be improved and why.
+- **Build:** `python3 scripts/photo-originals/build.py [id …]` downloads each original to `~/.cache/ecco-photo-originals/` and writes centre-cropped AVIF variants (Pillow, quality 45) to `images/stock/<id>-<l|m|p><width>.avif`.
+  - `l`: landscape screens, cropped to the slot's shape.
+  - `m`: portrait phones, a 0.6 crop (heroes with landscape originals only).
+  - `p`: other portrait screens, full frame.
+- **Markup:** wrap the existing `<img>` in `<picture>`, put the AVIF `<source>`s first (`l` with `media="(min-aspect-ratio: 1/1)"`), and keep the old WebP as the `<img>` fallback. Never rename or overwrite the WebP files: the quote wizard and `photo-warmup.spec.js` use some of them.
+  - The crops are centred, like `object-fit: cover`, so every screen shows the same framing as before.
+- **Home and `/janitorial` heroes:** served from the Unsplash CDN, not built by this script.
+
 ---
 
 ## 11. Cloudflare Configuration

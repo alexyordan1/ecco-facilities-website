@@ -101,7 +101,12 @@
   <!-- ════════════ ARTICLE HERO ════════════ -->
   <section class="svc-hero">
     <div class="svc-hero-media">
-      <img fetchpriority="high" src="../images/stock/ecco-blog-signs.webp" alt="A close look at a glass door being wiped clean.">
+      <!-- 2026-11-18: AVIF from the 3917×5875 original (scripts/photo-originals/manifest.json); the WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="../images/stock/ecco-blog-signs-l1280.avif 1280w, ../images/stock/ecco-blog-signs-l1920.avif 1920w, ../images/stock/ecco-blog-signs-l2560.avif 2560w, ../images/stock/ecco-blog-signs-l3200.avif 3200w" sizes="100vw">
+        <source type="image/avif" srcset="../images/stock/ecco-blog-signs-p900.avif 900w, ../images/stock/ecco-blog-signs-p1300.avif 1300w, ../images/stock/ecco-blog-signs-p1800.avif 1800w" sizes="(max-aspect-ratio: 2/3) 130vw, 100vw">
+        <img fetchpriority="high" src="../images/stock/ecco-blog-signs.webp" alt="A close look at a glass door being wiped clean.">
+      </picture>
     </div>
     <div class="wrap">
       <p class="crumb"><a href="/">Home</a> &nbsp;/&nbsp; <a href="/blog">Blog</a> &nbsp;/&nbsp; Quality</p>

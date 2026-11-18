@@ -101,7 +101,12 @@
   <!-- ════════════ ARTICLE HERO ════════════ -->
   <section class="svc-hero">
     <div class="svc-hero-media">
-      <img fetchpriority="high" src="../images/stock/ecco-blog-productivity.webp" alt="A quiet office desk in the low light of early evening.">
+      <!-- 2026-11-18: AVIF from the 3024×4032 original (scripts/photo-originals/manifest.json); the WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="../images/stock/ecco-blog-productivity-l1280.avif 1280w, ../images/stock/ecco-blog-productivity-l1920.avif 1920w, ../images/stock/ecco-blog-productivity-l2560.avif 2560w, ../images/stock/ecco-blog-productivity-l3024.avif 3024w" sizes="100vw">
+        <source type="image/avif" srcset="../images/stock/ecco-blog-productivity-p900.avif 900w, ../images/stock/ecco-blog-productivity-p1300.avif 1300w, ../images/stock/ecco-blog-productivity-p1800.avif 1800w" sizes="(max-aspect-ratio: 2/3) 130vw, 100vw">
+        <img fetchpriority="high" src="../images/stock/ecco-blog-productivity.webp" alt="A quiet office desk in the low light of early evening.">
+      </picture>
     </div>
     <div class="wrap">
       <p class="crumb"><a href="/">Home</a> &nbsp;/&nbsp; <a href="/blog">Blog</a> &nbsp;/&nbsp; Workplace health</p>

@@ -351,7 +351,11 @@
   <!-- ════════════ CLOSING ════════════ -->
   <section class="closing" id="proposal" aria-labelledby="close-title">
     <div class="closing-media">
-      <img src="images/stock/ecco-nyc-dusk.webp" srcset="images/stock/ecco-nyc-dusk-800.webp 800w, images/stock/ecco-nyc-dusk-1440.webp 1440w, images/stock/ecco-nyc-dusk.webp 1600w" sizes="100vw" alt="The New York City skyline at dusk." loading="lazy">
+      <!-- 2026-11-18: AVIF from the 3887×2591 original (scripts/photo-originals/manifest.json); the WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" srcset="images/stock/ecco-nyc-dusk-p900.avif 900w, images/stock/ecco-nyc-dusk-p1300.avif 1300w, images/stock/ecco-nyc-dusk-p1800.avif 1800w, images/stock/ecco-nyc-dusk-p2600.avif 2600w, images/stock/ecco-nyc-dusk-p2880.avif 2880w" sizes="(max-aspect-ratio: 2/3) 225vw, 120vw">
+        <img src="images/stock/ecco-nyc-dusk.webp" srcset="images/stock/ecco-nyc-dusk-800.webp 800w, images/stock/ecco-nyc-dusk-1440.webp 1440w, images/stock/ecco-nyc-dusk.webp 1600w" sizes="100vw" alt="The New York City skyline at dusk." loading="lazy">
+      </picture>
     </div>
     <div class="wrap">
       <p class="eyebrow">Start here</p>

@@ -103,7 +103,13 @@
   <!-- ════════════ HERO ════════════ -->
   <section class="svc-hero">
     <div class="svc-hero-media">
-      <img fetchpriority="high" src="images/stock/ecco-trust-hero.webp" srcset="images/stock/ecco-trust-hero-800.webp 800w, images/stock/ecco-trust-hero-1440.webp 1440w, images/stock/ecco-trust-hero.webp 1600w" sizes="100vw" alt="A pristine, immaculate corporate reception and lobby.">
+      <!-- 2026-11-18: AVIF from the 4000×2856 original (scripts/photo-originals/manifest.json); the WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="images/stock/ecco-trust-hero-l1280.avif 1280w, images/stock/ecco-trust-hero-l1920.avif 1920w, images/stock/ecco-trust-hero-l2560.avif 2560w, images/stock/ecco-trust-hero-l3200.avif 3200w" sizes="100vw">
+        <source type="image/avif" media="(max-aspect-ratio: 2/3)" srcset="images/stock/ecco-trust-hero-m900.avif 900w, images/stock/ecco-trust-hero-m1300.avif 1300w, images/stock/ecco-trust-hero-m1800.avif 1800w, images/stock/ecco-trust-hero-m2300.avif 2300w" sizes="170vw">
+        <source type="image/avif" srcset="images/stock/ecco-trust-hero-p2400.avif 2400w" sizes="1020px">
+        <img fetchpriority="high" src="images/stock/ecco-trust-hero.webp" srcset="images/stock/ecco-trust-hero-800.webp 800w, images/stock/ecco-trust-hero-1440.webp 1440w, images/stock/ecco-trust-hero.webp 1600w" sizes="100vw" alt="A pristine, immaculate corporate reception and lobby.">
+      </picture>
     </div>
     <div class="wrap">
       <p class="crumb"><a href="/">Home</a> &nbsp;/&nbsp; Trust</p>

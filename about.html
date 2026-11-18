@@ -103,7 +103,13 @@
   <!-- ════════════ HERO ════════════ -->
   <section class="svc-hero">
     <div class="svc-hero-media">
-      <img fetchpriority="high" src="images/stock/ecco-about-hero.webp" srcset="images/stock/ecco-about-hero-800.webp 800w, images/stock/ecco-about-hero-1440.webp 1440w, images/stock/ecco-about-hero.webp 1600w" sizes="100vw" alt="A pristine, light-filled modern office lobby.">
+      <!-- 2026-11-18: AVIF from the 6048×8064 original (scripts/photo-originals/manifest.json). Landscape screens get the
+           1.6:1 centre band (hero boxes there are 1.71:1 and wider, so the framing is unchanged); portrait screens get the full 3:4 frame. The WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="images/stock/ecco-about-hero-l1280.avif 1280w, images/stock/ecco-about-hero-l1920.avif 1920w, images/stock/ecco-about-hero-l2560.avif 2560w, images/stock/ecco-about-hero-l3200.avif 3200w" sizes="100vw">
+        <source type="image/avif" srcset="images/stock/ecco-about-hero-p900.avif 900w, images/stock/ecco-about-hero-p1300.avif 1300w, images/stock/ecco-about-hero-p1800.avif 1800w" sizes="(max-aspect-ratio: 2/3) 130vw, 100vw">
+        <img fetchpriority="high" src="images/stock/ecco-about-hero.webp" srcset="images/stock/ecco-about-hero-800.webp 800w, images/stock/ecco-about-hero-1440.webp 1440w, images/stock/ecco-about-hero.webp 1600w" sizes="100vw" alt="A pristine, light-filled modern office lobby.">
+      </picture>
     </div>
     <div class="wrap">
       <p class="crumb"><a href="/">Home</a> &nbsp;/&nbsp; About</p>
@@ -137,7 +143,13 @@
   <!-- ════════════ ATMOSPHERIC BAND (eco) ════════════ -->
   <section class="img-band">
     <div class="img-band-media">
-      <img src="images/stock/ecco-about-eco.webp" srcset="images/stock/ecco-about-eco-800.webp 800w, images/stock/ecco-about-eco-1440.webp 1440w, images/stock/ecco-about-eco.webp 1600w" sizes="100vw" alt="Wooden cleaning brushes and eucalyptus sprigs in a cotton mesh bag." loading="lazy">
+      <!-- 2026-11-18: AVIF from the 6000×4000 original (scripts/photo-originals/manifest.json); landscape screens get a
+           2.25:1 centre band, portrait screens the full 3:2 frame. The WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="images/stock/ecco-about-eco-l1280.avif 1280w, images/stock/ecco-about-eco-l1920.avif 1920w, images/stock/ecco-about-eco-l2560.avif 2560w, images/stock/ecco-about-eco-l2880.avif 2880w" sizes="100vw">
+        <source type="image/avif" srcset="images/stock/ecco-about-eco-p900.avif 900w, images/stock/ecco-about-eco-p1300.avif 1300w" sizes="(max-aspect-ratio: 2/3) 110vw, 100vw">
+        <img src="images/stock/ecco-about-eco.webp" srcset="images/stock/ecco-about-eco-800.webp 800w, images/stock/ecco-about-eco-1440.webp 1440w, images/stock/ecco-about-eco.webp 1600w" sizes="100vw" alt="Wooden cleaning brushes and eucalyptus sprigs in a cotton mesh bag." loading="lazy">
+      </picture>
     </div>
     <div class="wrap">
       <p class="eyebrow rv">Eco-certified, every job</p>

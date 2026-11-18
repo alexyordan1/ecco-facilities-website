@@ -1,0 +1,562 @@
+{
+  "about": "Sources of the site's stock photos at full resolution. Each original was matched to the file the site already used (mean absolute difference on a 96 px greyscale thumbnail; under 2/255 = same photo). Rebuild with build.py. Licences: https://www.pexels.com/license/ (free for websites and ads; no implied endorsement by people or brands in the photo; no selling unaltered copies).",
+  "photos": [
+    {
+      "id": "ecco-about-hero",
+      "site_file": "images/stock/ecco-about-hero.webp",
+      "pages": [
+        "about.html"
+      ],
+      "slot": "svc-hero-media (hero)",
+      "source_page": "https://www.pexels.com/photo/modern-corporate-building-lobby-with-glass-walls-36923562/",
+      "download": "https://images.pexels.com/photos/36923562/pexels-photo-36923562.png?fm=jpg&w=6048",
+      "cache_name": "pexels-36923562.jpg",
+      "author": "Thanh Quy",
+      "licence": "Pexels License",
+      "original": [
+        6048,
+        8064
+      ],
+      "match_diff": 0.5,
+      "quality": 45,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3200
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300,
+            1800
+          ],
+          "note": "portrait screens: full 3:4 frame"
+        }
+      ]
+    },
+    {
+      "id": "ecco-about-eco",
+      "site_file": "images/stock/ecco-about-eco.webp",
+      "pages": [
+        "about.html"
+      ],
+      "slot": "img-band-media (band)",
+      "source_page": "https://www.pexels.com/photo/cleaning-brushes-in-woven-bag-3737577/",
+      "download": "https://images.pexels.com/photos/3737577/pexels-photo-3737577.jpeg",
+      "cache_name": "pexels-3737577.jpg",
+      "author": "cottonbro studio",
+      "licence": "Pexels License",
+      "original": [
+        6000,
+        4000
+      ],
+      "match_diff": 0.8,
+      "quality": 45,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 2.25,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            2880
+          ],
+          "note": "landscape screens: 2.25:1 centre band (the band is 2.3:1 to 5.4:1 wide)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300
+          ],
+          "note": "portrait screens: full 3:2 frame"
+        }
+      ]
+    },
+    {
+      "id": "ecco-why-hero",
+      "site_file": "images/stock/ecco-why-hero.webp",
+      "pages": [
+        "why-ecco.html"
+      ],
+      "slot": "svc-hero-media (hero)",
+      "source_page": "https://www.pexels.com/photo/laptop-on-a-desk-5483188/",
+      "download": "https://images.pexels.com/photos/5483188/pexels-photo-5483188.jpeg",
+      "cache_name": "pexels-5483188.jpg",
+      "author": "cottonbro studio",
+      "licence": "Pexels License",
+      "original": [
+        5924,
+        3950
+      ],
+      "match_diff": 1.6,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3200
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "m",
+          "aspect": 0.85,
+          "widths": [
+            900,
+            1300,
+            1800,
+            2300
+          ],
+          "note": "portrait phones: 0.85 centre crop (phone hero boxes are 0.51-0.82:1)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            2400
+          ],
+          "note": "portrait tablets: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-trust-hero",
+      "site_file": "images/stock/ecco-trust-hero.webp",
+      "pages": [
+        "testimonials.html"
+      ],
+      "slot": "svc-hero-media (hero)",
+      "source_page": "https://www.pexels.com/photo/modern-reception-area-in-office-interior-design-34823913/",
+      "download": "https://images.pexels.com/photos/34823913/pexels-photo-34823913.jpeg",
+      "cache_name": "pexels-34823913.jpg",
+      "author": "Rana Matloob Hussain",
+      "licence": "Pexels License",
+      "original": [
+        4000,
+        2856
+      ],
+      "match_diff": 4.5,
+      "match_site_colours": true,
+      "note": "site copy is colour-graded warmer; build maps the original's channels to it",
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3200
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "m",
+          "aspect": 0.85,
+          "widths": [
+            900,
+            1300,
+            1800,
+            2300
+          ],
+          "note": "portrait phones: 0.85 centre crop (phone hero boxes are 0.51-0.82:1)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            2400
+          ],
+          "note": "portrait tablets: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-blog-choose",
+      "site_file": "images/stock/ecco-blog-choose.webp",
+      "pages": [
+        "blog/choose-commercial-cleaning-company-nyc.html"
+      ],
+      "slot": "svc-hero-media (post hero only; the 1000 px cards are already sharp)",
+      "source_page": "https://www.pexels.com/photo/unrecognizable-hands-handshaking-over-table-9870223/",
+      "download": "https://images.pexels.com/photos/9870223/pexels-photo-9870223.jpeg",
+      "cache_name": "pexels-9870223.jpg",
+      "author": "Ron Lach",
+      "licence": "Pexels License",
+      "original": [
+        4490,
+        2993
+      ],
+      "match_diff": 0.5,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3200
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "m",
+          "aspect": 0.85,
+          "widths": [
+            900,
+            1300,
+            1800,
+            2300
+          ],
+          "note": "portrait phones: 0.85 centre crop (phone hero boxes are 0.51-0.82:1)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            2400
+          ],
+          "note": "portrait tablets: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-blog-checklist",
+      "site_file": "images/stock/ecco-blog-checklist.webp",
+      "pages": [
+        "blog/commercial-cleaning-checklist-nyc.html"
+      ],
+      "slot": "svc-hero-media (post hero only)",
+      "source_page": "https://www.pexels.com/photo/close-up-photo-of-person-writing-on-a-paper-6170173/",
+      "download": "https://images.pexels.com/photos/6170173/pexels-photo-6170173.jpeg",
+      "cache_name": "pexels-6170173.jpg",
+      "author": "Tima Miroshnichenko",
+      "licence": "Pexels License",
+      "original": [
+        6000,
+        4000
+      ],
+      "match_diff": 0.9,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3200
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "m",
+          "aspect": 0.85,
+          "widths": [
+            900,
+            1300,
+            1800,
+            2300
+          ],
+          "note": "portrait phones: 0.85 centre crop (phone hero boxes are 0.51-0.82:1)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            2400
+          ],
+          "note": "portrait tablets: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-blog-productivity",
+      "site_file": "images/stock/ecco-blog-productivity.webp",
+      "pages": [
+        "blog/dirty-office-costs-productivity.html"
+      ],
+      "slot": "svc-hero-media (post hero only)",
+      "source_page": "https://www.pexels.com/photo/calm-office-space-with-evening-sunlight-28928434/",
+      "download": "https://images.pexels.com/photos/28928434/pexels-photo-28928434.jpeg",
+      "cache_name": "pexels-28928434.jpg",
+      "author": "Leandro Queiroz",
+      "licence": "Pexels License",
+      "original": [
+        3024,
+        4032
+      ],
+      "match_diff": 0.4,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3024
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300,
+            1800
+          ],
+          "note": "portrait screens: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-blog-signs",
+      "site_file": "images/stock/ecco-blog-signs.webp",
+      "pages": [
+        "blog/5-signs-cleaning-company.html"
+      ],
+      "slot": "svc-hero-media (post hero only)",
+      "source_page": "https://www.pexels.com/photo/person-cleaning-the-glass-window-7641230/",
+      "download": "https://images.pexels.com/photos/7641230/pexels-photo-7641230.jpeg",
+      "cache_name": "pexels-7641230.jpg",
+      "author": "MART PRODUCTION",
+      "licence": "Pexels License",
+      "original": [
+        3917,
+        5875
+      ],
+      "match_diff": 0.5,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.6,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            3200
+          ],
+          "note": "landscape screens: 1.6:1 centre band (hero boxes are 1.71:1 and wider)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300,
+            1800
+          ],
+          "note": "portrait screens: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-nyc-dusk",
+      "site_file": "images/stock/ecco-nyc-dusk.webp",
+      "pages": [
+        "janitorial.html"
+      ],
+      "slot": "closing-media",
+      "source_page": "https://www.pexels.com/photo/downtown-with-empire-state-building-in-the-middle-4451508/",
+      "download": "https://images.pexels.com/photos/4451508/pexels-photo-4451508.jpeg",
+      "cache_name": "pexels-4451508.jpg",
+      "author": "Vlada Karpovich",
+      "licence": "Pexels License",
+      "original": [
+        3887,
+        2591
+      ],
+      "match_diff": 0.6,
+      "variants": [
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300,
+            1800,
+            2600,
+            2880
+          ],
+          "note": "all screens: full frame (closing boxes span 0.67:1 to 3:1 around this 1.5:1 original, so any crop would change some framing)"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-sus-close",
+      "site_file": "images/stock/ecco-sus-close.webp",
+      "pages": [
+        "sustainability.html"
+      ],
+      "slot": "closing-media",
+      "source_page": "https://www.pexels.com/photo/photography-of-bricks-covered-with-moss-1089280/",
+      "download": "https://images.pexels.com/photos/1089280/pexels-photo-1089280.jpeg",
+      "cache_name": "pexels-1089280.jpg",
+      "author": "Arnie Chou",
+      "licence": "Pexels License",
+      "original": [
+        2183,
+        3270
+      ],
+      "match_diff": 1.4,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.25,
+          "widths": [
+            1280,
+            1920,
+            2183
+          ],
+          "note": "landscape screens: 1.25:1 centre band (closing boxes are 1.29:1 and wider)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300,
+            1800
+          ],
+          "note": "portrait screens: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-careers-close",
+      "site_file": "images/stock/ecco-careers-close.webp",
+      "pages": [
+        "careers.html"
+      ],
+      "slot": "closing-media",
+      "source_page": "https://www.pexels.com/photo/lone-janitor-in-subway-passageway-33701232/",
+      "download": "https://images.pexels.com/photos/33701232/pexels-photo-33701232.jpeg",
+      "cache_name": "pexels-33701232.jpg",
+      "author": "Thuan Pham (asks to be credited as \"thuan.jpeg\"; the Pexels License does not require it)",
+      "licence": "Pexels License",
+      "original": [
+        5152,
+        7728
+      ],
+      "match_diff": 0.4,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 1.25,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            2880
+          ],
+          "note": "landscape screens: 1.25:1 centre band (closing boxes are 1.29:1 and wider)"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300,
+            1800
+          ],
+          "note": "portrait screens: full frame"
+        }
+      ],
+      "quality": 45
+    },
+    {
+      "id": "ecco-sus-band",
+      "site_file": "images/stock/ecco-sus-band.webp",
+      "pages": [
+        "sustainability.html"
+      ],
+      "slot": "img-band-media (band)",
+      "source_page": "https://www.pexels.com/photo/folded-textile-in-close-up-shot-11733651/",
+      "download": "https://images.pexels.com/photos/11733651/pexels-photo-11733651.jpeg",
+      "cache_name": "pexels-11733651.jpg",
+      "author": "Ruslan Rozanov",
+      "licence": "Pexels License",
+      "original": [
+        5184,
+        3456
+      ],
+      "match_diff": 0.7,
+      "variants": [
+        {
+          "suffix": "l",
+          "aspect": 2.25,
+          "widths": [
+            1280,
+            1920,
+            2560,
+            2880
+          ],
+          "note": "landscape screens: 2.25:1 centre band"
+        },
+        {
+          "suffix": "p",
+          "aspect": null,
+          "widths": [
+            900,
+            1300
+          ],
+          "note": "portrait screens: full 3:2 frame"
+        }
+      ],
+      "quality": 45
+    }
+  ],
+  "not_improvable": {
+    "no free original found (Google Lens + pixel check)": [
+      "ecco-blog-dayporter",
+      "ecco-blog-eco",
+      "ecco-blog-vs",
+      "ecco-blog-hero",
+      "ecco-sus-hero",
+      "8-nyc-skyline-night",
+      "ecco-clean-squeegee-bw",
+      "3",
+      "ecco-careers-hero",
+      "ecco-careers-band",
+      "ecco-why-close (Lens: only lewisbuilds.com, licence unknown)",
+      "ecco-why-band",
+      "ecco-trust-band",
+      "1",
+      "22-handshake",
+      "ind-schools",
+      "ecco-about-nyc"
+    ],
+    "no original exists (look AI-generated)": [
+      "680bb2854a06f-1745597061 (day-porter hero; Alex keeps it)",
+      "ecco-cc-desk-green",
+      "welcome-eco-spray"
+    ]
+  },
+  "crop_rule": "A centre crop keeps today's framing only if its aspect ratio lies between the original's and every box it serves (cover then shows the same region). Hero boxes on landscape screens are >= 1.71:1, on portrait phones 0.51-0.82:1; closing boxes on landscape screens go down to 1.29:1."
+}

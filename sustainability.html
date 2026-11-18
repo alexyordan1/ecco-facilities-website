@@ -185,7 +185,12 @@
   <!-- ════════════ ATMOSPHERIC BAND ════════════ -->
   <section class="img-band">
     <div class="img-band-media">
-      <img src="images/stock/ecco-sus-band.webp" srcset="images/stock/ecco-sus-band-800.webp 800w, images/stock/ecco-sus-band-1440.webp 1440w, images/stock/ecco-sus-band.webp 1600w" sizes="100vw" alt="A neat stack of folded green cloths." loading="lazy">
+      <!-- 2026-11-18: AVIF from the 5184×3456 original (scripts/photo-originals/manifest.json); the WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="images/stock/ecco-sus-band-l1280.avif 1280w, images/stock/ecco-sus-band-l1920.avif 1920w, images/stock/ecco-sus-band-l2560.avif 2560w, images/stock/ecco-sus-band-l2880.avif 2880w" sizes="100vw">
+        <source type="image/avif" srcset="images/stock/ecco-sus-band-p900.avif 900w, images/stock/ecco-sus-band-p1300.avif 1300w" sizes="(max-aspect-ratio: 2/3) 110vw, 100vw">
+        <img src="images/stock/ecco-sus-band.webp" srcset="images/stock/ecco-sus-band-800.webp 800w, images/stock/ecco-sus-band-1440.webp 1440w, images/stock/ecco-sus-band.webp 1600w" sizes="100vw" alt="A neat stack of folded green cloths." loading="lazy">
+      </picture>
     </div>
     <div class="wrap">
       <p class="eyebrow rv">A lighter footprint</p>
@@ -196,7 +201,12 @@
   <!-- ════════════ CLOSING ════════════ -->
   <section class="closing" id="proposal" aria-labelledby="close-title">
     <div class="closing-media">
-      <img src="images/stock/ecco-sus-close.webp" srcset="images/stock/ecco-sus-close-800.webp 800w, images/stock/ecco-sus-close.webp 1280w" sizes="100vw" alt="A lush green plant wall." loading="lazy">
+      <!-- 2026-11-18: AVIF from the 2183×3270 original (scripts/photo-originals/manifest.json); the WebP stays as the fallback. -->
+      <picture>
+        <source type="image/avif" media="(min-aspect-ratio: 1/1)" srcset="images/stock/ecco-sus-close-l1280.avif 1280w, images/stock/ecco-sus-close-l1920.avif 1920w, images/stock/ecco-sus-close-l2183.avif 2183w" sizes="100vw">
+        <source type="image/avif" srcset="images/stock/ecco-sus-close-p900.avif 900w, images/stock/ecco-sus-close-p1300.avif 1300w, images/stock/ecco-sus-close-p1800.avif 1800w" sizes="(max-aspect-ratio: 2/3) 120vw, 100vw">
+        <img src="images/stock/ecco-sus-close.webp" srcset="images/stock/ecco-sus-close-800.webp 800w, images/stock/ecco-sus-close.webp 1280w" sizes="100vw" alt="A lush green plant wall." loading="lazy">
+      </picture>
     </div>
     <div class="wrap">
       <p class="eyebrow">Start here</p>
