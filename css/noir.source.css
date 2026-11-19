@@ -627,6 +627,20 @@
   .cmp-ic svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none}
   .cmp-usual .cmp-ic{border:1px solid var(--line-strong);color:var(--ink-faint)}
   .cmp-ecco .cmp-ic{background:rgba(var(--accent-rgb),.14);color:var(--accent)}
+  /* Lado a lado (2026-11-19): las dos tarjetas comparten las pistas de fila con subgrid, así cada
+     renglón de "The usual" queda a la altura de su pareja y ninguna tarjeta termina con un hueco.
+     Se reservan 16 pistas (etiqueta + título + hasta 14 renglones); las que sobran miden 0.
+     Sin soporte de subgrid se queda el layout anterior. */
+  @supports (grid-template-rows:subgrid){
+    @media(min-width:821px){
+      .compare-grid{row-gap:0}
+      .cmp{display:grid;grid-template-rows:subgrid;grid-row:span 16;grid-template-columns:minmax(0,1fr);row-gap:0}
+      .cmp-tag{grid-row:1;justify-self:start;margin-top:.375rem} /* .375rem = lo que bajaba la etiqueta dentro de su renglón en el layout anterior */
+      .cmp h3{grid-row:2}
+      .cmp-list{display:grid;grid-template-rows:subgrid;grid-row:3/-1;row-gap:0}
+      .cmp-row + .cmp-row{margin-top:1rem}
+    }
+  }
 
   /* ════════════ INDUSTRIES (photo cards) ════════════ */
   .ind-grid{
