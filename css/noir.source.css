@@ -430,9 +430,25 @@
     transition:border-color .4s ease,color .4s ease;
   }
   .link-ghost:hover .play{border-color:var(--accent);color:var(--accent)}
-  .cta-note{margin-top:1.1rem;font-size:.82rem;color:var(--ink-faint);letter-spacing:.02em;display:flex;flex-wrap:wrap;gap:.4em .9em;align-items:center}
-  .cta-note .ok{color:var(--accent)}
-  .closing .cta-note{justify-content:center}
+  /* Nota de confianza bajo el CTA (2026-11-19). Cada dato (.cn-i) es un bloque en línea, así que el
+     renglón solo corta entre datos, y el separador (.cn-sep) es UN espacio en blanco con el punto
+     dibujado de fondo: cuando el renglón corta ahí, el espacio colapsa y el punto desaparece con él.
+     Antes era un flex con el "·" como ítem propio y quedaba colgando al final del renglón.
+     El "·" sigue escrito en el HTML (.cn-dot, dentro del dato anterior, a tamaño 0): no se ve ni
+     ocupa sitio, pero el texto de la página sigue siendo "A · B · C" al copiarlo y para buscadores.
+     El margen inferior de cada dato (.4em) es la separación entre renglones que tenía el flex, y el
+     ::after la descuenta una vez al final: lo que viene después de la nota queda donde estaba.
+     OJO en el HTML: ni espacios ni saltos de línea entre los <span> de la nota. El único espacio
+     entre datos es el de .cn-sep; si hay otro, colapsa el del separador y el punto desaparece. */
+  .cta-note{margin-top:1.1rem;font-size:.82rem;color:var(--ink-faint);letter-spacing:.02em}
+  .cta-note::after{content:"";display:block;margin-bottom:-.4em}
+  .cta-note .ok{color:var(--accent);margin-right:.598em}
+  .cn-i{display:inline-block;margin-bottom:.4em}
+  .cn-sep{word-spacing:1.805em;background:radial-gradient(circle closest-side,currentColor 80%,transparent) center calc(50% + .03em)/.168em .168em no-repeat}
+  .cn-dot{font-size:0;letter-spacing:0;line-height:0}
+  @media (forced-colors:active){ /* el alto contraste de Windows quita los degradados: se repone el punto con el color de texto del sistema */
+    .cn-sep{forced-color-adjust:none;background-image:radial-gradient(circle closest-side,CanvasText 80%,transparent)}
+  }
 
   .scroll-hint{
     position:absolute;left:var(--pad);bottom:clamp(1.5rem,4vh,2.5rem);
