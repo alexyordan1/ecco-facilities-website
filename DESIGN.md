@@ -55,6 +55,14 @@ NAV (fija, `--nav-h`, menú móvil `body.menu-open`) · HERO · SECTION SHELL (`
 
 Páginas interiores de servicio/industria: patrón **svc-hero (foto) + svc-figure + img-band + ind-grid** — ricas en imagen, nunca texto sobre negro plano. `images/stock/680bb….jpg` = foto real de marca Ecco (equipo verde).
 
+**Nota de confianza bajo el CTA (`.cta-note`, 7 notas en 6 páginas).** Cada dato va en un `.cn-i`; entre datos, un `.cn-sep` con UN espacio (el punto se dibuja de fondo y desaparece cuando el renglón corta ahí, así nunca queda colgando). El `·` real va escrito al final del dato anterior como `.cn-dot` (tamaño 0, `aria-hidden`): el texto de la página sigue siendo `A · B · C`. **Ni espacios ni saltos de línea entre los `<span>` de la nota**: si un formateador parte la línea, el espacio de fuera se come al del separador y los puntos desaparecen sin error. Para una nota nueva, copiar el marcado de una existente. Comprobación (no debe imprimir nada; ve también los saltos de línea, que un `grep` por líneas no ve):
+
+```bash
+perl -0777 -ne 'while(/<p class="cta-note">(.*?)<\/p>/sg){ my $n=$1; $n =~ s/<span class="cn-sep"> <\/span>//g; print "$ARGV: espacio o salto de linea entre los <span> de la nota\n" if $n =~ />\s+</ }' *.html
+```
+
+**Alineación por fila con subgrid** (`.ind-grid` en todos los anchos; `.compare-grid` desde 821 px). Las tarjetas comparten las pistas de fila, así icono/título/texto (industrias) y cada pareja de renglones (comparativa) arrancan a la misma altura. Sin soporte de subgrid se queda el layout flex anterior (`@supports`). `--ind-min` y `--ind-pad` (en `.ind`) son la única fuente del alto mínimo y el relleno de la tarjeta: cambiar ahí, no en cada regla. La comparativa reserva 16 pistas (etiqueta + título + 14 renglones): una lista más larga necesita subir ese `span`.
+
 ## Reveal / motion
 
 - Sistema `rv` (IntersectionObserver) para reveals de scroll. **Prohibido** en contenido crítico above-the-fold que deba verse sin JS.
