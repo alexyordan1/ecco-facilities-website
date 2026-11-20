@@ -25,7 +25,7 @@ Dos hojas, sin `@layer`:
 | `--ink` | `#F4F2EC` | texto principal (marfil, no blanco puro) |
 | `--ink-dim` / `--ink-faint` | `#A8A89F` / `#8B8F88` | secundario / terciario |
 | `--line` / `--line-strong` | blanco al 10% / 18% | bordes |
-| `--maxw` | `1200px` | ancho de contenido (`.wrap`; `.wrap-wide` 1340px) |
+| `--maxw` | `1340px` | ancho de página, uno solo: lo usan el contenido (`.wrap`), la barra de navegación (`.nav`) y el pie (`.wrap-wide`), así logo, titulares, rejillas y pie arrancan en la misma línea. Con los 64 px de `--pad` a cada lado, el contenido mide 1212 px. Hasta nov-2026 el contenido iba a 1200 y la barra y el pie a 1340 (un desfase de 40 px a 1280 px de pantalla y de 70 px desde 1340 px). Las páginas de texto conservan su columna de lectura centrada (`.prose`). El indicador `.scroll-hint` de la portada va al borde derecho de ese mismo ancho |
 | `--pad` | `clamp(1.25rem,5vw,4rem)` | padding lateral fluido |
 | `--font-display` | `'Fraunces',Georgia,serif` | display serif |
 | `--font-body` | `'Inter',system-ui,sans-serif` | cuerpo |
