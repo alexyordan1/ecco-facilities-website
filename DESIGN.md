@@ -45,7 +45,8 @@ El sitio es **oscuro por diseño, sin modo claro ni toggle**: `html{color-scheme
 ## Tipografía
 
 - **Display:** Fraunces (serif, itálicas reales) para h1/h2/blockquotes; acentos en itálica dentro de titulares (`<em>`) como firma editorial.
-- **Cuerpo:** Inter 400/500; `line-height:1.6`.
+- **Cuerpo:** Inter 400/500; `line-height:1.6`. Todo texto de lectura va en 400: la fina (300) queda solo para los titulares en Fraunces. Y nunca por debajo de 14 px: el mínimo es el token `--text-min` (.875rem), que usan las notas, las descripciones de tarjeta, los enlaces pequeños y la línea legal del pie. Antes de noviembre de 2026 el 80 % del texto iba en 300 y hasta un 9 % medía menos de 14 px. Siguen fuera de esta regla, a propósito y pendientes: barra de navegación y menús, barra de cookies, wizard (`.qf-*`), etiquetas en mayúsculas y el `.skip-link` (13,6 px, solo visible con teclado).
+- **Ojo con los `<p>` con clase propia dentro de un bloque:** `.closing p`, `.post-card p` o `.feat-body p` (0,1,1) le ganan a la clase del párrafo (0,1,0). Así salía la nota del cierre a 19 px; por eso existe `.closing .cta-note`. Mismo choque, sin resolver: `.post-date` y `.feat-meta` (no aplican su tamaño), la etiqueta `.eyebrow` del cierre y `.feat-eyebrow` del blog (salen a tamaño y peso de párrafo, no de etiqueta) y `p.guarantee-band` dentro del cierre (toma el tamaño y el `max-width` de `.closing p`). Decidirlos con la escala de letra.
 - **Eyebrow:** uppercase, tracking `.32em`, color acento, con regla-guion `::before` degradada.
 - Sentence case en todo el copy (no Title Case).
 
