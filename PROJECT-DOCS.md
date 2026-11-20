@@ -531,7 +531,7 @@ collections:
 Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site is dark-only (`color-scheme: dark`).
 
 ### Versions (live)
-- CSS: `noir.css?v=33` · `quote-noir.css?v=76` · `crm.css?v=4.3`
+- CSS: `noir.css?v=34` · `quote-noir.css?v=76` · `crm.css?v=4.3`
 - JS: `site.js?v=5` (all 21 marketing pages, blog included) · `quote-flow.js?v=40.42` · `cookie-consent.js?v=1.7` · `crm-*.js?v=4.1–4.3`
 - **Rule:** Bump `?v=` in the same commit as CSS/JS changes (busters don't apply to deleted files)
 - Checked against the repo on 2026-11-20. Re-check with `grep -ho 'noir.css?v=[0-9]*' *.html blog/*.html | sort | uniq -c`; only one version should appear.
@@ -540,7 +540,7 @@ Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site i
 - Workflow: edit `css/noir.source.css` (tracked master) → minify to `css/noir.css` → bump `?v=` in the same commit
 - **Always use:** `bunx clean-css-cli` (fallback: `npx clean-css-cli`)
 - **Never use:** Python or Perl regex for minification
-- **Inspect the output:** clean-css has silently dropped a leading `@layer …; :root{}` line before — verify tokens survived after every minify
+- **Inspect the output:** clean-css has silently dropped a leading `@layer …; :root{}` line before — verify tokens survived after every minify. It also turns sub-millisecond `ms` values (`.001ms`) into `NaNs`, which browsers drop: `grep -c NaN css/noir.css` must print 0
 
 ### Code Rules
 - Zero inline styles — all styling through CSS classes

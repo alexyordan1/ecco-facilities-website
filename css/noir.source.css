@@ -1021,7 +1021,10 @@
 
   /* ════════════ REDUCED MOTION ════════════ */
   @media(prefers-reduced-motion:reduce){
-    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+    /* 1ms y no .001ms: clean-css convierte los valores por debajo del milisegundo en "NaNs", el navegador
+       descarta la declaración y la regla no hace nada (así estuvo de julio a noviembre de 2026).
+       Tras minificar: grep -c NaN css/noir.css debe dar 0. */
+    *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;scroll-behavior:auto!important}
     .hero-media img{transform:none}
     .rv{opacity:1;transform:none}
     /* Cinta de sellos sin movimiento. Antes quedaba una sola fila fija y lo que no cabía se recortaba
