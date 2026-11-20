@@ -452,7 +452,7 @@
   }
 
   .scroll-hint{
-    position:absolute;left:var(--pad);bottom:clamp(1.5rem,4vh,2.5rem);
+    position:absolute;right:max(var(--pad),calc((100% - var(--maxw))/2 + var(--pad)));bottom:clamp(1.5rem,4vh,2.5rem); /* alineado con el borde derecho del contenido. Antes iba a la izquierda, a var(--pad) de la orilla: era un tercer margen y, en ventanas de hasta 1280 px de ancho y menos de 900 de alto, quedaba encima de la nota de confianza */
     z-index:5;display:flex;align-items:center;gap:.8em;
     font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-faint);
   }
