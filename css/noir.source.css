@@ -18,6 +18,7 @@
     --pad:clamp(1.25rem,5vw,4rem);
     --font-display:'Fraunces',Georgia,serif;
     --font-body:'Inter',system-ui,sans-serif;
+    --text-min:.875rem; /* mínimo para texto de lectura: 14 px. El cuerpo va en peso 400; el 300 queda para los titulares */
     --nav-h:74px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -380,7 +381,7 @@
   .hero-sub{
     margin-top:1.6rem;
     font-size:clamp(1rem,1.5vw,1.22rem);
-    font-weight:300;
+    font-weight:400;
     color:var(--ink-dim);
     max-width:48ch;
     line-height:1.55;
@@ -440,10 +441,10 @@
      ::after la descuenta una vez al final: lo que viene después de la nota queda donde estaba.
      OJO en el HTML: ni espacios ni saltos de línea entre los <span> de la nota. El único espacio
      entre datos es el de .cn-sep; si hay otro, colapsa el del separador y el punto desaparece. */
-  .cta-note{margin-top:1.1rem;font-size:.82rem;color:var(--ink-faint);letter-spacing:.02em}
+  .cta-note{margin-top:1.1rem;font-size:var(--text-min);color:var(--ink-faint);letter-spacing:.02em}
   .cta-note::after{content:"";display:block;margin-bottom:-.4em}
   .cta-note .ok{color:var(--accent);margin-right:.598em}
-  .cn-i{display:inline-block;margin-bottom:.4em}
+  .cn-i{display:inline-block;margin-bottom:.4em;text-wrap:balance} /* si un dato no cabe entero (teléfonos de menos de 340 px), que parta en renglones parejos y no deje una palabra sola */
   .cn-sep{word-spacing:1.805em;background:radial-gradient(circle closest-side,currentColor 80%,transparent) center calc(50% + .03em)/.168em .168em no-repeat}
   .cn-dot{font-size:0;letter-spacing:0;line-height:0}
   @media (forced-colors:active){ /* el alto contraste de Windows quita los degradados: se repone el punto con el color de texto del sistema */
@@ -488,7 +489,7 @@
   .cert{
     display:inline-flex;align-items:center;gap:.7em;
     padding:0 clamp(1.4rem,3vw,2.4rem);
-    font-size:.82rem;letter-spacing:.06em;color:var(--ink-dim);white-space:nowrap;
+    font-size:var(--text-min);letter-spacing:.06em;color:var(--ink-dim);white-space:nowrap;
   }
   .cert .ic{color:var(--accent);display:inline-flex}
   .cert .ic svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.5;fill:none}
@@ -509,7 +510,7 @@
     text-wrap:balance;
   }
   .sec-head h2 em{font-style:italic;color:var(--accent-soft)}
-  .sec-sub{margin-top:1.2rem;color:var(--ink-dim);font-weight:300;font-size:clamp(1rem,1.4vw,1.12rem);max-width:54ch;line-height:1.6}
+  .sec-sub{margin-top:1.2rem;color:var(--ink-dim);font-weight:400;font-size:clamp(1rem,1.4vw,1.12rem);max-width:54ch;line-height:1.6}
   .sec-head.center .sec-sub{margin-inline:auto}
 
   /* reveal */
@@ -559,10 +560,10 @@
     line-height:1.05;
     margin-bottom:.7rem;
   }
-  .svc-body p{color:var(--ink-dim);font-weight:300;font-size:1rem;max-width:40ch}
+  .svc-body p{color:var(--ink-dim);font-weight:400;font-size:1rem;max-width:40ch}
   .svc-link{
     margin-top:1.5rem;display:inline-flex;align-items:center;min-height:44px;gap:.5em;
-    font-size:.86rem;color:var(--accent);letter-spacing:.02em;
+    font-size:var(--text-min);color:var(--accent);letter-spacing:.02em;
   }
   .svc-link .arr{transition:transform .4s ease}
   .svc:hover .svc-link .arr{transform:translateX(4px)}
@@ -620,7 +621,7 @@
   }
   .cmp-usual h3{color:var(--ink-dim)}
   .cmp-list{display:flex;flex-direction:column;gap:1rem}
-  .cmp-row{display:flex;gap:.85rem;align-items:flex-start;font-size:.98rem;font-weight:300;line-height:1.5}
+  .cmp-row{display:flex;gap:.85rem;align-items:flex-start;font-size:.98rem;font-weight:400;line-height:1.5}
   .cmp-usual .cmp-row{color:var(--ink-faint)}
   .cmp-ecco .cmp-row{color:var(--ink)}
   .cmp-ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
@@ -674,7 +675,7 @@
   .ind:hover .ind-ic{border-color:var(--accent);background:rgba(var(--accent-rgb),.16)}
   .ind-ic svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none}
   .ind h3{font-family:var(--font-display);font-weight:400;font-size:1.18rem;line-height:1.1;color:var(--ink)}
-  .ind p{font-size:.84rem;color:var(--ink-dim);font-weight:300;line-height:1.5;margin-top:.4rem}
+  .ind p{font-size:var(--text-min);color:var(--ink-dim);font-weight:400;line-height:1.5;margin-top:.4rem}
   /* Alineación por fila (2026-11-19): icono, título y texto de cada tarjeta ocupan tres pistas que
      comparten todas las tarjetas de la fila (subgrid), así arrancan a la misma altura sin importar
      cuánto texto lleve cada una. El ::before reparte el alto mínimo de la tarjeta, y como las pistas
@@ -712,9 +713,9 @@
   .feat-eyebrow{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:500}
   .feat-body h2,.feat-body h3{font-family:var(--font-display);font-weight:300;font-size:clamp(1.6rem,3vw,2.5rem);line-height:1.08;letter-spacing:-.01em;margin:.7rem 0 0;text-wrap:balance}
   .feat-body h2 em,.feat-body h3 em{font-style:italic;color:var(--accent-soft)}
-  .feat-body p{margin-top:.9rem;font-size:.96rem;color:var(--ink-dim);font-weight:300;line-height:1.6;max-width:46ch}
+  .feat-body p{margin-top:.9rem;font-size:.96rem;color:var(--ink-dim);font-weight:400;line-height:1.6;max-width:46ch}
   .feat-meta{margin-top:1.1rem;font-size:.76rem;letter-spacing:.04em;color:var(--ink-faint)}
-  .feat-readlink{margin-top:1.5rem;font-size:.86rem;font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.45rem}
+  .feat-readlink{margin-top:1.5rem;font-size:var(--text-min);font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.45rem}
   .feat-readlink .arr{transition:transform .4s ease}
   .feat-post:hover .feat-readlink .arr{transform:translateX(5px)}
 
@@ -738,8 +739,8 @@
   .post-body{display:flex;flex-direction:column;flex:1;padding:clamp(1.15rem,2vw,1.5rem)}
   .post-date{font-size:.72rem;letter-spacing:.04em;color:var(--ink-faint)}
   .post-card h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.16rem,1.5vw,1.32rem);line-height:1.16;color:var(--ink);margin:.5rem 0 0;text-wrap:balance}
-  .post-card p{font-size:.85rem;color:var(--ink-dim);font-weight:300;line-height:1.55;margin-top:.55rem}
-  .post-readlink{margin-top:auto;padding-top:1.1rem;font-size:.8rem;font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.4rem}
+  .post-card p{font-size:var(--text-min);color:var(--ink-dim);font-weight:400;line-height:1.55;margin-top:.55rem}
+  .post-readlink{margin-top:auto;padding-top:1.1rem;font-size:var(--text-min);font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:.4rem}
   /* 2026-11-13 (auditoría SEO/IA #5c): the card's only link is its title (.post-link), stretched over the whole card.
      "Read article" is now a visual cue (span, aria-hidden). The overlay used to sit on the cue, which gave every card a generic "Read article" link. */
   .post-link::after{content:"";position:absolute;inset:0;z-index:3}
@@ -759,13 +760,13 @@
     margin-top:1.4rem;font-family:var(--font-display);font-weight:300;font-style:italic;
     font-size:clamp(1.2rem,2.4vw,1.7rem);line-height:1.35;color:var(--ink);max-width:28ch;
   }
-  .eco-prose p.eco-body{margin-top:1.4rem;color:var(--ink-dim);font-weight:300;font-size:1.02rem;line-height:1.65;max-width:52ch}
+  .eco-prose p.eco-body{margin-top:1.4rem;color:var(--ink-dim);font-weight:400;font-size:1.02rem;line-height:1.65;max-width:52ch}
   .eco-points{margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
   @media(max-width:520px){.eco-points{grid-template-columns:1fr}}
   .eco-pt{display:flex;flex-direction:column;gap:.5rem}
   .eco-pt .ph{display:flex;align-items:center;gap:.6em;font-weight:500;font-size:.98rem;color:var(--ink)}
   .eco-pt .ph .d{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px 1px rgba(var(--accent-rgb),.6);flex:none}
-  .eco-pt p{font-size:.85rem;color:var(--ink-faint);font-weight:300;line-height:1.5}
+  .eco-pt p{font-size:var(--text-min);color:var(--ink-faint);font-weight:400;line-height:1.5}
   /* promoted from inline styles (zero-inline-styles rule) */
   #eco-title{font-family:var(--font-display);font-weight:300;font-size:clamp(2rem,5vw,3.6rem);line-height:1.04;letter-spacing:-.01em;margin-top:1rem;text-wrap:balance}
   #eco-title em{font-style:italic;color:var(--accent-soft)}
@@ -799,7 +800,7 @@
     display:block;margin-bottom:1rem;letter-spacing:-.02em;
   }
   .step h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.3rem,2.4vw,1.6rem);line-height:1.1;margin-bottom:.7rem}
-  .step p{color:var(--ink-dim);font-weight:300;font-size:.98rem;line-height:1.55;max-width:34ch}
+  .step p{color:var(--ink-dim);font-weight:400;font-size:.98rem;line-height:1.55;max-width:34ch}
   .step-cta{margin-top:clamp(2.5rem,5vw,3.5rem)}
 
   /* ════════════ SIX COMMITMENTS ════════════ */
@@ -823,7 +824,7 @@
   }
   .commit-ic svg{width:23px;height:23px;stroke:currentColor;stroke-width:1.5;fill:none}
   .commit h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.2rem,2vw,1.45rem);line-height:1.1}
-  .commit p{color:var(--ink-dim);font-weight:300;font-size:.95rem;line-height:1.6}
+  .commit p{color:var(--ink-dim);font-weight:400;font-size:.95rem;line-height:1.6}
 
   /* ════════════ CLOSING ════════════ */
   .closing{
@@ -844,9 +845,10 @@
     margin:1.3rem auto 0;max-width:16ch;text-wrap:balance;
   }
   .closing h2 em{font-style:italic;color:var(--accent-soft)}
-  .closing p{margin:1.5rem auto 0;color:var(--ink-dim);font-weight:300;font-size:clamp(1rem,1.6vw,1.2rem);max-width:42ch}
+  .closing p{margin:1.5rem auto 0;color:var(--ink-dim);font-weight:400;font-size:clamp(1rem,1.6vw,1.2rem);max-width:42ch}
+  .closing .cta-note{font-size:var(--text-min)} /* la nota es un <p> dentro de .closing: sin esta regla .closing p le gana a .cta-note y sale a tamaño de párrafo (19 px) */
   .closing .btn-gold{margin-top:clamp(2rem,4vw,3rem)}
-  .closing-trust{margin-top:2rem;display:flex;flex-wrap:wrap;justify-content:center;gap:1.4rem;font-size:.82rem;color:var(--ink-faint)}
+  .closing-trust{margin-top:2rem;display:flex;flex-wrap:wrap;justify-content:center;gap:1.4rem;font-size:var(--text-min);color:var(--ink-faint)}
   .closing-trust span{display:inline-flex;align-items:center;gap:.5em}
   .closing-trust .tk{color:var(--accent)}
 
@@ -859,7 +861,7 @@
   .foot-brand{grid-column:1 / -1}
   @media(min-width:621px){.foot-brand{grid-column:auto}}
   .foot-brand .wordmark{font-size:clamp(1.3rem,3vw,1.6rem)}
-  .foot-brand p{margin-top:1.1rem;color:var(--ink-faint);font-weight:300;font-size:.9rem;max-width:30ch;line-height:1.55}
+  .foot-brand p{margin-top:1.1rem;color:var(--ink-faint);font-weight:400;font-size:.9rem;max-width:30ch;line-height:1.55}
   .foot-social{margin-top:1.4rem;display:flex;gap:.7rem}
   .foot-social a{
     width:44px;height:44px;border-radius:10px;border:1px solid var(--line-strong);
@@ -869,13 +871,13 @@
   .foot-social a:hover{color:var(--accent);border-color:var(--accent)}
   .foot-social svg{width:18px;height:18px;fill:currentColor}
   .foot-col h3{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem;font-weight:500}
-  .foot-col a,.foot-col span{display:flex;align-items:center;min-height:44px;color:var(--ink-dim);font-weight:300;font-size:.92rem;margin-bottom:.1rem;transition:color .3s ease;line-height:1.4}
+  .foot-col a,.foot-col span{display:flex;align-items:center;min-height:44px;color:var(--ink-dim);font-weight:400;font-size:.92rem;margin-bottom:.1rem;transition:color .3s ease;line-height:1.4}
   .foot-col a:hover{color:var(--accent)}
   .foot-col a.foot-cta{color:var(--accent);font-weight:400}
   .foot-rule{
     margin-top:clamp(2.5rem,5vw,3.5rem);padding-top:1.6rem;border-top:1px solid var(--line);
     display:flex;flex-wrap:wrap;justify-content:space-between;gap:.8rem;
-    font-size:.78rem;color:var(--ink-faint);letter-spacing:.02em;
+    font-size:var(--text-min);color:var(--ink-faint);letter-spacing:.02em;
   }
   .foot-rule .dot{color:var(--ink-faint);opacity:.5;margin-inline:.5em}
 
@@ -1025,7 +1027,7 @@
     .marquee-track{animation:none}
     .marquee .m-group:not(:first-child){display:none}
   }
-  .guarantee-band{margin:1.6rem auto 0;max-width:58ch;display:flex;align-items:flex-start;gap:.7rem;text-align:left;border:1px solid rgba(var(--accent-rgb),.32);background:rgba(var(--accent-rgb),.06);border-radius:14px;padding:.9rem 1.2rem;font-size:.92rem;color:var(--ink-dim);font-weight:300;line-height:1.5}
+  .guarantee-band{margin:1.6rem auto 0;max-width:58ch;display:flex;align-items:flex-start;gap:.7rem;text-align:left;border:1px solid rgba(var(--accent-rgb),.32);background:rgba(var(--accent-rgb),.06);border-radius:14px;padding:.9rem 1.2rem;font-size:.92rem;color:var(--ink-dim);font-weight:400;line-height:1.5}
   .guarantee-band strong{color:var(--ink);font-weight:500}
   .guarantee-band .gb-ic{flex:none;color:var(--accent);display:inline-flex;margin-top:1px}
   .guarantee-band .gb-ic svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6;fill:none}
@@ -1043,7 +1045,7 @@
   .faq-item[open] .faq-x::after{transform:scaleY(0);opacity:0}
   .faq-item > .faq-a{display:none}
   .faq-item[open] > .faq-a{display:block}
-  .faq-a{padding:0 1.4rem 1.3rem;color:var(--ink-dim);font-weight:300;font-size:.98rem;line-height:1.65}
+  .faq-a{padding:0 1.4rem 1.3rem;color:var(--ink-dim);font-weight:400;font-size:.98rem;line-height:1.65}
   .faq-a p{max-width:66ch}
 
   /* ════════════════════════════════════════════════
@@ -1052,12 +1054,12 @@
   .page-head{position:relative;padding-top:calc(var(--nav-h) + clamp(3rem,8vw,6rem));padding-bottom:clamp(2.75rem,6vw,4.5rem);border-bottom:1px solid var(--line);overflow:hidden}
   .page-head::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 120% at 85% 0%,rgba(var(--accent-rgb),.06) 0%,transparent 55%);pointer-events:none}
   .page-head .wrap{position:relative}
-  .page-head .crumb{font-size:.78rem;letter-spacing:.04em;color:var(--ink-faint);margin-bottom:.4rem}
+  .page-head .crumb{font-size:var(--text-min);letter-spacing:.04em;color:var(--ink-faint);margin-bottom:.4rem}
   .page-head .crumb a{color:var(--ink-faint)}
   .page-head .crumb a:hover{color:var(--accent)}
   .page-head h1{font-family:var(--font-display);font-weight:300;font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.05;letter-spacing:-.015em;margin:.5rem 0 0;text-wrap:balance;max-width:18ch}
   .page-head h1 em{font-style:italic;color:var(--accent-soft)}
-  .page-head .lead{margin-top:1.4rem;max-width:58ch;font-size:clamp(1.02rem,1.7vw,1.2rem);color:var(--ink-dim);font-weight:300;line-height:1.6}
+  .page-head .lead{margin-top:1.4rem;max-width:58ch;font-size:clamp(1.02rem,1.7vw,1.2rem);color:var(--ink-dim);font-weight:400;line-height:1.6}
   /* FIX 2026-06-24: base .head-actions — the closing CTA on privacy/terms uses a
      bare .head-actions (no scoped rule existed), so its buttons collapsed/stacked
      unstyled. Scoped variants below keep higher specificity and still win. */
@@ -1069,15 +1071,15 @@
   .svc-detail .svc-no{margin-bottom:.6rem}
   .svc-detail h2{font-family:var(--font-display);font-weight:400;font-size:clamp(1.9rem,3.6vw,2.7rem);line-height:1.08;letter-spacing:-.01em;margin:0}
   .svc-detail h2 em{font-style:italic;color:var(--accent-soft)}
-  .svc-detail .lead{margin-top:1.1rem;font-size:1.05rem;color:var(--ink-dim);font-weight:300;line-height:1.6}
-  .svc-detail p{color:var(--ink-dim);font-weight:300;line-height:1.6}
+  .svc-detail .lead{margin-top:1.1rem;font-size:1.05rem;color:var(--ink-dim);font-weight:400;line-height:1.6}
+  .svc-detail p{color:var(--ink-dim);font-weight:400;line-height:1.6}
   .svc-detail .lead + p,.svc-detail p + p{margin-top:1.1rem}
   .svc-detail h4,.svc-detail .svc-label{font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:1.7rem 0 .9rem;font-weight:500}
   .svc-detail .svc-link{margin-top:1.6rem}
   .svc-aside{background:var(--surface-1);border:1px solid var(--line);border-radius:20px;padding:clamp(1.5rem,3vw,2.3rem)}
 
   .scope-list{list-style:none;margin:0;padding:0;display:grid;gap:.7rem}
-  .scope-list li{display:flex;align-items:flex-start;gap:.7em;font-size:.95rem;color:var(--ink-dim);font-weight:300;line-height:1.45}
+  .scope-list li{display:flex;align-items:flex-start;gap:.7em;font-size:.95rem;color:var(--ink-dim);font-weight:400;line-height:1.45}
   .scope-list li svg{flex:none;width:18px;height:18px;margin-top:2px;stroke:var(--accent);stroke-width:2.2;fill:none}
 
   @media(max-width:760px){
@@ -1093,13 +1095,13 @@
   .prose{max-width:70ch;margin-inline:auto}
   .prose h2{font-family:var(--font-display);font-weight:400;font-size:clamp(1.4rem,2.5vw,1.95rem);line-height:1.2;margin:2.4rem 0 .8rem;color:var(--ink)}
   .prose h3{font-size:1.08rem;font-weight:500;margin:1.7rem 0 .6rem;color:var(--ink)}
-  .prose p,.prose li{color:var(--ink-dim);font-weight:300;line-height:1.7;font-size:1rem}
+  .prose p,.prose li{color:var(--ink-dim);font-weight:400;line-height:1.7;font-size:1rem}
   .prose p,.prose ul,.prose ol{margin:0 0 1.05rem}
   .prose ul,.prose ol{padding-left:1.3rem}
   .prose li{margin-bottom:.45rem}
   .prose a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
   .prose strong{color:var(--ink);font-weight:500}
-  .prose .updated{font-size:.85rem;color:var(--ink-faint);margin-bottom:2rem}
+  .prose .updated{font-size:var(--text-min);color:var(--ink-faint);margin-bottom:2rem}
 
   /* ════════════ SITEMAP DIRECTORY ════════════ */
   .sitemap-grid{margin-top:clamp(2.2rem,4vw,3.4rem);column-count:3;column-gap:clamp(1.8rem,3.6vw,3.2rem)}
@@ -1109,10 +1111,10 @@
   .sm-col h2{font-family:var(--font-display);font-weight:400;font-size:1.22rem;color:var(--ink);margin:0;padding-bottom:.7rem;border-bottom:1px solid var(--line);letter-spacing:-.01em}
   .sm-col ul{list-style:none;margin:.35rem 0 0;padding:0}
   .sm-col li{margin:0}
-  .sm-col a{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:.4rem 0;color:var(--ink-dim);font-size:.95rem;font-weight:300;line-height:1.35;transition:color .25s ease,padding-left .25s ease;border-bottom:1px solid rgba(244,242,236,.05)}
+  .sm-col a{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:.4rem 0;color:var(--ink-dim);font-size:.95rem;font-weight:400;line-height:1.35;transition:color .25s ease,padding-left .25s ease;border-bottom:1px solid rgba(244,242,236,.05)}
   .sm-col li:last-child a{border-bottom:0}
   .sm-col a:hover,.sm-col a:focus-visible{color:var(--accent);padding-left:.35rem}
-  .sm-col a .sm-sub{display:block;font-size:.78rem;color:var(--ink-faint);margin-top:.1rem}
+  .sm-col a .sm-sub{display:block;font-size:var(--text-min);color:var(--ink-faint);margin-top:.1rem}
 
   /* ════════════ 404 / NOT FOUND ════════════ */
   .notfound{
@@ -1127,11 +1129,11 @@
   .notfound .err-code em{font-style:normal;color:var(--accent-soft)}
   .notfound h1{font-family:var(--font-display);font-weight:300;font-size:clamp(1.7rem,4vw,2.7rem);line-height:1.08;letter-spacing:-.01em;margin:1.4rem 0 0;color:var(--ink);text-wrap:balance}
   .notfound h1 em{font-style:italic;color:var(--accent-soft)}
-  .notfound .lead{margin:1.1rem auto 0;max-width:48ch;color:var(--ink-dim);font-weight:300;font-size:clamp(1rem,1.6vw,1.15rem);line-height:1.6}
+  .notfound .lead{margin:1.1rem auto 0;max-width:48ch;color:var(--ink-dim);font-weight:400;font-size:clamp(1rem,1.6vw,1.15rem);line-height:1.6}
   .notfound .head-actions{margin-top:2.1rem;display:flex;flex-wrap:wrap;gap:.9rem 1.2rem;align-items:center;justify-content:center}
   .notfound .err-links{margin-top:2.7rem;display:flex;flex-wrap:wrap;gap:.6rem 1.6rem;justify-content:center;border-top:1px solid var(--line);padding-top:1.8rem}
-  .notfound .err-help{margin-top:1.8rem;font-size:.85rem;color:var(--ink-dim);font-weight:300}
-  .notfound .err-links a{display:inline-flex;align-items:center;min-height:44px;font-size:.9rem;color:var(--ink-dim);font-weight:300;transition:color .25s ease}
+  .notfound .err-help{margin-top:1.8rem;font-size:var(--text-min);color:var(--ink-dim);font-weight:400}
+  .notfound .err-links a{display:inline-flex;align-items:center;min-height:44px;font-size:.9rem;color:var(--ink-dim);font-weight:400;transition:color .25s ease}
   .notfound .err-links a:hover,.notfound .err-links a:focus-visible{color:var(--accent)}
 
   /* ════════════ QUOTE WIZARD (Noir) ════════════ */
@@ -1270,13 +1272,13 @@
   .svc-hero-media img{width:100%;height:100%;object-fit:cover;filter:grayscale(.14) brightness(.56) contrast(1.02);animation:slowzoom 28s ease-out forwards}
   .svc-hero-media::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 95% at 14% 100%,rgba(12,14,13,.94) 0%,rgba(12,14,13,.5) 44%,rgba(12,14,13,.16) 72%),linear-gradient(180deg,rgba(12,14,13,.6) 0%,rgba(12,14,13,0) 30%,rgba(12,14,13,.45) 64%,var(--black) 100%)}
   .svc-hero .wrap{position:relative;width:100%}
-  .svc-hero .crumb{font-size:.78rem;letter-spacing:.04em;color:var(--ink-faint)}
+  .svc-hero .crumb{font-size:var(--text-min);letter-spacing:.04em;color:var(--ink-faint)}
   .svc-hero .crumb a{color:var(--ink-faint)}
   .svc-hero .crumb a:hover{color:var(--accent)}
   .svc-hero .eyebrow{margin-top:1.1rem}
   .svc-hero h1{font-family:var(--font-display);font-weight:300;font-size:clamp(2.5rem,6.6vw,5.1rem);line-height:1.03;letter-spacing:-.015em;margin:1.1rem 0 0;max-width:19ch;text-wrap:balance}
   .svc-hero h1 em{font-style:italic;color:var(--accent-soft)}
-  .svc-hero .lead{margin-top:1.5rem;max-width:52ch;font-size:clamp(1.02rem,1.6vw,1.22rem);color:var(--ink-dim);font-weight:300;line-height:1.55}
+  .svc-hero .lead{margin-top:1.5rem;max-width:52ch;font-size:clamp(1.02rem,1.6vw,1.22rem);color:var(--ink-dim);font-weight:400;line-height:1.55}
   .svc-hero .head-actions{margin-top:clamp(1.8rem,3.5vw,2.4rem);display:flex;flex-wrap:wrap;gap:.9rem 1.4rem;align-items:center}
 
   /* — Image figure inside a 2-col svc-detail — */

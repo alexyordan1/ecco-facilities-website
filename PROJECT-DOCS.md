@@ -95,8 +95,8 @@ The old `services.html`, the split quote pages (`quote-janitorial.html` / `quote
 | File | Size | Notes |
 |------|------|-------|
 | `css/noir.source.css` | ~80 KB | **Editable master** — edit here, then minify (tracked; exception in `.gitignore`) |
-| `css/noir.css` | ~69 KB | Minified from source (`?v=26`) — loaded by every public page |
-| `css/quote-noir.css` | — | Quote wizard skin (`?v=63`) |
+| `css/noir.css` | ~71 KB | Minified from source (current `?v=` under "Versions (live)" below) — loaded by every public page |
+| `css/quote-noir.css` | — | Quote wizard skin (current `?v=` under "Versions (live)" below) |
 | `css/crm.css` | — | CRM styles (`?v=4.3`) |
 
 ### JavaScript
@@ -531,10 +531,10 @@ collections:
 Token source of truth: `:root{}` at the top of `css/noir.source.css`. The site is dark-only (`color-scheme: dark`).
 
 ### Versions (live)
-- CSS: `noir.css?v=31` · `quote-noir.css?v=76` · `crm.css?v=4.3`
+- CSS: `noir.css?v=32` · `quote-noir.css?v=76` · `crm.css?v=4.3`
 - JS: `site.js?v=5` (all 21 marketing pages, blog included) · `quote-flow.js?v=40.42` · `cookie-consent.js?v=1.7` · `crm-*.js?v=4.1–4.3`
 - **Rule:** Bump `?v=` in the same commit as CSS/JS changes (busters don't apply to deleted files)
-- Checked against the repo on 2026-11-19. Re-check with `grep -ho 'noir.css?v=[0-9]*' *.html blog/*.html | sort | uniq -c`; only one version should appear.
+- Checked against the repo on 2026-11-20. Re-check with `grep -ho 'noir.css?v=[0-9]*' *.html blog/*.html | sort | uniq -c`; only one version should appear.
 
 ### Minification
 - Workflow: edit `css/noir.source.css` (tracked master) → minify to `css/noir.css` → bump `?v=` in the same commit
