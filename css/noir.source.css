@@ -14,7 +14,7 @@
     --ink-faint:#8B8F88;
     --line:rgba(244,242,236,0.10);
     --line-strong:rgba(244,242,236,0.18);
-    --maxw:1200px;
+    --maxw:1340px; /* ancho de página: contenido (.wrap), barra de navegación (.nav) y pie (.wrap-wide) usan el mismo, así logo, titulares, rejillas y pie arrancan en la misma línea. Hasta nov-2026 el contenido iba a 1200 y la barra y el pie a 1340: un desfase de 40 px a 1280 px de pantalla y de 70 px desde 1340 px */
     --pad:clamp(1.25rem,5vw,4rem);
     --font-display:'Fraunces',Georgia,serif;
     --font-body:'Inter',system-ui,sans-serif;
@@ -52,7 +52,7 @@
   .skip-link:focus{transform:translateX(-50%) translateY(0)}
 
   .wrap{max-width:var(--maxw);margin:0 auto;padding-inline:var(--pad)}
-  .wrap-wide{max-width:1340px;margin:0 auto;padding-inline:var(--pad)}
+  .wrap-wide{max-width:var(--maxw);margin:0 auto;padding-inline:var(--pad)}
 
   .eyebrow{
     font-size:clamp(.68rem,1vw,.74rem);
@@ -85,7 +85,7 @@
     box-shadow:0 18px 50px -28px rgba(0,0,0,.9);
   }
   .nav{
-    max-width:1340px;margin:0 auto;padding-inline:var(--pad);
+    max-width:var(--maxw);margin:0 auto;padding-inline:var(--pad);
     height:var(--nav-h);
     display:flex;align-items:center;justify-content:space-between;gap:1.2rem;
   }
