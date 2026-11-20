@@ -68,6 +68,8 @@ perl -0777 -ne 'while(/<p class="cta-note">(.*?)<\/p>/sg){ my $n=$1; $n =~ s/<sp
 
 - Sistema `rv` (IntersectionObserver) para reveals de scroll. **Prohibido** en contenido crítico above-the-fold que deba verse sin JS.
 - Fallbacks obligatorios: `@media (prefers-reduced-motion: reduce)` y `@media (scripting: none)` (fuerza visibilidad de `.rv`, comparadores, etc.).
+- **La regla general de movimiento reducido** (`*{animation-duration:1ms…;transition-duration:1ms…}`) se escribe con `1ms`, nunca con `.001ms`: clean-css convierte los valores por debajo del milisegundo en `NaNs` y el navegador descarta la declaración. Así estuvo muerta de julio a noviembre de 2026 (la foto de portada seguía con su zoom y las transiciones duraban lo normal). Tras minificar, `grep -c NaN css/noir.css` debe dar 0.
+- **Cinta de sellos con movimiento reducido:** no se mueve y enseña los 7 sellos enteros. La fila envuelve y se centra (en columna, con los iconos alineados, por debajo de 560 px) y se quitan los degradados de los bordes. Regla general: lo que deja de moverse no puede quedar recortado; el estado quieto se diseña, no se hereda. Comprobación: `scripts/cinta.mjs` de la auditoría de noviembre de 2026 (16 anchos, con y sin movimiento).
 - `position: sticky` no pinnea bajo un ancestro con `overflow != visible` (lección: `.qf-stage` del wizard) — verificar ancestros al añadir sticky.
 
 ## Responsive
