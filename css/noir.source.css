@@ -1024,8 +1024,21 @@
     *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
     .hero-media img{transform:none}
     .rv{opacity:1;transform:none}
-    .marquee-track{animation:none}
+    /* Cinta de sellos sin movimiento. Antes quedaba una sola fila fija y lo que no cabía se recortaba
+       (5 de 7 sellos a 1440 px, 1 o 2 en teléfono). Ahora la fila envuelve, centrada, y se ven los 7;
+       en teléfono van en columna, con los iconos alineados. Se quitan los degradados de los bordes,
+       que taparían el primer y el último sello. La versión con movimiento no cambia. */
+    .marquee{padding-inline:var(--pad)}
+    .marquee::before,.marquee::after{display:none}
+    .marquee-track{animation:none;width:auto;justify-content:center}
     .marquee .m-group:not(:first-child){display:none}
+    .marquee .m-group{flex:0 1 auto;flex-wrap:wrap;justify-content:center;row-gap:.75rem}
+    .marquee .cert{white-space:normal;text-wrap:balance;padding-inline:clamp(.6rem,2vw,1.4rem)}
+    .marquee .dot{display:none} /* separadores vacíos: en columna cada uno sumaba un hueco de fila */
+    @media(max-width:560px){
+      .marquee .m-group{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;row-gap:.55rem}
+      .marquee .cert{padding-inline:0}
+    }
   }
   .guarantee-band{margin:1.6rem auto 0;max-width:58ch;display:flex;align-items:flex-start;gap:.7rem;text-align:left;border:1px solid rgba(var(--accent-rgb),.32);background:rgba(var(--accent-rgb),.06);border-radius:14px;padding:.9rem 1.2rem;font-size:.92rem;color:var(--ink-dim);font-weight:400;line-height:1.5}
   .guarantee-band strong{color:var(--ink);font-weight:500}
